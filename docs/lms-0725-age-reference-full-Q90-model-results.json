@@ -1,0 +1,159 @@
+{
+  "recordedAt": "2026-09-08T16:55:18.199Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q90",
+      "question": "What is the date for the primetime league for basing the age on",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+          "pageNumber": 12,
+          "ruleNumber": "6.3",
+          "excerptItems": [
+            {
+              "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 27,
+              "end": 160,
+              "pageNumber": 12,
+              "ruleNumber": "6.3",
+              "applicability": {
+                "role": "requirement",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+                  "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            },
+            {
+              "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 656,
+              "end": 950,
+              "pageNumber": 12,
+              "ruleNumber": "6.3",
+              "applicability": {
+                "role": "requirement",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+                  "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 133,
+              "sha256": "289bcaf341cc0ce74153856fc7eaa39609c1c23309ffce8256f3c24512a69eb9"
+            },
+            {
+              "characters": 294,
+              "sha256": "a153775dd5d205ef15752f6f8ee3671a80872d2b1e4ff507ad2a6eed10902209"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1990,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the PrimeTime DUPR League, age is based on the age a player will attain as of December 31 of the current calendar year. PrimeTime is for players age 65 and older, and a player is age-eligible for the entire season even if they have not yet turned 65 by the season’s start date.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3160,
+        "sourceResolutionMs": 4,
+        "totalMs": 3182,
+        "inputTokens": 1872,
+        "outputTokens": 85,
+        "totalTokens": 1957,
+        "estimatedGenerationCostUsd": 0.01191
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3 — Page 12",
+          "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+          "pageNumber": 12,
+          "ruleNumber": "6.3",
+          "excerptItems": [
+            {
+              "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 27,
+              "end": 160,
+              "pageNumber": 12,
+              "ruleNumber": "6.3",
+              "applicability": {
+                "role": "requirement",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+                  "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            },
+            {
+              "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 656,
+              "end": 950,
+              "pageNumber": 12,
+              "ruleNumber": "6.3",
+              "applicability": {
+                "role": "requirement",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+                  "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

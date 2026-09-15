@@ -1,4 +1,5 @@
 "use client";
+import {displaySystemSettings} from "../lib/viewAsPageState.js";
 
 import { useEffect, useState } from "react";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
@@ -14,7 +15,7 @@ export default function SystemFooter() {
 
     async function loadSettings() {
       try {
-        const response = await fetch("/api/system-settings");
+        const response = await displaySystemSettings();
         const result = await response.json().catch(() => ({}));
         if (isMounted && result.success) {
           setSettings(mergeSystemSettings(result.settings));

@@ -1,0 +1,41 @@
+(node:3172) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0727 Rule 3.5 policy bypasses Approved Answers; standalone conflict controls remain (69.2179ms)
+✔ 0721 managed answer has exact feedback/viewer provenance, one query embedding and one model call (13.6007ms)
+✔ 0721 safe managed fallback: unsupported (6.0812ms)
+✔ 0721 safe managed fallback: retired-during-generation (7.0613ms)
+✔ 0721 website existing-authority review independently identifies Rule 1.1 (1.9904ms)
+✔ 0721 scope, competing policies and complementary evidence remain distinct (1.2943ms)
+(node:21500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0720 actual original/assisted sequence: Can I volly in the kitchen? (41.2896ms)
+✔ 0720 actual original/assisted sequence: Can I join a team in another comunity? (17.7784ms)
+✔ 0720 actual original/assisted sequence: What happens with a medcal issue during a match? (26.3135ms)
+✔ 0720 actual original/assisted sequence: How do I add someone to my roser? (32.05ms)
+✔ 0720 actual original/assisted sequence: When do I submit my linep? (15.3913ms)
+✔ 0720 actual original/assisted sequence: How is Seson DUPR determined? (14.0045ms)
+✔ 0720 actual original/assisted sequence: What happens if the ball is damged? (13.8519ms)
+✔ 0720 actual original/assisted sequence: What happens if the ball is craked during a rally? (15.2865ms)
+✔ 0720 actual original/assisted sequence: When can I add players for Satrday league? (15.8426ms)
+✔ 0720 actual original/assisted sequence: Can I volley in the kitchen? (7.9784ms)
+✔ 0720 exhausted/failed assistance stays bounded false (6.402ms)
+✔ 0720 exhausted/failed assistance stays bounded true (4.3782ms)
+✔ 0720 no assisted RPC for veto/entity/precision: What if I am plaing the ball? (1.3602ms)
+✔ 0720 no assisted RPC for veto/entity/precision: Can I join the team named Roster? (1.2019ms)
+✔ 0720 no assisted RPC for veto/entity/precision: Can I play for the community named Satrday? (0.5402ms)
+✔ 0720 no assisted RPC for veto/entity/precision: NR DUPR 3.50 Rule 5.7.2 user@medcal.org ID-roser (0.4895ms)
+✔ 0720 generation follows completed retry 0 (11.1328ms)
+✔ 0720 generation follows completed retry 1 (10.1416ms)
+✔ 0720 generation follows completed retry 2 (16.5882ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2681.2925

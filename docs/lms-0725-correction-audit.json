@@ -1,0 +1,992 @@
+{
+  "recordedAt": "2026-09-08T14:36:55.498Z",
+  "method": "Local saved official-source snapshot. Actual source validator and generation pipeline. Fixture metadata and signing; no production requests or writes. Candidate scores are fixture constants, not a semantic retrieval rerun.",
+  "cases": [
+    {
+      "id": "Q01",
+      "question": "Who is on my roster?",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q02",
+      "question": "Show me my roster.",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q03",
+      "question": "How many players are currently on my roster?",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q04",
+      "question": "Who is on the Artisan Lakes roster?",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q05",
+      "question": "Show the Artisan Lakes roster.",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q06",
+      "question": "Which players are on our roster?",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q07",
+      "question": "What date can I start entering my roster for weekday league",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q08",
+      "question": "when can I start entering my players for my team",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q09",
+      "question": "When can I start entering my roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q10",
+      "question": "What date can I start entering my roster for weekday league?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q11",
+      "question": "When can I add players?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q12",
+      "question": "When does roster entry open?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q13",
+      "question": "When can I start entering my PrimeTime players?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q14",
+      "question": "When can I start entering my Saturday roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q15",
+      "question": "When may I begin entering team players?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q16",
+      "question": "When can I build my roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q17",
+      "question": "When can I fill my roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q18",
+      "question": "When can I start my roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q19",
+      "question": "Can I add players to my roster yet?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q20",
+      "question": "When do we begin adding players to our team?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q21",
+      "question": "What date does player entry open for Weekday?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q22",
+      "question": "When can I start entering my rosterr for weekdy league?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q23",
+      "question": "when can i add plyers to my team",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q24",
+      "question": "When can I enter players in the match lineup?",
+      "route": "DOCUMENT",
+      "sourceContainers": 1,
+      "excerptItems": 1,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q25",
+      "question": "How do I enter players on my roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q26",
+      "question": "How do I add a player to my roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q27",
+      "question": "How can I update my roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q28",
+      "question": "Where do I go to build my team roster?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q29",
+      "question": "How do I enter match scores?",
+      "route": "DOCUMENT",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q30",
+      "question": "Does the weekday dupr league use rally scoring",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q31",
+      "question": "Does the Weekday DUPR League use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q32",
+      "question": "What scoring method does the Weekday League use?",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q33",
+      "question": "Do regular Weekday games use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q34",
+      "question": "Does Weekday 9.1 use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q35",
+      "question": "Does the Weekday 9.1 Picklebreaker use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q36",
+      "question": "Is Weekday all rally?",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q37",
+      "question": "Does the weekdy league use raly scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 3,
+      "excerptItems": 3,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q38",
+      "question": "Does Saturday use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 5,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q39",
+      "question": "Do regular Saturday games use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 5,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q40",
+      "question": "Does the Saturday Picklebreaker use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 5,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q41",
+      "question": "Does PrimeTime use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q42",
+      "question": "Do regular PrimeTime games use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q43",
+      "question": "Does the PrimeTime Picklebreaker use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 4,
+      "excerptItems": 4,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q44",
+      "question": "Does Weekday 8.1 use Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q45",
+      "question": "How does Rally Scoring work?",
+      "route": "DOCUMENT",
+      "sourceContainers": 1,
+      "excerptItems": 1,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q46",
+      "question": "How does Rally Scoring work in a Picklebreaker?",
+      "route": "DOCUMENT",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q47",
+      "question": "Do I have to be serving to win with Rally Scoring?",
+      "route": "DOCUMENT",
+      "sourceContainers": 1,
+      "excerptItems": 1,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q48",
+      "question": "What happens at 24 all in a game to 25 by 2?",
+      "route": "DOCUMENT",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q49",
+      "question": "When do scores freeze again?",
+      "route": "DOCUMENT",
+      "sourceContainers": 1,
+      "excerptItems": 1,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q50",
+      "question": "What's my DUPR",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q51",
+      "question": "What is my Season DUPR?",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q52",
+      "question": "What is my PrimeTime Season DUPR?",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q53",
+      "question": "What is my current official DUPR?",
+      "route": "LIVE",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q54",
+      "question": "When is Season DUPR established?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q55",
+      "question": "When is my Season DUPR established?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q56",
+      "question": "How is my Season DUPR calculated?",
+      "route": "DOCUMENT",
+      "sourceContainers": 2,
+      "excerptItems": 2,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q57",
+      "question": "When are Season DUPR ratings recorded for Saturday?",
+      "route": "DOCUMENT",
+      "sourceContainers": 1,
+      "excerptItems": 1,
+      "validation": "PASS",
+      "pass": true
+    },
+    {
+      "id": "Q58",
+      "question": "Export all player emails",
+      "route": "PROTECTED",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q59",
+      "question": "What is my password?",
+      "route": "PROTECTED",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q60",
+      "question": "Did I save my lineup?",
+      "route": "PROTECTED",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q61",
+      "question": "Am I currently eligible for this team?",
+      "route": "PROTECTED",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q62",
+      "question": "Show my rating and tell me if I am eligible",
+      "route": "PROTECTED",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    },
+    {
+      "id": "Q63",
+      "question": "What is my roster and when can I add players?",
+      "route": "PROTECTED",
+      "sourceContainers": 0,
+      "excerptItems": 0,
+      "validation": "Not applicable: deterministic route or no selected document evidence",
+      "pass": true
+    }
+  ],
+  "examples": [
+    {
+      "question": "What date can I start entering my roster for weekday league",
+      "counts": {
+        "reads": 2,
+        "signs": 2
+      },
+      "sources": [
+        {
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "pageNumber": 1,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "text": "• Sept. 28, Monday - Can start updating rosters",
+              "applicability": {
+                "league": "weekday",
+                "role": "opening_date"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ],
+              "ruleNumber": "",
+              "pageNumber": 1
+            }
+          ]
+        },
+        {
+          "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+          "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+          "chunkId": "1b88b1d6-cabd-4aab-ba26-cb0b34aeb1fa",
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "pageNumber": 5,
+          "excerptItems": [
+            {
+              "chunkId": "1b88b1d6-cabd-4aab-ba26-cb0b34aeb1fa",
+              "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+              "start": 0,
+              "end": 1084,
+              "text": "• Complete all required questions to set up your team. Most of the information you enter, such as\nyour Team Name, Captain, and other team details, can be changed later. This initial information\nwill be used to create and activate your team and associate it with the appropriate community and\nrelated league information.\n• Once you have completed the registration form, click Register My Team! You will then be prompted\nto enter your payment information or, if available, select your current payment method already on\nfile.\n• After completing your registration, you will receive a confirmation email with your team registration\ndetails, important next steps, and upcoming dates and deadlines.\n• League Management will then activate your team and assign you and/or the individuals designated\nduring registration as the Captain and Co-Captain(s). Once this is completed, your initial team\nregistration and setup will be complete.\n• League Management will notify you when team rosters for your league have been unlocked and are\navailable for you to begin adding and managing your players.",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": [],
+              "ruleNumber": "",
+              "pageNumber": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Does the Weekday DUPR League use Rally Scoring?",
+      "counts": {
+        "reads": 2,
+        "signs": 1
+      },
+      "sources": [
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.3 — Point Scoring Methods — Page 4",
+          "pageNumber": 4,
+          "excerptItems": [
+            {
+              "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 896,
+              "end": 1067,
+              "text": "5.3. Point Scoring Methods: Unless otherwise specifically stated, all games shall use\nStandard Scoring as defined by the current USA Pickleball (USAP) Rules. Rally Scoring",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": [],
+              "ruleNumber": "5.3",
+              "pageNumber": 4
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5 — Page 5",
+          "pageNumber": 5,
+          "excerptItems": [
+            {
+              "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 124,
+              "text": "shall be used only when a particular game or match format expressly identifies Rally\nScoring as the required scoring method.",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": [],
+              "ruleNumber": "5",
+              "pageNumber": 5
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "77cebfac-54ac-4199-8d6a-233c439a0a69",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.1.9.7 — Page 8",
+          "pageNumber": 8,
+          "excerptItems": [
+            {
+              "chunkId": "77cebfac-54ac-4199-8d6a-233c439a0a69",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 484,
+              "text": "6.1.9.7. The Picklebreaker™ shall be played only when the match is tied 2–2\nfollowing completion of all preceding rounds. The Picklebreaker™ features the\ndesignated doubles teams that participated in the preceding rounds, rotating\nin accordance with the Picklebreaker™ Rotation Rules. The Picklebreaker™\nshall consist of one game to 15 points, win by two (2), using Rally Scoring.\nNote: Picklebreaker matches will not be recorded in DUPR and do not reflect\non individual’s W/L record.",
+              "applicability": {
+                "role": "express_format",
+                "league": "weekday",
+                "division": "9.1"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "09f36807-0451-4500-bace-d25901bfd6e1",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 11,
+                  "end": 35,
+                  "kind": "league"
+                },
+                {
+                  "chunkId": "1dfe3d62-af28-4c5d-9b07-1e444511e643",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 239,
+                  "end": 328,
+                  "kind": "division"
+                }
+              ],
+              "ruleNumber": "6.1.9.7",
+              "pageNumber": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Does Saturday use Rally Scoring?",
+      "counts": {
+        "reads": 2,
+        "signs": 1
+      },
+      "sources": [
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.3 — Point Scoring Methods — Page 4",
+          "pageNumber": 4,
+          "excerptItems": [
+            {
+              "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 896,
+              "end": 1067,
+              "text": "5.3. Point Scoring Methods: Unless otherwise specifically stated, all games shall use\nStandard Scoring as defined by the current USA Pickleball (USAP) Rules. Rally Scoring",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": [],
+              "ruleNumber": "5.3",
+              "pageNumber": 4
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5 — Page 5",
+          "pageNumber": 5,
+          "excerptItems": [
+            {
+              "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 124,
+              "text": "shall be used only when a particular game or match format expressly identifies Rally\nScoring as the required scoring method.",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": [],
+              "ruleNumber": "5",
+              "pageNumber": 5
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "49b68f73-d7a5-435c-9c50-b98a59180774",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rules 6.2.3.1, 6.2.3.5 — Match Day Format — Page 9",
+          "pageNumber": 9,
+          "excerptItems": [
+            {
+              "chunkId": "49b68f73-d7a5-435c-9c50-b98a59180774",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 43,
+              "end": 337,
+              "text": "6.2.3.1. All Games: Games to 15 using Rally Scoring* (win by 1). 1 point per win. Two\none-minute timeouts per team/game but no timeouts in Picklebreaker. Teams\nswitch ends when the first team reaches 8 points. Visitors choose serve,\nreceive, side, or defer in games 1 and 3 and all mixed games.",
+              "applicability": {
+                "role": "express_format",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "7a0cb14f-4896-487e-8ba7-cef2f6a60109",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 25,
+                  "kind": "league"
+                }
+              ],
+              "ruleNumber": "6.2.3.1",
+              "pageNumber": 9
+            },
+            {
+              "chunkId": "49b68f73-d7a5-435c-9c50-b98a59180774",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 761,
+              "end": 925,
+              "text": "6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams that played in the Mixed rounds. This will",
+              "applicability": {
+                "role": "express_format",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "7a0cb14f-4896-487e-8ba7-cef2f6a60109",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 25,
+                  "kind": "league"
+                }
+              ],
+              "ruleNumber": "6.2.3.5",
+              "pageNumber": 9
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "66a8e74d-bfa1-4ba3-a8e0-9f3824a315db",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.3 — Page 10",
+          "pageNumber": 10,
+          "excerptItems": [
+            {
+              "chunkId": "66a8e74d-bfa1-4ba3-a8e0-9f3824a315db",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 714,
+              "text": "be one game to 25 win by 2 using Rally Scoring. The winning team collects 3\nadditional points. (If there isn’t a tie, the leading team collects a 3-point\nbonus.) Note: Picklebreaker matches will not be recorded in DUPR and do not\nreflect on individual’s W/L record.\nTeams are numbered 1–3 for Men’s Doubles, 4–6 for Women’s Doubles, and 7–12 for Mixed\nDoubles. These team numbers correspond directly to the Match Score Sheet printed from the system.\nWe highly recommend assigning higher team numbers to teams with higher combined skill levels and\nratings (for instance, Team 6 should have a higher combined DUPR rating than Team 4 in Women’s or\nTeam 12 should be a higher team rating than Team 7 in Mixed Doubles).",
+              "applicability": {
+                "role": "express_format",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "7a0cb14f-4896-487e-8ba7-cef2f6a60109",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 25,
+                  "kind": "league"
+                }
+              ],
+              "ruleNumber": "6.2.3",
+              "pageNumber": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Does PrimeTime use Rally Scoring?",
+      "counts": {
+        "reads": 2,
+        "signs": 1
+      },
+      "sources": [
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.3 — Point Scoring Methods — Page 4",
+          "pageNumber": 4,
+          "excerptItems": [
+            {
+              "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 896,
+              "end": 1067,
+              "text": "5.3. Point Scoring Methods: Unless otherwise specifically stated, all games shall use\nStandard Scoring as defined by the current USA Pickleball (USAP) Rules. Rally Scoring",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": [],
+              "ruleNumber": "5.3",
+              "pageNumber": 4
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5 — Page 5",
+          "pageNumber": 5,
+          "excerptItems": [
+            {
+              "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 124,
+              "text": "shall be used only when a particular game or match format expressly identifies Rally\nScoring as the required scoring method.",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": [],
+              "ruleNumber": "5",
+              "pageNumber": 5
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "4193818c-5dcb-4ee6-9f03-249f18d5d38c",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.6 — Page 12",
+          "pageNumber": 12,
+          "excerptItems": [
+            {
+              "chunkId": "4193818c-5dcb-4ee6-9f03-249f18d5d38c",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 162,
+              "text": "6.3.6. The Picklebreaker™ shall be played only when the match is tied 2–2 following\ncompletion of all preceding rounds. The Picklebreaker™ features the designated",
+              "applicability": {
+                "role": "express_format",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "3da3f281-eb8d-4bd2-8904-700a122e3462",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ],
+              "ruleNumber": "6.3.6",
+              "pageNumber": 12
+            }
+          ]
+        },
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "413ec35d-6bf2-4f72-a753-f20b2246abb3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.6 — Page 13",
+          "pageNumber": 13,
+          "excerptItems": [
+            {
+              "chunkId": "413ec35d-6bf2-4f72-a753-f20b2246abb3",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 319,
+              "text": "doubles teams that participated in the preceding rounds, rotating in accordance\nwith the Picklebreaker™ Rotation Rules. The Picklebreaker™ shall consist of one\ngame to 15 points, win by two (2), using Rally Scoring.\nNote: Picklebreaker matches will not be recorded in DUPR and do not reflect on\nindividual’s W/L record.",
+              "applicability": {
+                "role": "express_format",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "3da3f281-eb8d-4bd2-8904-700a122e3462",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ],
+              "ruleNumber": "6.3.6",
+              "pageNumber": 13
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "performance": {
+    "method": "30 warmups; 300 alternating measured runs; in-memory same valid source selection; includes source validation, citation labels/signing fixture and JSON packaging. Excludes network and model latency.",
+    "legacy": {
+      "medianMs": 0.774599999999964,
+      "p95Ms": 1.1444000000000187
+    },
+    "separateExcerpts": {
+      "medianMs": 0.8960999999999899,
+      "p95Ms": 1.3861000000000558
+    }
+  }
+}

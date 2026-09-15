@@ -1,0 +1,36 @@
+{
+  "tests": {
+    "result": "1154/1154 pass; no skips",
+    "log": "lms-0733-tests.txt",
+    "sha256": "ac3a94bdda3bf34686ec9b5b5e9d062bb15d5dbee4ec1441dccbc04411b21cb0"
+  },
+  "critical": {
+    "result": "59/59 pass",
+    "log": "lms-0733-critical.txt",
+    "sha256": "d5c315f0bdded054863ef6dfaf53800caf38156f6f223ba9156f7a34a84a1d64"
+  },
+  "lint": {
+    "result": "0 errors; 6 baseline warnings",
+    "log": "lms-0733-lint.txt",
+    "sha256": "5cee64f230a1a5595b64120679abb55c8b5ffc733b64644cf06d96e0f77e4dfe"
+  },
+  "types": {
+    "result": "pass",
+    "log": "lms-0733-types.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "build": {
+    "result": "pass",
+    "log": "lms-0733-build.txt",
+    "sha256": "00e067891958dc3a0e0276ef995263241bd460f38f6390d74ba45c4d314b6a49"
+  },
+  "pdf": {
+    "result": "pass",
+    "log": "lms-0733-pdf.txt",
+    "sha256": "3ed5f6130f8727b29b99129e6fbb046afd9115c470d5961f43d67db5d2001164"
+  },
+  "diffCheck": {
+    "result": "pass"
+  },
+  "modelCalls": 0
+}

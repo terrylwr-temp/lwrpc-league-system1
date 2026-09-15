@@ -1,0 +1,37 @@
+{
+  "acceptedBaseline": "LMS-0728 / 0.1.550",
+  "comparedFiles": 313,
+  "unchanged": 308,
+  "changed": [
+    {
+      "file": "package-lock.json",
+      "before": "b6185bc89341ad2c2f658d623dcdf0029e1792e0967e9545be96f56a381a087d",
+      "after": "f1593094fc440aca56d205b1a22763077649fbf78973efd49e81bfa6c0a1dcbf"
+    },
+    {
+      "file": "package.json",
+      "before": "5dbcb895eb64665950609a78cd50e70e42fa543b57ce51f62911a6cba3c54da6",
+      "after": "19513925cd1026aedd6f7c8cc0fcade37330a06439cbe11b4fb2196bf737ace1"
+    },
+    {
+      "file": "app/lib/liveLmsIntent.js",
+      "before": "f74de90d91f0a1f39242f351def23e55b5b3d6a9578c5a50e39e97d21913997d",
+      "after": "b30f37ad1f5fb6459b5c679167e9c7b6d7c12662638d1ea21692e35d2523a725"
+    },
+    {
+      "file": "app/lib/liveLmsService.js",
+      "before": "e48de586d037fe14730696dca486c6fb651c3ebef2ad0861a45d79d1faffac2a",
+      "after": "fa916581ea273bbd3b840c2eda71ac3ba20bdb169367b434d50e8a6e5f1e4707"
+    },
+    {
+      "file": "app/lib/version.js",
+      "before": "3133118b69807fa12a062a30649164eac0aac89bd43f489d1a52b9fec958a809",
+      "after": "b597a9d98864b7df914255059f500787c8461eb0438c9cccf35d35cafd6a17ab"
+    }
+  ],
+  "newAppFiles": [
+    "app/lib/liveTeamRecord.js"
+  ],
+  "migration": "supabase\\migrations\\20260909212951_lms0729_live_identity_team_record.sql",
+  "migrationSha256": "ff532799ad343fbac176406cff4e675372341b8fda0ae4a6b633e3672d2c0cba"
+}

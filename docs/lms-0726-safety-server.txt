@@ -1,0 +1,75 @@
+(node:23300) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/viewAsProjectionClient.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▲ Next.js 16.2.4 (webpack)
+- Local:         http://localhost:3076
+- Network:       http://192.168.4.44:3076
+✓ Ready in 1809ms
+
+○ Compiling / ...
+ GET / 200 in 10.2s (next.js: 9.4s, proxy.ts: 192ms, application-code: 560ms)
+[browser] Unable to count dashboard games played { message: '' } 
+    at countScopedPlayedGames (app\AdminDashboardClient.js:2547:13)
+    at async loadDashboardCounts (app\AdminDashboardClient.js:190:9)
+  2545 |
+  2546 |   if (error) {
+> 2547 |     console.error("Unable to count dashboard games played", error);
+       |             ^
+  2548 |     return 0;
+  2549 |   }
+  2550 | (app\AdminDashboardClient.js:2547:13)
+ GET /api/system-settings 200 in 2.6s (next.js: 2.5s, proxy.ts: 11ms, application-code: 47ms)
+ GET /api/notification-templates?template_key=player_login_popup 200 in 1178ms (next.js: 822ms, proxy.ts: 292ms, application-code: 64ms)
+ GET /api/notification-templates?template_key=captain_login_popup 200 in 1183ms (next.js: 823ms, proxy.ts: 292ms, application-code: 68ms)
+ GET /api/notification-templates?template_key=player_guide_pdf 200 in 901ms (next.js: 801ms, proxy.ts: 26ms, application-code: 75ms)
+ GET /api/notification-templates?template_key=captain_guide_pdf 200 in 895ms (next.js: 54ms, proxy.ts: 809ms, application-code: 31ms)
+ GET /api/notification-template-history 200 in 1342ms (next.js: 822ms, proxy.ts: 293ms, application-code: 227ms)
+ GET /api/notification-templates?template_key=admin_guide_pdf 200 in 72ms (next.js: 12ms, proxy.ts: 31ms, application-code: 29ms)
+ GET /api/system-settings 200 in 1284ms (next.js: 153ms, proxy.ts: 1114ms, application-code: 17ms)
+ POST /api/match-setup-reminders 200 in 1340ms (next.js: 1120ms, proxy.ts: 32ms, application-code: 188ms)
+ GET / 200 in 1322ms (next.js: 100ms, proxy.ts: 1114ms, application-code: 108ms)
+ GET /view-as-test?member=8 200 in 2.6s (next.js: 2.2s, proxy.ts: 6ms, application-code: 317ms)
+ GET /api/system-settings 200 in 125ms (next.js: 91ms, proxy.ts: 7ms, application-code: 28ms)
+ GET /api/view-as/start 200 in 998ms (next.js: 929ms, proxy.ts: 16ms, application-code: 53ms)
+ GET /api/view-as/start 200 in 1000ms (next.js: 929ms, proxy.ts: 16ms, application-code: 55ms)
+ GET /api/system-settings 200 in 990ms (next.js: 17ms, proxy.ts: 958ms, application-code: 15ms)
+ GET /view-as-test?member=8 200 in 259ms (next.js: 59ms, proxy.ts: 9ms, application-code: 191ms)
+ GET /api/system-settings 200 in 23ms (next.js: 6ms, proxy.ts: 6ms, application-code: 11ms)
+ GET /api/view-as/start 200 in 41ms (next.js: 3ms, proxy.ts: 12ms, application-code: 26ms)
+ GET /api/view-as/start 200 in 44ms (next.js: 12ms, proxy.ts: 12ms, application-code: 20ms)
+ GET /api/system-settings 200 in 45ms (next.js: 13ms, proxy.ts: 24ms, application-code: 8ms)
+ GET / 200 in 468ms (next.js: 39ms, proxy.ts: 9ms, application-code: 421ms)
+ GET /api/system-settings 200 in 22ms (next.js: 3ms, proxy.ts: 7ms, application-code: 12ms)
+ GET /api/notification-templates?template_key=captain_login_popup 200 in 101ms (next.js: 8ms, proxy.ts: 11ms, application-code: 83ms)
+ GET /api/notification-templates?template_key=player_login_popup 200 in 116ms (next.js: 19ms, proxy.ts: 11ms, application-code: 87ms)
+ GET /api/system-settings 200 in 129ms (next.js: 82ms, proxy.ts: 11ms, application-code: 35ms)
+ GET /api/notification-template-history 200 in 158ms (next.js: 20ms, proxy.ts: 20ms, application-code: 118ms)
+ GET /api/notification-templates?template_key=player_guide_pdf 200 in 161ms (next.js: 43ms, proxy.ts: 17ms, application-code: 101ms)
+ GET /api/notification-templates?template_key=captain_guide_pdf 200 in 165ms (next.js: 51ms, proxy.ts: 17ms, application-code: 97ms)
+ GET /api/notification-templates?template_key=admin_guide_pdf 200 in 165ms (next.js: 85ms, proxy.ts: 48ms, application-code: 33ms)
+ POST /api/match-setup-reminders 200 in 180ms (next.js: 102ms, proxy.ts: 18ms, application-code: 60ms)
+[browser] Unable to count dashboard games played { message: '' } 
+    at countScopedPlayedGames (app\AdminDashboardClient.js:2547:13)
+    at async loadDashboardCounts (app\AdminDashboardClient.js:190:9)
+  2545 |
+  2546 |   if (error) {
+> 2547 |     console.error("Unable to count dashboard games played", error);
+       |             ^
+  2548 |     return 0;
+  2549 |   }
+  2550 | (app\AdminDashboardClient.js:2547:13)
+ GET /members 200 in 3.2s (next.js: 2.5s, proxy.ts: 6ms, application-code: 654ms)
+ GET /api/system-settings 200 in 171ms (next.js: 93ms, proxy.ts: 12ms, application-code: 66ms)
+ GET /api/system-settings 200 in 1219ms (next.js: 33ms, proxy.ts: 1175ms, application-code: 11ms)
+ GET /api/admin/member-directory?mode=members&page=1&pageSize=100&search=&includeInactive=false&currentRosterOnly=false&sort=member&direction=asc 500 in 1241ms (next.js: 1174ms, proxy.ts: 15ms, application-code: 52ms)
+ GET /api/system-settings 200 in 36ms (next.js: 14ms, proxy.ts: 10ms, application-code: 11ms)
+ GET /api/system-settings 200 in 30ms (next.js: 7ms, proxy.ts: 13ms, application-code: 10ms)
+ GET /members/10000000-0000-4000-8000-000000000002 200 in 3.5s (next.js: 3.0s, proxy.ts: 7ms, application-code: 467ms)
+ GET /api/system-settings 200 in 95ms (next.js: 71ms, proxy.ts: 9ms, application-code: 14ms)
+ GET /api/system-settings 200 in 1243ms (next.js: 19ms, proxy.ts: 1216ms, application-code: 8ms)
+ GET /api/admin/member-last-login?memberId=10000000-0000-4000-8000-000000000002 200 in 1260ms (next.js: 1216ms, proxy.ts: 9ms, application-code: 35ms)
+ GET /api/system-settings 200 in 16ms (next.js: 2ms, proxy.ts: 7ms, application-code: 6ms)
+ GET /api/system-settings 200 in 28ms (next.js: 7ms, proxy.ts: 10ms, application-code: 11ms)
+ GET /api/view-as/start 200 in 909ms (next.js: 870ms, proxy.ts: 9ms, application-code: 30ms)
+ GET /api/view-as/start 200 in 916ms (next.js: 870ms, proxy.ts: 9ms, application-code: 37ms)

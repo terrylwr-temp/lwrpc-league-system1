@@ -1,0 +1,33 @@
+start view flow
+signed in fixture
+popup opened http://127.0.0.1:3086/
+view console %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+view console [HMR] connected
+normal console [Fast Refresh] rebuilding
+view console [Fast Refresh] rebuilding
+normal console [Fast Refresh] done in 981ms
+view console [Fast Refresh] done in 982ms
+view console [Fast Refresh] rebuilding
+normal console [Fast Refresh] rebuilding
+normal console [Fast Refresh] done in 833ms
+view console [Fast Refresh] done in 833ms
+view console Failed to load resource: the server responded with a status of 503 (Service Unavailable)
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Image with src "https://lwrpickleballclub.com/lwrpc-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+view console Image with src "http://127.0.0.1:3086/website-emblem.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+view console Failed to load resource: the server responded with a status of 403 (Forbidden)
+view console Failed to load resource: the server responded with a status of 403 (Forbidden)
+view console Failed to load resource: the server responded with a status of 403 (Forbidden)
+view console Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+view console Failed to load resource: net::ERR_FAILED
+view console %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+view console [HMR] connected

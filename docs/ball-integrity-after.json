@@ -1,0 +1,62 @@
+[
+  {
+    "evidence": {
+      "teams": {
+        "hash": "8742788dd2658ad0e1d8ccddad1eb0f4",
+        "count": 110
+      },
+      "leagues": {
+        "hash": "516fdfc3b512fddb90f6ef5f7ea8f3cf",
+        "count": 3
+      },
+      "matches": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "count": 0
+      },
+      "members": {
+        "hash": "b52f75aae6f10786fae19ea396b0a08a",
+        "count": 1986
+      },
+      "seasons": {
+        "hash": "10ebd51367920b6986da08dd1fe60cda",
+        "count": 2
+      },
+      "divisions": {
+        "hash": "74b34587e6d8634431b750ab68bc04e2",
+        "count": 18
+      },
+      "team_byes": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "count": 0
+      },
+      "line_games": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "count": 0
+      },
+      "user_roles": {
+        "hash": "6f3a427851e08194e344f6aef9b48c78",
+        "count": 195
+      },
+      "match_lines": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "count": 0
+      },
+      "team_members": {
+        "hash": "3336b7fd028062d34ff4a9fc4c391f7e",
+        "count": 15
+      },
+      "match_lineups": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "count": 0
+      },
+      "team_standings": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "count": 0
+      },
+      "member_season_ratings": {
+        "hash": "2af92b380888cb2b0024f3bf5c410b47",
+        "count": 1683
+      }
+    }
+  }
+]

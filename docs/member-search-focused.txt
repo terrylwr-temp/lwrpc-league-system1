@@ -1,0 +1,17 @@
+✔ 0726 read RPC manifest denies unknown, writes, View-As mutation and wrong credential (1.2333ms)
+✔ 0726 exact member directory SQL executes read-only with search, roles, roster filters and paging (2909.2191ms)
+✔ fast Steve typing: older broad response cannot overwrite final rows, count or logins (25.3067ms)
+✔ slow typing still updates normally and preserves request filters (14.9388ms)
+✔ Clear Search wins over an in-flight named search (2.6879ms)
+✔ filter, page and sort changes keep only latest response (4.319ms)
+✔ superseded authorization cannot launch an older search (4.3861ms)
+✔ stale API error is ignored; current API error remains actionable (4.3398ms)
+✔ unmount/effect cleanup invalidates late responses (3.1799ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4331.6653

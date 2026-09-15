@@ -1,0 +1,109 @@
+[
+  {
+    "role": "captain",
+    "member": "10000000-0000-4000-8000-000000000002",
+    "normal": [
+      {
+        "id": "10000000-0000-4000-8000-000000000031",
+        "name": "Other Team",
+        "captains": "Synthetic Person9, Synthetic Person6, Synthetic Person7"
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000030",
+        "name": "Synthetic Team",
+        "captains": "Synthetic Person2, Synthetic Person3, Synthetic Person4"
+      }
+    ],
+    "viewAs": [
+      {
+        "id": "10000000-0000-4000-8000-000000000031",
+        "name": "Other Team",
+        "captains": ""
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000030",
+        "name": "Synthetic Team",
+        "captains": "Synthetic Person2, Synthetic Person3, Synthetic Person4"
+      }
+    ],
+    "sameTeamSet": true,
+    "firstDivergence": {
+      "otherTeamCaptainKeyPresent": false,
+      "otherCaptainNameRowPresent": false
+    }
+  },
+  {
+    "role": "player",
+    "member": "10000000-0000-4000-8000-000000000001",
+    "normal": [
+      {
+        "id": "10000000-0000-4000-8000-000000000031",
+        "name": "Other Team",
+        "captains": "Synthetic Person9, Synthetic Person6, Synthetic Person7"
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000030",
+        "name": "Synthetic Team",
+        "captains": "Synthetic Person2, Synthetic Person3, Synthetic Person4"
+      }
+    ],
+    "viewAs": [
+      {
+        "id": "10000000-0000-4000-8000-000000000031",
+        "name": "Other Team",
+        "captains": ""
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000030",
+        "name": "Synthetic Team",
+        "captains": "Synthetic Person2, Synthetic Person3, Synthetic Person4"
+      }
+    ],
+    "sameTeamSet": true,
+    "firstDivergence": {
+      "otherTeamCaptainKeyPresent": false,
+      "otherCaptainNameRowPresent": false
+    }
+  },
+  {
+    "role": "club_pro",
+    "member": "10000000-0000-4000-8000-000000000005",
+    "normal": [
+      {
+        "id": "10000000-0000-4000-8000-000000000031",
+        "name": "Other Team",
+        "captains": "Synthetic Person9, Synthetic Person6, Synthetic Person7"
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000030",
+        "name": "Synthetic Team",
+        "captains": "Synthetic Person2, Synthetic Person3, Synthetic Person4"
+      }
+    ],
+    "viewAs": [
+      {
+        "id": "10000000-0000-4000-8000-000000000031",
+        "name": "Other Team",
+        "captains": ""
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000030",
+        "name": "Synthetic Team",
+        "captains": "Synthetic Person2, Synthetic Person3, Synthetic Person4"
+      }
+    ],
+    "sameTeamSet": true,
+    "firstDivergence": {
+      "otherTeamCaptainKeyPresent": false,
+      "otherCaptainNameRowPresent": false
+    }
+  },
+  {
+    "formatterControls": {
+      "missing": "",
+      "emailOnly": "synthetic@example.invalid",
+      "duplicate": "Same Name, Same Name"
+    },
+    "limits": "Exact accepted SQL projection + display adapter + unchanged formatter. Normal rows model the explicit existing schedule SELECT; not a browser or normal-RLS proof. No correction applied."
+  }
+]

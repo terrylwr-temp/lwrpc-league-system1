@@ -1,0 +1,86 @@
+{
+  "baseline": "LMS-0731 semantic production upload",
+  "changes": [
+    "app/lib/aiAnswerGeneration.js",
+    "app/lib/aiConversation.js",
+    "app/lib/aiLeagueDateEvidence.js",
+    "app/lib/aiLeagueDateFacts.js",
+    "app/lib/aiPolicyEvidence.js",
+    "app/lib/aiRequestIntent.js",
+    "app/lib/liveLmsIntent.js",
+    "app/lib/version.js",
+    "package-lock.json",
+    "package.json"
+  ],
+  "added": [
+    "app/lib/aiRegistrationReleaseIntent.js",
+    "app/lib/aiRegistrationEvidence.js"
+  ],
+  "artifacts": [
+    "test/lms0732.test.mjs",
+    "test/fixtures/lms0732-documents.mjs",
+    "scripts/lms0732-generated.mjs"
+  ],
+  "hashes": [
+    {
+      "file": "app/lib/aiAnswerGeneration.js",
+      "sha256": "b1ada0d1b7b6224b46a5a382261c7e4e92ff88163c8af305b25438343313256d"
+    },
+    {
+      "file": "app/lib/aiConversation.js",
+      "sha256": "103dda5b806f5191787f99c579b0e9c7baed264d7352e2125419b6b86275cad6"
+    },
+    {
+      "file": "app/lib/aiLeagueDateEvidence.js",
+      "sha256": "2ffe4a3902bce5a5403d89971d5c12598bfcc6327ec87ee99e3e30f9a1fe6f52"
+    },
+    {
+      "file": "app/lib/aiLeagueDateFacts.js",
+      "sha256": "88c3d9eec9dbc27348ad83966bcba08ad81b34e9394cf1ca5a712ba6ec4787cc"
+    },
+    {
+      "file": "app/lib/aiPolicyEvidence.js",
+      "sha256": "54a0bc897839cbe8856086012016b1afab64b9ab0f00d4b0b624c03e03fcd74c"
+    },
+    {
+      "file": "app/lib/aiRequestIntent.js",
+      "sha256": "a93769d579e8a10b0d24f24f9fa1139811c77aa4cbefeccc85e799e474a6bcab"
+    },
+    {
+      "file": "app/lib/liveLmsIntent.js",
+      "sha256": "13faf4b1caf48a4539cfd88868822b3ec553a47db17cc5f02d4b8debacc0b616"
+    },
+    {
+      "file": "app/lib/version.js",
+      "sha256": "f48a4ce4d4035a28b28958f9d908a9e5c9f6e7f12e8b3ce71ab3fea9d4909b95"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "5d7c6a33758e8ea1f87cb99764bb8f17fa59f65f46b19c25cf824f27b3f54498"
+    },
+    {
+      "file": "package.json",
+      "sha256": "880f2b3bd549cb424ff6cb48709092e5c0cfba73453efee8ad03983ead84e321"
+    },
+    {
+      "file": "app/lib/aiRegistrationReleaseIntent.js",
+      "sha256": "fc6ffdc900db6188eefb55c0e030198d80b6e0e7d9b05e80519ee8020961c74b"
+    },
+    {
+      "file": "app/lib/aiRegistrationEvidence.js",
+      "sha256": "cdcacab617baef3f6a29858c9d2a7cc21fd9585ecc1d8f89284cd78cc9740a88"
+    },
+    {
+      "file": "test/lms0732.test.mjs",
+      "sha256": "d6db193b36127f156c8872bc3822c62f2e422ed0d235a7ee183bcc0eccdef722"
+    },
+    {
+      "file": "test/fixtures/lms0732-documents.mjs",
+      "sha256": "dfccffbb9e4a6d0d13a3ca2b897f8ee83dd856cff94d4d3402f1f921550cbbb8"
+    },
+    {
+      "file": "scripts/lms0732-generated.mjs",
+      "sha256": "c1ffe89ea8f8807f7a4fad9ee1e92004985111dcdf1bd74f376aba3bbc777547"
+    }
+  ]
+}

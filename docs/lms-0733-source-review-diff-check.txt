@@ -1,0 +1,5 @@
+warning: in the working copy of 'docs/project-roadmap.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/app/components/RatingsImportPreview.js', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/app/lib/seasonRatingsImport.js', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/app/lib/seasonRatingsImportServer.js', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/app/ratings/page.js', CRLF will be replaced by LF the next time Git touches it

@@ -1,0 +1,565 @@
+{
+  "commit": "50ae3343e1a5bc9a763ca71db7e75b945b12516a",
+  "deployment": "dpl_7qjLYYTsZn5t98PNHoQLRqUvKzSX",
+  "runId": "ae55c764-8a2b-4b0a-961e-cf072849917c",
+  "applicationGate": "disabled throughout; verified in browser immediately afterward",
+  "normalSmoke": [
+    "Commissioner Dashboard",
+    "Captain Dashboard",
+    "Season Ratings",
+    "Ask LWR opens (no model call)",
+    "Nick Williams Captain View-As, read-only and exited"
+  ],
+  "simpleBefore": [
+    {
+      "captured_at": "2026-09-10 22:21:12.906072+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "dd28041d5831bde799870753445056c9"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+        },
+        {
+          "name": "locations",
+          "rows": 138,
+          "fingerprint": "c2090d6cae9483b243920a774db4b7f1"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1012,
+          "fingerprint": "3053f8baf7f11abdb04ee91903ce1c72"
+        },
+        {
+          "name": "members",
+          "rows": 1980,
+          "fingerprint": "5f6239150d204e9fff4a13c8583730ee"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 105,
+          "fingerprint": "f3b0e29384ba6cd1bae31c0c44e60146"
+        },
+        {
+          "name": "user_roles",
+          "rows": 186,
+          "fingerprint": "990a1f4e09c4e4abfc2061cb88938535"
+        }
+      ]
+    }
+  ],
+  "simpleFinalPreview": [
+    {
+      "captured_at": "2026-09-10 22:27:10.480863+00",
+      "season": {
+        "id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+        "name": "2026 Fall Season"
+      },
+      "counts": {
+        "rf": 659,
+        "age": 551,
+        "total": 1980,
+        "create": 0,
+        "review": 0,
+        "update": 0,
+        "doubles": 659,
+        "missing": 108,
+        "affected": 659,
+        "inactive": 159,
+        "noChange": 0,
+        "nrDeferred": 0,
+        "protectedFields": 0,
+        "primeTimeUpdates": 0
+      },
+      "fingerprint": "082e44166bb766bbeeef848144c8d4e5",
+      "rules": {
+        "hash": "07fc603d1774fde0c7be41093f69f67c",
+        "scale": 1,
+        "version": "6ae10e5f-fdde-41be-a941-d1b7ed360d1a",
+        "threshold": 29,
+        "adjustment": 0.5,
+        "nrAdmission": true
+      },
+      "actions": [
+        {
+          "n": 159,
+          "action": "SKIP",
+          "reason": "Inactive or unverified activity"
+        },
+        {
+          "n": 659,
+          "action": "FILL",
+          "reason": "Fill blank working inputs only"
+        },
+        {
+          "n": 1162,
+          "action": "DEFER",
+          "reason": "No imported source"
+        }
+      ],
+      "prior_runs": 0,
+      "source_hash": "4f873f55bc9ab6c08c612363a3ce74cc",
+      "batch_hash": "95ffd370b162ee7b9df086201e014dd3"
+    }
+  ],
+  "simplePreReconcileBusiness": [
+    {
+      "captured_at": "2026-09-10 22:26:55.605248+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "dd28041d5831bde799870753445056c9"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+        },
+        {
+          "name": "locations",
+          "rows": 138,
+          "fingerprint": "c2090d6cae9483b243920a774db4b7f1"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1012,
+          "fingerprint": "3053f8baf7f11abdb04ee91903ce1c72"
+        },
+        {
+          "name": "members",
+          "rows": 1980,
+          "fingerprint": "5f6239150d204e9fff4a13c8583730ee"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 105,
+          "fingerprint": "f3b0e29384ba6cd1bae31c0c44e60146"
+        },
+        {
+          "name": "user_roles",
+          "rows": 186,
+          "fingerprint": "990a1f4e09c4e4abfc2061cb88938535"
+        }
+      ]
+    }
+  ],
+  "simpleFinalsBefore": [
+    {
+      "captured_at": "2026-09-10 22:25:38.048784+00",
+      "regular_hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "primetime_hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "regular_count": 0,
+      "primetime_count": 0,
+      "runs": 0,
+      "source_hash": "4f873f55bc9ab6c08c612363a3ce74cc",
+      "import_hash": "95ffd370b162ee7b9df086201e014dd3"
+    }
+  ],
+  "simpleSecurityBefore": [
+    {
+      "migration_count": 1,
+      "service_commit": true,
+      "authenticated_commit": false,
+      "other_seasons_hash": "fbfc9ea102e55e13ce582bfceb2660e0",
+      "fall_populated": 0,
+      "active_cron": 3
+    }
+  ],
+  "simpleReconcileResult": [
+    {
+      "result": {
+        "counts": {
+          "rf": 659,
+          "age": 551,
+          "total": 1980,
+          "create": 0,
+          "review": 0,
+          "update": 0,
+          "doubles": 659,
+          "missing": 108,
+          "affected": 659,
+          "inactive": 159,
+          "noChange": 0,
+          "nrDeferred": 0,
+          "protectedFields": 0,
+          "primeTimeUpdates": 0
+        },
+        "status": "success",
+        "primeTimeUpdates": 0
+      }
+    }
+  ],
+  "simpleWorkingVerification": [
+    {
+      "source_rows": 659,
+      "doubles": 659,
+      "rf": 659,
+      "age": 551,
+      "missing_age": 108,
+      "doubles_mismatches": 0,
+      "rf_mismatches": 0,
+      "age_mismatches": 0,
+      "final_regular": 0,
+      "final_primetime": 0,
+      "provenance_rows": 659,
+      "total_runs": 1,
+      "run": {
+        "id": "ae55c764-8a2b-4b0a-961e-cf072849917c",
+        "status": "success",
+        "createdAt": "2026-09-10T22:27:49.402362+00:00",
+        "operation": "transfer",
+        "beforeImages": 659
+      }
+    }
+  ],
+  "simpleFinalsAfter": [
+    {
+      "captured_at": "2026-09-10 22:28:38.261118+00",
+      "regular_hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "primetime_hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "regular_count": 0,
+      "primetime_count": 0,
+      "runs": 1,
+      "source_hash": "4f873f55bc9ab6c08c612363a3ce74cc",
+      "import_hash": "95ffd370b162ee7b9df086201e014dd3"
+    }
+  ],
+  "simpleAfterBusiness": [
+    {
+      "captured_at": "2026-09-10 22:28:42.830182+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "dd28041d5831bde799870753445056c9"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+        },
+        {
+          "name": "locations",
+          "rows": 138,
+          "fingerprint": "c2090d6cae9483b243920a774db4b7f1"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1671,
+          "fingerprint": "ec727db1f1fcb5bf4eaf2eb96a6140b8"
+        },
+        {
+          "name": "members",
+          "rows": 1980,
+          "fingerprint": "5f6239150d204e9fff4a13c8583730ee"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 105,
+          "fingerprint": "f3b0e29384ba6cd1bae31c0c44e60146"
+        },
+        {
+          "name": "user_roles",
+          "rows": 186,
+          "fingerprint": "990a1f4e09c4e4abfc2061cb88938535"
+        }
+      ]
+    }
+  ],
+  "simpleCleanAfter": [
+    {
+      "counts": {
+        "rf": 0,
+        "age": 0,
+        "total": 1980,
+        "create": 538,
+        "review": 0,
+        "update": 0,
+        "doubles": 0,
+        "missing": 1162,
+        "affected": 538,
+        "inactive": 159,
+        "noChange": 0,
+        "nrDeferred": 121,
+        "protectedFields": 0,
+        "primeTimeUpdates": 0
+      },
+      "rules": {
+        "hash": "07fc603d1774fde0c7be41093f69f67c",
+        "scale": 1,
+        "version": "6ae10e5f-fdde-41be-a941-d1b7ed360d1a",
+        "threshold": 29,
+        "adjustment": 0.5,
+        "nrAdmission": true
+      },
+      "reasons": [
+        {
+          "n": 159,
+          "action": "SKIP",
+          "reason": "Inactive or unverified activity"
+        },
+        {
+          "n": 121,
+          "action": "DEFER",
+          "reason": "WAITING FOR DIVISION"
+        },
+        {
+          "n": 538,
+          "action": "CREATE",
+          "reason": "Truncate Working Doubles under current Rules"
+        },
+        {
+          "n": 1162,
+          "action": "DEFER",
+          "reason": "Missing required working Doubles/RF"
+        }
+      ],
+      "boundary": null,
+      "roster_memberships": 0
+    }
+  ],
+  "simpleRepresentatives": [
+    {
+      "player": "Ann Shaddix",
+      "source_doubles": "2.918",
+      "source_rf": "20",
+      "source_age": "3.423",
+      "working_doubles": "2.9",
+      "working_rf": "20.000",
+      "working_age": "3.4",
+      "category": "NR + age"
+    },
+    {
+      "player": "Alexander Senetar",
+      "source_doubles": "NR",
+      "source_rf": "0",
+      "source_age": null,
+      "working_doubles": "NR",
+      "working_rf": "0.000",
+      "working_age": null,
+      "category": "NR + missing age"
+    },
+    {
+      "player": "Adil Jaffer",
+      "source_doubles": "4.057",
+      "source_rf": "90",
+      "source_age": "4.31",
+      "working_doubles": "4.0",
+      "working_rf": "90.000",
+      "working_age": "4.3",
+      "category": "Rated + age"
+    },
+    {
+      "player": "Aaron Muia",
+      "source_doubles": "3.673",
+      "source_rf": "70",
+      "source_age": null,
+      "working_doubles": "3.6",
+      "working_rf": "70.000",
+      "working_age": null,
+      "category": "Rated + missing age"
+    }
+  ],
+  "simpleOriginalRowsAfter": [
+    {
+      "newly_created_rows": 659,
+      "untouched_original_rows_hash": "3053f8baf7f11abdb04ee91903ce1c72",
+      "other_seasons_hash": "fbfc9ea102e55e13ce582bfceb2660e0",
+      "fall_rows": 661,
+      "source_batches": 1
+    }
+  ],
+  "simpleBoundary": [
+    {
+      "rf": "30.000",
+      "classification": "RATED",
+      "action": "CREATE",
+      "n": 71
+    }
+  ]
+}

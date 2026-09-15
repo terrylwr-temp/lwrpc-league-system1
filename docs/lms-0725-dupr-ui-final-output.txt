@@ -1,0 +1,72 @@
+(node:48416) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+RESULT normal 1440 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT normal 1440 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /Current official DUPR isn't available/. Input:
+
+'Local Ask LWR verification\n' +
+  'Open Ask LWR\n' +
+  'Ask LWR Pickleball Club AI\n' +
+  '\n' +
+  'Get answers from official LWR PC information and USAP Rules\n' +
+  '\n' +
+  '×\n' +
+  '\n' +
+  'Ask LWR PC AI may make mistakes. Check Official Sources for important information.\n' +
+  '\n' +
+  'Ask a question\n' +
+  'New Question\n' +
+  'Ask\n' +
+  '\n' +
+  'Answer ready\n' +
+  '\n' +
+  'LIVE LMS DATA\n' +
+  'SELF RATING\n' +
+  'Current as of 9/8/2026, 1:33:57 PM\n' +
+  'QUESTION\n' +
+  '\n' +
+  "What's my Season DUPR for the 2026 Fall Season?\n" +
+  '\n' +
+  'ANSWER\n' +
+  '\n' +
+  "You don't currently have a Season DUPR recorded for 2026 Fall Season.\n" +
+  '\n' +
+  'Was this helpful?\n' +
+  '👍 Helpful\n' +
+  '👎 Not Helpful\n' +
+  'LIVE LMS DATA\n' +
+  'SELF RATING\n' +
+  'Current as of 9/8/2026, 1:33:57 PM\n' +
+  'QUESTION\n' +
+  '\n' +
+  "What's my DUPR?\n" +
+  '\n' +
+  'CLARIFICATION\n' +
+  '\n' +
+  "Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?\n" +
+  '\n' +
+  'Season DUPR - 2026 Fall Season\n' +
+  'PrimeTime Season DUPR - 2026 Fall Season\n' +
+  'Browse Guides & Rules\n' +
+  '+'
+
+    at C:\lwrpc-league-system\.local-validation\lms0725-dupr-ui.cjs:24:262 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'Local Ask LWR verification\n' +
+    'Open Ask LWR\n' +
+    'Ask LWR Pickleball Club AI\n' +
+    '\n' +
+    'Get answers from official LWR PC information and USAP Rules\n' +
+    '\n' +
+    '×\n' +
+    '\n' +
+    'Ask LWR PC AI may make mistakes. Check Official Sources for important information.\n' +
+    '\n' +
+    '...',
+  expected: /Current official DUPR isn't available/,
+  operator: 'doesNotMatch',
+  diff: 'simple'
+}

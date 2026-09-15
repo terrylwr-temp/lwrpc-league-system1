@@ -1,0 +1,298 @@
+{
+  "category": "LOCAL_BENCHMARK",
+  "mode": "provider",
+  "method": "Verified active official snapshot; actual selection and citation resolver; fixture DB/signing. No production HTTP or ranking replay.",
+  "calls": 8,
+  "usage": [
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1633,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 93,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1726
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1630,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 117,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1747
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1628,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 62,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1690
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1643,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 130,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1773
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1643,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 100,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1743
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1642,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 101,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1743
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1642,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 154,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1796
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1647,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 146,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1793
+      }
+    }
+  ],
+  "cases": [
+    {
+      "question": "Can I play on a team in a different community?",
+      "answer": "Yes, players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nSo the restriction depends on your specific situation: whether your own community has a team in the same division, and whether that team has roster availability.",
+      "metrics": {
+        "generationMs": 3953,
+        "sourceResolutionMs": 5,
+        "totalMs": 3971,
+        "inputTokens": 1633,
+        "outputTokens": 93,
+        "totalTokens": 1726,
+        "estimatedGenerationCostUsd": 0.010955
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "Can I play in a different community?",
+      "answer": "Yes, players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nSo this depends on the specific division and availability. If your own community does not have a team in your division, or does not have roster availability, this restriction would not block you from playing with another community’s team. This does not certify any other eligibility requirements.",
+      "metrics": {
+        "generationMs": 2377,
+        "sourceResolutionMs": 1,
+        "totalMs": 2379,
+        "inputTokens": 1630,
+        "outputTokens": 117,
+        "totalTokens": 1747,
+        "estimatedGenerationCostUsd": 0.01166
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "Are cross-community teams allowed?",
+      "answer": "Yes—players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.",
+      "metrics": {
+        "generationMs": 2558,
+        "sourceResolutionMs": 0,
+        "totalMs": 2561,
+        "inputTokens": 1628,
+        "outputTokens": 62,
+        "totalTokens": 1690,
+        "estimatedGenerationCostUsd": 0.01
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "My community doesn't have a DUPR7 team. Can I play for another community in DUPR7?",
+      "answer": "Yes—if your community does not have a team in your DUPR7 division, Rule 3.5’s cross-community restriction does not block you from playing for another community in DUPR7.\n\nThe rule says players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nThis does not certify any other eligibility requirements; it only answers the cross-community team restriction based on your stated fact.",
+      "metrics": {
+        "generationMs": 2465,
+        "sourceResolutionMs": 1,
+        "totalMs": 2470,
+        "inputTokens": 1643,
+        "outputTokens": 130,
+        "totalTokens": 1773,
+        "estimatedGenerationCostUsd": 0.012115
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "My community has a team in my division but the roster is full. Can I play for another community?",
+      "answer": "Players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nSo, if your community’s team in your division truly has no roster availability, that specific restriction would not block you from playing for another community. This does not certify any other eligibility requirements.",
+      "metrics": {
+        "generationMs": 1990,
+        "sourceResolutionMs": 1,
+        "totalMs": 1996,
+        "inputTokens": 1643,
+        "outputTokens": 100,
+        "totalTokens": 1743,
+        "estimatedGenerationCostUsd": 0.011215
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "My community already has a team in my division and has room. Can I play for another community?",
+      "answer": "No. Rule 3.5 says players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nBased on your stated facts—that your community has a team in your division and has room—this rule would prohibit you from playing for another community’s team.",
+      "metrics": {
+        "generationMs": 6350,
+        "sourceResolutionMs": 0,
+        "totalMs": 6353,
+        "inputTokens": 1642,
+        "outputTokens": 101,
+        "totalTokens": 1743,
+        "estimatedGenerationCostUsd": 0.01124
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "My community has a DUPR7 team. Can I play for another community in DUPR8?",
+      "answer": "Yes, based on the fact you supplied, this specific cross-community restriction would not block you from playing DUPR8 for another community.\n\nRule 3.5 says players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nYou said your community has a DUPR7 team, but you are asking about DUPR8. A DUPR7 team is not a team in your requested DUPR8 division, so this restriction does not apply on that fact alone. This does not certify any other eligibility requirements.",
+      "metrics": {
+        "generationMs": 4233,
+        "sourceResolutionMs": 1,
+        "totalMs": 4236,
+        "inputTokens": 1642,
+        "outputTokens": 154,
+        "totalTokens": 1796,
+        "estimatedGenerationCostUsd": 0.01283
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "My community has a Saturday DUPR7 team with room. Can I play for another community in Weekday DUPR7?",
+      "answer": "Yes, based on the fact you supplied, Rule 3.5 does not block you from playing for another community in Weekday DUPR7.\n\nThe rule allows players to form teams with members from other communities; however, they may not play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nYou said your community’s team with room is Saturday DUPR7, while you want to play Weekday DUPR7. A team in another league does not establish the restriction for Weekday DUPR7. This does not certify any other eligibility requirements.",
+      "metrics": {
+        "generationMs": 3304,
+        "sourceResolutionMs": 1,
+        "totalMs": 3307,
+        "inputTokens": 1647,
+        "outputTokens": 146,
+        "totalTokens": 1793,
+        "estimatedGenerationCostUsd": 0.012615
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "path": "/api/match-setup",
+    "status": 403
+  },
+  {
+    "path": "/api/admin/delete-member",
+    "status": 403
+  },
+  {
+    "path": "/api/round-robin/action",
+    "status": 403
+  },
+  {
+    "path": "/api/tournaments/action",
+    "status": 403
+  },
+  {
+    "path": "/api/ask-lwr/feedback",
+    "status": 403
+  },
+  {
+    "path": "/api/system-settings",
+    "status": 403
+  },
+  {
+    "path": "/teams/10000000-0000-4000-8000-000000000030",
+    "status": 403
+  },
+  {
+    "path": "/members/10000000-0000-4000-8000-000000000001",
+    "status": 403
+  },
+  {
+    "path": "/score-entry/10000000-0000-4000-8000-000000000050",
+    "status": 403
+  }
+]

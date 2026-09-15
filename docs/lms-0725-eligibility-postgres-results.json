@@ -1,0 +1,21 @@
+{
+  "postgresVersion": "17.11",
+  "loopbackOnly": true,
+  "productionAccess": false,
+  "modelCalls": 0,
+  "rollback": "PASS",
+  "telemetryOutcomes": 3,
+  "rlsUnchanged": true,
+  "inactiveMember": "DENIED",
+  "revokedRole": "DENIED",
+  "apply": "PASS",
+  "replay": "PASS",
+  "secondReplay": "PASS",
+  "metadataPreserved": true,
+  "selfRoles": 7,
+  "wrongSubject": "DENIED",
+  "browser": "DENIED",
+  "forgedViewTarget": "DENIED",
+  "effectiveRf": "PASS",
+  "audit": "PASS"
+}

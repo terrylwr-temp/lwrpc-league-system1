@@ -1,0 +1,13 @@
+✔ additive foundation replay, bounded Remove role/lock/dependency/history and replay controls (3778.6124ms)
+✔ Add holds unknown admission facts without membership, receipt, notification, or protected evidence (1777.4979ms)
+✔ Match Setup uses the bounded authority path; held saves preserve rows and reset protects completed history (2202.711ms)
+✔ migration rejects execution/column drift and delivery privileges cannot rewrite payloads (3288.7993ms)
+✔ replay refuses RLS disabled on an existing private table instead of silently repairing it (1945.6147ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13248.8717

@@ -1,0 +1,18 @@
+# Season DUPR rounding — FAST FIX production acceptance
+
+September 13, 2026. **FAST FIX — PRODUCTION ACCEPTED.**
+
+- Baseline: 9e02e61 / dpl_EesjhBpXCrugcoUAihC4Fy7wqzhB. Exact production question returned `stage4_no_applicable_evidence` and document fallback; local first-stage intent was unresolved with no rating-question classification.
+- Authority: active League Rules version 478a87bb-1b05-4da9-ac09-7ddecec64f69, Rule 4.2, page 3. Ratings are truncated to one decimal; 3.496 and 3.401 both become 3.4.
+- Correction: recognize Season DUPR round/rounded/rounding/decimal/tenth wording in the existing intent and rating applicability matchers. Reuses existing rating-method evidence completion, exact excerpts and source revalidation. No calculation or generated-answer text hardcoded.
+- Scope: two application matcher files (4 added / 3 removed lines), eight regression controls, active-source fixture, diagnosis document. No SQL/schema/security/authorization/corpus/Approved Answer/business-data change. No escalation condition triggered.
+- Tests: 111 affected tests passed, including exact wording and five variants, Rule 4.2/page 3 validation, missing-source failure, personal/date/eligibility/non-rating contrasts and existing related policies. Lint passes: 0 errors, 6 pre-existing warnings. Build/TypeScript pass; scoped diff check passes.
+- Exact deployed application: **c88447fde5c31e87b02137bcef4fd94618d43495**. Export verified all 1,217 Git blobs byte-for-byte, with explicit project linkage. Deployment **dpl_8qBAzd6FrjawH9graP7Hjqe47Zrs**, immutable host `lwrpc-admin-rkvdcrxmz-terry-lwrpc.vercel.app`, READY. Production alias and reviewedCommit/gitCommitSha verified. CLI-inherited descriptive gitCommitMessage is stale metadata; immutable content manifest and explicit SHA identify the release.
+- Exact production replay: “For the Season DUPR rating, do you round up down to the first decimal?” returns truncation to nearest tenth, 3.496 becomes 3.4; OFFICIAL RULES, source includes Rule 4.2 page 3.
+- Variant: “Is Season DUPR rounded to one decimal place?” returns “No. Season DUPR is truncated to the nearest tenth, not rounded. For example, 3.496 is truncated to 3.4.” Same authoritative classification/source. Existing rating-method selection also retains related rule sources; source selection was not redesigned.
+- Neighboring control: “When are Season DUPR ratings recorded for the Saturday league?” returns Sunday September 27, 2026, citing the Saturday Important Dates page 1.
+- Normal LMS: real Terry Adelman Commissioner dashboard/Teams load before deployment; after deployment Teams remains healthy at 83 active of 110. No View-As used. All 14 fresh pre/post business-table counts and content hashes match, including members/roles/ratings/rosters/teams and league/match data. Expected operational telemetry only.
+- Model usage: local deterministic tests made no generation calls. Baseline fallback skipped generation. Three post-release acceptance calls used gpt-5.5-2026-04-23: 7,564 input + 146 output tokens. Existing application uncached generation estimator gives **$0.0422**; this is an estimate, excludes embedding charges and does not represent a verified invoice or cached-token billing.
+- Recovery: previous READY application deployment dpl_EesjhBpXCrugcoUAihC4Fy7wqzhB is retained for application rollback. No database recovery action is needed or authorized for this application-only fix.
+
+Evidence: rounding-focused.log, rounding-lint.log, rounding-build.log, rounding-deploy.log, rounding-production-export.json, rounding-production-evidence.json and rounding-final-evidence.json. Stop after acceptance.

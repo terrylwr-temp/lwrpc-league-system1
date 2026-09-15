@@ -1,0 +1,18 @@
+{
+  "app/approved-answer/[citation]/page.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\approved-answer\\[citation]\\page.js",
+  "app/captain-dashboard/page.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\captain-dashboard\\page.js",
+  "app/components/AppHeader.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\components\\AppHeader.js",
+  "app/components/AskLwrAssistant.module.css": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\components\\AskLwrAssistant.module.css",
+  "app/components/DashboardProfileDialog.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\components\\DashboardProfileDialog.js",
+  "app/components/OfficialDocumentViewer.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\components\\OfficialDocumentViewer.js",
+  "app/components/ViewAsStartButton.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788817868898\\app\\components\\ViewAsStartButton.js",
+  "app/design-preview/captain/CaptainDesignPreviewView.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\design-preview\\captain\\CaptainDesignPreviewView.js",
+  "app/layout.tsx": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788817868898\\app\\layout.tsx",
+  "app/lib/auth.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\lib\\auth.js",
+  "app/lib/dashboardGuides.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\lib\\dashboardGuides.js",
+  "app/members/[id]/page.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\members\\[id]\\page.js",
+  "app/player-dashboard/page.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\player-dashboard\\page.js",
+  "app/standings/page.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\standings\\page.js",
+  "app/teams/[id]/page.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\app\\teams\\[id]\\page.js",
+  "proxy.js": "C:\\lwrpc-league-system\\.local-validation\\lms0724-browser-fixture-1788814636919\\proxy.js"
+}

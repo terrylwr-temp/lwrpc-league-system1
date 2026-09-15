@@ -1,4 +1,7 @@
 "use client";
+import {scheduleTeamsWithNames} from "../lib/viewAsPageState.js";
+import {viewAsLeagueDocument} from "../lib/viewAsPageState.js";
+import {getCurrentMemberRows} from "../lib/auth";
 
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -33,7 +36,7 @@ import {
   normalizeLeagueDocumentBucket,
 } from "../lib/leagueDocuments";
 import { GUIDE_DOCUMENT_TYPES, guidePdfDocument, openGuideDocument } from "../lib/dashboardGuides";
-import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
+import { memberEmailResolution } from "../lib/memberLookup";
 import { buildActiveDivisionOptions } from "../lib/divisionOptions";
 import {
   isSpecialMatchResult,
@@ -165,20 +168,9 @@ export default function PlayerDashboardPage() {
   }, [loadWeekdayLeague]);
 
   const loadData = useCallback(async function loadData() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const {data:memberRows,error:memberError,identityMissing} = await getCurrentMemberRows("id, first_name, last_name, email, phone, club_location, dupr_id, renewal_date, is_active_member, self_rating, profile_image_urls");
 
-    if (!user?.email) {
-      setLoading(false);
-      return;
-    }
-
-    const { data: memberRows, error: memberError } = await findMembersByEmail(
-      supabase,
-      user.email,
-      "id, first_name, last_name, email, phone, club_location, dupr_id, renewal_date, is_active_member, self_rating, profile_image_urls"
-    );
+    if (identityMissing) { setLoading(false); return; }
 
     if (memberError) {
       alert(memberError.message);
@@ -975,6 +967,7 @@ export default function PlayerDashboardPage() {
   }
 
   async function openMatchLineup(match) {
+    if(isViewAsMode()){alert("The combined saved lineup is not currently available in View As mode. Authorized Captains can inspect their own team through Match Setup.");return;}
     setMatchLineupPreview({ match, lineups: [], loading: true, error: "" });
 
     const { data, error } = await supabase
@@ -1155,6 +1148,7 @@ export default function PlayerDashboardPage() {
           co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, full_name, email)
         `)
         .eq("division_id", divisionId)
+        .eq("is_active", true)
         .order("name", { ascending: true }),
       supabase
         .from("matches")
@@ -1247,7 +1241,7 @@ export default function PlayerDashboardPage() {
       (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
     );
 
-    const nextDivisionTeams = (divisionTeams || [])
+    const nextDivisionTeams = (await scheduleTeamsWithNames(divisionTeams || [], divisionId))
       .map((team) => ({
         ...team,
         standing: standingsByTeamId[String(team.id)] || null,
@@ -1301,8 +1295,7 @@ export default function PlayerDashboardPage() {
     const bucket = normalizeLeagueDocumentBucket(
       league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET
     );
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    const documentUrl = data?.publicUrl || "";
+    const documentUrl = isViewAsMode() ? await viewAsLeagueDocument(league.id,documentType.key) : supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || "";
 
     if (!documentUrl) {
       documentWindow?.close();

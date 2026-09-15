@@ -1,0 +1,80 @@
+{
+  "beforeEqualsAfter": true,
+  "snapshot": [
+    {
+      "snapshot": {
+        "data": [
+          {
+            "n": 7,
+            "hash": "eaf8437616f7bb52649b3fff60380279",
+            "kind": "documents"
+          },
+          {
+            "n": 23,
+            "hash": "ef75f8969629ad24d737a939780d3d4c",
+            "kind": "versions"
+          },
+          {
+            "n": 1804,
+            "hash": "de33cbf3c9e1dbc0b64bf282edc0f421",
+            "kind": "chunks"
+          },
+          {
+            "n": 1,
+            "hash": "a0ba3d0cb8a3257bad09c7deeac02847",
+            "kind": "approved_answers"
+          },
+          {
+            "n": 2,
+            "hash": "404cbfae87bb73312f9412f627402356",
+            "kind": "approved_revisions"
+          },
+          {
+            "n": 7,
+            "hash": "1a8aeecd3237a48cea7a41366911c98d",
+            "kind": "approved_events"
+          },
+          {
+            "n": 1951,
+            "hash": "3d595ec6dd91734bfdb6bbcb5a346ad3",
+            "kind": "members"
+          },
+          {
+            "n": 92,
+            "hash": "66fb1e06a0fd0390cfe28cbab9d490a8",
+            "kind": "teams"
+          },
+          {
+            "n": 0,
+            "hash": null,
+            "kind": "rosters"
+          },
+          {
+            "n": 1012,
+            "hash": "1c26b8ace1b7e20ff7443ed70ca9f80e",
+            "kind": "ratings"
+          },
+          {
+            "n": 158,
+            "hash": "6ae966a2cfe23a53249c59b7206f7e1d",
+            "kind": "identity_links"
+          },
+          {
+            "n": 221,
+            "hash": "d99fc69c5ef25b83c1d545931ad2ad99",
+            "kind": "outcomes"
+          },
+          {
+            "n": 20,
+            "hash": "8c75eaf1fc1da099d79bba4c7b24553b",
+            "kind": "feedback"
+          }
+        ],
+        "policies": "ecc34069cbdfbf33b7713f5a812401a1",
+        "column_acl": "450b0564e80fa9eee12eb0815a5fc5e4",
+        "table_security": "0fff2150f07ea2d498703813a2bdf572",
+        "unrelated_functions": "aa895831147c4378c4d62b76c0c0721e"
+      }
+    }
+  ]
+}

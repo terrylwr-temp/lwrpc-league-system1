@@ -1,0 +1,10 @@
+{
+  "file": "app\\view-as\\page.js",
+  "oldSha256": "45e5dd350c068c40f0d2c37ecc7551f588ebba4e6aa68058af70a717cd2230b1",
+  "oldBytes": 12254,
+  "oldLines": 69,
+  "newBytes": 134,
+  "newLines": 2,
+  "removed": "Parallel dashboard, Teams/Rosters, Matches, Standings, navigation, Ask conversation/source presentation and inline styling. Only required handoff landing route remains.",
+  "sqlSnapshot": "Historical accepted SQL retained; no forward SQL deletion authorized."
+}

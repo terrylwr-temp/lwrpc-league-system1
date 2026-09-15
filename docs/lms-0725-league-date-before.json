@@ -1,0 +1,114 @@
+[
+  {
+    "question": "when does the women weekday dupr league start",
+    "interpretation": {
+      "policyVersion": "lms0720-v1",
+      "annotations": [],
+      "matchingView": "when does the women weekday dupr league start"
+    },
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "weekday"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "when does the women weekday dupr league start"
+    },
+    "liveRoute": null,
+    "documentGuard": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "when does the women weekday dupr league start",
+      "effectiveQuestion": "when does the women weekday dupr league start",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "boundedPolicyCompletion": false,
+    "dateCandidate": [
+      {
+        "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+        "heading": "Weekday DUPR League Key Dates",
+        "applicable": []
+      },
+      {
+        "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+        "heading": "Saturday DUPR League Key Dates",
+        "applicable": []
+      },
+      {
+        "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+        "heading": "PrimeTime DUPR League Key Dates",
+        "applicable": []
+      }
+    ],
+    "selected": []
+  },
+  {
+    "question": "What is the starting date for the women's weekday dupr league",
+    "interpretation": {
+      "policyVersion": "lms0720-v1",
+      "annotations": [],
+      "matchingView": "What is the starting date for the women's weekday dupr league"
+    },
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "weekday"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "what is the starting date for the women's weekday dupr league"
+    },
+    "liveRoute": null,
+    "documentGuard": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "What is the starting date for the women's weekday dupr league",
+      "effectiveQuestion": "What is the starting date for the women's weekday dupr league",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "boundedPolicyCompletion": false,
+    "dateCandidate": [
+      {
+        "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+        "heading": "Weekday DUPR League Key Dates",
+        "applicable": []
+      },
+      {
+        "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+        "heading": "Saturday DUPR League Key Dates",
+        "applicable": []
+      },
+      {
+        "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+        "heading": "PrimeTime DUPR League Key Dates",
+        "applicable": []
+      }
+    ],
+    "selected": []
+  }
+]

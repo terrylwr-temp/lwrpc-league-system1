@@ -1,6 +1,9 @@
+import {documentProvenance} from '../../../lib/aiResultSource.js';
+import {needsEligibility} from '../../../lib/aiEligibilityIntent.js';
+import {runEligibility} from '../../../lib/aiEligibilityService.js';
 import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { conversationDiagnostics } from "../../../lib/aiConversationDiagnostics";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import {approvedViewerHref} from "../../../lib/aiApprovedAnswerViewer.js";
 import { answerGenerationDiagnostic, generateOfficialAnswer } from "../../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
@@ -17,14 +20,21 @@ export async function POST(req) {
   if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
+    if(needsEligibility(body)) {
+      const eligibilityAuth=await authorizeAdminRequest(req,"league_manager");
+      if(eligibilityAuth.error)return failure(eligibilityAuth.error,eligibilityAuth.status);
+      const result=await runEligibility({body,principal:await authenticateLive(req),deferRecovery:after,origin:'manager_test'});
+      if(result)return NextResponse.json({success:true,result:{answer:{answer:result.answer,sources:result.sources,evidenceSufficient:result.kind==='answer',model:'Not called',metrics:{inputTokens:0,outputTokens:0}},kind:result.kind,eligibility:result.eligibility,provenance:result.provenance,privateContext:result.privateContext,live:result.live,clarification:result.clarification,conversationReceipt:result.conversationReceipt,retrieval:{candidates:[],suppliedEvidence:[],authorityReviewCandidates:[],intentEvidenceCandidates:[],documentsConsidered:[],evidence:{sufficient:result.kind==='answer'},metrics:{embeddingMs:0,retrievalMs:0,totalMs:0}}}},{headers:{'Cache-Control':'private, no-store'}});
+      body.conversationReceipt=null;
+    }
     if(needsLive(body)) {
-      const result=await runLive({body,principal:await authenticateLive(req),origin:'manager_test'});
+      const result=await runLive({deferRecovery:after,body,principal:await authenticateLive(req),origin:'manager_test'});
       if(result)return NextResponse.json({success:true,result:{answer:{answer:result.answer,sources:[],evidenceSufficient:result.kind==='answer',model:'Not called',metrics:{inputTokens:0,outputTokens:0}},live:result.live,conversationReceipt:result.conversationReceipt,retrieval:{candidates:[],suppliedEvidence:[],authorityReviewCandidates:[],intentEvidenceCandidates:[],documentsConsidered:[],evidence:{sufficient:result.kind==='answer'},metrics:{embeddingMs:0,retrievalMs:0,totalMs:0}}}},{headers:{'Cache-Control':'private, no-store'}});
       body.conversationReceipt=null;
     }
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return failure(authorization.error, authorization.status);
-    const execution = await observeQualityRequest({ supabase: authorization.supabase, origin: "manager_test", run: (_id, trace) => runManagerAnswer(authorization, body, trace) });
+    const execution = await observeQualityRequest({ deferRecovery: after, supabase: authorization.supabase, origin: "manager_test", run: (_id, trace) => runManagerAnswer(authorization, body, trace) });
     return NextResponse.json({ success: true, result: execution.response });
   } catch (error) {
     const authFailure=liveAuthFailure(error);
@@ -59,6 +69,7 @@ async function runManagerAnswer(authorization, body, trace) {
       retrieval, answer, conversationResolution,
       result: { kind: answer.conflict?.requiresClarification ? "conflict" : answer.evidenceSufficient ? "answer" : "insufficient_evidence", answer: answer.answer },
       response: {
+        provenance: documentProvenance(answer),
         retrieval: { ...retrieval, documentsConsidered, conversationResolution: conversationDiagnostics(conversationResolution, { stage3Invoked: true, answer }) },
         answer: { ...answer, sources:answer.sources.map(s=>s.sourceKind==="approved_answer"?{...s,officialDocumentUrl:approvedViewerHref(s,authorization.user.id)}:s), metrics: { ...answer.metrics, retrievalMs: retrieval.metrics.totalMs, totalMs: Math.round(performance.now() - started) } },
         conversationReceipt: answer.evidenceSufficient ? createFollowUpReceipt(authorization.user.id, conversationResolution.effectiveQuestion) : null,

@@ -1,0 +1,15 @@
+{
+  "baseline": "LMS-0729 accepted upload",
+  "changed": [
+    "app\\api\\view-as\\read\\route.js",
+    "app\\captain-dashboard\\page.js",
+    "app\\lib\\version.js",
+    "app\\lib\\viewAsPageState.js",
+    "app\\player-dashboard\\page.js"
+  ],
+  "newFiles": [
+    "app/lib/scheduleCaptainNames.js"
+  ],
+  "normalScheduleQueriesAndRenderingUnchanged": true,
+  "unchangedExistingAppFiles": 255
+}

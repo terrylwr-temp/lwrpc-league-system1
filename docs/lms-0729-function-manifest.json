@@ -1,0 +1,23 @@
+[
+  {
+    "signature": "ai_live_private.lookup(uuid,uuid,jsonb)",
+    "oldMd5": "fecb77efcf5c33008b43a230fc31d3e9",
+    "newMd5": "57f4a0385936a691935dd1c73fd81d90",
+    "owner": "postgres",
+    "execute": "service_role"
+  },
+  {
+    "signature": "public.ai_live_feedback(uuid,uuid,boolean,jsonb)",
+    "oldMd5": "b8f129db990b3f4001b11cb72874f1b1",
+    "newMd5": "690795e9d4a67cef7fe43d6b3f1e7b9a",
+    "owner": "postgres",
+    "execute": "service_role"
+  },
+  {
+    "signature": "view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)",
+    "oldMd5": "3d8ce5f61c83215561784840ff7ee551",
+    "newMd5": "000f219d61b182494ced2bb1bf2f4b1e",
+    "owner": "postgres",
+    "execute": "lms_view_as_executor"
+  }
+]

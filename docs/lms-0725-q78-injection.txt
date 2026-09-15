@@ -1,0 +1,27 @@
+(node:15412) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityPersistence.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 Q78 450ms success (5.4292ms)
+✔ 0725 Q78 deadline then found (2.4689ms)
+✔ 0725 Q78 deadline absent then retry (1.1825ms)
+✔ 0725 Q78 late first commit races retry (1.2563ms)
+✔ 0725 Q78 reconciliation timeout (0.9474ms)
+✔ 0725 Q78 reconciliation failure (0.6009ms)
+✔ 0725 Q78 second deadline then found (2.5247ms)
+✔ 0725 Q78 second deadline absent (0.9495ms)
+✔ 0725 Q78 mismatch never retries (0.7219ms)
+✔ 0725 Q78 safe answer returns before recovery and no answer rerun (3.9473ms)
+✔ 0725 reconciliation cannot accept an older positive occurrence for missing negative review case (0.4654ms)
+✔ 0725 recovery scheduling failure is visible and never runs detached (0.7743ms)
+✔ 0725 recovery keeps origin and never introduces actor or effective member identifiers (1.6606ms)
+✔ 0725 recovery callback reentry cannot exceed one retry or terminal diagnostic (0.7175ms)
+✔ 0725 all ordinary capture route callers register framework-owned recovery (0.9669ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 241.151

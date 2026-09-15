@@ -1,0 +1,88 @@
+{
+  "date": "2026-09-11",
+  "authorizedMutation": {
+    "memberId": "a6cc5885-f6da-41f2-8bdc-88596b176d96",
+    "field": "dupr_id",
+    "before": "1R9LNE",
+    "after": null
+  },
+  "retained": {
+    "memberId": "43e1e363-82f1-47d7-a869-befed4c967b8",
+    "dupr_id": "1R9LNE",
+    "normalizedMatches": 1
+  },
+  "before": [
+    {
+      "verification": {
+        "auth": "fccce6959891dfba98c38d2e8c4a971d",
+        "roles": "e59cd514e095cd38f8ae1bcc74515702",
+        "teams": "745cd4d3c873ce77d6da32317c035a9a",
+        "ratings": "ec36e89e097654e553e2f63e51b27a6b",
+        "rosters": "d751713988987e9331980363e24189ce",
+        "memberNonDupr": {
+          "43e1e363-82f1-47d7-a869-befed4c967b8": "8b39c965f43d67d5f2de378cf16e5fa4",
+          "a6cc5885-f6da-41f2-8bdc-88596b176d96": "809277dc0591c633192405179271f80b"
+        },
+        "tournamentContacts": "91091a3e02b83df5d9b972819eb9b9f9",
+        "otherDuplicateMembers": "ca71e27c24ff6090977d88995c544413"
+      }
+    }
+  ],
+  "after": [
+    {
+      "verification": {
+        "auth": "fccce6959891dfba98c38d2e8c4a971d",
+        "roles": "e59cd514e095cd38f8ae1bcc74515702",
+        "teams": "745cd4d3c873ce77d6da32317c035a9a",
+        "ratings": "ec36e89e097654e553e2f63e51b27a6b",
+        "rosters": "d751713988987e9331980363e24189ce",
+        "memberNonDupr": {
+          "43e1e363-82f1-47d7-a869-befed4c967b8": "8b39c965f43d67d5f2de378cf16e5fa4",
+          "a6cc5885-f6da-41f2-8bdc-88596b176d96": "809277dc0591c633192405179271f80b"
+        },
+        "tournamentContacts": "91091a3e02b83df5d9b972819eb9b9f9",
+        "otherDuplicateMembers": "ca71e27c24ff6090977d88995c544413"
+      }
+    }
+  ],
+  "afterPreview": [
+    {
+      "verification": {
+        "auth": "fccce6959891dfba98c38d2e8c4a971d",
+        "roles": "e59cd514e095cd38f8ae1bcc74515702",
+        "teams": "745cd4d3c873ce77d6da32317c035a9a",
+        "ratings": "ec36e89e097654e553e2f63e51b27a6b",
+        "rosters": "d751713988987e9331980363e24189ce",
+        "memberNonDupr": {
+          "43e1e363-82f1-47d7-a869-befed4c967b8": "8b39c965f43d67d5f2de378cf16e5fa4",
+          "a6cc5885-f6da-41f2-8bdc-88596b176d96": "809277dc0591c633192405179271f80b"
+        },
+        "tournamentContacts": "91091a3e02b83df5d9b972819eb9b9f9",
+        "otherDuplicateMembers": "ca71e27c24ff6090977d88995c544413"
+      }
+    }
+  ],
+  "csvPreview": {
+    "filename": "members-list-lakewoodranchpickleballclub-091026223019.csv",
+    "sha256": "a4857c7a1d9ee43261ec29a7e226d478bec4f4b2b47253cc4e3a77a2c247a704",
+    "season": "2026 Fall Season",
+    "member": "Terry Adelman",
+    "duprId": "1R9LNE",
+    "action": "READY TO IMPORT",
+    "doubles": "4.077 → 4.0",
+    "rf": "doublesReliability 100 → 100",
+    "age": "over_50 4.311 → 4.3; over_65 absent",
+    "importCommitted": false,
+    "cleanRun": false
+  },
+  "otherDuplicateGroupsUnchanged": [
+    "309R64",
+    "67POVE",
+    "EGL7GM",
+    "JJVRPW",
+    "MYLYJD",
+    "QP7W65",
+    "RW4QDD",
+    "ZN5DGM"
+  ]
+}

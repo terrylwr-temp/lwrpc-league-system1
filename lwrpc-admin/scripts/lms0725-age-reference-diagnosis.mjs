@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import {questionIntent} from '../app/lib/aiRequestIntent.js';
+import {liveIntent} from '../app/lib/liveLmsIntent.js';
+import {needsPolicyEvidence} from '../app/lib/aiPolicyEvidence.js';
+import {selectAnswerEvidence} from '../app/lib/aiAnswerGeneration.js';
+import {resolveOfficialConversation,isUnsupportedOperationalQuestion} from '../app/lib/askLwrPlayerAnswer.js';
+const s=JSON.parse(fs.readFileSync(new URL('../../docs/lms-0725-league-dates-current-evidence.json',import.meta.url)));
+const candidates=s.evidence.map(c=>({chunkId:c.id,documentId:c.document.id,documentVersionId:c.document_version_id,documentTitle:c.document.title,documentType:c.document.document_type,documentAuthorityRank:c.document.authority_rank,content:c.content,ruleNumber:c.rule_number,heading:c.heading,sectionLabel:c.section_label,pageNumber:c.page_number,chunkOrdinal:c.chunk_ordinal,combinedScore:.8}));
+const questions=['What is the date for the primetime league for basing the age on','What date is my age based on for PrimeTime?','What is the PrimeTime age cutoff date?','When do I have to turn 65 to play PrimeTime?','Do I have to be 65 when the PrimeTime season starts?','If I turn 65 later this year can I play PrimeTime?','I turn 65 in December. Can I play PrimeTime?','What date do you use to determine age for the 65+ league?'];
+const output=questions.map(question=>({question,intent:questionIntent(question),live:liveIntent(question),operational:isUnsupportedOperationalQuestion(question),conversation:resolveOfficialConversation({question,userId:'local-fixture'}),policyCompletion:needsPolicyEvidence(question),selected:selectAnswerEvidence({request:{question},candidates,suppliedEvidence:candidates,authorityReviewCandidates:candidates,policyEvidence:{status:'complete',candidates},evidence:{sufficient:true}}).map(c=>({chunkId:c.chunkId,content:c.content}))}));fs.writeFileSync(new URL('../../docs/lms-0725-age-reference-before.json',import.meta.url),JSON.stringify(output,null,2));console.log(JSON.stringify(output));

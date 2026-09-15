@@ -1,0 +1,36 @@
+(node:13004) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0727 policy routing and exact evidence: Can I play on a team in a different community? (18.037ms)
+✔ 0727 policy routing and exact evidence: Can I play in a different community? (3.5393ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community? (3.6037ms)
+✔ 0727 policy routing and exact evidence: Can I join another community's team? (4.1668ms)
+✔ 0727 policy routing and exact evidence: Can players from different communities be on the same team? (2.4935ms)
+✔ 0727 policy routing and exact evidence: Do I have to play for my own community? (1.2535ms)
+✔ 0727 policy routing and exact evidence: Are cross-community teams allowed? (3.7868ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a team in my division. Can I play for another community? (4.7306ms)
+✔ 0727 policy routing and exact evidence: My community has a team but it's full. Can I play for another community? (5.4827ms)
+✔ 0727 policy routing and exact evidence: My community has a team in my division and has room. Can I play for another community? (4.7858ms)
+✔ 0727 policy routing and exact evidence: My community has a team in another division. Can I play elsewhere in my division? (5.589ms)
+✔ 0727 policy routing and exact evidence: What are the rules for cross-community teams? (3.0266ms)
+✔ 0727 policy routing and exact evidence: Can I play on another community's team? (3.3923ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a DUPR7 team. Can I play for another community? (3.3571ms)
+✔ 0727 policy routing and exact evidence: Can players play on teams in other communities? (1.8853ms)
+✔ 0727 policy routing and exact evidence: Do you have to play for your own community? (0.8836ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community if mine has a team? (2.3099ms)
+✔ 0727 policy routing and exact evidence: What if my community's team is full? (1.1952ms)
+✔ 0727 policy routing and exact evidence: My community has a Saturday DUPR7 team. Can I play for another community in Weekday DUPR8? (2.818ms)
+✔ 0727 separate live and division eligibility remain separate (3.9347ms)
+✔ 0727 missing conjunction, conflicting candidates, changed exact source fail closed (12.78ms)
+✔ 0727 completion reads only active ready searchable document corpus (2.5055ms)
+✔ 0727 generated request contains only exact policy/question, with conditional fact instructions (5.3654ms)
+✔ 0727 league-scoped distractor never becomes governing evidence for another league (0.9181ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1359.8132

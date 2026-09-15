@@ -1,0 +1,122 @@
+{
+  "recordedAt": "2026-09-08T16:39:36.128Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q81",
+      "question": "When is the Weekday championship?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 381,
+              "end": 486,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 105,
+              "sha256": "f1e7525e4ac996bf280aa5508d6de11ae86b2d929f8ea02707b270565e07e65d"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1338,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "The Weekday DUPR League championship days are Dec. 9/10, 2026, for the 2026 Fall League.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1840,
+        "sourceResolutionMs": 3,
+        "totalMs": 1863,
+        "inputTokens": 1587,
+        "outputTokens": 46,
+        "totalTokens": 1633,
+        "estimatedGenerationCostUsd": 0.009315
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 381,
+              "end": 486,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

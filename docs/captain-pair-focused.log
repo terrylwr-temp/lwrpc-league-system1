@@ -1,0 +1,102 @@
+(node:16908) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  managedRoster: true,
+  prospectivePair: true,
+  mixedPair: true,
+  coCaptains: true,
+  unmanagedTeamDenied: true,
+  contextRequired: true,
+  playerDenied: true,
+  viewAsDenied: true,
+  commissionerPreserved: true,
+  clubProUnchanged: true,
+  minimalProjection: true,
+  communityScope: true,
+  revocation: true,
+  audit: true,
+  replay: true,
+  transactionRollback: true,
+  operationalRollback: true,
+  browserDenied: true,
+  businessDataUnchanged: true
+}
+✔ Captain prospective SQL authorization, minimum projection, replay and exact rollback (6462.3503ms)
+(node:2420) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Captain pair routing: Can Terry play with Tim? (10.6775ms)
+✔ Captain pair routing: Can Tim play with Terry? (1.681ms)
+✔ Captain pair routing: Can Terry and Tim play together on my team? (0.9765ms)
+✔ Captain pair routing: Can I add Terry and Tim to my MDUPR8 team? (0.704ms)
+✔ Captain pair routing: Can Terry partner with Tim on Synthetic Team? (0.6314ms)
+✔ Captain team-first clarification retains both identities, team and division through actual SQL (8141.2308ms)
+(node:21700) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiPairEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pair route: Can Terry play with Tim? (10.421ms)
+✔ pair route: Can Tim play with Terry? (0.7626ms)
+✔ pair route: Can Terry and Tim play together? (0.5891ms)
+✔ pair route: Can Terry partner with Tim? (0.2113ms)
+✔ pair route: Are Terry and Tim eligible for DUPR7? (0.5677ms)
+✔ pair route: Can I play with Tim? (0.1802ms)
+✔ pair route: Can John partner with Mary? (0.1727ms)
+✔ pair route: Are Sue and Bob eligible to play together? (5.4927ms)
+✔ pair route: Can Terry and Tim be partners? (0.8314ms)
+✔ pair route: Can Terry play with Tim in DUPR7? (0.4481ms)
+✔ pair captures both subjects and keeps existing route contrasts (19.9465ms)
+✔ both exact questions yield same deterministic answer and no RF/profile leakage (43.2738ms)
+✔ View-As denied before catalog or lookup; normal denial does not fall back (1.2723ms)
+✔ two bounded identity choices survive later division clarification (13.211ms)
+✔ validated page division is retained and raw browser IDs are ignored (4.5859ms)
+✔ forged and cross-session choices cannot perform a lookup (3.0275ms)
+✔ stale final audit or required source failure blocks answer (4.7498ms)
+✔ Rated + Rated (0.4307ms)
+✔ Rated + NR blank (3.8257ms)
+✔ NR + NR blank (8.4583ms)
+✔ independent NR (3.3118ms)
+✔ individual max failure (0.4988ms)
+✔ individual min failure (0.1282ms)
+✔ combined failure (0.1104ms)
+✔ exact maximum (0.1471ms)
+✔ unknown NR basis (0.2298ms)
+✔ missing rated value (0.1221ms)
+✔ unknown placement (12.9323ms)
+✔ NR highest adjustment spans relevant divisions and cannot reduce established assigned value (11.548ms)
+✔ active replacement Rules versions need no code binding but unsupported semantics fail closed (4.8301ms)
+✔ PrimeTime uses its applicable policy and identifies unverified age eligibility (3.6433ms)
+(node:3244) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  replay: true,
+  transactionRollback: true,
+  operationalRollback: true,
+  browserDenied: true,
+  playerDenied: true,
+  targetsIndependent: true,
+  privateProjection: true,
+  orderInvariant: true,
+  staleFactsDenied: true,
+  auditRequired: true,
+  businessDataUnchanged: true
+}
+✔ pair private SQL security, projection, replay and rollback (10731.3572ms)
+(node:15864) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exact questions traverse actual SQL, retained name choices and deterministic answer (10701.4733ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22515.7293

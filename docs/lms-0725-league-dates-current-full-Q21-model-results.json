@@ -1,0 +1,158 @@
+{
+  "recordedAt": "2026-09-08T16:29:42.508Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q21",
+      "question": "What date does player entry open for Weekday?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 3147,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall Weekday DUPR League, player/roster entry can start on Monday, Sept. 28, 2026.\n\nAccess also depends on the setup/unlock steps: after team registration is completed, League Management must activate the team and assign the captain/co-captain(s), and League Management will notify you when rosters are unlocked and available to begin adding/managing players.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2561,
+        "sourceResolutionMs": 3,
+        "totalMs": 2586,
+        "inputTokens": 2029,
+        "outputTokens": 103,
+        "totalTokens": 2132,
+        "estimatedGenerationCostUsd": 0.013235
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "category": "PRODUCTION_ACCEPTANCE",
+  "classification": "Local submission ledger, timestamp and scope correlation; provider category not persisted.",
+  "calls": 9,
+  "input": 14188,
+  "output": 398,
+  "cached": "unavailable",
+  "estimatedUncachedUsd": 0.08288000000000001,
+  "embeddingCalls": "9 retrieval invocations observed; embedding token usage not retained",
+  "excludedConcurrentOutcomes": 5,
+  "rows": [
+    {
+      "case": "Q78",
+      "id": "73a67adf-5e7b-47b8-931e-c2538069f544",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1571,
+      "output": 45,
+      "cached": null,
+      "estimatedUncachedUsd": 0.009205
+    },
+    {
+      "case": "Q79",
+      "id": "546df09c-5f42-42d6-ba8d-ecdb643d3ad6",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1573,
+      "output": 37,
+      "cached": null,
+      "estimatedUncachedUsd": 0.008975
+    },
+    {
+      "case": "Q80",
+      "id": "14c43f8a-4dc4-4eb0-8b7a-6eff1d500331",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1576,
+      "output": 42,
+      "cached": null,
+      "estimatedUncachedUsd": 0.00914
+    },
+    {
+      "case": "Q81",
+      "id": "7abc290c-d0b4-4038-9417-25810ea3567d",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1587,
+      "output": 46,
+      "cached": null,
+      "estimatedUncachedUsd": 0.009314999999999999
+    },
+    {
+      "case": "Q82",
+      "id": "7ad6c42c-2259-4d2b-811c-5686d7e1595d",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1587,
+      "output": 47,
+      "cached": null,
+      "estimatedUncachedUsd": 0.009345
+    },
+    {
+      "case": "Q83",
+      "id": "5f394bc6-fa04-4829-a599-c8be09266b6c",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1570,
+      "output": 42,
+      "cached": null,
+      "estimatedUncachedUsd": 0.00911
+    },
+    {
+      "case": "Q84",
+      "id": "b3dbad82-a881-43c9-b280-02f97f883ae4",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1573,
+      "output": 46,
+      "cached": null,
+      "estimatedUncachedUsd": 0.009245
+    },
+    {
+      "case": "Q85",
+      "id": "a2a981c2-ce99-4c77-a37a-bbb893018086",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1579,
+      "output": 49,
+      "cached": null,
+      "estimatedUncachedUsd": 0.009364999999999998
+    },
+    {
+      "case": "Q86",
+      "id": "22780387-27d2-42f1-9f2b-70a13e77af30",
+      "model": "gpt-5.5-2026-04-23",
+      "input": 1572,
+      "output": 44,
+      "cached": null,
+      "estimatedUncachedUsd": 0.00918
+    }
+  ]
+}

@@ -28,7 +28,12 @@ export function assistantPageContext(pathname) {
   return Object.freeze({ currentPath, featureModule, suggestions });
 }
 
-export const ASK_LWR_INITIAL_COPY = "Ask me about LWR Pickleball Club leagues, DUPR requirements, scoring, Match Setup, Captain procedures, league formats, and more. You also have access to the complete USA Pickleball Rulebook, so you can ask me about pickleball rules, faults, serving, the kitchen (NVZ), equipment, and other rules of play.";
+export const ASK_LWR_INITIAL_COPY = "Ask me about LWR leagues, rules, important dates, scoring, DUPR, Match Setup, or your authorized LMS information.";
+export const ASK_LWR_HELP_GROUPS = Object.freeze([
+  {title:'LWR leagues & rules',questions:["When does the Women's Weekday League start?",'Does the Weekday League use Rally Scoring?','When can I start entering my roster?','What ball are we using?']},
+  {title:'My LMS information',description:"Available information depends on your LMS role and what you're authorized to access.",questions:["What's my Season DUPR?",'What team am I on?',"Who's on my roster?",'When is my next match?']},
+  {title:'USA Pickleball rules',questions:['What is a kitchen violation?','Can my serve hit the net?','When can I step into the NVZ?','What happens if the ball hits a player?']},
+]);
 
 // These mirror the existing dashboard entry points. Guide browsing is separate
 // from official-document retrieval eligibility and never constrains RAG.

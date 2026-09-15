@@ -1,0 +1,47 @@
+lwrpc-admin/app\lib\aiEligibilityService.js:1:import { sourceRfClassification, rulesRfThreshold } from './rfPolicy.js';
+lwrpc-admin/app\lib\aiEligibilityService.js:44:   const c=catalog.candidates.find(c=>c.documentVersionId===ELIGIBILITY_POLICY_BINDING.version&&c.documentType==='league_rules'&&rulesRfThreshold(c.content)!==null);
+lwrpc-admin/app\lib\aiEligibilityService.js:46:   const threshold=rulesRfThreshold(c.content);
+lwrpc-admin/app\lib\aiEligibilityService.js:47:   const classification=sourceRfClassification(intent.rf,threshold);
+lwrpc-admin/app\lib\aiEligibilityService.js:48:   const answer=classification==='RF_UNKNOWN'?'That Reliability Factor is outside the supported 0–100 range.':`Under current Rule 4.1.1, the Reliability Factor you supplied (${intent.rf}) ${classification==='NR'?`is NR because it is ${threshold} or below`:`does not trigger NR because it is above ${threshold}`}. This applies the RF rule to your supplied value; it does not verify your stored rating, change a locked Season DUPR, or establish complete eligibility.`;
+lwrpc-admin/app\lib\aiEligibilityPolicy.js:1:import { sourceRfClassification, rulesRfThreshold } from './rfPolicy.js';
+lwrpc-admin/app\lib\aiEligibilityPolicy.js:7:export function rfClassification(rf,policy){return sourceRfClassification(rf,policy?.threshold);}
+lwrpc-admin/app\lib\aiEligibilityPolicy.js:20: const rf=current.find(c=>rulesRfThreshold(c.content)!==null);
+lwrpc-admin/app\lib\aiEligibilityPolicy.js:21: const threshold=rulesRfThreshold(rf?.content);
+lwrpc-admin/app\lib\aiEligibilityPolicy.js:53: parts.push(`A Reliability Factor of ${policy.threshold} or below makes a player NR. NR players may participate in any division under Rule 4.5, with professional guidance recommended and the captain responsible for proper placement. For pair aggregates, Rule 4.5.1 initially assigns an NR player the division's maximum individual rating minus 0.5. Rule 4.5.2 uses the highest adjusted rating when the player participates in multiple divisions; it is not a numerical comparison of NR with the ordinary range.`);
+lwrpc-admin/app\lib\aiPolicyEvidence.js:111:  const material=rules.map(c=>({c,passages:evidencePassages(c).filter(text=>/Season DUPR Rating is established|Reliability Factor (?:below|of \d+(?:\.\d+)? or below)|truncated to the nearest tenth|Age-based.*DUPR|For team aggregate rating calculations, an NR|highest adjusted Season/is.test(text))})).filter(x=>x.passages.length);
+lwrpc-admin/app\lib\aiQuestionApplicability.js:94:    const reliability = /\breliability\s+factor\b/i.test(p) && /\b(?:below|above|less|minimum|required|classified|not rated)\b/i.test(p);
+lwrpc-admin/app\ratings\page.js:584:    const reliabilityThresholdText = await appPrompt({
+lwrpc-admin/app\ratings\page.js:585:      title: `Reliability rating threshold — ${seasonName}`,
+lwrpc-admin/app\ratings\page.js:586:      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active division Rating Range Max minus 0.5 instead. Existing Age-Based ratings are also rounded down to one decimal place. DUPR Doubles ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
+lwrpc-admin/app\ratings\page.js:587:      inputLabel: "Reliability Rating threshold",
+lwrpc-admin/app\ratings\page.js:593:    if (reliabilityThresholdText === null) return;
+lwrpc-admin/app\ratings\page.js:595:    const reliabilityThreshold = parseReliabilityThreshold(reliabilityThresholdText);
+lwrpc-admin/app\ratings\page.js:597:    if (reliabilityThreshold === null) {
+lwrpc-admin/app\ratings\page.js:604:      reliabilityThreshold,
+lwrpc-admin/app\ratings\page.js:609:  async function buildRatingCleanupChanges(reliabilityThreshold) {
+lwrpc-admin/app\ratings\page.js:662:        reliabilityThreshold
+lwrpc-admin/app\ratings\page.js:668:        reliabilityThreshold
+lwrpc-admin/app\ratings\page.js:684:          reliabilityThreshold
+lwrpc-admin/app\ratings\page.js:706:  async function applyRatingCleanupChanges(changes, reliabilityThreshold, reviewMode = false) {
+lwrpc-admin/app\ratings\page.js:751:    setRatingImportStatus(`${reviewMode ? "Applied" : "Cleaned"} ${seasonDuprCount} Season DUPR rating(s) and ${reviewMode ? "updated" : "truncated"} ${ageBasedCount} Age-Based rating(s).${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below; ${reliabilityAdjustedCount} player(s) were treated as NR for Season DUPR cleanup with DUPR Notes updated.` : ""}`);
+lwrpc-admin/app\ratings\page.js:758:    const { reliabilityThreshold, startOfSeasonClean } = cleanRatingsDialog;
+lwrpc-admin/app\ratings\page.js:763:    const cleanup = await buildRatingCleanupChanges(reliabilityThreshold);
+lwrpc-admin/app\ratings\page.js:771:      await applyRatingCleanupChanges(cleanup.changes, reliabilityThreshold);
+lwrpc-admin/app\ratings\page.js:786:      reliabilityThreshold,
+lwrpc-admin/app\ratings\page.js:805:      ratingCleanupReview.reliabilityThreshold,
+lwrpc-admin/app\ratings\page.js:1885:            {cleanRatingsDialog.reliabilityThreshold > 0 && (
+lwrpc-admin/app\ratings\page.js:1887:                Reliability Ratings of {cleanRatingsDialog.reliabilityThreshold} or below will use the NR division-based calculation and add a DUPR Note.
+lwrpc-admin/app\ratings\page.js:2114:function parseReliabilityThreshold(value) {
+lwrpc-admin/app\ratings\page.js:2124:function isReliabilityNrAdjustment(reliabilityValue, reliabilityThreshold = 0) {
+lwrpc-admin/app\ratings\page.js:2128:    Number(reliabilityThreshold || 0) > 0 &&
+lwrpc-admin/app\ratings\page.js:2133:    reliabilityNumber <= Number(reliabilityThreshold)
+lwrpc-admin/app\ratings\page.js:2137:function reliabilityAdjustmentNote(reliabilityThreshold) {
+lwrpc-admin/app\ratings\page.js:2138:  return `Season DUPR rating is adjusted based on the Reliability rating threshold of ${reliabilityThreshold} and treated as NR for the division-based Season DUPR adjustment.`;
+lwrpc-admin/app\ratings\page.js:2141:function ratingNotesWithReliabilityAdjustment(existingNotes, reliabilityThreshold) {
+lwrpc-admin/app\ratings\page.js:2142:  const note = reliabilityAdjustmentNote(reliabilityThreshold);
+lwrpc-admin/app\ratings\page.js:2149:        !/^Season DUPR rating is adjusted based on the Reliability rating (of|threshold of) .+ (and automatically adjusted to NR|and treated as NR for the division-based Season DUPR adjustment)\.$/.test(line)
+lwrpc-admin/app\ratings\page.js:2155:function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = null, reliabilityThreshold = 0) {
+lwrpc-admin/app\ratings\page.js:2157:  const hasLowReliability = isReliabilityNrAdjustment(reliabilityValue, reliabilityThreshold);
+lwrpc-admin/app\lib\rfPolicy.js:2:export function rulesRfThreshold(content) {
+lwrpc-admin/app\lib\rfPolicy.js:3:  const match = String(content || '').match(/4\.1\.1\.[\s\S]*?Reliability Factor of (\d+(?:\.\d{1,3})?) or below will be classified as/);
+lwrpc-admin/app\lib\rfPolicy.js:7:export function sourceRfClassification(value, threshold) {

@@ -1,0 +1,2 @@
+{"id":"Q57","status":"generated","calls":1,"answer":"For the Saturday DUPR League, Season DUPR ratings are recorded on Sept. 27, 2026.","materialPass":true}
+{"calls":1,"statuses":{"generated":1}}

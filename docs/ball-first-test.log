@@ -1,0 +1,20 @@
+(node:1844) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEquipmentIntents.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Are we going to use the Lifetime ball (26.5538ms)
+✔ Will we use the Lifetime ball? (4.3392ms)
+✔ Are we using the Lifetime ball? (2.6092ms)
+✔ Is the league going to use the Lifetime ball? (5.9329ms)
+✔ Will we be using a different ball? (2.6982ms)
+✔ Are we going to use the ExampleBrand pickleball? (2.5175ms)
+✔ legal specifications, damage and personal equipment permission retain boundaries (0.4326ms)
+✔ no source means no invented brand answer (2.5968ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1416.1927

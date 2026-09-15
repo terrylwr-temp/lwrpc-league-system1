@@ -1,0 +1,82 @@
+[
+  {
+    "file": "package-lock.json",
+    "before": "4bbdebc59e6db4f19c2ef71332c9719d0ed905dc5d371686e509a05f70d308ae",
+    "after": "473fe84decfb7d89f7d3ab117d0bf7aefb1e8a684598e11e2b87d72557b3f8f0"
+  },
+  {
+    "file": "package.json",
+    "before": "bcc055075702477fad0aa4799b0a85f924d2d0b6b3fabd8ba3b1cfa1fab6fc0a",
+    "after": "c1d01ed4a622932c5b2e03a7a3c8dd02a3b17d47e9df530ea98eb2a64fd8f480"
+  },
+  {
+    "file": "test/aiApprovedAnswersIntegration.test.mjs",
+    "before": "4459610c1e6131797993cceee126a4b5e8f51b4e1a2309daf157ab174b60173b",
+    "after": "0aec8faa8347c8facc4ba7c5104c0d3abf27580e0ca35216aacd75cb87f66d82"
+  },
+  {
+    "file": "test/lms0720AssistedRetrieval.test.mjs",
+    "before": "116c726e0e91062d9eab39cb67b785eb598aad15ebd55aedcfb1eaa985915167",
+    "after": "e234f750a9c13d393c309d33b6c60ed208f6f51ae1b64140bb19954f7d5f1c79"
+  },
+  {
+    "file": "app/lib/aiAnswerGeneration.js",
+    "before": "81bcbb9164a49d93e6fb7495c6a921f6ab30085b9e43574a9b4adac046119aaa",
+    "after": "ccd5161c6de3d9cf7ffd65b9307a18e99457e410380c08b6d9d546f955a70195"
+  },
+  {
+    "file": "app/lib/aiConversation.js",
+    "before": "e08e84f11c67bbb4be0d27cb2fa3903c45a79b1038881670bb00becce0f6d667",
+    "after": "3ab5b2a9da99afd6e2847778a89d2f98213352eda9b8d65f1306f18999d6747b"
+  },
+  {
+    "file": "app/lib/aiEligibilityIntent.js",
+    "before": "f0cdabc9c3d1f8a49963cc125452c48f4db314c53bb93b9f2918aed02f8ef9f8",
+    "after": "bab0133dd80af3cdef5134ff09541d74060358eecad988a2bfa31321ffb0b93b"
+  },
+  {
+    "file": "app/lib/aiPolicyDiagnostics.js",
+    "before": "ab63dae307b584e7484686cf82f69a5b6e7bebdabad8844797bf82edcf9b2c57",
+    "after": "2b7a9933c9719739a1c9a57c37e3dfadbb68b9af1d97e02d8602e54280de576d"
+  },
+  {
+    "file": "app/lib/aiPolicyEvidence.js",
+    "before": "cc6d1df43e13ea80c055bbb4fc97e7dac8245eb2c3b5917f1becdb92e287f02b",
+    "after": "0400db046825f2b0446572a4916d84fd81b6ed1fe3b248bc9547588259df48e8"
+  },
+  {
+    "file": "app/lib/aiQuestionApplicability.js",
+    "before": "39c769c9414b9aea96422ccbd33cd5d4dbf15c6f2f18f5c8c9a9377606b32cdc",
+    "after": "8dc3f8aa514d1411cef02840ed9df51c5a46c685cddf8d6deceae6a4594a9558"
+  },
+  {
+    "file": "app/lib/aiRequestIntent.js",
+    "before": "d5c2a92f6526eab904f5681d008fbe6578e5e765891daaab3b9388028aa80bdd",
+    "after": "fb871e57490fad84a1a073a0ba7dad2f5e0a20b9dbf61a79d55d123a7fc2c05f"
+  },
+  {
+    "file": "app/lib/version.js",
+    "before": "a0a9c5f46445437aacba2f54ee9ffc04c305e42fdbb7c0c328a174b89e8f221a",
+    "after": "7767e1224e566992c3cff98949b318e388d5e47222adf972549701ca38f666f7"
+  },
+  {
+    "file": "app/lib/aiCommunityIntent.js",
+    "before": null,
+    "after": "2cad49a3d17dca716bbce63d71044c86167bf3e0c192cb849f944f104d915570"
+  },
+  {
+    "file": "test/lms0727Community.test.mjs",
+    "before": null,
+    "after": "83b7a037a86d9f506bc1e008cc74f83fccbfbd1a4034b216b085b5e23d3882e1"
+  },
+  {
+    "file": "test/fixtures/lms0727-community-source.json",
+    "before": null,
+    "after": "13571879c7ba3721979368d67c465f7950d12dfd50a681b1046ae1a1979786e5"
+  },
+  {
+    "file": "scripts/lms0727-community-validation.mjs",
+    "before": null,
+    "after": "fbd688df4335cc511de627bd836804899eb947bee3d12048092220a6d8755550"
+  }
+]

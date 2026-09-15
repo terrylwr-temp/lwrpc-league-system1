@@ -1,0 +1,82 @@
+{
+  "category": "LOCAL_BENCHMARK",
+  "mode": "provider",
+  "method": "Verified active official snapshot; actual selection and citation resolver; fixture DB/signing. No production HTTP or ranking replay.",
+  "calls": 2,
+  "usage": [
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1705,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 153,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1858
+      }
+    },
+    {
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "usage": {
+        "input_tokens": 1710,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 363,
+        "output_tokens_details": {
+          "reasoning_tokens": 179
+        },
+        "total_tokens": 2073
+      }
+    }
+  ],
+  "cases": [
+    {
+      "question": "My community has a DUPR7 team. Can I play for another community in DUPR8?",
+      "answer": "A DUPR7 team in your community does not, by itself, block you from playing for another community in DUPR8.\n\nRule 3.5 says players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nSo for DUPR8, the relevant question is whether your own community has a DUPR8 team with roster availability. A DUPR7 team is in a different division, so it does not establish that restriction for DUPR8. This answer does not certify any other eligibility requirements.",
+      "metrics": {
+        "generationMs": 3218,
+        "sourceResolutionMs": 3,
+        "totalMs": 3231,
+        "inputTokens": 1705,
+        "outputTokens": 153,
+        "totalTokens": 1858,
+        "estimatedGenerationCostUsd": 0.013115
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "My community has a Saturday DUPR7 team with room. Can I play for another community in Weekday DUPR7?",
+      "answer": "Players may form teams with members from other communities; however, they are not permitted to play for another community’s team if their own community already has a team in their division and has roster availability for additional players.\n\nYour stated Saturday DUPR7 team with room does not, by itself, block you from playing for another community in Weekday DUPR7, because the limiting condition must be a team in the requested division and applicable league with roster availability.\n\nSo, for Weekday DUPR7: if your own community already has a Weekday DUPR7 team and has roster availability, you would not be permitted to play for another community’s team. If your own community does not have a Weekday DUPR7 team, or it has no roster availability, this particular restriction would not block you.",
+      "metrics": {
+        "generationMs": 5201,
+        "sourceResolutionMs": 1,
+        "totalMs": 5205,
+        "inputTokens": 1710,
+        "outputTokens": 363,
+        "totalTokens": 2073,
+        "estimatedGenerationCostUsd": 0.01944
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,587 @@
+{
+  "diagnosisOnly": true,
+  "networkCalls": 0,
+  "modelCalls": 0,
+  "controls": [
+    {
+      "question": "What is my Season DUPR?",
+      "expected": "live_self_rating",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is my season dupr?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "season"
+      },
+      "selected": null
+    },
+    {
+      "question": "When is my Season DUPR established?",
+      "expected": "document_policy",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when is my season dupr established?"
+      },
+      "live": null,
+      "selected": [
+        {
+          "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentType": "league_rules",
+          "documentAuthorityRank": 1,
+          "content": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.",
+          "ruleNumber": "4",
+          "heading": "DUPR RATINGS/DIVISIONS",
+          "sectionLabel": "Rule 4",
+          "pageNumber": 3,
+          "chunkOrdinal": 9,
+          "excerptItems": [
+            {
+              "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 26,
+              "end": 232,
+              "text": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "selectedPassages": [
+            "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season."
+          ],
+          "sourceClassification": "lwr_controlling",
+          "evidenceRole": "rating_policy",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        },
+        {
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentType": "league_supplement",
+          "documentAuthorityRank": 2,
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+          "ruleNumber": null,
+          "heading": "Weekday DUPR League Key Dates",
+          "sectionLabel": "Weekday DUPR League Key Dates",
+          "pageNumber": 1,
+          "chunkOrdinal": 2,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 68,
+              "end": 117,
+              "text": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+              "applicability": {
+                "league": "weekday",
+                "role": "recording_date"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "selectedPassages": [
+            "• Sept. 27, Sunday – Season DUPR ratings recorded"
+          ],
+          "sourceClassification": "lwr_supporting_guide",
+          "evidenceRole": "recording_date",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        },
+        {
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentType": "league_supplement",
+          "documentAuthorityRank": 2,
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+          "ruleNumber": null,
+          "heading": "Saturday DUPR League Key Dates",
+          "sectionLabel": "Saturday DUPR League Key Dates",
+          "pageNumber": 1,
+          "chunkOrdinal": 3,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "text": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+              "applicability": {
+                "league": "saturday",
+                "role": "recording_date"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "selectedPassages": [
+            "• Sept. 27, Sunday – Season DUPR ratings recorded"
+          ],
+          "sourceClassification": "lwr_supporting_guide",
+          "evidenceRole": "recording_date",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        },
+        {
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentType": "league_supplement",
+          "documentAuthorityRank": 2,
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+          "ruleNumber": null,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "sectionLabel": "PrimeTime DUPR League Key Dates",
+          "pageNumber": 2,
+          "chunkOrdinal": 4,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 70,
+              "end": 119,
+              "text": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+              "applicability": {
+                "league": "primetime",
+                "role": "recording_date"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "selectedPassages": [
+            "• Sept. 27, Sunday – Season DUPR ratings recorded"
+          ],
+          "sourceClassification": "lwr_supporting_guide",
+          "evidenceRole": "recording_date",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        }
+      ]
+    },
+    {
+      "question": "How is my Season DUPR determined?",
+      "expected": "document_policy",
+      "intent": {
+        "kind": "action_policy",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "how is my season dupr determined?"
+      },
+      "live": null,
+      "selected": [
+        {
+          "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentType": "league_rules",
+          "documentAuthorityRank": 1,
+          "content": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.\n\n4.1.1. A player with a DUPR Reliability Factor below 29 will be classified as “Not Rated”\n(NR) for League purposes and will be subject to the provisions of Rule 4.5. This\nclassification recognizes that a player’s current DUPR rating may not yet provide a\nsuƯiciently reliable indication of skill level, particularly for newer or less-established\nplayers or those who have not recently recorded matches in DUPR. Players\nclassified as “NR” may be placed on a team in the division that most appropriately\nreflects their current skill level while they record additional matches and establish a\nmore reliable DUPR rating. These players are strongly encouraged to consult with a\nlocal Certified DUPR Coach, pickleball professional, or knowledgeable team\ncaptain for guidance regarding appropriate division placement.\n\n4.2. All DUPR ratings will be truncated to the nearest tenth to establish a player's “Season's\nDUPR Rating”. For example, a rating of 3.496 will be truncated to 3.4, as will a rating of\n\n4.3. Some of our Leagues use the “Age-based” DUPR sub-rating but will still follow all DUPR\nRating/Division Rules. If a player hasn’t established their 65+ Age-based rating as of the\nstart of a season, their 50+ Age-based rating will be used.",
+          "ruleNumber": "4",
+          "heading": "DUPR RATINGS/DIVISIONS",
+          "sectionLabel": "Rule 4",
+          "pageNumber": 3,
+          "chunkOrdinal": 9,
+          "excerptItems": [
+            {
+              "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 26,
+              "end": 232,
+              "text": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 233,
+              "end": 1043,
+              "text": "4.1.1. A player with a DUPR Reliability Factor below 29 will be classified as “Not Rated”\n(NR) for League purposes and will be subject to the provisions of Rule 4.5. This\nclassification recognizes that a player’s current DUPR rating may not yet provide a\nsuƯiciently reliable indication of skill level, particularly for newer or less-established\nplayers or those who have not recently recorded matches in DUPR. Players\nclassified as “NR” may be placed on a team in the division that most appropriately\nreflects their current skill level while they record additional matches and establish a\nmore reliable DUPR rating. These players are strongly encouraged to consult with a\nlocal Certified DUPR Coach, pickleball professional, or knowledgeable team\ncaptain for guidance regarding appropriate division placement.",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1044,
+              "end": 1229,
+              "text": "4.2. All DUPR ratings will be truncated to the nearest tenth to establish a player's “Season's\nDUPR Rating”. For example, a rating of 3.496 will be truncated to 3.4, as will a rating of",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1237,
+              "end": 1479,
+              "text": "4.3. Some of our Leagues use the “Age-based” DUPR sub-rating but will still follow all DUPR\nRating/Division Rules. If a player hasn’t established their 65+ Age-based rating as of the\nstart of a season, their 50+ Age-based rating will be used.",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "selectedPassages": [
+            "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.",
+            "4.1.1. A player with a DUPR Reliability Factor below 29 will be classified as “Not Rated”\n(NR) for League purposes and will be subject to the provisions of Rule 4.5. This\nclassification recognizes that a player’s current DUPR rating may not yet provide a\nsuƯiciently reliable indication of skill level, particularly for newer or less-established\nplayers or those who have not recently recorded matches in DUPR. Players\nclassified as “NR” may be placed on a team in the division that most appropriately\nreflects their current skill level while they record additional matches and establish a\nmore reliable DUPR rating. These players are strongly encouraged to consult with a\nlocal Certified DUPR Coach, pickleball professional, or knowledgeable team\ncaptain for guidance regarding appropriate division placement.",
+            "4.2. All DUPR ratings will be truncated to the nearest tenth to establish a player's “Season's\nDUPR Rating”. For example, a rating of 3.496 will be truncated to 3.4, as will a rating of",
+            "4.3. Some of our Leagues use the “Age-based” DUPR sub-rating but will still follow all DUPR\nRating/Division Rules. If a player hasn’t established their 65+ Age-based rating as of the\nstart of a season, their 50+ Age-based rating will be used."
+          ],
+          "sourceClassification": "lwr_controlling",
+          "evidenceRole": "rating_policy",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        },
+        {
+          "chunkId": "ebacb205-f960-489e-97ea-0a059fdb7984",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentType": "league_rules",
+          "documentAuthorityRank": 1,
+          "content": "4.5.1. For team aggregate rating calculations, an NR player will initially be assigned a\nSeason DUPR Rating equal to the maximum individual DUPR rating allowed for\nthat division, minus 0.5. For example, in a division, where the maximum individual\nrating is 3.8, an NR player would be assigned an initial Season DUPR Rating of 3.3\n(3.8 − 0.5) for team aggregate calculations.",
+          "ruleNumber": "4.5.1",
+          "heading": null,
+          "sectionLabel": "Rule 4.5.1",
+          "pageNumber": 4,
+          "chunkOrdinal": 11,
+          "excerptItems": [
+            {
+              "chunkId": "ebacb205-f960-489e-97ea-0a059fdb7984",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 374,
+              "text": "4.5.1. For team aggregate rating calculations, an NR player will initially be assigned a\nSeason DUPR Rating equal to the maximum individual DUPR rating allowed for\nthat division, minus 0.5. For example, in a division, where the maximum individual\nrating is 3.8, an NR player would be assigned an initial Season DUPR Rating of 3.3\n(3.8 − 0.5) for team aggregate calculations.",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "selectedPassages": [
+            "4.5.1. For team aggregate rating calculations, an NR player will initially be assigned a\nSeason DUPR Rating equal to the maximum individual DUPR rating allowed for\nthat division, minus 0.5. For example, in a division, where the maximum individual\nrating is 3.8, an NR player would be assigned an initial Season DUPR Rating of 3.3\n(3.8 − 0.5) for team aggregate calculations."
+          ],
+          "sourceClassification": "lwr_controlling",
+          "evidenceRole": "rating_policy",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        },
+        {
+          "chunkId": "d2b349cf-49b5-45cb-9c2e-0f4052e7d22b",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentType": "league_rules",
+          "documentAuthorityRank": 1,
+          "content": "4.5.2. If a player is rostered on teams in multiple divisions, the highest adjusted Season\nDUPR Rating assigned to that player will be used consistently across all divisions in\nwhich they appear.",
+          "ruleNumber": "4.5.2",
+          "heading": null,
+          "sectionLabel": "Rule 4.5.2",
+          "pageNumber": 4,
+          "chunkOrdinal": 12,
+          "excerptItems": [
+            {
+              "chunkId": "d2b349cf-49b5-45cb-9c2e-0f4052e7d22b",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 195,
+              "text": "4.5.2. If a player is rostered on teams in multiple divisions, the highest adjusted Season\nDUPR Rating assigned to that player will be used consistently across all divisions in\nwhich they appear.",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "selectedPassages": [
+            "4.5.2. If a player is rostered on teams in multiple divisions, the highest adjusted Season\nDUPR Rating assigned to that player will be used consistently across all divisions in\nwhich they appear."
+          ],
+          "sourceClassification": "lwr_controlling",
+          "evidenceRole": "rating_policy",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        }
+      ]
+    },
+    {
+      "question": "When is Season DUPR locked?",
+      "expected": "document_policy",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when is season dupr locked?"
+      },
+      "live": null,
+      "selected": null
+    },
+    {
+      "question": "Can my Season DUPR change during the season?",
+      "expected": "document_policy",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can my season dupr change during the season?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "season"
+      },
+      "selected": null
+    },
+    {
+      "question": "What is my PrimeTime Season DUPR?",
+      "expected": "live_self_rating",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is my primetime season dupr?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "primetime"
+      },
+      "selected": null
+    },
+    {
+      "question": "When is my PrimeTime Season DUPR established?",
+      "expected": "document_policy",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when is my primetime season dupr established?"
+      },
+      "live": null,
+      "selected": [
+        {
+          "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentType": "league_rules",
+          "documentAuthorityRank": 1,
+          "content": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.",
+          "ruleNumber": "4",
+          "heading": "DUPR RATINGS/DIVISIONS",
+          "sectionLabel": "Rule 4",
+          "pageNumber": 3,
+          "chunkOrdinal": 9,
+          "excerptItems": [
+            {
+              "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 26,
+              "end": 232,
+              "text": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "selectedPassages": [
+            "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season."
+          ],
+          "sourceClassification": "lwr_controlling",
+          "evidenceRole": "rating_policy",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        },
+        {
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentType": "league_supplement",
+          "documentAuthorityRank": 2,
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+          "ruleNumber": null,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "sectionLabel": "PrimeTime DUPR League Key Dates",
+          "pageNumber": 2,
+          "chunkOrdinal": 4,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 70,
+              "end": 119,
+              "text": "• Sept. 27, Sunday – Season DUPR ratings recorded",
+              "applicability": {
+                "league": "primetime",
+                "role": "recording_date"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "selectedPassages": [
+            "• Sept. 27, Sunday – Season DUPR ratings recorded"
+          ],
+          "sourceClassification": "lwr_supporting_guide",
+          "evidenceRole": "recording_date",
+          "evidenceSelectionReason": "Active-version exact policy excerpts",
+          "passageScopes": []
+        }
+      ]
+    },
+    {
+      "question": "What is my current official DUPR?",
+      "expected": "capability_limitation",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is my current official dupr?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "unsupported"
+      },
+      "selected": null
+    }
+  ],
+  "failedCompletion": [],
+  "faultControls": [
+    {
+      "fault": "build",
+      "ok": false,
+      "logs": [
+        [
+          "capture_failed",
+          "persistence"
+        ]
+      ]
+    },
+    {
+      "fault": "rpc",
+      "ok": false,
+      "logs": [
+        [
+          "capture_failed",
+          "persistence"
+        ]
+      ]
+    },
+    {
+      "fault": "timeout",
+      "ok": false,
+      "logs": [
+        [
+          "capture_failed",
+          "persistence"
+        ]
+      ]
+    }
+  ],
+  "shapes": [
+    {
+      "caseId": "Q23",
+      "selectedCount": 4,
+      "representativeBytes": 860,
+      "payloadHasExcerpts": false,
+      "persisted": true,
+      "replayRows": 1
+    },
+    {
+      "caseId": "Q36",
+      "selectedCount": 3,
+      "representativeBytes": 860,
+      "payloadHasExcerpts": false,
+      "persisted": true,
+      "replayRows": 1
+    }
+  ]
+}

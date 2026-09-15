@@ -1,0 +1,84 @@
+(node:15676) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF01 below (1.4695ms)
+✔ RF02 fraction (0.1239ms)
+✔ RF03 boundary (0.1034ms)
+✔ RF04 above (0.1493ms)
+✔ RF05 missing (0.1857ms)
+✔ RF06 numeric NR (0.1228ms)
+✔ RF07 rated below (0.1374ms)
+✔ RF08 rated inside (0.1022ms)
+✔ RF09 rated above (0.1788ms)
+✔ RF10 independent NR (0.2841ms)
+✔ RF11 independent unknown (0.186ms)
+✔ RF12 pair unknown (0.1256ms)
+✔ Exact official source gate + NR precedence + sanitized single telemetry outcome (17.3186ms)
+✔ Policy only never reads SELF (7.0069ms)
+✔ PT9 conflict blocks personal lookup; no crossing to Weekday rules (4.4376ms)
+✔ PrimeTime age policy includes exact 6.3.2 source; no live lookup (0.6788ms)
+✔ Clarification binds subject session, exact choice and current source (7.3449ms)
+✔ Inactive or unavailable SDUPR5 does not substitute another division (1.7504ms)
+✔ Missing RF stays unknown and denied subject remains protected (7.7994ms)
+✔ Telemetry exceptions fail open with exactly one logical attempt (5.2118ms)
+✔ Standalone other-player RF is protected before catalog or provider (0.7654ms)
+✔ Inactive season and missing policy evidence fail closed (0.762ms)
+(node:27856) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiPairEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pair route: Can Terry play with Tim? (4.0492ms)
+✔ pair route: Can Tim play with Terry? (0.1531ms)
+✔ pair route: Can Terry and Tim play together? (0.2544ms)
+✔ pair route: Can Terry partner with Tim? (0.1294ms)
+✔ pair route: Are Terry and Tim eligible for DUPR7? (0.3268ms)
+✔ pair route: Can I play with Tim? (0.1101ms)
+✔ pair route: Can John partner with Mary? (0.1012ms)
+✔ pair route: Are Sue and Bob eligible to play together? (0.1155ms)
+✔ pair route: Can Terry and Tim be partners? (0.1181ms)
+✔ pair route: Can Terry play with Tim in DUPR7? (0.1665ms)
+✔ pair captures both subjects and keeps existing route contrasts (6.7676ms)
+✔ both exact questions yield same deterministic answer and no RF/profile leakage (20.1004ms)
+✔ View-As denied before catalog or lookup; normal denial does not fall back (0.441ms)
+✔ two bounded identity choices survive later division clarification (3.8614ms)
+✔ validated page division is retained and raw browser IDs are ignored (1.0914ms)
+✔ forged and cross-session choices cannot perform a lookup (0.716ms)
+✔ stale final audit or required source failure blocks answer (1.267ms)
+✔ Rated + Rated (0.0976ms)
+✔ Rated + NR blank (0.9036ms)
+✔ NR + NR blank (2.0758ms)
+✔ independent NR (1.3111ms)
+✔ individual max failure (0.1069ms)
+✔ individual min failure (0.0585ms)
+✔ combined failure (0.0807ms)
+✔ exact maximum (0.0659ms)
+✔ unknown NR basis (0.102ms)
+✔ missing rated value (0.0493ms)
+✔ unknown placement (0.104ms)
+✖ NR highest adjustment spans relevant divisions and cannot reduce established assigned value (0.372ms)
+✔ active replacement Rules versions need no code binding but unsupported semantics fail closed (3.2482ms)
+ℹ tests 52
+ℹ suites 0
+ℹ pass 51
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2605.8238
+
+✖ failing tests:
+
+test at test\pairEligibility.test.mjs:81:1
+✖ NR highest adjustment spans relevant divisions and cannot reduce established assigned value (0.372ms)
+  TypeError: Cannot read properties of undefined (reading 'active')
+      at file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityPolicy.js:7:114
+      at Array.filter (<anonymous>)
+      at activeEligibilityBinding (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityPolicy.js:7:102)
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/pairEligibility.test.mjs:82:134)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)

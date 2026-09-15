@@ -1,0 +1,2 @@
+{"id":"Q21","status":"generated","calls":1,"answer":"For the 2026 Fall Weekday DUPR League, player/roster entry can start on Monday, Sept. 28, 2026.\n\nAccess also depends on the setup/unlock steps: after team registration is completed, League Management must activate the team and assign the captain/co-captain(s), and League Management will notify you when rosters are unlocked and available to begin adding/managing players.","materialPass":true}
+{"calls":1,"statuses":{"generated":1}}

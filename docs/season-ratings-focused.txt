@@ -1,0 +1,77 @@
+(node:9652) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF01 below (1.7515ms)
+✔ RF02 fraction (0.3494ms)
+✔ RF03 boundary (0.1598ms)
+✔ RF04 above (0.2073ms)
+✔ RF05 missing (0.2221ms)
+✔ RF06 numeric NR (0.1481ms)
+✔ RF07 rated below (0.176ms)
+✔ RF08 rated inside (0.1076ms)
+✔ RF09 rated above (0.216ms)
+✔ RF10 independent NR (0.3181ms)
+✔ RF11 independent unknown (0.2345ms)
+✔ RF12 pair unknown (0.0966ms)
+✔ Exact official source gate + NR precedence + sanitized single telemetry outcome (13.5026ms)
+✔ Policy only never reads SELF (4.3644ms)
+✔ PT9 conflict blocks personal lookup; no crossing to Weekday rules (4.0214ms)
+✔ PrimeTime age policy includes exact 6.3.2 source; no live lookup (0.665ms)
+✔ Clarification binds subject session, exact choice and current source (5.17ms)
+✔ Inactive or unavailable SDUPR5 does not substitute another division (0.7878ms)
+✔ Missing RF stays unknown and denied subject remains protected (6.0962ms)
+✔ Telemetry exceptions fail open with exactly one logical attempt (3.4289ms)
+✔ Standalone other-player RF is protected before catalog or provider (0.4988ms)
+✔ Changed policy version, future season and missing continuation fail closed (0.3987ms)
+(node:15268) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 879-row scrubbed actual export reconciles source fields and recorded identity categories (26.8481ms)
+✔ DUPR only, normalized exact match, missing/unmatched and all duplicate rows rejected (0.5402ms)
+✔ missing age preserves existing source age without touching locked inputs; unchanged repeat is no-op (1.7468ms)
+✔ invalid values do not become ratings: {"doubles":"3abc"} (0.2427ms)
+✔ invalid values do not become ratings: {"doubles":"-3"} (0.1475ms)
+✔ invalid values do not become ratings: {"doubles":"Infinity"} (0.125ms)
+✔ invalid values do not become ratings: {"doubles":"8.1"} (0.114ms)
+✔ invalid values do not become ratings: {"doubles":"3.2345"} (0.1345ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29%"} (0.2051ms)
+✔ invalid values do not become ratings: {"doublesReliability":"-1"} (0.2475ms)
+✔ invalid values do not become ratings: {"doublesReliability":"101"} (0.1611ms)
+✔ invalid values do not become ratings: {"doublesReliability":"1e1"} (0.1155ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29","doublesRe":"30"} (0.14ms)
+✔ invalid values do not become ratings: {"metrics":"{broken"} (0.1323ms)
+✔ invalid values do not become ratings: {"metrics":"[]"} (0.0918ms)
+✔ invalid values do not become ratings: {"metrics":"{\"subscores\":{\"doubles\":{\"over_65\":\"bad\",\"over_50\":\"3.4\"}}}"} (0.1359ms)
+✔ full RF header is primary; short alias works only when primary absent (0.1275ms)
+✔ strict CSV multiline, escaping, duplicate headers, width and row bound (1.1303ms)
+✔ signed exact preview rejects tampering, wrong session, expiration and wrong purpose (1.1463ms)
+✔ preview calls only read RPC; commit requires explicit confirmation and same season (2.5761ms)
+✔ current-policy RF 28 (0.3442ms)
+✔ current-policy RF 29 (0.0768ms)
+✔ current-policy RF 30 (0.0506ms)
+✔ current-policy RF 29.0 (0.0511ms)
+✔ current-policy RF 29.01 (0.0465ms)
+✔ Ask LWR supplied RF: My Reliability Factor is 29. Am I NR? (6.0507ms)
+✔ Ask LWR supplied RF: Is a Reliability Factor of 30 considered NR? (1.1656ms)
+✔ Ask LWR supplied RF: What happens if my RF is 28? (0.9914ms)
+✔ unchanged substitute Approved Answer applies current NR rules at RF29 (2.2893ms)
+✔ import rejects View-As credentials before authentication or database access (23.1374ms)
+✔ RF cutoff comes from evidence, with no implicit fallback or importer classification (0.2476ms)
+(node:5832) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityPolicy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ owner resolution synchronizes cleanup and Ask LWR at RF 29 (1.025ms)
+✔ RF=29 retains actual cleanup rating result and existing eligibility result (0.3016ms)
+✔ owner resolution preserves cleanup threshold opt-out and missing RF behavior (0.1807ms)
+✔ current CSV import contains no cleanup or eligibility-classification calls (0.3235ms)
+ℹ tests 57
+ℹ suites 0
+ℹ pass 57
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3893.237

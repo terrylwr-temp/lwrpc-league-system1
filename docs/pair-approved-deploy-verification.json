@@ -1,0 +1,11 @@
+{
+  "commit": "74df01d2b38d5950d053371bd26fe0ca22cb955d",
+  "verifiedBlobs": 1198,
+  "project": {
+    "projectId": "prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3",
+    "orgId": "team_l5rlGNrtKbyjq5Q0V4Pg9ouR",
+    "projectName": "lwrpc-admin"
+  },
+  "method": "git cat-file exact committed bytes",
+  "directory": "C:\\lwrpc-league-system\\.local-validation\\pair-approved-deploy"
+}

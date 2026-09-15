@@ -1,0 +1,742 @@
+{
+  "deployment": {
+    "deployment": {
+      "id": "dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL",
+      "name": "lwrpc-admin",
+      "url": "lwrpc-admin-lbddz1vp7-terry-lwrpc.vercel.app",
+      "type": "LAMBDAS",
+      "state": "READY",
+      "createdAt": 1788887304009,
+      "creator": {
+        "uid": "JUuQDjLgrTx95yrq0IbiBdU6",
+        "username": "terrylwr-temp"
+      },
+      "project": {
+        "id": "prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3",
+        "name": "lwrpc-admin",
+        "framework": "nextjs"
+      },
+      "meta": {
+        "githubCommitAuthorName": "terrylwrpickleballclub",
+        "githubCommitAuthorEmail": "terry.adelman@gmail.com",
+        "githubCommitMessage": "LMS-0724 isolated read-only View As User",
+        "githubCommitOrg": "terrylwr-temp",
+        "githubCommitRef": "main",
+        "githubCommitRepo": "lwrpc-league-system1",
+        "githubCommitSha": "f9c94b948739e34be071b6af6ffbef52eebccfdc",
+        "githubDeployment": "1",
+        "githubOrg": "terrylwr-temp",
+        "githubRepo": "lwrpc-league-system1",
+        "gitDirty": "1",
+        "actor": "codex",
+        "lambdaRuntimeStats": "{\"nodejs\":3}",
+        "bundler": "turbopack"
+      },
+      "alias": [
+        "lwrpc-admin.vercel.app",
+        "league.lwrpickleballclub.com",
+        "view-as.lwrpickleballclub.com",
+        "lwrpc-admin-terry-lwrpc.vercel.app"
+      ],
+      "target": "production",
+      "regions": [
+        "iad1"
+      ],
+      "buildingAt": 1788887305209,
+      "ready": 1788887376497,
+      "readyState": "READY",
+      "source": "cli",
+      "aliasError": null
+    }
+  },
+  "outcomes": [
+    {
+      "id": "a651fdaf-2594-4291-a5de-274824005bec",
+      "request_started_at": "2026-09-08 17:10:02.297+00",
+      "completed_at": "2026-09-08 17:10:07.823+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 5526,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q07",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "ba4eeef9-fcf7-46c7-9197-9b7d99fdac3a",
+      "request_started_at": "2026-09-08 17:10:49.107+00",
+      "completed_at": "2026-09-08 17:10:52.612+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3505,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q08",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "9d4e89bc-8f9a-494a-946e-3ca77d021d08",
+      "request_started_at": "2026-09-08 17:11:09.656+00",
+      "completed_at": "2026-09-08 17:11:12.501+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 2845,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q64",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "22a24ba4-0425-459a-bbf7-95d9b69a2248",
+      "request_started_at": "2026-09-08 17:11:34.662+00",
+      "completed_at": "2026-09-08 17:11:38.244+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3582,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q65",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "2451a1d1-7057-458a-9c6e-f503000c8c7d",
+      "request_started_at": "2026-09-08 17:12:04.695+00",
+      "completed_at": "2026-09-08 17:12:06.638+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 1943,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q70",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "1257ebd7-c65b-437c-84a1-3a02bc96706b",
+      "request_started_at": "2026-09-08 17:12:39.053+00",
+      "completed_at": "2026-09-08 17:12:41.448+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 2395,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q72",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "bb7a9f32-b6db-4fd4-8e16-91dda065bc5b",
+      "request_started_at": "2026-09-08 17:12:53.095+00",
+      "completed_at": "2026-09-08 17:12:56.299+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3204,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q73",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "5feecb9b-639d-4c05-9f08-dd5fc250401d",
+      "request_started_at": "2026-09-08 17:13:09.106+00",
+      "completed_at": "2026-09-08 17:13:11.885+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 2779,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q74",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "ae0eff05-e314-4f86-a58e-44e03b5349a9",
+      "request_started_at": "2026-09-08 17:13:32.187+00",
+      "completed_at": "2026-09-08 17:13:35.233+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3046,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q30",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "55f7d91c-ab69-458d-a99e-052331746cb2",
+      "request_started_at": "2026-09-08 17:13:52.894+00",
+      "completed_at": "2026-09-08 17:13:57.137+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 4243,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q45",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "21a194c8-e2ea-4dc5-a9fb-f2ca48a25c20",
+      "request_started_at": "2026-09-08 17:14:12.207+00",
+      "completed_at": "2026-09-08 17:14:16.115+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3908,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q35",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "9ae03003-be81-4891-b3d2-2ee6c6c79b22",
+      "request_started_at": "2026-09-08 17:14:35.832+00",
+      "completed_at": "2026-09-08 17:14:40.021+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 4189,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q90",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "ef587cb5-1d4b-42b7-98fe-a15fc729a2f0",
+      "request_started_at": "2026-09-08 17:15:02.584+00",
+      "completed_at": "2026-09-08 17:15:05.86+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3276,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q91",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "26bed22c-7fa4-4877-b715-bd3eda32b3f0",
+      "request_started_at": "2026-09-08 17:15:28.281+00",
+      "completed_at": "2026-09-08 17:15:30.718+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 2437,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q92",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "89e19340-6447-4cbc-8337-4f2e46078138",
+      "request_started_at": "2026-09-08 17:15:52.405+00",
+      "completed_at": "2026-09-08 17:15:54.95+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 2545,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q93",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "5d28b006-93b4-4b79-a84b-d949b5efd53f",
+      "request_started_at": "2026-09-08 17:16:04.652+00",
+      "completed_at": "2026-09-08 17:16:07.987+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3335,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q94",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "8e96bee8-a2a3-46a6-9322-b2ddb1d6384f",
+      "request_started_at": "2026-09-08 17:16:35.215+00",
+      "completed_at": "2026-09-08 17:16:43.062+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 7847,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q95",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "6a5eac09-1a96-45f7-9587-2f2c59629145",
+      "request_started_at": "2026-09-08 17:17:00.76+00",
+      "completed_at": "2026-09-08 17:17:03.592+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 2832,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q96",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "bbd45f31-9c7d-4d55-9582-6fd7a2f9187d",
+      "request_started_at": "2026-09-08 17:17:15.757+00",
+      "completed_at": "2026-09-08 17:17:19.358+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3601,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q97",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "72a50661-4781-4eef-b9bf-9369fff01cc1",
+      "request_started_at": "2026-09-08 17:17:58.241+00",
+      "completed_at": "2026-09-08 17:18:00.319+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 2078,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q98",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "1b97085a-aba9-483f-b23b-f1d1f2d83b3f",
+      "request_started_at": "2026-09-08 17:18:09.367+00",
+      "completed_at": "2026-09-08 17:18:13.172+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3805,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q99",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "373568f0-ce95-4f63-a0f1-d428d8755d8b",
+      "request_started_at": "2026-09-08 17:19:00.161+00",
+      "completed_at": "2026-09-08 17:19:04.159+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "origin": "player_interface",
+      "total_ms": 3998,
+      "model": "gpt-5.5-2026-04-23",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "caseId": "Q09",
+      "acceptance": "PASS_OBSERVED_ANSWER",
+      "httpStatus": 200
+    },
+    {
+      "id": "889692bc-ea61-482d-853f-2976f34edf9f",
+      "request_started_at": "2026-09-08 17:19:19.521+00",
+      "completed_at": "2026-09-08 17:19:19.563+00",
+      "final_kind": "clarification",
+      "reason_code": "ambiguous",
+      "origin": "player_interface",
+      "total_ms": 42,
+      "model": null,
+      "stage3_invoked": false,
+      "model_call_skipped": true,
+      "diagnostic_snapshot": {
+        "liveIntent": "SELF_RATING",
+        "resultCode": "ambiguous",
+        "relationship": "self",
+        "projectionVersion": 1
+      },
+      "caseId": "Q50",
+      "acceptance": "FAIL_REQUIRED_OFFICIAL_DUPR_LIMITATION",
+      "httpStatus": 200
+    }
+  ],
+  "corpus": [
+    {
+      "integrity": {
+        "at": "2026-09-08T17:21:09.490251+00:00",
+        "cron": {
+          "active": true,
+          "failed": 0,
+          "success": 60,
+          "schedule": "* * * * *"
+        },
+        "chunks": {
+          "n": 1893,
+          "hash": "ce36509643744dfbb57a25f892f89303"
+        },
+        "events": {
+          "n": 7,
+          "hash": "1a8aeecd3237a48cea7a41366911c98d"
+        },
+        "answers": {
+          "n": 1,
+          "hash": "a0ba3d0cb8a3257bad09c7deeac02847"
+        },
+        "versions": {
+          "n": 25,
+          "hash": "89318b9e877b2821c306a26c972e1fb0"
+        },
+        "documents": {
+          "n": 7,
+          "hash": "7771ed56a3ba23b8f7c3380136a757c5"
+        },
+        "migration": [
+          {
+            "name": "lms0725_clarification_choices",
+            "version": "20260908123627"
+          }
+        ],
+        "revisions": {
+          "n": 2,
+          "hash": "404cbfae87bb73312f9412f627402356"
+        }
+      }
+    }
+  ],
+  "historicAndBusiness": [
+    {
+      "baseline": {
+        "at": "2026-09-08T17:21:31.674832+00:00",
+        "roles": {
+          "n": 164,
+          "hash": "800b266953bc5c73a4b6aa8bb6c3e9d7"
+        },
+        "teams": {
+          "n": 94,
+          "hash": "09c42f69262660f6bbb7818259db9760"
+        },
+        "members": {
+          "n": 1951,
+          "hash": "3d595ec6dd91734bfdb6bbcb5a346ad3"
+        },
+        "ratings": {
+          "n": 1012,
+          "hash": "1c26b8ace1b7e20ff7443ed70ca9f80e"
+        },
+        "rosters": {
+          "n": 0,
+          "hash": null
+        },
+        "feedback": {
+          "n": 21,
+          "hash": "2ade753516fbf134f1e360020ddfce3a"
+        },
+        "outcomes": {
+          "n": 233,
+          "hash": "ecd9a67d27828bb48a3794653f8aa0ac"
+        },
+        "policies": "b2ed3ad5f4c5d8b4bb6d36b2fd55f37a",
+        "historic_failure": "ef951d614d6ffc7f0ae49220f7638b6b",
+        "security_functions": "c829a62feb84e77bee9655b7589d158d"
+      }
+    }
+  ],
+  "clarificationFailure": {
+    "question": "What's my DUPR",
+    "message": "Which rating and season do you mean?",
+    "choices": [
+      "PrimeTime Season DUPR \u2014 2026 Fall Season",
+      "Season DUPR \u2014 2026 Fall Season",
+      "PrimeTime Season DUPR \u2014 26/27 Saturday Season",
+      "Season DUPR \u2014 26/27 Saturday Season"
+    ],
+    "missing": "Current official DUPR is not available through this live lookup.",
+    "reason": "Explicit gate 16 requires this qualification. Combined ambiguous choiceKind branch returns early and does not use the legacy rating_clarification message.",
+    "correctionApplied": false
+  },
+  "status": "STOP BEFORE CORRECTION \u2014 NOT PRODUCTION ACCEPTED"
+}

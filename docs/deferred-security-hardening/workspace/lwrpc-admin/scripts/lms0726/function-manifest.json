@@ -1,0 +1,89 @@
+[
+  {
+    "name": "lms_write_private.lock_roster_add",
+    "signature": "lms_write_private.lock_roster_add(uuid,uuid,uuid)",
+    "owner": "postgres",
+    "executors": [
+      "lms_roster_writer"
+    ],
+    "security": "definer",
+    "bodyHash": "097db80b8824f0c84776838832669a56"
+  },
+  {
+    "name": "lms_write_private.lock_roster_remove",
+    "signature": "lms_write_private.lock_roster_remove(uuid,uuid,uuid)",
+    "owner": "postgres",
+    "executors": [
+      "lms_roster_writer"
+    ],
+    "security": "definer",
+    "bodyHash": "4acc66f9cecf37881fe1da9c10d44a85"
+  },
+  {
+    "name": "public.lms_roster_remove_player",
+    "signature": "public.lms_roster_remove_player(uuid,uuid,uuid,uuid)",
+    "owner": "lms_roster_writer",
+    "executors": [
+      "service_role",
+      "lms_normal_executor"
+    ],
+    "security": "definer",
+    "bodyHash": "2ee214d9e427dd7827d2492c9493513d"
+  },
+  {
+    "name": "lms_write_private.evaluate_eligibility",
+    "signature": "lms_write_private.evaluate_eligibility(uuid,uuid,uuid[],text,uuid,jsonb)",
+    "owner": "lms_eligibility_reader",
+    "executors": [
+      "lms_roster_writer",
+      "lms_lineup_writer",
+      "lms_normal_executor"
+    ],
+    "security": "definer",
+    "bodyHash": "4fea01494378df43be1eb35109b35d87"
+  },
+  {
+    "name": "public.lms_roster_add_player",
+    "signature": "public.lms_roster_add_player(uuid,uuid,uuid,uuid)",
+    "owner": "lms_roster_writer",
+    "executors": [
+      "service_role",
+      "lms_normal_executor"
+    ],
+    "security": "definer",
+    "bodyHash": "0c445575d53ac451911fcfb41ca6b3ca"
+  },
+  {
+    "name": "lms_write_private.lock_match_setup",
+    "signature": "lms_write_private.lock_match_setup(uuid,uuid,uuid)",
+    "owner": "postgres",
+    "executors": [
+      "lms_lineup_writer",
+      "lms_normal_executor"
+    ],
+    "security": "definer",
+    "bodyHash": "36f2733eb7c186579f70cac6ba6d74c6"
+  },
+  {
+    "name": "public.lms_match_setup_save",
+    "signature": "public.lms_match_setup_save(uuid,uuid,uuid,jsonb,uuid)",
+    "owner": "lms_lineup_writer",
+    "executors": [
+      "service_role",
+      "lms_normal_executor"
+    ],
+    "security": "definer",
+    "bodyHash": "0ae35cae0b218bd87a4ef83bdc3c9564"
+  },
+  {
+    "name": "public.lms_match_setup_reset",
+    "signature": "public.lms_match_setup_reset(uuid,uuid,uuid)",
+    "owner": "lms_lineup_writer",
+    "executors": [
+      "service_role",
+      "lms_normal_executor"
+    ],
+    "security": "definer",
+    "bodyHash": "3414c193ffaf3b66d01d1647e84861cb"
+  }
+]

@@ -1,0 +1,82 @@
+(node:41992) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF01 below (11.7517ms)
+✔ RF02 fraction (0.8191ms)
+✔ RF03 boundary (0.8281ms)
+✔ RF04 above (0.3063ms)
+✔ RF05 missing (4.8913ms)
+✔ RF06 numeric NR (0.2467ms)
+✔ RF07 rated below (0.251ms)
+✔ RF08 rated inside (0.4058ms)
+✔ RF09 rated above (0.3137ms)
+✔ RF10 independent NR (0.3576ms)
+✔ RF11 independent unknown (0.4942ms)
+✔ RF12 pair unknown (0.2238ms)
+✔ Exact official source gate + NR precedence + sanitized single telemetry outcome (24.7572ms)
+✔ Policy only never reads SELF (15.8535ms)
+✔ PT9 conflict blocks personal lookup; no crossing to Weekday rules (12.0921ms)
+✔ PrimeTime age policy includes exact 6.3.2 source; no live lookup (2.3461ms)
+✔ Clarification binds subject session, exact choice and current source (10.863ms)
+✔ Inactive or unavailable SDUPR5 does not substitute another division (1.4138ms)
+✔ Missing RF stays unknown and denied subject remains protected (8.0445ms)
+✔ Telemetry exceptions fail open with exactly one logical attempt (6.853ms)
+✔ Standalone other-player RF is protected before catalog or provider (0.9149ms)
+✔ Changed policy version, future season and missing continuation fail closed (0.6087ms)
+(node:24036) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Document-only What are the requirements for DUPR5? (61.2946ms)
+✔ Document-only What DUPR range is allowed in DUPR5? (37.1896ms)
+✔ Document-only How does NR work for DUPR5? (8.317ms)
+✔ Hybrid Can I play on a DUPR5 team? (7.2697ms)
+✔ Hybrid Am I eligible for DUPR5? (13.7026ms)
+✔ Existing document policy When is my Season DUPR established? (7.0203ms)
+✔ Existing document policy Can my Season DUPR change during the season? (4.7166ms)
+✔ Existing document policy How does NR eligibility work? (3.2818ms)
+✔ Existing document policy What does the Reliability Factor rule say? (2.9151ms)
+✔ Existing Live SELF_RATING remains live-only (1.5144ms)
+✔ Authorized missing RF is consulted and hybrid but UNKNOWN (8.0046ms)
+✔ No successful personal inputs: denied (1.1809ms)
+✔ No successful personal inputs: not_found (0.7315ms)
+✔ No successful personal inputs: rate_limited (0.5367ms)
+✔ No successful personal inputs: unsupported (0.6972ms)
+✔ No successful personal inputs: ambiguous (1.3728ms)
+✔ No successful personal inputs: no_season (4.6799ms)
+✔ Planned personal access not performed Can I play PrimeTime 9? (6.7656ms)
+✔ Planned personal access not performed Can I play DUPR7? (1.2899ms)
+✔ Planned personal access not performed Can I play SDUPR5? (0.3143ms)
+✔ Failed source validation cannot claim successful personal comparison (1.6422ms)
+✔ View-As uses identical trusted source classifications with no role inference (22.5459ms)
+✔ Source metadata contains no private values or member identifiers (7.837ms)
+✔ Privacy history is independent of document-only badge and stale result.live (7.2667ms)
+✔ Normal and View-As UI use shared presentation and avoid hardcoded eligibility LIVE banner (3.4213ms)
+(node:47904) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityPersistence.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 Q78 450ms success (18.8289ms)
+✔ 0725 Q78 deadline then found (4.831ms)
+✔ 0725 Q78 deadline absent then retry (3.1248ms)
+✔ 0725 Q78 late first commit races retry (2.1612ms)
+✔ 0725 Q78 reconciliation timeout (1.5668ms)
+✔ 0725 Q78 reconciliation failure (1.1107ms)
+✔ 0725 Q78 second deadline then found (3.9115ms)
+✔ 0725 Q78 second deadline absent (1.4348ms)
+✔ 0725 Q78 mismatch never retries (1.466ms)
+✔ 0725 Q78 safe answer returns before recovery and no answer rerun (7.4345ms)
+✔ 0725 reconciliation cannot accept an older positive occurrence for missing negative review case (0.7013ms)
+✔ 0725 recovery scheduling failure is visible and never runs detached (1.3466ms)
+✔ 0725 recovery keeps origin and never introduces actor or effective member identifiers (4.9999ms)
+✔ 0725 recovery callback reentry cannot exceed one retry or terminal diagnostic (1.7816ms)
+✔ 0725 all ordinary capture route callers register framework-owned recovery (6.1753ms)
+ℹ tests 62
+ℹ suites 0
+ℹ pass 62
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 758.4436

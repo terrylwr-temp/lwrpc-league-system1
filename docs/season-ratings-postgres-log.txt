@@ -1,0 +1,1 @@
+{"postgres":"17.11","loopbackOnly":true,"memberWriteContention":"import aborts within 1s lock timeout","identityPhantom":"rejected","identityWriteDuringCommit":"blocked","outerRollback":"no source changes","batch879Ms":1456,"seasonDataUnchanged":true}

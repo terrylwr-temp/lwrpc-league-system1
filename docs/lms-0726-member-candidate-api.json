@@ -1,0 +1,68 @@
+[
+  {
+    "actor": 8,
+    "search": "",
+    "status": 200,
+    "count": 8
+  },
+  {
+    "actor": 8,
+    "search": "Person2",
+    "status": 200,
+    "count": 1
+  },
+  {
+    "actor": 8,
+    "search": "no-such-person",
+    "status": 200,
+    "count": 0
+  },
+  {
+    "actor": 7,
+    "search": "",
+    "status": 200,
+    "count": 8
+  },
+  {
+    "actor": 7,
+    "search": "Person2",
+    "status": 200,
+    "count": 1
+  },
+  {
+    "actor": 7,
+    "search": "no-such-person",
+    "status": 200,
+    "count": 0
+  },
+  {
+    "actor": 2,
+    "search": "",
+    "status": 403
+  },
+  {
+    "actor": 2,
+    "search": "Person2",
+    "status": 403
+  },
+  {
+    "actor": 2,
+    "search": "no-such-person",
+    "status": 403
+  },
+  {
+    "actor": 1,
+    "search": "",
+    "status": 403
+  },
+  {
+    "actor": 1,
+    "search": "Person2",
+    "status": 403
+  },
+  {
+    "actor": 1,
+    "search": "no-such-person",
+    "status": 403
+  }
+]

@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {questionIntent} from '../lwrpc-admin/app/lib/aiRequestIntent.js';
+import {liveIntent} from '../lwrpc-admin/app/lib/liveLmsIntent.js';
+import {officialQuestionConcept} from '../lwrpc-admin/app/lib/aiQuestionConcepts.js';
+import {genericApplicablePassages} from '../lwrpc-admin/app/lib/aiQuestionApplicability.js';
+globalThis.fetch=()=>{throw Error('Diagnosis forbids network');};
+const plan=JSON.parse(fs.readFileSync(new URL('./lms-0725-eligibility-cases.json',import.meta.url),'utf8'));
+const rules=JSON.parse(fs.readFileSync(new URL('./lms-0725-eligibility-rules-read.json',import.meta.url),'utf8'));
+const table=rules.find(r=>r.id==='70843ff0-4964-4d71-b6c5-37bf52de54fc');
+assert.ok(table);
+const candidate={content:table.content,documentType:'league_rules',heading:'Weekday DUPR League Divisions',documentTitle:'League Rules'};
+const observations=[...plan.cases,...plan.reusedControls].map(c=>({id:c.id,question:c.question,expectedRoute:c.expectedRoute,intent:questionIntent(c.question),live:liveIntent(c.question),concept:officialQuestionConcept(c.question),weekdayTableGenericPassages:genericApplicablePassages(candidate,c.question).length}));
+const exact=observations[0];
+assert.equal(exact.intent.kind,'unresolved');
+assert.equal(exact.live,null);
+assert.equal(exact.concept,null);
+assert.equal(exact.weekdayTableGenericPassages,0);
+assert.equal(observations.at(-1).live.intent,'SELF_RATING');
+const result={diagnosisOnly:true,networkCalls:0,modelCalls:0,personalDataReads:0,expandedCount:120,observations};
+fs.writeFileSync(new URL('./lms-0725-eligibility-local-diagnosis.json',import.meta.url),JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({diagnosisAssertions:'PASS',observations:observations.map(x=>({id:x.id,intent:x.intent.kind,live:x.live?.intent||null,concept:x.concept?.kind||null,tablePassages:x.weekdayTableGenericPassages})),networkCalls:0,modelCalls:0}));
+

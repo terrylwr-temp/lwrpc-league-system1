@@ -1,0 +1,39 @@
+(node:22948) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/proxy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0726 normal routing is independent of View-As context service, hostname availability and maintenance (12.6219ms)
+✔ 0726 unavailable context never converts isolated requests into normal mutation authority (9.3952ms)
+(node:15920) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/viewAsProjectionClient.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0726 normal member/role/auth headers preserve normal identity without View-As state (2.1789ms)
+✔ 0726 isolated identity creates no Supabase client or target Auth session (0.8151ms)
+✔ 0726 in-memory projection reuses joins and filters but cannot fetch or mutate (1.2037ms)
+✔ 0726 normal authentication matches the recovered baseline for all five role levels (16.4246ms)
+✔ 0726 keeps one real LMS presentation and removes the mini snapshot transport (3.3804ms)
+✔ 0726 shared settings loader preserves normal fetch and uses only projected values in View-As (31.6846ms)
+(node:21868) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/viewAsPageAssets.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0726 profile image resolves only authorized self reference and fixed storage bucket (1.7536ms)
+(node:22092) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/viewAsBoundary.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0724 omit-context and legacy/event-code replay boundary; normal tab unchanged (8.1218ms)
+✔ 0724 strict origins and server credential confidentiality (2.3705ms)
+✔ 0724 complete legacy handler guard registry and isolated renderer dependency boundary (65.5126ms)
+✔ 0724 normalized Next URL uses Host boundary but keeps rewrite internal (5.2389ms)
+✔ 0724 ordinary and Live citation/conversation receipts cannot cross contexts or ordinary actor session (1.6378ms)
+✔ 0724 Member Detail is the only entry; isolated target cannot nest (231.7852ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5032.5806

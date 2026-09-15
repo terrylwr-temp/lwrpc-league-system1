@@ -1,0 +1,84 @@
+(node:14616) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ full precision Upload preview/commit, RF, source, blank-only repeat, final preservation (4121.4037ms)
+✔ old signed Upload and Transfer previews reject after apply; new previews work; replay and planner rollback (4982.631ms)
+✔ Clean truncation boundaries retain all full-precision working inputs and RF through commit (5499.2217ms)
+✔ read-only repair preview, exact source restoration, audit, idempotence and guarded rollback (5878.632ms)
+✔ repair blocks manual value (11004.9462ms)
+✔ repair blocks later matching-value edit (4342.4014ms)
+✔ repair blocks RF change (5484.8782ms)
+✔ repair blocks source change (6242.3862ms)
+✔ repair blocks duplicate identity (4359.0649ms)
+✔ tampered manifest and transaction failure roll back every working/basis change; audit failure persists (3518.6792ms)
+✔ security: fixed owner/path; browser and player denial; no public wrapper or table grants (3157.6545ms)
+✔ parser and administrative preview retain precision without adding a main-grid Age column (6.8294ms)
+✔ accepted batch or protected final changing after preview invalidates the exact repair manifest (5620.8979ms)
+✔ rollback refuses subsequent edits and successful run IDs cannot be repurposed (4460.6381ms)
+(node:17920) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/seasonRatingsClean.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Upload: selection/preview/reselect/cancel retain file; summary action precedes table; success resets (23.282ms)
+✔ Upload: zero ready rows explain and cannot import; a new file invalidates the old preview (5.4784ms)
+✔ Clean: Rules default, summary action, full combined confirmation, cancel retains preview, cutoff re-previews (4.903ms)
+✔ Clean: confirmation pending disables cutoff and generation change rejects outdated confirmation (5.02ms)
+✔ Upload preview labels current CSV fields and age path, including excluded identities (5.4114ms)
+✔ upload success uses committed totals, clears preview/receipt, preserves season and refreshes once (2.9778ms)
+✔ upload failed commit retains preview/input and never refreshes or claims success (3.0054ms)
+✔ clean success uses committed totals, clears preview/receipt, preserves season and refreshes once (2.5929ms)
+✔ clean failed commit retains preview/input and never refreshes or claims success (8.2805ms)
+✔ refresh failure retains committed success, clears consumed preview and never retries commit (2.5429ms)
+✔ actual page completion handler re-fetches selected/all ratings and advances only grid input keys (2.4186ms)
+(node:22468) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ distinct numeric fields and reordered headers map only named Doubles, RF and age paths (6.2435ms)
+✔ valid over_65 takes precedence over different over_50 and careerHigh (0.8941ms)
+✔ absent or invalid over_65 uses valid over_50: undefined (0.5647ms)
+✔ absent or invalid over_65 uses valid over_50: null (0.4948ms)
+✔ absent or invalid over_65 uses valid over_50: "" (0.5687ms)
+✔ absent or invalid over_65 uses valid over_50: "NR" (0.5981ms)
+✔ absent or invalid over_65 uses valid over_50: "bad" (0.5553ms)
+✔ absent or invalid over_65 uses valid over_50: "-1" (0.4123ms)
+✔ absent or invalid over_65 uses valid over_50: "8.1" (0.5123ms)
+✔ absent or invalid over_65 uses valid over_50: {} (0.7587ms)
+✔ absent or invalid over_65 uses valid over_50: [] (0.5636ms)
+✔ absent or invalid over_65 uses valid over_50: [4.487] (0.3541ms)
+✔ no valid age remains blank; normal doubles and careerHigh never substitute: {} (0.6078ms)
+✔ no valid age remains blank; normal doubles and careerHigh never substitute: {"over_65":"NR","over_50":"bad"} (0.3331ms)
+✔ current RF header wins over legacy alias, including invalid or conflicting alias (0.6361ms)
+✔ legacy RF alias is used only when current RF header is absent (0.5631ms)
+✔ present current RF header with empty row never falls back to legacy or singles (0.6751ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: bad (2.3516ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: 87.5 (0.5275ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: 101 (0.2992ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: -1 (0.1917ms)
+✔ real preview transaction truncates distinct named values and exposes source mapping without writes (6038.962ms)
+(node:17084) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ gate OFF: authorized Upload/Clean issue receipts and commit once through reviewed transactions (7147.6053ms)
+✔ gate OFF: missing, forged, expired, wrong session/season/operation and cutoff receipts deny before writes (6800.7202ms)
+✔ gate OFF: existing League Manager authorization permits both normal signed actions (9605.5353ms)
+✔ gate OFF: Player/Captain cannot preview or commit; revoked administrator rejected at commit (5521.0081ms)
+✔ gate OFF: Transfer/Clear remain unsigned and deny even a valid maintenance receipt; unknown operations deny (4747.9947ms)
+✔ gate OFF: fresh receipt required after input state changes; zero ready rows have no receipt (6939.7651ms)
+(node:24696) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ receipt ties actor/session/season/operation; write-disabled route makes no RPC (23.0436ms)
+✔ each transaction rolls back its own partial writes and rejects changed Rules/roster/input/source (8630.3233ms)
+✔ DUPR-only matching skips inactive/not-found/ambiguous and invalid source; numeric truncation and missing age (6045.4267ms)
+ℹ tests 56
+ℹ suites 0
+ℹ pass 56
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 70748.3107

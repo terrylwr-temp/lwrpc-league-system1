@@ -1,0 +1,3473 @@
+{
+  "commit": "de36572acdbcd5b5e6f669ed451dc6db93c7778a",
+  "deployment": {
+    "deployment": {
+      "id": "dpl_3BXEyQk6kbxFA793Jg649oAZq77X",
+      "name": "lwrpc-admin",
+      "url": "lwrpc-admin-41c6e9qhs-terry-lwrpc.vercel.app",
+      "type": "LAMBDAS",
+      "state": "READY",
+      "createdAt": 1789065952593,
+      "creator": {
+        "uid": "JUuQDjLgrTx95yrq0IbiBdU6",
+        "username": "terrylwr-temp"
+      },
+      "project": {
+        "id": "prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3",
+        "name": "lwrpc-admin",
+        "framework": "nextjs"
+      },
+      "meta": {
+        "gitCommitAuthorName": "terrylwrpickleballclub",
+        "gitCommitAuthorEmail": "terry.adelman@gmail.com",
+        "gitCommitMessage": "LMS-0733 current CSV preview empty state",
+        "gitCommitRef": "codex/lms0733-source-review",
+        "gitCommitSha": "de36572acdbcd5b5e6f669ed451dc6db93c7778a",
+        "gitDirty": "0",
+        "release": "LMS-0733",
+        "packageVersion": "0.1.555",
+        "actor": "codex",
+        "lambdaRuntimeStats": "{\"nodejs\":3}"
+      },
+      "alias": [
+        "lwrpc-admin.vercel.app",
+        "league.lwrpickleballclub.com",
+        "view-as.lwrpickleballclub.com",
+        "lwrpc-admin-terry-lwrpc.vercel.app"
+      ],
+      "target": "production",
+      "regions": [
+        "iad1"
+      ],
+      "buildingAt": 1789065953720,
+      "ready": 1789066011641,
+      "readyState": "READY",
+      "source": "cli",
+      "aliasError": null
+    }
+  },
+  "business": [
+    {
+      "captured_at": "2026-09-10 18:49:01.27057+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "dd28041d5831bde799870753445056c9"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+        },
+        {
+          "name": "locations",
+          "rows": 137,
+          "fingerprint": "ad8768b59dc159e7a5cb779f49657635"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1012,
+          "fingerprint": "45213079f14e8e6374c4cb7876d0e6e7"
+        },
+        {
+          "name": "members",
+          "rows": 1974,
+          "fingerprint": "0fbc1703c533b6a2122766611a43a685"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 105,
+          "fingerprint": "83ec67dc7e6ca9664b35a4cf09790a1b"
+        },
+        {
+          "name": "user_roles",
+          "rows": 183,
+          "fingerprint": "2dd120cf3ac7ed71b296b4610802e87c"
+        }
+      ]
+    }
+  ],
+  "source": [
+    {
+      "snapshot": {
+        "last": {
+          "result": {
+            "updated": 659,
+            "importId": "2c0fcb21-e3b3-4dc0-ab52-9b49114995af",
+            "seasonValuesChanged": 0
+          },
+          "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+          "created_at": "2026-09-10T15:47:26.791625+00:00"
+        },
+        "batches": {
+          "count": 1,
+          "fingerprint": "95ffd370b162ee7b9df086201e014dd3"
+        },
+        "sources": {
+          "count": 659,
+          "fingerprint": "c7901d3b0f89c3de7f839cf06f4e4b7c"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "snapshot": {
+        "roles": [
+          {
+            "rolname": "lms_view_as_executor",
+            "rolsuper": false,
+            "rolinherit": false,
+            "rolcanlogin": false,
+            "rolcreatedb": false,
+            "rolbypassrls": false,
+            "rolcreaterole": false,
+            "rolreplication": false
+          },
+          {
+            "rolname": "lms_view_as_reader",
+            "rolsuper": false,
+            "rolinherit": false,
+            "rolcanlogin": false,
+            "rolcreatedb": false,
+            "rolbypassrls": false,
+            "rolcreaterole": false,
+            "rolreplication": false
+          }
+        ],
+        "tables": [
+          {
+            "name": "ai_live_private.access_audit",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=ar/postgres",
+              "ai_live_retention=rd/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "ai_live_private.attempts",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=ar/postgres",
+              "ai_live_retention=rd/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "ai_live_private.feedback",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=ar/postgres",
+              "ai_live_retention=rd/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "ai_live_private.retention_runs",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=r/postgres",
+              "ai_live_retention=a/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_answer_feedback_events",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_approved_answer_events",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=r/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_approved_answer_revisions",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=r/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_approved_answers",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=r/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_document_chunks",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_document_versions",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_documents",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_manager_review_cases",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arw/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_manager_review_events",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=ar/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_question_fingerprint_routes",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arw/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_question_groups",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arw/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_request_outcomes",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=ar/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.ai_review_occurrences",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arw/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.app_notification_subscriptions",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.division_lines",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.divisions",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.league_blackout_dates",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.league_schedule_settings",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.leagues",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.line_games",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.location_court_availability",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.locations",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.match_lines",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.match_lineups",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.matches",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.member_import_batches",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.member_import_rows",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.member_season_ratings",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.members",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.notification_template_history",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.notification_templates",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.password_reset_rate_limits",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_activity_log",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_courts",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_groups",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_matches",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_player_group_members",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_player_groups",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_player_session_results",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_players",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_session_players",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.round_robin_sessions",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.score_sheet_templates",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.seasons",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.system_settings",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.team_byes",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.team_members",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.team_standings",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.teams",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.tournament_activity_log",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.tournament_courts",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.tournament_divisions",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.tournament_matches",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.tournament_team_contacts",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.tournament_teams",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.tournaments",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "public.user_roles",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "anon=arwdDxtm/postgres",
+              "authenticated=arwdDxtm/postgres",
+              "service_role=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "ratings_source_private.batches",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "ratings_source_private.sources",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "view_as_private.attempts",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "lms_view_as_executor=ar/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "view_as_private.audit_events",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "lms_view_as_executor=ar/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "view_as_private.contexts",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "lms_view_as_executor=arw/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          },
+          {
+            "name": "view_as_private.diagnostic_outcomes",
+            "owner": "postgres",
+            "relacl": [
+              "postgres=arwdDxtm/postgres",
+              "lms_view_as_executor=ar/postgres"
+            ],
+            "relrowsecurity": true,
+            "relforcerowsecurity": false
+          }
+        ],
+        "policies": [
+          {
+            "cmd": "ALL",
+            "qual": "(at < (statement_timestamp() - '90 days'::interval))",
+            "roles": [
+              "ai_live_retention"
+            ],
+            "tablename": "access_audit",
+            "permissive": "PERMISSIVE",
+            "policyname": "ai_live_audit_expiry",
+            "schemaname": "ai_live_private",
+            "with_check": null
+          },
+          {
+            "cmd": "ALL",
+            "qual": "(at < (statement_timestamp() - '1 day'::interval))",
+            "roles": [
+              "ai_live_retention"
+            ],
+            "tablename": "attempts",
+            "permissive": "PERMISSIVE",
+            "policyname": "ai_live_attempt_expiry",
+            "schemaname": "ai_live_private",
+            "with_check": null
+          },
+          {
+            "cmd": "ALL",
+            "qual": "(at < (statement_timestamp() - '90 days'::interval))",
+            "roles": [
+              "ai_live_retention"
+            ],
+            "tablename": "feedback",
+            "permissive": "PERMISSIVE",
+            "policyname": "ai_live_feedback_expiry",
+            "schemaname": "ai_live_private",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "ai_live_retention"
+            ],
+            "tablename": "retention_runs",
+            "permissive": "PERMISSIVE",
+            "policyname": "ai_live_retention_record",
+            "schemaname": "ai_live_private",
+            "with_check": "true"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "division_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read division lines",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "division_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete division lines",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "division_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert division lines",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "division_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update division lines",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "division_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "divisions",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can delete divisions",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "divisions",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can insert divisions",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "divisions",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read divisions",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "divisions",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can update divisions",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "divisions",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "divisions",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "league_blackout_dates",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete league blackout dates",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "league_blackout_dates",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert league blackout dates",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "public"
+            ],
+            "tablename": "league_blackout_dates",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read league blackout dates",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "league_blackout_dates",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update league blackout dates",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "league_schedule_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read league schedule settings",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "league_schedule_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete league schedule settings",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "league_schedule_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert league schedule settings",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "league_schedule_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update league schedule settings",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "leagues",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can delete leagues",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "leagues",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can insert leagues",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "leagues",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read leagues",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "leagues",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can update leagues",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "leagues",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "leagues",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "line_games",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read line games",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "line_games",
+            "permissive": "PERMISSIVE",
+            "policyname": "Captains and managers can insert own-team line games",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_match_line(match_line_id)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "private.current_user_can_manage_match_line(match_line_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "line_games",
+            "permissive": "PERMISSIVE",
+            "policyname": "Captains and managers can update own-team line games",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_match_line(match_line_id)"
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "line_games",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete line games",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "line_games",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "location_court_availability",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read location court availability",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "location_court_availability",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete location court availability",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "location_court_availability",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert location court availability",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "location_court_availability",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update location court availability",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "locations",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can delete locations",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "locations",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can insert locations",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "locations",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read locations",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "locations",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can update locations",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "locations",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "locations",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read match lines",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "private.current_user_can_manage_match(match_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "Captains and managers can update own-team match lines",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_match(match_id)"
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete match lines",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert match lines",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "match_lines",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "match_lineups",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "private.current_user_can_manage_match_lineup(team_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lineups",
+            "permissive": "PERMISSIVE",
+            "policyname": "match_lineups_delete_captains_and_managers",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lineups",
+            "permissive": "PERMISSIVE",
+            "policyname": "match_lineups_insert_captains_and_managers",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_match_lineup(team_id)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lineups",
+            "permissive": "PERMISSIVE",
+            "policyname": "match_lineups_select_authenticated",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "private.current_user_can_manage_match_lineup(team_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "match_lineups",
+            "permissive": "PERMISSIVE",
+            "policyname": "match_lineups_update_captains_and_managers",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_match_lineup(team_id)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read matches",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "private.current_user_can_manage_match(id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "Captains and managers can update own-team matches",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_match(id)"
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete matches",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert matches",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "ALL",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "member_import_batches",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users full access member import batches",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "ALL",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "member_import_rows",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users full access member import rows",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "member_season_ratings",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read member season ratings",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "member_season_ratings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete member season ratings",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "member_season_ratings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert member season ratings",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "member_season_ratings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update member season ratings",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "member_season_ratings",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "member_season_ratings",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "members",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read members",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "(( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text]))",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "members",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete members",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "members",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert members",
+            "schemaname": "public",
+            "with_check": "(( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text]))"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "(private.current_user_can_update_member(id) OR (( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "members",
+            "permissive": "PERMISSIVE",
+            "policyname": "Users and managers can update members",
+            "schemaname": "public",
+            "with_check": "(private.current_user_can_update_member(id) OR (( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "members",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "members",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "notification_templates",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "round_robin_activity_log",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read round robin logs",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM round_robin_groups g\n  WHERE ((g.id = round_robin_courts.group_id) AND (g.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "round_robin_courts",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public round robin courts are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "((public_status = 'public'::text) OR (EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = ( SELECT auth.uid() AS uid)) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text]))))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "round_robin_groups",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public round robin groups are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM (round_robin_sessions s\n     JOIN round_robin_groups g ON ((g.id = s.group_id)))\n  WHERE ((s.id = round_robin_matches.session_id) AND (g.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "round_robin_matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public round robin matches are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "round_robin_player_group_members",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read round robin player group members",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "round_robin_player_groups",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read round robin player groups",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM (round_robin_sessions s\n     JOIN round_robin_groups g ON ((g.id = s.group_id)))\n  WHERE ((s.id = round_robin_player_session_results.session_id) AND (g.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "round_robin_player_session_results",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public round robin results are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "round_robin_players",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read round robin players",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "round_robin_session_players",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read round robin session players",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM round_robin_groups g\n  WHERE ((g.id = round_robin_sessions.group_id) AND (g.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "round_robin_sessions",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public round robin sessions are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "score_sheet_templates",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete score sheet templates",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "score_sheet_templates",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert score sheet templates",
+            "schemaname": "public",
+            "with_check": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "score_sheet_templates",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update score sheet templates",
+            "schemaname": "public",
+            "with_check": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "score_sheet_templates",
+            "permissive": "PERMISSIVE",
+            "policyname": "Score sheet templates are readable by authenticated users",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "score_sheet_templates",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "seasons",
+            "permissive": "PERMISSIVE",
+            "policyname": "Admins can delete seasons",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "seasons",
+            "permissive": "PERMISSIVE",
+            "policyname": "Admins can insert seasons",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_admin() AS current_user_is_admin)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "seasons",
+            "permissive": "PERMISSIVE",
+            "policyname": "Admins can update seasons",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_admin() AS current_user_is_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "seasons",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read seasons",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "seasons",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "seasons",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "system_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert system settings",
+            "schemaname": "public",
+            "with_check": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = ( SELECT auth.uid() AS uid)) AND (user_roles.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = ( SELECT auth.uid() AS uid)) AND (user_roles.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "system_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update system settings",
+            "schemaname": "public",
+            "with_check": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = ( SELECT auth.uid() AS uid)) AND (user_roles.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "system_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "System settings are readable by authenticated users",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "system_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "system_settings",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "private.current_user_can_manage_team(team_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_byes",
+            "permissive": "PERMISSIVE",
+            "policyname": "Allow authenticated users to delete team byes",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_byes",
+            "permissive": "PERMISSIVE",
+            "policyname": "Allow authenticated users to insert team byes",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_team(team_id)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "private.current_user_can_manage_team(team_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_byes",
+            "permissive": "PERMISSIVE",
+            "policyname": "Allow authenticated users to update team byes",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_team(team_id)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_byes",
+            "permissive": "PERMISSIVE",
+            "policyname": "Allow authenticated users to view team byes",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "team_byes",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "private.current_user_can_manage_team(team_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_members",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can delete team members",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_members",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can insert team members",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_team(team_id)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_members",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read team members",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "private.current_user_can_manage_team(team_id)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_members",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can update team members",
+            "schemaname": "public",
+            "with_check": "private.current_user_can_manage_team(team_id)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "team_members",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "team_members",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_standings",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read team standings",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_standings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can delete team standings",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_standings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can insert team standings",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "team_standings",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can update team standings",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "team_standings",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "team_standings",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "teams",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can insert teams",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "teams",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read teams",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "teams",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can update teams",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "teams",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "teams",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "tournament_activity_log",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read tournament logs",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_courts.tournament_id) AND (t.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "tournament_courts",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public tournament courts are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_divisions.tournament_id) AND (t.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "tournament_divisions",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public tournament divisions are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_matches.tournament_id) AND (t.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "tournament_matches",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public tournament matches are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "tournament_team_contacts",
+            "permissive": "PERMISSIVE",
+            "policyname": "League managers can read tournament team contacts",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_teams.tournament_id) AND (t.public_status = 'public'::text))))",
+            "roles": [
+              "public"
+            ],
+            "tablename": "tournament_teams",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public tournament teams are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "(public_status = 'public'::text)",
+            "roles": [
+              "public"
+            ],
+            "tablename": "tournaments",
+            "permissive": "PERMISSIVE",
+            "policyname": "Public tournaments are readable",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "user_roles",
+            "permissive": "PERMISSIVE",
+            "policyname": "Authenticated users can read user roles",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "DELETE",
+            "qual": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "user_roles",
+            "permissive": "PERMISSIVE",
+            "policyname": "Commissioners can delete roles",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "INSERT",
+            "qual": null,
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "user_roles",
+            "permissive": "PERMISSIVE",
+            "policyname": "Commissioners can insert roles",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)"
+          },
+          {
+            "cmd": "UPDATE",
+            "qual": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+            "roles": [
+              "authenticated"
+            ],
+            "tablename": "user_roles",
+            "permissive": "PERMISSIVE",
+            "policyname": "Commissioners can update roles",
+            "schemaname": "public",
+            "with_check": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)"
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_reader"
+            ],
+            "tablename": "user_roles",
+            "permissive": "PERMISSIVE",
+            "policyname": "lms0726_internal_page_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "SELECT",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "user_roles",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_read",
+            "schemaname": "public",
+            "with_check": null
+          },
+          {
+            "cmd": "ALL",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "attempts",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_attempts",
+            "schemaname": "view_as_private",
+            "with_check": "true"
+          },
+          {
+            "cmd": "ALL",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "audit_events",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_audit",
+            "schemaname": "view_as_private",
+            "with_check": "true"
+          },
+          {
+            "cmd": "ALL",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "contexts",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_context",
+            "schemaname": "view_as_private",
+            "with_check": "true"
+          },
+          {
+            "cmd": "ALL",
+            "qual": "true",
+            "roles": [
+              "lms_view_as_executor"
+            ],
+            "tablename": "diagnostic_outcomes",
+            "permissive": "PERMISSIVE",
+            "policyname": "view_as_executor_diagnostic",
+            "schemaname": "view_as_private",
+            "with_check": "true"
+          }
+        ],
+        "functions": [
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog"
+            ],
+            "prosecdef": false,
+            "signature": "activate_ai_document_version(uuid,uuid,uuid)",
+            "definition_md5": "d8496e4561f56c41f6db0937184bff8c"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "admin_master_reset_all()",
+            "definition_md5": "655e5a9d084215da4c3462f88ddf6e91"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "admin_member_directory_page(text,boolean,boolean,text,text,integer,integer)",
+            "definition_md5": "fff26f5fd7ff8e9dfa6da726c9529ef2"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "admin_reset_season(uuid)",
+            "definition_md5": "cc63bc5a9cf51b0f8587cf6a5a3623de"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog",
+              "statement_timeout=3s",
+              "lock_timeout=250ms"
+            ],
+            "prosecdef": true,
+            "signature": "ai_approved_answer_action(uuid,uuid,text,uuid,bigint,jsonb)",
+            "definition_md5": "f321c582b34d0e0becb63ab8b4163f79"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog"
+            ],
+            "prosecdef": false,
+            "signature": "ai_approved_authority_manifest()",
+            "definition_md5": "0a66655beddb10fd254ad920e0d862be"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog"
+            ],
+            "prosecdef": false,
+            "signature": "ai_approved_knowledge_manifest()",
+            "definition_md5": "26dd7cc3c8460d2970b272b81129084d"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog",
+              "statement_timeout=2s"
+            ],
+            "prosecdef": false,
+            "signature": "ai_approved_source_review(text[])",
+            "definition_md5": "d5308d6b5575752a2af152284b2995b5"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "=X/postgres",
+              "postgres=X/postgres",
+              "anon=X/postgres",
+              "authenticated=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public"
+            ],
+            "prosecdef": false,
+            "signature": "ai_assistant_set_updated_at()",
+            "definition_md5": "6965ccea74b5e1556aab0a1fd71a7b43"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "ai_live_feedback(uuid,uuid,boolean,jsonb)",
+            "definition_md5": "0a292258d573208269248f5d50f9d776"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "ai_live_lookup(uuid,uuid,jsonb)",
+            "definition_md5": "10fa678360b17f84b6e6ea8fcee4e5e9"
+          },
+          {
+            "owner": "ai_live_retention",
+            "proacl": [
+              "ai_live_retention=X/ai_live_retention",
+              "service_role=X/ai_live_retention"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "ai_live_private.expire_records()",
+            "definition_md5": "18642c6da2ce7a027349d801ab3b68ff"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "ai_live_private.lookup(uuid,uuid,jsonb)",
+            "definition_md5": "657bd9e2fcbde0fdd899f0e219226013"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "ai_live_private.resolve_identity(uuid)",
+            "definition_md5": "0e351a3d1eba75252cd8def53f43e977"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "ai_live_review(uuid)",
+            "definition_md5": "a23fa9999ab5aae61a809228a6ee9fef"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog"
+            ],
+            "prosecdef": false,
+            "signature": "ai_require_activation_history()",
+            "definition_md5": "f7d89b733639c378e5877d4dc70d5150"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog, public",
+              "statement_timeout=3s",
+              "lock_timeout=250ms"
+            ],
+            "prosecdef": false,
+            "signature": "ai_review_case_action(uuid,uuid,uuid,integer,text,text,text,timestamp with time zone)",
+            "definition_md5": "536feec00fe8d37f5dab1666de1f49a3"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog, public"
+            ],
+            "prosecdef": false,
+            "signature": "ai_review_feedback_state(timestamp with time zone)",
+            "definition_md5": "5b6476308d98b687eaba8291bccd20c1"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog, public"
+            ],
+            "prosecdef": false,
+            "signature": "ai_review_group_rows(timestamp with time zone)",
+            "definition_md5": "6cb9abb5d2fa91b4072bce8b609db0d2"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog, public",
+              "statement_timeout=5s"
+            ],
+            "prosecdef": false,
+            "signature": "ai_review_report(jsonb)",
+            "definition_md5": "88cc6880ba6a0e08b888e531a2796cbe"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public"
+            ],
+            "prosecdef": true,
+            "signature": "bulk_import_members(jsonb)",
+            "definition_md5": "7602faa488500d89362021ae887e689e"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog, public",
+              "statement_timeout=450ms",
+              "lock_timeout=150ms"
+            ],
+            "prosecdef": false,
+            "signature": "capture_ai_quality(jsonb,jsonb,jsonb,uuid)",
+            "definition_md5": "a491aad3e74cf4cad5318bda32a1cbad"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public"
+            ],
+            "prosecdef": true,
+            "signature": "consume_password_reset_rate_limit(text,integer,integer)",
+            "definition_md5": "a61ea6f8e55262d663c12ada433b8f4f"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public"
+            ],
+            "prosecdef": true,
+            "signature": "current_user_can_manage_match_lineup(uuid)",
+            "definition_md5": "dc19fe26399ade72597e83ad9888c628"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public"
+            ],
+            "prosecdef": true,
+            "signature": "current_user_is_lwrpc_admin()",
+            "definition_md5": "2ecfb1b7bb058221ef3e705903ad6335"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public"
+            ],
+            "prosecdef": true,
+            "signature": "current_user_role()",
+            "definition_md5": "6a0eb890a3e1a5999a74d8204db651ee"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public, pg_temp"
+            ],
+            "prosecdef": true,
+            "signature": "delete_inactive_member(uuid)",
+            "definition_md5": "ce0004c9461bd7ae8406afc4f085640a"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "link_future_existing_member_identity(uuid)",
+            "definition_md5": "d9cac41b4ae3230a5726fa94bb39b545"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "lms_view_as_maintenance()",
+            "definition_md5": "2f328a4cd10997a2ea3732a4f965576f"
+          },
+          {
+            "owner": "lms_view_as_executor",
+            "proacl": [
+              "lms_view_as_executor=X/lms_view_as_executor",
+              "service_role=X/lms_view_as_executor"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "lms_view_as(text,jsonb)",
+            "definition_md5": "c69d45b84feb8d650a07a2a77383d39f"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "ratings_source_private.authorize(uuid)",
+            "definition_md5": "f316e51f5cc95d5ec51be249d6afc5fa"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\"",
+              "lock_timeout=1s",
+              "statement_timeout=5s"
+            ],
+            "prosecdef": true,
+            "signature": "ratings_source_private.commit_import(uuid,jsonb)",
+            "definition_md5": "9545ca338772e033ff0bab7fa1fe75f2"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\"",
+              "statement_timeout=5s"
+            ],
+            "prosecdef": true,
+            "signature": "ratings_source_private.snapshot(uuid,uuid,jsonb)",
+            "definition_md5": "328a2a1476e86beacabf96351d9fd040"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=pg_catalog",
+              "statement_timeout=450ms"
+            ],
+            "prosecdef": false,
+            "signature": "search_ai_approved_answers(vector,text)",
+            "definition_md5": "fe8711aff132bc5acca21efb1caa32cd"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=public, extensions, pg_temp"
+            ],
+            "prosecdef": false,
+            "signature": "search_ai_official_chunks(vector,text,text,text,text,uuid,uuid,uuid,uuid,text,integer)",
+            "definition_md5": "9e14ee601eb98166cadbc234c24aae9b"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "season_ratings_source_commit(uuid,jsonb)",
+            "definition_md5": "f934212f710854d58dccbbf7c41f9e36"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "season_ratings_source_snapshot(uuid,uuid,jsonb)",
+            "definition_md5": "9515feaa1b167d059c1dc6e14f20239a"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "lms_view_as_executor=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "view_as_private.actor_member(uuid)",
+            "definition_md5": "7c91d4b544c8af9d93cbaf47c8d2741d"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "lms_view_as_executor=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "view_as_private.end_context(uuid,text)",
+            "definition_md5": "0888f4a67e6ed82e251544a36003a8cd"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "lms_view_as_executor=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "view_as_private.lock_authorization(jsonb,text,uuid,uuid,uuid)",
+            "definition_md5": "374a9ea6386a525acf96bbe7415c2f82"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "lms_view_as_executor=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)",
+            "definition_md5": "32e3993bec1068200b156ff90c08d45e"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "lms_view_as_executor=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "view_as_private.member_role(uuid)",
+            "definition_md5": "b1091e12684024562ef73f52f79f761d"
+          },
+          {
+            "owner": "lms_view_as_reader",
+            "proacl": [
+              "lms_view_as_reader=X/lms_view_as_reader",
+              "lms_view_as_executor=X/lms_view_as_reader"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": true,
+            "signature": "view_as_private.page_read(jsonb,text,jsonb)",
+            "definition_md5": "3a61f904da75e356b70993f6b945bbbd"
+          },
+          {
+            "owner": "postgres",
+            "proacl": [
+              "postgres=X/postgres",
+              "lms_view_as_executor=X/postgres"
+            ],
+            "proconfig": [
+              "search_path=\"\""
+            ],
+            "prosecdef": false,
+            "signature": "view_as_private.snapshot(uuid,text)",
+            "definition_md5": "da805fe0236fc394a5ae0b6015596e35"
+          }
+        ],
+        "memberships": [
+          {
+            "oid": "16407",
+            "member": "16388",
+            "roleid": "3373",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16408",
+            "member": "16432",
+            "roleid": "3373",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "16409",
+            "member": "16434",
+            "roleid": "3373",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "10226",
+            "member": "3373",
+            "roleid": "3374",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "10227",
+            "member": "3373",
+            "roleid": "3375",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "10228",
+            "member": "3373",
+            "roleid": "3377",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "16413",
+            "member": "16388",
+            "roleid": "4200",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16410",
+            "member": "16388",
+            "roleid": "6181",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16411",
+            "member": "16432",
+            "roleid": "6181",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "16412",
+            "member": "16434",
+            "roleid": "6181",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "16406",
+            "member": "16388",
+            "roleid": "6304",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16401",
+            "member": "16388",
+            "roleid": "16484",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16400",
+            "member": "16487",
+            "roleid": "16484",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": false
+          },
+          {
+            "oid": "16403",
+            "member": "16388",
+            "roleid": "16485",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16402",
+            "member": "16487",
+            "roleid": "16485",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": false
+          },
+          {
+            "oid": "16415",
+            "member": "16388",
+            "roleid": "16486",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16414",
+            "member": "16487",
+            "roleid": "16486",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": false
+          },
+          {
+            "oid": "16404",
+            "member": "16388",
+            "roleid": "16487",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": true,
+            "inherit_option": true
+          },
+          {
+            "oid": "16405",
+            "member": "16547",
+            "roleid": "16487",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": false
+          },
+          {
+            "oid": "16416",
+            "member": "16388",
+            "roleid": "16662",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "16417",
+            "member": "16432",
+            "roleid": "16662",
+            "grantor": "10",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "23797",
+            "member": "16388",
+            "roleid": "23796",
+            "grantor": "10",
+            "set_option": false,
+            "admin_option": true,
+            "inherit_option": false
+          },
+          {
+            "oid": "23798",
+            "member": "16388",
+            "roleid": "23796",
+            "grantor": "16388",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": true
+          },
+          {
+            "oid": "23966",
+            "member": "16388",
+            "roleid": "23965",
+            "grantor": "10",
+            "set_option": false,
+            "admin_option": true,
+            "inherit_option": false
+          },
+          {
+            "oid": "23967",
+            "member": "16388",
+            "roleid": "23965",
+            "grantor": "16388",
+            "set_option": true,
+            "admin_option": false,
+            "inherit_option": false
+          },
+          {
+            "oid": "24241",
+            "member": "16388",
+            "roleid": "24240",
+            "grantor": "10",
+            "set_option": false,
+            "admin_option": true,
+            "inherit_option": false
+          }
+        ]
+      }
+    }
+  ],
+  "comparisons": {
+    "business": true,
+    "source": true,
+    "security": true
+  },
+  "mobileAcceptance": "NOT APPLICABLE — owner-scoped desktop-only administrative workflow"
+}

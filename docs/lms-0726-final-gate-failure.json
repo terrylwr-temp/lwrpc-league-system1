@@ -1,0 +1,10 @@
+{
+  "stage": "accepted baseline before LMS-0726 migration",
+  "requestMethod": "GET diagnostic equivalent of failing HEAD count",
+  "status": 500,
+  "response": {
+    "message": "Unsupported page filter"
+  },
+  "productionAccess": false,
+  "candidateApplied": false
+}

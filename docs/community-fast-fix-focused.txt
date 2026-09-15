@@ -1,0 +1,74 @@
+(node:5560) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-community-rule/lwrpc-admin/app/lib/askLwrAssistantConfig.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-community-rule\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ centralizes page-aware suggestions without fabricating LMS scope IDs (1.1646ms)
+✔ player response is deliberately limited to plain answer and trusted citations (3.264ms)
+✔ player-safe sources preserve the validated page-aware URL without rebuilding it (1.3339ms)
+✔ personal or live LMS questions do not enter document RAG without a future data tool (14.9691ms)
+✔ normalizes generic question framing so FTS keeps the substantive Balls term (9.2973ms)
+✔ player route passes realistic unrelated-page context to the shared Stage 3/4 pipeline without scope filtering (30.5705ms)
+✔ unsupported and insufficient paths do not manufacture an operational or aggressive-serve answer (2.7457ms)
+✔ guide browsing mirrors existing role entry points without changing RAG scope (0.2602ms)
+✔ the shared AI trigger covers every authenticated header shell without changing guide access (6.4337ms)
+✔ the standard authenticated route shell retains the shared AI trigger (5.2176ms)
+(node:12756) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-community-rule/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-community-rule\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ current Rule 3.5: Can I play on a team from another community (15.2297ms)
+✔ current Rule 3.5: Do I have to play in my own community (3.1013ms)
+✔ current Rule 3.5: Can I play for another community? (1.2295ms)
+✔ current Rule 3.5: Can I join a different community’s team? (1.8048ms)
+✔ current Rule 3.5: Do I have to play for my own community if there is room? (1.0184ms)
+✔ current Rule 3.5: Can I play for another community in the Weekday League? (3.8044ms)
+✔ current policy fails closed on incomplete, conflicting or wrong-league evidence (17.6519ms)
+✔ nearby personal records and division eligibility preserve their routes (2.7316ms)
+✔ generation preserves recommendation instead of imposing historical prohibition (7.6372ms)
+(node:28424) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-community-rule/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-community-rule\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 exact six capabilities and document routing controls (14.9062ms)
+✔ 0723 six live executions cannot invoke a model and retain metadata only (7.1641ms)
+✔ 0723 receipt subject reauthorization, expiry, cross-user/session and New Question (1.6936ms)
+✔ 0723 unsupported queries never touch data and audit/query errors do not fall through (0.4725ms)
+✔ 0723 independent document question supersedes a live reference and capture failure is fail-open (0.8693ms)
+✔ 0723 semantic subject matrix: recipient is not subject; competing subjects fail closed (9.6429ms)
+✔ 0723 stale, forged and cleared references cannot become self or override a new subject (2.4312ms)
+(node:24368) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-community-rule/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-community-rule\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0727 policy routing and exact evidence: Can I play on a team in a different community? (19.8616ms)
+✔ 0727 policy routing and exact evidence: Can I play in a different community? (3.6371ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community? (3.8396ms)
+✔ 0727 policy routing and exact evidence: Can I join another community's team? (3.2704ms)
+✔ 0727 policy routing and exact evidence: Can players from different communities be on the same team? (2.4606ms)
+✔ 0727 policy routing and exact evidence: Do I have to play for my own community? (2.2344ms)
+✔ 0727 policy routing and exact evidence: Are cross-community teams allowed? (4.5215ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a team in my division. Can I play for another community? (4.6261ms)
+✔ 0727 policy routing and exact evidence: My community has a team but it's full. Can I play for another community? (3.2257ms)
+✔ 0727 policy routing and exact evidence: My community has a team in my division and has room. Can I play for another community? (6.202ms)
+✔ 0727 policy routing and exact evidence: My community has a team in another division. Can I play elsewhere in my division? (6.5867ms)
+✔ 0727 policy routing and exact evidence: What are the rules for cross-community teams? (3.117ms)
+✔ 0727 policy routing and exact evidence: Can I play on another community's team? (4.146ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a DUPR7 team. Can I play for another community? (6.1622ms)
+✔ 0727 policy routing and exact evidence: Can players play on teams in other communities? (2.3031ms)
+✔ 0727 policy routing and exact evidence: Do you have to play for your own community? (1.0556ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community if mine has a team? (2.4494ms)
+✔ 0727 policy routing and exact evidence: What if my community's team is full? (1.2491ms)
+✔ 0727 policy routing and exact evidence: My community has a Saturday DUPR7 team. Can I play for another community in Weekday DUPR8? (2.6966ms)
+✔ 0727 separate live and division eligibility remain separate (3.9336ms)
+✔ 0727 missing conjunction, conflicting candidates, changed exact source fail closed (13.7171ms)
+✔ 0727 completion reads only active ready searchable document corpus (2.6197ms)
+✔ 0727 generated request contains only exact policy/question, with conditional fact instructions (6.0103ms)
+✔ 0727 league-scoped distractor never becomes governing evidence for another league (1.1694ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4901.0802

@@ -1,0 +1,13 @@
+{
+  "postgres": "17.11",
+  "cleanApply": true,
+  "replay": 2,
+  "teamRevocationSerialized": true,
+  "roleRevocationSerialized": true,
+  "hierarchyChangeSerialized": true,
+  "authorizedHistoricalScopePreserved": true,
+  "publicationRevocationSerialized": true,
+  "publicHelperDenied": true,
+  "expiredDenied": true,
+  "business": "Only explicitly seeded synthetic race mutations; no production connection."
+}

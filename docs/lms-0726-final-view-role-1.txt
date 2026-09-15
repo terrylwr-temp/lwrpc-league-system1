@@ -1,0 +1,41 @@
+- generic
+  - complementary "View As User status"
+    - strong
+      - StaticText "VIEWING AS: Synthetic Person1 · READ-ONLY"
+    - paragraph
+      - StaticText "player · Signed in as Synthetic Person7 (league manager)"
+    - button "Exit View As User" [ref=e1]
+  - alert
+  - main
+    - complementary "League Management navigation; hover to expand when collapsed"
+      - link "Lakewood Ranch Pickleball Club Lakewood Ranch Pickleball Club" [ref=e3]
+        - image "Lakewood Ranch Pickleball Club"
+        - strong
+          - StaticText "Lakewood Ranch Pickleball Club"
+      - navigation "League Management navigation" [ref=e4]
+        - button "Dashboard" [ref=e10]
+          - StaticText "Dashboard"
+      - StaticText "SELECTED SCOPE"
+      - strong
+        - StaticText "Active Seasons"
+      - StaticText "Admin operations"
+      - paragraph
+        - StaticText "© 2026 Lakewood Ranch Pickleball Club"
+    - sectionheader
+      - StaticText "ADMINISTRATION"
+      - heading "Welcome Synthetic" [level=1, ref=e5]
+        - StaticText "Welcome Synthetic"
+      - button "Ask LWR Pickleball Club AI" [ref=e6]
+      - link "Email League Management" [ref=e7]
+      - strong
+        - StaticText "Synthetic Person1"
+      - StaticText "Player"
+      - button "Open profile" [ref=e8]
+        - StaticText "SP"
+    - StaticText "ADMINISTRATION"
+    - heading "League Management" [level=2, ref=e9]
+    - paragraph
+      - StaticText "League operations and administration."
+    - heading "This page isn't currently available in View As mode." [level=1, ref=e2]
+  - contentinfo
+    - StaticText "© 2026 Lakewood Ranch Pickleball Club · Version LMS-0726"

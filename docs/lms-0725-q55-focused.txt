@@ -1,0 +1,148 @@
+(node:49768) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityGrouping.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ai_quality_capture {
+  event: 'capture_failed',
+  stage: 'observer',
+  assistant_version: 'LMS-0725',
+  time: '2026-09-08T18:37:37.384Z'
+}
+✔ 0716 Unicode expansion retained; byte boundary and boundary+1 (2.3727ms)
+✔ 0716 conservative versioned fingerprints preserve material distinctions (1.9393ms)
+✔ 0716 unvoted grounded metadata only; correlated receipt and unchanged result keys (27.9067ms)
+✔ 0716 automatic insufficient_evidence detail without vote (3.495ms)
+✔ 0716 automatic conflict detail without vote (0.4801ms)
+✔ 0716 candidate conflict hint alone creates no occurrence (0.3601ms)
+✔ 0716 protected no text, group or feedback (0.7256ms)
+✔ 0716 clarification no text, group or feedback (0.6581ms)
+✔ 0716 clarification ending in no source retains bounded resolver only (1.5847ms)
+✔ 0716 manager tests separate and ineligible (0.7466ms)
+✔ 0716 legacy receipt and four-click append-only transition unchanged (1.8192ms)
+✔ 0716 privacy redaction isolates group and excludes chunks/URLs/vectors (1.0908ms)
+✔ 0716 build/oversize/write/logger/timeout failures fail open (15.1588ms)
+✔ 0716 technical failure operational only and original error preserved (1.6766ms)
+✔ 0716 static migration and player payload boundaries (9.6468ms)
+(node:28736) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualitySnapshots.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ 0716 real PostgreSQL migration, transactions, constraints and browser denial (isolated PGlite)
+  ✔ effective operations and replay under production-like default grants (123.6022ms)
+  ✔ repeat capture one occurrence/group/case/audit; mismatched same ID rejected (52.4477ms)
+  ✔ forced digest collision retains exact full text, separate slots and groups (27.1845ms)
+  ✔ final conflict creates high-priority case without feedback (21.8524ms)
+  ✔ legacy feedback remains parentless, two transitions and one occurrence/case (20.5183ms)
+  ✔ Unicode expansion and exact 32KiB accepted, one-byte-over rolls back safely (18.9934ms)
+  ✔ RLS enabled, browser grants and RPC denied, audit update denied (52.5997ms)
+  ✔ nullable parent reference preserves occurrence on outcome deletion (6.2995ms)
+✔ 0716 real PostgreSQL migration, transactions, constraints and browser denial (isolated PGlite) (4563.7322ms)
+(node:60576) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 policy operation: When is my Season DUPR established? (42.3137ms)
+✔ 0725 policy operation: When is Season DUPR established? (6.2076ms)
+✔ 0725 policy operation: When is my Season DUPR set? (2.9538ms)
+✔ 0725 policy operation: When is my Season DUPR locked? (7.3007ms)
+✔ 0725 policy operation: When does my Season DUPR lock? (3.4075ms)
+✔ 0725 policy operation: Can my Season DUPR change during the season? (6.4161ms)
+✔ 0725 policy operation: Does my Season DUPR stay the same all season? (2.5323ms)
+✔ 0725 policy operation: How long does my Season DUPR remain in effect? (6.6778ms)
+✔ 0725 policy operation: Can my rating be reset during the season? (7.4374ms)
+✔ 0725 policy operation: How is my Season DUPR determined? (4.1899ms)
+✔ 0725 policy operation: When is my PrimeTime Season DUPR established? (5.0046ms)
+✔ 0725 policy operation: When is my season rating updated? (4.5453ms)
+✔ 0725 value contrast season (2.784ms)
+✔ 0725 value contrast primetime (1.6789ms)
+✔ 0725 value contrast unsupported (0.7839ms)
+✔ 0725 completion failure and dedup conflict remain empty with safe reasons (5.4404ms)
+✔ 0725 duration selects separately documented reset qualification (4.9628ms)
+✔ 0725 bounded telemetry reason build (1.4066ms)
+✔ 0725 bounded telemetry reason rpc (0.5215ms)
+✔ 0725 bounded telemetry reason timeout (13.6992ms)
+ai_policy_evidence {
+  event: 'policy_evidence_failed',
+  time: '2026-09-08T18:37:41.900Z',
+  correlationId: null,
+  origin: null,
+  intent: 'policy_date',
+  object: 'rating',
+  scope: [],
+  candidateCount: 109,
+  completionCount: 109,
+  candidates: [
+    {
+      chunkId: 'd51e615b-a4f2-460f-8a81-da9abfbd46af',
+      versionId: 'f0aad5ad-cf08-46c2-94fd-686ceb1271c0',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'c4ab8544-decb-4ea1-b856-2df4a2d196f1',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9f05921-2ee9-46fc-9b44-e5a861d7dd6f',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: '950a54ab-aa3b-4f43-9c51-88ce0ca803ae',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9e04de7-e031-4446-b14d-ad4484157cd2',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '6cab8beb-ccf1-4c30-b8ba-a032f3e582d6',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'af393e89-06b0-406c-99ab-eaffeb369c7c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'ea519f19-a038-4eb5-b391-3868da7efe2c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    }
+  ],
+  referencesTruncated: true,
+  selectedCount: 4,
+  applicability: 'SELECTED',
+  validation: 'SOURCE_REVALIDATION_FAILED',
+  finalCount: 0,
+  zeroStage: 'validation',
+  completion: 'complete',
+  completionStage: null,
+  completionReason: null,
+  completionMs: 0
+}
+✔ 0725 diagnostic snapshot fits existing PostgreSQL and replay remains idempotent (4184.8592ms)
+✔ 0725 no evidence or failed source validation never invokes model (68.5927ms)
+✔ 0725 private injected diagnostics are sanitized; View-As stays separate (1.5176ms)
+✔ 0725 View-As policy clears Live clarification without a lookup or provider call (193.4506ms)
+(node:63244) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/viewAsBoundary.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0724 omit-context and legacy/event-code replay boundary; normal tab unchanged (12.0484ms)
+✔ 0724 strict origins and server credential confidentiality (2.3914ms)
+✔ 0724 complete legacy handler guard registry and isolated renderer dependency boundary (48.8721ms)
+✔ 0724 normalized Next URL uses Host boundary but keeps rewrite internal (6.1572ms)
+✔ 0724 ordinary and Live citation/conversation receipts cannot cross contexts or ordinary actor session (2.6321ms)
+✔ 0724 Member Detail is the only entry; isolated target cannot nest (308.4288ms)
+ℹ tests 54
+ℹ suites 0
+ℹ pass 54
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5115.0565

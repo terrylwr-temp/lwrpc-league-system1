@@ -1,0 +1,49 @@
+{
+  "csvSha256": "345f2a01399fa28933893c3423187e001e6295cae9332785abcfd8adf4eb2a6b",
+  "rawDataRows": 879,
+  "allTenFieldsMatchIndependentCsvReader": true,
+  "identityEvidence": "Original raw CSV; accepted SYNTHETIC membership category fixture, not production membership.",
+  "counts": {
+    "total": 879,
+    "matched": 695,
+    "notFound": 178,
+    "missingId": 0,
+    "ambiguous": 6,
+    "ready": 659,
+    "noChange": 0,
+    "skipped": 220,
+    "invalid": 0,
+    "locked": 0
+  },
+  "activeUnique": 659,
+  "inactive": 36,
+  "preservedSyntheticLockedRows": 695,
+  "protectedStatusExplanation": "locked counter is 0; it is not a count of preserved fields. Synthetic season values on 695 matched rows are preserved, including 659 updates.",
+  "ageAllRows": {
+    "over65": 295,
+    "over50": 394,
+    "missing": 190
+  },
+  "ageSyntheticReadyRows": {
+    "over65": 234,
+    "over50": 310,
+    "missing": 115
+  },
+  "sourceFields": [
+    "doubles",
+    "rf",
+    "age",
+    "ageSource",
+    "ageMissing",
+    "rfMissing",
+    "doublesMissing"
+  ],
+  "snapshotUnchanged": true,
+  "fixtureRpcCalls": [
+    "season_ratings_source_snapshot"
+  ],
+  "commitCalls": 0,
+  "productionAccess": false,
+  "receiptCreated": true,
+  "receiptPersisted": false
+}

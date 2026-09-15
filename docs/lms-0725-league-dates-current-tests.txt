@@ -1,0 +1,43 @@
+(node:30484) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 date Q64: when does the women weekday dupr league start (28.2054ms)
+✔ 0725 date Q65: What is the starting date for the women's weekday dupr league (5.1414ms)
+✔ 0725 date Q66: When does the women's weekday league start? (2.4282ms)
+✔ 0725 date Q67: When is the first women's weekday match? (3.173ms)
+✔ 0725 date Q68: When does women's weekday begin? (1.4799ms)
+✔ 0725 date Q69: What day does the women's league start? (1.7796ms)
+✔ 0725 date Q70: When does the men's weekday league start? (1.7608ms)
+✔ 0725 date Q71: When does the Weekday league start? (1.4836ms)
+✔ 0725 date Q72: When does Weekday 9.1 start? (1.6277ms)
+✔ 0725 date Q73: When does PrimeTime league start? (2.148ms)
+✔ 0725 date Q74: When does the Saturday season begin? (1.4047ms)
+✔ 0725 date Q75: When does Saturday DUPR7 start? (0.9956ms)
+✔ 0725 date Q76: When does Saturday DUPR6 start? (0.7703ms)
+✔ 0725 date Q77: When does Saturday DUPR8 begin? (1.0993ms)
+✔ 0725 date Q78: When does registration open for Weekday? (0.7832ms)
+✔ 0725 date Q79: When does registration open for Saturday? (0.8814ms)
+✔ 0725 date Q80: When does registration close for PrimeTime? (0.8684ms)
+✔ 0725 date Q81: When is the Weekday championship? (0.4566ms)
+✔ 0725 date Q82: When are the Saturday playoffs? (1.1456ms)
+✔ 0725 date Q83: When is the PrimeTime championship? (0.4529ms)
+✔ 0725 date Q84: When does the Weekday season end? (0.4843ms)
+✔ 0725 date Q85: When does the Saturday season end? (0.4857ms)
+✔ 0725 date Q86: When does the PrimeTime season end? (0.4881ms)
+✔ 0725 date Q87: When does the league start? (0.6473ms)
+✔ 0725 date Q88: When is the first Saturday DUPR7 match? (1.2652ms)
+✔ 0725 date Q89: When does the Women's Weekday league start in 2027? (1.5506ms)
+✔ 0725 date metadata is revalidated, never accepted from caller; altered text or scope fails (1.1172ms)
+✔ 0725 ambiguous source period and unordered dates cannot manufacture a calendar year (0.1124ms)
+✔ 0725 signed league clarification preserves gender/date intent and rejects another user context (3.5821ms)
+✔ 0725 compact welcome advertises four implemented read intents and retains all existing benchmark cases (3.9444ms)
+✔ 0725 current Rules table of contents is not an operative Rally mechanics section (1.8703ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 301.412

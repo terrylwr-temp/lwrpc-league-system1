@@ -1,5 +1,5 @@
 import "./globals.css";
-import ViewAsPage from "./view-as/page";
+import ViewAsSharedPages from "./components/ViewAsSharedPages";
 import BrowserTitle from "./components/BrowserTitle";
 import { AppDialogProvider } from "./components/AppDialogProvider";
 import InactivitySessionTimeout from "./components/InactivitySessionTimeout";
@@ -24,11 +24,12 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      data-lms-view-as={isolated ? "true" : undefined}
       className="h-full antialiased"
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        {isolated ? <ViewAsPage /> : <><BrowserTitle />
+        {isolated ? <AppDialogProvider><ViewAsSharedPages>{children}</ViewAsSharedPages></AppDialogProvider> : <><BrowserTitle />
         <LmsPwaRegister />
         <AppDialogProvider>{children}</AppDialogProvider>
         <InactivitySessionTimeout />

@@ -1,0 +1,23 @@
+(node:29164) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/seasonRatingsClean.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Upload: selection/preview/reselect/cancel retain file; summary action precedes table; success resets (11.7433ms)
+✔ Upload: zero ready rows explain and cannot import; a new file invalidates the old preview (2.5085ms)
+✔ Clean: Rules default, summary action, full combined confirmation, cancel retains preview, cutoff re-previews (3.5194ms)
+✔ Clean: confirmation pending disables cutoff and generation change rejects outdated confirmation (3.3126ms)
+✔ Upload preview labels current CSV fields and age path, including excluded identities (2.3931ms)
+✔ upload success uses committed totals, clears preview/receipt, preserves season and refreshes once (3.2317ms)
+✔ upload failed commit retains preview/input and never refreshes or claims success (2.6305ms)
+✔ clean success uses committed totals, clears preview/receipt, preserves season and refreshes once (2.127ms)
+✔ clean failed commit retains preview/input and never refreshes or claims success (2.9294ms)
+✔ refresh failure retains committed success, clears consumed preview and never retries commit (2.0247ms)
+✔ actual page completion handler re-fetches selected/all ratings and advances only grid input keys (1.99ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1435.6326

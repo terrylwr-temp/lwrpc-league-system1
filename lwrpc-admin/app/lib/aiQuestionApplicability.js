@@ -24,29 +24,22 @@ export function leagueCompatible(candidate, question) {
 }
 
 export function evidencePassages(candidate) {
-  const blocks = String(candidate?.content || '').replace(/\r/g, '').split(/\n\s*\n|\n(?=\s*(?:[•]\s*|o\s+|\d+(?:\.\d+)*\.\s))/).map(text => text.trim()).filter(Boolean);
-  const units = [];
-  const leagueHeading = blocks[0] === candidate?.heading && /\bleague\s+key\s+dates\b/i.test(blocks[0]) && questionLeague(blocks[0]).length === 1 ? blocks[0] : '';
-  for (let i = 0; i < blocks.length; i++) {
-    const parent = blocks[i];
-    if (leagueHeading && /^•\s/.test(parent) && /\bseason\s+dupr\s+ratings?\s+recorded\b/i.test(parent)) {
-      units.push(`${leagueHeading}\n${parent}`);
-      continue;
+  const content=String(candidate?.content||'');
+  const boundary=/\r?\n\s*\r?\n|\r?\n(?=\s*(?:[•]\s*|o\s+|\d+(?:\.\d+)*\.\s))/g;
+  const cuts=[0];for(const m of content.matchAll(boundary))cuts.push(m.index+m[0].length);
+  cuts.push(content.length);
+  const blocks=cuts.slice(0,-1).map((start,i)=>({start,end:cuts[i+1],text:content.slice(start,cuts[i+1]).trim()})).filter(x=>x.text);
+  const units=[];
+  for(let i=0;i<blocks.length;i++){
+    const first=blocks[i],number=first.text.match(/^(\d+(?:\.\d+)*)\.\s/)?.[1];
+    if(number&&/:\s*$/.test(first.text)){
+      while(i+1<blocks.length&&blocks[i+1].text.match(/^(\d+(?:\.\d+)*)\.\s/)?.[1]?.startsWith(number+'.'))i++;
+    }else if(/^o\s/.test(first.text)&&/:\s*$/.test(first.text)&&/\b(?:shall|must|will|may|provide|require)\b/i.test(first.text)){
+      if(i+1<blocks.length&&/^\s/.test(blocks[i+1].text))i++;
     }
-    const number = parent.match(/^(\d+(?:\.\d+)*)\.\s/)?.[1];
-    if (number && /:\s*$/.test(parent)) {
-      const children = [];
-      while (i + 1 < blocks.length && blocks[i + 1].match(/^(\d+(?:\.\d+)*)\.\s/)?.[1]?.startsWith(`${number}.`)) children.push(blocks[++i]);
-      units.push([parent, ...children].join('\n'));
-    } else if (/^o\s/.test(parent) && /:\s*$/.test(parent) && /\b(?:shall|must|will|may|provide|require)\b/i.test(parent)) {
-      // Keep only each relevant child with its own adjacent governing parent.
-      // The other bullets remain separate units and must qualify independently.
-      let children = 0;
-      while (i + 1 < blocks.length && /^\s/.test(blocks[i + 1])) {
-        units.push(`${parent}\n${blocks[++i]}`); children++;
-      }
-      if (!children) units.push(parent);
-    } else units.push(parent);
+    // Preserve the entire selected contiguous family, including original separators.
+    // Never reconstruct a heading with a nonadjacent child or date bullet.
+    units.push(content.slice(first.start,blocks[i].end).trim());
   }
   return units;
 }
@@ -77,15 +70,10 @@ export function isSeasonRatingDateQuestion(question) {
 
 export function seasonRatingDatePassages(candidate, question) {
   if (!isSeasonRatingDateQuestion(question) || !leagueCompatible(candidate, question) || candidate?.documentType === 'usap_rulebook') return [];
-  return evidencePassages(candidate).filter(p => /\bleague\s+key\s+dates\s*\n•\s*[^\n]+\bseason\s+dupr\s+ratings?\s+recorded\b/i.test(p));
+  return /league key dates/i.test(candidate.heading||'') ? evidencePassages(candidate).filter(p => /season\s+dupr\s+ratings?\s+recorded/i.test(p)) : [];
 }
 
-export function isCommunityParticipationQuestion(question) {
-  const q = String(question || '').toLowerCase();
-  return /\bcommunit(?:y|ies)\b/.test(q)
-    && /\b(?:join(?:ing)?|play|form|eligibility\s+rules)\b/.test(q)
-    && (/\bteams?\b/.test(q) || /\bplay\s+for\s+(?:another|a\s+different|the)\s+community\b/.test(q));
-}
+export {isCommunityParticipationQuestion} from './aiCommunityIntent.js';
 
 export function communityParticipationPassages(candidate) {
   if (candidate?.documentType !== 'league_rules') return [];
@@ -171,6 +159,7 @@ export function genericApplicablePassages(candidate, question) {
 
 export function missingPlayerObject(question) {
   const value = operationWords(question);
+  if (/\bwhen\b/.test(value) && /\b(?:can|may)\b/.test(value)) return false;
   return /\b(?:add|enter)\s+(?:new\s+)?players?\b/.test(value)
     && /\b(?:when|how|start|begin)\b/.test(value)
     && !/\b(?:rosters?|teams?|league|season|lineups?|pairings?|match|scores?|tournament|event|database|directory|registration)\b/.test(value);

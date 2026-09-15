@@ -1,6 +1,10 @@
+import {registrationStateQuestion} from './aiRegistrationReleaseIntent.js';
+import {requestsStoredAge} from './aiAgeReferencePolicy.js';
+import {questionIntent,isDocumentIntent} from './aiRequestIntent.js';
 import {PUBLIC_ORGANIZATIONAL_EMAILS} from './publicOrganizationalContacts.js';
+import {teamRecordIntent,teamRecordMessage} from './liveTeamRecord.js';
 // No retrieval, provider, client role, or database dependency belongs in this module.
-export const LIVE_CAPABILITIES = Object.freeze(['SELF_RATING','PLAYER_RATING','PLAYER_CONTACT','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH']);
+export const LIVE_CAPABILITIES = Object.freeze(['SELF_RATING','PLAYER_RATING','PLAYER_CONTACT','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH','TEAM_RECORD']);
 const normalize = value => String(value || '').normalize('NFKC').replace(/[’‘]/g,"'").replace(/\s+/g,' ').trim();
 export function liveIntent(question, continuation = null) {
   const text = normalize(question), q = text.toLowerCase();
@@ -10,6 +14,11 @@ export function liveIntent(question, continuation = null) {
   // Public procedural guidance and policy stay on the accepted document path.
   if (/\b(reset|forgot|change)\b.*\bpassword\b|\b(how do i|how can i) (sign in|log in|update my roster|enter match scores)\b/.test(q) && !/\b(token|someone|their)\b|@/.test(q)) return null;
   if (/\b(all|every|export|list of)\b.*\b(emails?|members?|ratings?)\b|@|\b(dob|date of birth|password|tokens?|private notes|payments?|credit card|phone number|auth id)\b/.test(privacyText)) return result('UNSUPPORTED');
+  if(requestsStoredAge(q))return result('UNSUPPORTED');
+  if(registrationStateQuestion(q))return result('UNSUPPORTED');
+  const competition=teamRecordIntent(text);if(competition)return competition;
+  const semantic=questionIntent(text);
+  if(isDocumentIntent(semantic))return null;
   // Strip only the request wrapper, not the subject of the requested field.
   const core=text.replace(/^(?:please\s+)?(?:(?:can|could|would) you\s+)?(?:tell|show)\s+(?:me\s+)?/i,'');
   const possessive=core.match(/^(?:(?:what|when)(?:'s| is| was)\s+)?(.+?)'s\s+(?:(?:season|primetime|prime time|current|official|next|upcoming|team)\s+)*(?:dupr|rating|email|team|division|roster|match)\b/i);
@@ -27,12 +36,12 @@ export function liveIntent(question, continuation = null) {
   if(ambiguous)return result('UNSUPPORTED',{subjectKind});
   const self=subjectKind==='SELF';
   const personal = self || Boolean(name) || referential;
-  if (personal && /\b(and|also)\b.*\b(rule|allowed|eligible|maximum|limit|policy|email|rating|dupr)\b/.test(q))return result('UNSUPPORTED');
+  if (personal && /\b(and|also)\b.*\b(rule|allowed|eligible|maximum|limit|policy|email|rating|dupr|age|cutoff)\b/.test(q))return result('UNSUPPORTED');
   if (personal && /\b(last season|previous|historical|eligible|eligibility)\b|\bcan .+ (play|join)\b/.test(q)) return result('UNSUPPORTED');
   if (continuation && /^(?:option )?[1-5]$/.test(q)) return {...continuation.query,continueContext:true,choice:Number(q.replace('option ',''))};
   if (continuation && /^(?:next|more)(?: players| page)?$/.test(q) && (continuation.moreChoices || continuation.intent==='TEAM_ROSTER')) return {...continuation.query,continueContext:true,...(continuation.moreChoices?{nextChoices:true}:{nextPage:true})};
-  if (continuation && /^(?:season dupr|primetime(?: season)? dupr|prime time(?: season)? dupr|current dupr)[?.!]*$/.test(q)) return {...continuation.query,continueContext:true,rating: /current/.test(q)?'unsupported':/prime/.test(q)?'primetime':'season'};
-  const teamMatch=text.match(/(?:roster|next match)\s+(?:for|of)\s+(.+?)[?.!]*$/i)||text.match(/^show (?:me )?(?:the )?(.+?) roster[?.!]*$/i);
+  if (continuation && /^(?:season dupr|primetime(?: season)?(?: dupr)?|prime time(?: season)?(?: dupr)?|current dupr)[?.!]*$/.test(q)) return {...continuation.query,continueContext:true,rating: /current/.test(q)?'unsupported':/prime/.test(q)?'primetime':'season'};
+  const teamMatch=text.match(/^who is on (?:the )?(.+?) roster[?.!]*$/i)||text.match(/(?:roster|next match)\s+(?:for|of)\s+(.+?)[?.!]*$/i)||text.match(/^show (?:me )?(?:the )?(.+?) roster[?.!]*$/i);
   const teamName=!name&&teamMatch&&!/^(my|our|the team|team)$/i.test(teamMatch[1])?normalize(teamMatch[1]).replace(/[?.!]+$/,''):null;
   const subject = {subjectKind,...(name?{name}:subjectKind==='FOLLOWUP_REFERENT'?{useSubject:true}:{} )};
   if (personal && /\b(dupr|rating)\b/.test(q)) {
@@ -41,7 +50,7 @@ export function liveIntent(question, continuation = null) {
   }
   if (personal && /\bemail\b/.test(q)) return result('PLAYER_CONTACT',{...subject,...(self?{self:true}:{})});
   if (/\b(next|upcoming)\b/.test(q) && /\b(match|playing|opponent|game)\b/.test(q)) return result('NEXT_MATCH',{...subject,...(teamName?{teamName}:{})});
-  if ((personal || /\bshow\b/.test(q)) && /\broster\b/.test(q) && !/\b(how|rule|maximum|limit|add|update)\b/.test(q)) return result('TEAM_ROSTER',{...subject,...(teamName?{teamName}:{})});
+  if ((personal || teamName || /\bshow\b/.test(q)) && /\broster\b/.test(q) && !/\b(rule|maximum|limit|add|update)\b/.test(q) && (!/\bhow\b/.test(q)||/\bhow many\b/.test(q))) return result('TEAM_ROSTER',{...subject,...(teamName?{teamName}:{}),...(/\bhow many\b/.test(q)?{projection:'count'}:{})});
   if (personal && /\b(team|division)\b/.test(q) && /\b(on|in|which|what|name)\b/.test(q) && !/\b(rule|allowed|how many)\b/.test(q)) return result('SELF_TEAM',{...subject,...(self?{self:true}:{})});
   if (/\b(show|list|what|who|when)\b.*\b(my|our|their|his|her)\b.*\b(ratings?|emails?|schedule|lineups?|standings|account status)\b/.test(q))return result('UNSUPPORTED');
   // An unresolved personal request must never become a document/model lookup.
@@ -49,8 +58,16 @@ export function liveIntent(question, continuation = null) {
   return null;
 }
 
-export function liveMessage(data) {
-  const messages={denied:"I can't access that player information for your account.",not_found:"I couldn't find that player within the players you're authorized to access.",rate_limited:'Please wait before making another live lookup.',unsupported:'That live lookup is not supported yet. No personal data was retrieved.',no_team:'No current authorized team is available for this lookup.',no_season:'No active season is available for this lookup.',missing:'That requested value is not recorded in the authorized LMS data.',no_match:'No upcoming published match is available for this team.',technical_error:"I couldn't complete the live lookup. Please try again.",ambiguous:'Please choose an authorized context by replying with its number:',rating_clarification:'Do you mean Season DUPR or PrimeTime Season DUPR? Current official DUPR is not available through this live lookup.'};
+export function liveMessage(data, query = {}) {
+  const competition=teamRecordMessage(data,query);if(competition)return competition;
+  const messages={denied:"I can't access that player information for your account.",not_found:"I couldn't find that player within the players you're authorized to access.",rate_limited:'Please wait before making another live lookup.',unsupported:'That live lookup is not supported yet. No personal data was retrieved.',no_team:'No current authorized team is available for this lookup.',no_season:'No active season is available for this lookup.',missing:'That requested value is not recorded in the authorized LMS data.',no_match:'No upcoming published match is available for this team.',technical_error:"I couldn't complete the live lookup. Please try again.",ambiguous:'Please choose the season, player or team you mean:',rating_clarification:'Do you mean Season DUPR or PrimeTime Season DUPR? Current official DUPR is not available through this live lookup.'};
+  if(data.status==='ambiguous'&&data.choiceKind){
+    const limitation=['SELF_RATING','PLAYER_RATING'].includes(data.intent)&&query.rating==='clarify' ? "Current official DUPR isn't available through this Live LMS lookup. " : '';
+    return `${limitation}Which ${data.choiceKind} do you mean?`;
+  }
+  if(data.status==='missing'&&['SELF_RATING','PLAYER_RATING'].includes(data.intent)&&data.season)return `${data.self?"You don't":`${data.label} doesn't`} currently have a ${data.rating==='primetime'?'PrimeTime Season DUPR':'Season DUPR'} recorded for ${data.season}.`;
+  if(data.status==='missing'&&data.intent==='PLAYER_CONTACT')return 'No email address is recorded for this player.';
+  if(data.status==='success'&&data.intent==='TEAM_ROSTER'&&data.projection==='count')return Number.isInteger(data.count)?`${data.team} has ${data.count} players on its current roster.`:"I couldn't determine the complete roster count. Please try again.";
   if(data.status!=='success') return messages[data.status] || messages.technical_error;
   if(data.intent==='SELF_RATING'||data.intent==='PLAYER_RATING') return `${data.label}'s ${data.rating==='primetime'?'PrimeTime Season DUPR':'Season DUPR'} for ${data.season} is ${data.value}.`;
   if(data.intent==='PLAYER_CONTACT') return `${data.label}'s email address is ${data.value}.`;

@@ -1,0 +1,15 @@
+{
+  "replay": true,
+  "transactionRollback": true,
+  "operationalRollback": true,
+  "browserDenied": true,
+  "playerDenied": true,
+  "targetsIndependent": true,
+  "privateProjection": true,
+  "orderInvariant": true,
+  "staleFactsDenied": true,
+  "auditRequired": true,
+  "businessDataUnchanged": true,
+  "postgres": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+  "loopbackOnly": true
+}

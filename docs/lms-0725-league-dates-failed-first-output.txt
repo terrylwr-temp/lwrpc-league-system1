@@ -1,0 +1,3 @@
+{"id":"Q64","status":"generated","calls":1,"answer":"The Women Weekday DUPR League season starts Oct. 14, 2026, for the 2026 Fall League season.","materialPass":true}
+{"id":"Q65","status":"generated","calls":1,"answer":"The women’s Weekday DUPR League starts on Oct. 14, 2026, for the 2026 Fall League season.","materialPass":true}
+{"calls":2,"statuses":{"generated":2}}

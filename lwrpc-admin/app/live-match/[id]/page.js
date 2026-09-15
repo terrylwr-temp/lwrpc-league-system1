@@ -1,4 +1,5 @@
 ﻿"use client";
+import {isViewAsMode} from "../../lib/viewAsPageState.js";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -281,6 +282,7 @@ export default function LiveMatchPage() {
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button
+              disabled={isViewAsMode()}
               onClick={() => router.push(`/score-entry/${id}`)}
               className="rounded-2xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-700"
             >

@@ -1,0 +1,173 @@
+{
+  "method": "Four affected generations using verified official-document fixtures and real source revalidation against isolated database mock. No production, embedding, telemetry writes or Live data.",
+  "results": [
+    {
+      "question": "I'm trying to sign up our team for the 2026 Fall PrimeTime DUPR league. Will you send me step-by-step instructions?",
+      "passed": true,
+      "answer": "Yes. Follow these steps:\n\n1. Wait for league registration to open; the Club will notify previous Captains and other Club members when registration is open.\n2. Go to the Club’s Leagues page: https://lwrpickleballclub.com/leagues and select the appropriate league.\n3. On the league registration page, click “Register My Team!”\n4. Sign into your regular Club membership account; you must be signed in before registering a team.\n5. Select Quantity “1” to register one team. If registering multiple teams, complete the process separately for each team.\n6. Complete all required team setup questions, including items such as Team Name, Captain, and other team details.\n7. After completing the form, click “Register My Team!” again.\n8. Enter payment information, or select your current payment method on file if available.\n9. After registration, watch for a confirmation email with team registration details, next steps, and upcoming dates/deadlines.\n10. League Management will activate your team and assign the Captain and/or Co-Captain(s) designated during registration.\n11. Wait for League Management to notify you that team rosters for your league have been unlocked before adding or managing players.",
+      "sources": [
+        {
+          "title": "LWR Pickleball Club DUPR Captains Guide",
+          "page": 4,
+          "chunkId": "ba65d436-5d3d-431a-b320-1dd78e472c2d"
+        },
+        {
+          "title": "LWR Pickleball Club DUPR Captains Guide",
+          "page": 5,
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9"
+        }
+      ],
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 3183,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 277,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 3460
+      },
+      "metrics": {
+        "generationMs": 4486,
+        "sourceResolutionMs": 4,
+        "totalMs": 4517,
+        "inputTokens": 3183,
+        "outputTokens": 277,
+        "totalTokens": 3460,
+        "estimatedGenerationCostUsd": 0.024225
+      }
+    },
+    {
+      "question": "When will you send out the schedules?",
+      "passed": true,
+      "answer": "For the 2026 Fall League, schedules are listed as completed and sent on Wednesday, Oct. 7, 2026, for the Weekday DUPR, Saturday DUPR, and PrimeTime DUPR leagues.",
+      "sources": [
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae"
+        }
+      ],
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 2265,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 63,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 2328
+      },
+      "metrics": {
+        "generationMs": 2209,
+        "sourceResolutionMs": 1,
+        "totalMs": 2214,
+        "inputTokens": 2265,
+        "outputTokens": 63,
+        "totalTokens": 2328,
+        "estimatedGenerationCostUsd": 0.013215
+      }
+    },
+    {
+      "question": "When will the 2026 Fall PrimeTime schedules be released?",
+      "passed": true,
+      "answer": "The 2026 Fall PrimeTime DUPR League schedules are listed to be completed and sent on Wednesday, Oct. 7, 2026.",
+      "sources": [
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae"
+        }
+      ],
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 1559,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 48,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1607
+      },
+      "metrics": {
+        "generationMs": 2223,
+        "sourceResolutionMs": 0,
+        "totalMs": 2225,
+        "inputTokens": 1559,
+        "outputTokens": 48,
+        "totalTokens": 1607,
+        "estimatedGenerationCostUsd": 0.009235
+      }
+    },
+    {
+      "question": "How do I register a Saturday team for the 26/27 Saturday Season?",
+      "passed": true,
+      "answer": "1. Wait for registration to open; the Club will notify previous Captains and other Club members.\n2. Go to the Club’s Leagues page and select the appropriate Saturday 26/27 league.\n3. On that league registration page, click “Register My Team!”\n4. Sign into your regular Club membership account; you must be signed in before registering a team.\n5. Select Quantity “1” to register one team. Register multiple teams separately.\n6. Complete all required team setup questions.\n7. Click “Register My Team!” again and enter payment information or use an available payment method on file.\n8. Watch for the confirmation email with team registration details, next steps, dates, and deadlines.\n9. League Management will activate the team and assign the Captain/Co-Captain(s) designated during registration.\n10. Wait for League Management to notify you that rosters are unlocked before adding or managing players.",
+      "sources": [
+        {
+          "title": "LWR Pickleball Club DUPR Captains Guide",
+          "page": 4,
+          "chunkId": "ba65d436-5d3d-431a-b320-1dd78e472c2d"
+        },
+        {
+          "title": "LWR Pickleball Club DUPR Captains Guide",
+          "page": 5,
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9"
+        }
+      ],
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 3171,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 214,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 3385
+      },
+      "metrics": {
+        "generationMs": 3730,
+        "sourceResolutionMs": 1,
+        "totalMs": 3735,
+        "inputTokens": 3171,
+        "outputTokens": 214,
+        "totalTokens": 3385,
+        "estimatedGenerationCostUsd": 0.022275
+      }
+    }
+  ]
+}

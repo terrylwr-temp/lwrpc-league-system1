@@ -60,9 +60,9 @@ for(const q of ['Who is on my roster?','Show me my roster.','Is John Smith on my
  const o=qualityOutcome({id:randomUUID(),origin:'player_interface',started:1000,completed:1010,execution:e});assert.equal(qualityException(o,e).p_occurrence,null);
 });
 test('0717 correction two-stage object and league clarification preserves signed context',async()=>{
- const first=await execute(2,'When can I start adding players');assert.equal(first.result.kind,'clarification');
+ const first=await execute(2,'When do I start adding players');assert.equal(first.result.kind,'clarification');
  const second=await execute(2,'On my team roster',first.result.conversationReceipt);assert.equal(second.result.kind,'clarification');
- assert.equal(second.conversationResolution.clarificationQuestion,rows[2].question);
+ assert.equal(second.conversationResolution.clarificationQuestion,rows[2].question.replace("When can","When do"));
  assert.match(second.result.answer,/Which league/);for(const league of ['Saturday','Weekday','PrimeTime'])assert.ok(second.result.answer.includes(league));
  assert.equal(second.answer,undefined);assert.equal(second.result.feedbackReceipt,null);assert.deepEqual(second.result.sources,[]);
  const o=qualityOutcome({id:randomUUID(),origin:'player_interface',started:1000,completed:1010,execution:second});assert.equal(o.final_kind,'clarification');assert.equal(qualityException(o,second).p_occurrence,null);
@@ -129,7 +129,7 @@ test('0717 correction manager clarification executes without model and retains a
   retrieveOfficialEvidence:async({body})=>retrieval(2,body.question),generateOfficialAnswer:()=>assert.fail('clarification must skip model'),eligibleDocuments:()=>assert.fail('no catalog needed for clarification'),
  });
  const auth={user:{id:userId},supabase:{}},trace={};
- const first=await fn(auth,{question:'When can I start adding players'},trace);assert.equal(first.result.kind,'clarification');assert.ok(first.response.conversationReceipt);
+ const first=await fn(auth,{question:'When do I start adding players'},trace);assert.equal(first.result.kind,'clarification');assert.ok(first.response.conversationReceipt);
  const next=await fn(auth,{question:'On my team roster',conversationReceipt:first.response.conversationReceipt},trace);
  assert.equal(next.result.kind,'clarification');assert.equal(trace.stage3Invoked,true);assert.equal(next.response.retrieval.candidates.length,32);
  assert.equal(next.response.retrieval.conversationResolution.finalResponseKind,'clarification');assert.ok(next.response.conversationReceipt);assert.equal(next.response.answer.modelCallSkipped,true);

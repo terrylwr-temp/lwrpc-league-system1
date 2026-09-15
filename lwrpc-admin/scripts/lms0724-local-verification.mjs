@@ -8,6 +8,10 @@ const config=path.join(dir,'next.config.ts');fs.writeFileSync(config,fs.readFile
 if(!fs.existsSync(path.join(dir,'node_modules')))fs.symlinkSync(path.join(root,'node_modules'),path.join(dir,'node_modules'),'junction');
 const token=[Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'),Buffer.from(JSON.stringify({sub:id(107),session_id:id(207),exp:Math.floor(Date.now()/1000)+3600,role:'authenticated'})).toString('base64url'),'synthetic-signature'].join('.');
 const db=await fixture();
+if(process.argv.includes('--lock-correction')){
+ for(const table of ['members','user_roles','teams','team_members','seasons','leagues','divisions','member_season_ratings','locations','team_standings','matches','system_settings'])await db.exec('alter table public.'+table+' enable row level security');
+ await db.exec(fs.readFileSync(path.join(root,'supabase/migrations/20260908011413_lms0724_view_as_authorization_locks.sql'),'utf8'));
+}
 const server=http.createServer(async(req,res)=>{res.setHeader('Access-Control-Allow-Origin','http://localhost:3074');res.setHeader('Access-Control-Allow-Headers','authorization,apikey,content-type,x-client-info,x-supabase-api-version');res.setHeader('Content-Type','application/json');if(req.method==='OPTIONS'){res.end('{}');return;}
  try{
   if(req.url==='/auth/v1/user'){if(req.headers.authorization!=='Bearer '+token){res.statusCode=401;res.end(JSON.stringify({message:'invalid synthetic session'}));return;}res.end(JSON.stringify({id:id(107),aud:'authenticated',role:'authenticated',email:'synthetic@example.invalid'}));return;}

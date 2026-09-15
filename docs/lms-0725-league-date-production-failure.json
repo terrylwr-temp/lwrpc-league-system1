@@ -1,0 +1,77 @@
+[
+  {
+    "answer_id": "4d889612-bd9b-4439-b4cb-82d55fa084db",
+    "original_question": "What is the starting date for the women\u0027s weekday dupr league",
+    "effective_question": "What is the starting date for the women\u0027s weekday dupr league",
+    "occurrence_kind": "insufficient_evidence",
+    "output_text": "I couldn\u0027t find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.",
+    "selection_snapshot": {
+      "candidates": [
+        {
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "combinedScore": 0.7569,
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+        },
+        {
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "combinedScore": 0.7159,
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+        },
+        {
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "combinedScore": 0.7151,
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+        },
+        {
+          "chunkId": "846a9a9a-89c3-4769-99fb-c931a9ee2feb",
+          "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+          "combinedScore": 0.6695,
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+        },
+        {
+          "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "combinedScore": 0.6409,
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+        },
+        {
+          "chunkId": "09f36807-0451-4500-bace-d25901bfd6e1",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "combinedScore": 0.5048,
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+        },
+        {
+          "chunkId": "2c1c337c-c480-45da-86bc-6f0be9a3efbc",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "combinedScore": 0.4818,
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+        },
+        {
+          "chunkId": "7a0cb14f-4896-487e-8ba7-cef2f6a60109",
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "combinedScore": 0.4801,
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+        }
+      ],
+      "selectedEvidence": []
+    },
+    "source_snapshot": [],
+    "reason_code": "stage4_no_applicable_evidence",
+    "total_ms": 1362,
+    "model_call_skipped": true,
+    "diagnostic_snapshot": {
+      "candidateCount": 32,
+      "embeddingModel": "text-embedding-3-small",
+      "retrievalLimit": 8,
+      "stage3Sufficient": true,
+      "evidenceThreshold": 0.35,
+      "authorityReviewLimit": 12,
+      "configurationVersion": "LMS-0725",
+      "equipmentProbeInvoked": false,
+      "equipmentProbeRetrieved": false
+    }
+  }
+]

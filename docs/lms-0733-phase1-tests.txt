@@ -1,0 +1,18 @@
+(node:29516) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/seasonRatingsInitialization.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Phase 1 boundaries, missing/invalid/conflicting input, independent protected value (1.2132ms)
+✔ atomic success, source immutable, PrimeTime untouched, provenance retained and idempotency (2208.1663ms)
+✔ unexpected failure rolls back earlier writes, records failed audit, no provenance; stale inputs fail (1601.2167ms)
+✔ manual established rating and changed source/rules block stale preview (4674.2665ms)
+✔ server receipt tampering, origin actor/session binding and write-disabled gate (3.4186ms)
+✔ private grants, unauthorized actor denied and snapshot works read-only (1478.1999ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11304.4011

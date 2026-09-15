@@ -1,0 +1,117 @@
+{
+  "file": "C:\\Users\\t_ade\\Downloads\\members-list-lakewoodranchpickleballclub-091026124814.csv",
+  "sha256": "345f2a01399fa28933893c3423187e001e6295cae9332785abcfd8adf4eb2a6b",
+  "rows": 879,
+  "headers": [
+    "duprId",
+    "name",
+    "email",
+    "phone",
+    "singles",
+    "singlesReliability",
+    "doubles",
+    "doublesReliability",
+    "status",
+    "metrics",
+    ""
+  ],
+  "counts": {
+    "rf_outside_0_100": 0,
+    "rf_below_29": 192,
+    "rf_equal_29": 0,
+    "rf_above_29": 687,
+    "doubles_NR": 73,
+    "doubles_blank": 0,
+    "doubles_malformed": 0,
+    "metrics_blank": 0,
+    "over_50": 394,
+    "no_age": 190,
+    "over_65": 295
+  },
+  "rf_range": [
+    0.0,
+    100.0
+  ],
+  "doubles_range": [
+    2.0,
+    5.105
+  ],
+  "duplicate_ids": 0,
+  "duplicate_rows": 0,
+  "missing_ids": 0,
+  "metric_keys": {
+    "over_50": 689,
+    "mixed": 315,
+    "over_65": 295
+  },
+  "examples": {
+    "over_50": {
+      "csvLine": 2,
+      "duprId": "8GGLQ8",
+      "doubles": "3.237",
+      "rf": "30",
+      "metrics": {
+        "statistics": {
+          "singles": {
+            "careerHigh": "-1"
+          },
+          "doubles": {
+            "careerHigh": "3.576"
+          }
+        },
+        "subscores": {
+          "singles": {},
+          "doubles": {
+            "over_50": "3.478"
+          }
+        }
+      }
+    },
+    "no_age": {
+      "csvLine": 5,
+      "duprId": "8E9WJ8",
+      "doubles": "4.620",
+      "rf": "100",
+      "metrics": {
+        "statistics": {
+          "singles": {
+            "careerHigh": "3.547"
+          },
+          "doubles": {
+            "careerHigh": "4.871"
+          }
+        },
+        "subscores": {
+          "singles": {},
+          "doubles": {
+            "mixed": "4.662"
+          }
+        }
+      }
+    },
+    "over_65": {
+      "csvLine": 8,
+      "duprId": "3L4VK3",
+      "doubles": "4.196",
+      "rf": "100",
+      "metrics": {
+        "statistics": {
+          "singles": {
+            "careerHigh": "4.328"
+          },
+          "doubles": {
+            "careerHigh": "4.521"
+          }
+        },
+        "subscores": {
+          "singles": {},
+          "doubles": {
+            "mixed": "4.335",
+            "over_50": "4.451",
+            "over_65": "4.744"
+          }
+        }
+      }
+    }
+  }
+}

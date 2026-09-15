@@ -1,0 +1,24 @@
+(node:60640) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/proxy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0726 normal routing is independent of View-As context service, hostname availability and maintenance (14.7642ms)
+✔ 0726 unavailable context never converts isolated requests into normal mutation authority (7.8237ms)
+(node:61964) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/viewAsBoundary.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0724 omit-context and legacy/event-code replay boundary; normal tab unchanged (8.5306ms)
+✔ 0724 strict origins and server credential confidentiality (1.8096ms)
+✔ 0724 complete legacy handler guard registry and isolated renderer dependency boundary (38.9865ms)
+✔ 0724 normalized Next URL uses Host boundary but keeps rewrite internal (3.3748ms)
+✔ 0724 ordinary and Live citation/conversation receipts cannot cross contexts or ordinary actor session (1.367ms)
+✔ 0724 Member Detail is the only entry; isolated target cannot nest (142.8507ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 574.6334

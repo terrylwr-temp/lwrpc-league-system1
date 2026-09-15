@@ -1,4 +1,5 @@
 "use client";
+import {isViewAsMode} from "../../lib/viewAsPageState.js";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -718,7 +719,7 @@ function getAverageTeamRating() {
 
   const rostersLocked = team?.divisions?.leagues?.rosters_locked === true;
   const canAdministerLockedRoster = hasRole(currentUser?.role, "league_manager");
-  const canModifyRoster = hasRole(currentUser?.role, "captain") && (!rostersLocked || canAdministerLockedRoster);
+  const canModifyRoster = !isViewAsMode() && hasRole(currentUser?.role, "captain") && (!rostersLocked || canAdministerLockedRoster);
   const onlyHomeCommunityPlayers = team?.divisions?.leagues?.only_home_community_players === true;
   const canOverrideHomeCommunityRestriction = hasRole(currentUser?.role, "league_manager");
   const homeCommunityRestrictionApplies = onlyHomeCommunityPlayers && !canOverrideHomeCommunityRestriction;
@@ -727,7 +728,7 @@ function getAverageTeamRating() {
     ? team?.home_location_id || ""
     : selectedLocationId;
   const isCaptainOnly = currentUser?.role === "captain";
-  const canRequestCaptainChange = isCurrentTeamCaptainOrCoCaptain();
+  const canRequestCaptainChange = !isViewAsMode() && isCurrentTeamCaptainOrCoCaptain();
   const teamInfoDetailView = teamInfoView === "detail";
   const teamRosterDetailView = teamRosterView === "detail";
 
@@ -741,6 +742,7 @@ function getAverageTeamRating() {
   }
 
   async function addPlayer() {
+    if(isViewAsMode())return;
     if (!selectedMemberId) {
       alert("Select a player");
       return;
@@ -878,6 +880,7 @@ function getAverageTeamRating() {
   }
 
   async function removePlayer(teamMemberId) {
+    if(isViewAsMode())return;
     if (!canModifyRoster) {
       alert("Rosters are locked for this league. Only League Managers and Commissioners can modify team rosters.");
       return;
@@ -1099,7 +1102,7 @@ function getAverageTeamRating() {
 
               {!canModifyRoster && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
-                  Team rosters are locked for this league. Only League Managers and Commissioners can view and modify rosters while locked.
+                  {isViewAsMode() ? "View As User is read-only. Adding and removing players is unavailable." : "Team rosters are locked for this league. Only League Managers and Commissioners can view and modify rosters while locked."}
                 </div>
               )}
 
@@ -1421,7 +1424,7 @@ function getAverageTeamRating() {
 
                 {!canModifyRoster && (
                   <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
-                    Team rosters are locked for this league. Only League Managers and Commissioners can view and modify rosters while locked.
+                    {isViewAsMode() ? "View As User is read-only. Adding and removing players is unavailable." : "Team rosters are locked for this league. Only League Managers and Commissioners can view and modify rosters while locked."}
                   </div>
                 )}
 

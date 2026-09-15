@@ -1,5 +1,5 @@
 import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { feedbackTransition, readFeedbackReceipt } from "../../../lib/aiConversation";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 import { captureQualityFeedback } from "../../../lib/aiQualityCapture";
@@ -28,7 +28,7 @@ export async function POST(req) {
     if (existingError) throw existingError;
     const latest = existing?.[0] || null;
     if (!feedbackTransition(latest?.helpful, body.helpful)) {
-      await captureQualityFeedback(authorization.supabase, claims, latest.id);
+      await captureQualityFeedback(authorization.supabase, claims, latest.id, {deferRecovery:after});
       return NextResponse.json({ success: true, result: { helpful: latest.helpful, changed: false, feedbackId: latest.id } });
     }
     const event = {
@@ -39,7 +39,7 @@ export async function POST(req) {
     };
     const { data: inserted, error: insertError } = await authorization.supabase.from("ai_answer_feedback_events").insert(event).select("id, helpful, created_at").single();
     if (insertError) throw insertError;
-    await captureQualityFeedback(authorization.supabase, claims, inserted.id);
+    await captureQualityFeedback(authorization.supabase, claims, inserted.id, {deferRecovery:after});
     return NextResponse.json({ success: true, result: { helpful: inserted.helpful, changed: true, feedbackId: inserted.id } });
   } catch (error) {
     const authFailure=liveAuthFailure(error);

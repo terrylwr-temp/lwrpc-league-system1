@@ -1,0 +1,57 @@
+{
+  "checkpoint": {
+    "active_sources": [
+      {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "status": "ready",
+        "active_version": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+      },
+      {
+        "id": "1c9bcadf-79b9-4493-b426-3c3e3528766e",
+        "title": "LWR Pickleball Club Code of Conduct",
+        "status": "ready",
+        "active_version": "1ea2ccf1-598e-4d0c-b0a4-b20f833805f0"
+      },
+      {
+        "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+        "title": "LWRPC-Players Guide to the LMS",
+        "status": "ready",
+        "active_version": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+      },
+      {
+        "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "title": "LWRPC-Captains Guide to the LMS",
+        "status": "ready",
+        "active_version": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+      },
+      {
+        "id": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "title": "2026 Fall League Important Dates",
+        "status": "ready",
+        "active_version": "f811e60f-9af8-444f-b009-9594a530acd6"
+      },
+      {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "status": "ready",
+        "active_version": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+      },
+      {
+        "id": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "title": "2026 USA Pickleball Official Rulebook",
+        "status": "ready",
+        "active_version": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+      }
+    ],
+    "historic_failure": [
+      {
+        "id": "f3d73d4a-f89b-4ed1-aad8-bdd3dc6a18c7",
+        "final_kind": "technical_error",
+        "reason_code": "technical_error",
+        "completed_at": "2026-09-08T12:42:15.461+00:00",
+        "request_started_at": "2026-09-08T12:42:12.694+00:00"
+      }
+    ]
+  }
+}

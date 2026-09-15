@@ -1,0 +1,244 @@
+- main
+  - complementary "Captain dashboard navigation; hover to expand when collapsed"
+    - link "Lakewood Ranch Pickleball Club Lakewood Ranch Pickleball Club" [ref=e5]
+      - image "Lakewood Ranch Pickleball Club"
+      - strong
+        - StaticText "Lakewood Ranch Pickleball Club"
+    - navigation "Captain dashboard navigation" [ref=e6]
+      - button "Dashboard Captain ›" [expanded=false, ref=e15]
+        - StaticText "Dashboard"
+        - StaticText "Captain"
+        - StaticText "›"
+      - button "My Team" [ref=e16]
+        - StaticText "My Team"
+      - button "Captain Tools" [ref=e17]
+        - StaticText "Captain Tools"
+      - button "League Documents Synthetic League ›" [expanded=false, ref=e18]
+        - StaticText "League Documents"
+        - StaticText "Synthetic League"
+        - StaticText "›"
+    - StaticText "SELECTED SEASON"
+    - strong
+      - StaticText "Synthetic Current"
+    - StaticText "Synthetic League"
+    - paragraph
+      - StaticText "© 2026 Lakewood Ranch Pickleball Club"
+  - generic
+    - sectionheader
+      - StaticText "CAPTAIN DASHBOARD"
+      - heading "Welcome Synthetic" [level=1, ref=e19]
+        - StaticText "Welcome Synthetic"
+      - button "Ask LWR Pickleball Club AI" [ref=e20]
+      - link "Email League Management" [ref=e21]
+      - strong
+        - StaticText "Synthetic Person2"
+      - StaticText "Captain"
+      - button "SP" [ref=e22]
+        - StaticText "SP"
+    - generic
+      - StaticText "NEXT MATCH"
+      - StaticText "HOME MATCH"
+      - StaticText "Fri, Sep 11 - 12:00 PM"
+      - heading "Synthetic Team vs Other Team" [level=2, ref=e37]
+        - StaticText "Synthetic Team "
+        - emphasis
+          - StaticText "vs"
+        - StaticText " Other Team"
+      - StaticText "Synthetic Courts"
+      - button "Match Details" [ref=e38]
+      - button "Email Opposing Captains" [ref=e39]
+      - button "Match Score Sheet" [ref=e40]
+      - button "Enter Match Scores" [disabled, ref=e41]
+      - generic
+        - generic
+          - StaticText "MATCH SETUP"
+          - strong
+            - StaticText "Team lineups & readiness"
+        - StaticText "Home"
+        - StaticText " - "
+        - StaticText "Synthetic Team"
+        - strong
+          - StaticText "Setup Complete"
+        - StaticText "Away"
+        - StaticText " - "
+        - StaticText "Other Team"
+        - strong
+          - StaticText "Setup Complete"
+        - button "Match Setup" [ref=e84]
+    - region "Captain team statistics" [ref=e7]
+      - article
+        - StaticText "TEAM RECORD"
+        - strong
+          - StaticText "3-0"
+        - generic
+          - StaticText "12 Team Points"
+      - button "Open Division Standings" [ref=e23]
+        - StaticText "DIVISION RANK"
+        - strong
+          - StaticText "#1 OF 2"
+        - generic
+          - StaticText "Synthetic League | Synthetic Division"
+      - button "Open pending match score entry and validation actions" [disabled, ref=e24]
+        - StaticText "PENDING MATCH SCORE ENTRY/VALIDATIONS"
+        - strong
+          - StaticText "0"
+        - StaticText "Nothing awaiting action"
+    - generic
+      - StaticText "CAPTAIN TOOLS"
+      - heading "Synthetic Team" [level=3, ref=e25]
+      - button "View Team 6 rostered players" [ref=e26]
+        - strong
+          - StaticText "View Team"
+        - generic
+          - StaticText "6 rostered players"
+      - button "Manage Roster Players and leadership" [ref=e27]
+        - strong
+          - StaticText "Manage Roster"
+        - StaticText "Players and leadership"
+      - button "Division Schedules View all division team schedules" [ref=e28]
+        - strong
+          - StaticText "Division Schedules"
+        - StaticText "View all division team schedules"
+      - button "Division Captains Captain contact list" [ref=e29]
+        - strong
+          - StaticText "Division Captains"
+        - StaticText "Captain contact list"
+    - generic
+      - StaticText "ACTION NEEDED"
+      - heading "Pending Match Score Entry/Validations" [level=3, ref=e30]
+      - paragraph
+        - StaticText "No matches currently need score entry or validation."
+    - generic
+      - StaticText "PLAN FOR UPCOMING MATCHES"
+      - heading "Upcoming matches & byes" [level=3, ref=e31]
+      - paragraph
+        - StaticText "Click Match for Match Tools"
+      - StaticText "MATCHES"
+      - strong
+        - StaticText "1"
+      - button "Open Match Tools for Synthetic Team versus Other Team" [ref=e32]
+        - time
+          - StaticText "11"
+          - StaticText "SEP"
+        - strong
+          - StaticText "Synthetic Team vs Other Team"
+        - StaticText "Fri, Sep 11"
+        - StaticText " - "
+        - StaticText "12:00 PM"
+        - StaticText "Home"
+    - generic
+      - StaticText "DIVISION SNAPSHOT"
+      - heading "Standings" [level=3, ref=e33]
+      - button "Full view" [ref=e34]
+      - strong
+        - StaticText "#1 Synthetic Team"
+      - StaticText "12"
+      - strong
+        - StaticText "#2 Other Team"
+      - StaticText "4"
+    - generic
+      - StaticText "COMPLETED"
+      - heading "Recent results" [level=3, ref=e35]
+      - paragraph
+        - StaticText "Click Match for Score Details"
+      - StaticText "TOTAL TEAM POINTS"
+      - strong
+        - StaticText "12"
+      - paragraph
+        - StaticText "No completed matches are available."
+    - paragraph
+      - StaticText "LIVE CAPTAIN DASHBOARD - CURRENT DATA, PERMISSIONS, AND OPERATIONAL TOOLS"
+- StaticText "MATCH SETUP"
+- heading "Synthetic Team vs Other Team" [level=2, ref=e1]
+  - StaticText "Synthetic Team vs Other Team"
+- StaticText "09/11/2026"
+- StaticText "12:00 PM"
+- StaticText "Synthetic League"
+- StaticText "Synthetic Division"
+- StaticText "HOME TEAM"
+- StaticText "Synthetic Team"
+- StaticText "SETTING UP"
+- StaticText "Synthetic Team"
+- button "Save Match Setup" [ref=e2]
+- button "Email Players" [ref=e3]
+- button "Close" [ref=e4]
+- generic
+  - StaticText "Individual Range: 2 - 5 (DUPR)"
+- generic
+  - StaticText "Doubles Team Maximum: None (DUPR)"
+- StaticText "Team 1"
+- generic
+  - StaticText "DUPR: 7.44"
+- generic
+  - combobox [expanded=false, ref=e8]: Person1, Synthetic (DUPR: 3.72)
+    - MenuListPopup
+      - option "Select Player 1" [ref=e42]
+      - option "Person1, Synthetic (DUPR: 3.72)" [selected, ref=e43]
+      - option "Person2, Synthetic (DUPR: 3.72)" [ref=e44]
+      - option "Person3, Synthetic (DUPR: 3.72)" [ref=e45]
+      - option "Person4, Synthetic (DUPR: 3.72)" [ref=e46]
+      - option "Person5, Synthetic (DUPR: 3.72)" [ref=e47]
+      - option "Person6, Synthetic (DUPR: 3.72)" [ref=e48]
+  - combobox [expanded=false, ref=e9]: Person2, Synthetic (DUPR: 3.72)
+    - MenuListPopup
+      - option "Select Player 2" [ref=e49]
+      - option "Person1, Synthetic (DUPR: 3.72)" [ref=e50]
+      - option "Person2, Synthetic (DUPR: 3.72)" [selected, ref=e51]
+      - option "Person3, Synthetic (DUPR: 3.72)" [ref=e52]
+      - option "Person4, Synthetic (DUPR: 3.72)" [ref=e53]
+      - option "Person5, Synthetic (DUPR: 3.72)" [ref=e54]
+      - option "Person6, Synthetic (DUPR: 3.72)" [ref=e55]
+- StaticText "Team 2"
+- generic
+  - StaticText "DUPR: 7.44"
+- generic
+  - combobox [expanded=false, ref=e10]: Person3, Synthetic (DUPR: 3.72)
+    - MenuListPopup
+      - option "Select Player 1" [ref=e56]
+      - option "Person1, Synthetic (DUPR: 3.72)" [ref=e57]
+      - option "Person2, Synthetic (DUPR: 3.72)" [ref=e58]
+      - option "Person3, Synthetic (DUPR: 3.72)" [selected, ref=e59]
+      - option "Person4, Synthetic (DUPR: 3.72)" [ref=e60]
+      - option "Person5, Synthetic (DUPR: 3.72)" [ref=e61]
+      - option "Person6, Synthetic (DUPR: 3.72)" [ref=e62]
+  - combobox [expanded=false, ref=e11]: Person4, Synthetic (DUPR: 3.72)
+    - MenuListPopup
+      - option "Select Player 2" [ref=e63]
+      - option "Person1, Synthetic (DUPR: 3.72)" [ref=e64]
+      - option "Person2, Synthetic (DUPR: 3.72)" [ref=e65]
+      - option "Person3, Synthetic (DUPR: 3.72)" [ref=e66]
+      - option "Person4, Synthetic (DUPR: 3.72)" [selected, ref=e67]
+      - option "Person5, Synthetic (DUPR: 3.72)" [ref=e68]
+      - option "Person6, Synthetic (DUPR: 3.72)" [ref=e69]
+- StaticText "Team 3"
+- generic
+  - StaticText "DUPR: 7.44"
+- generic
+  - combobox [expanded=false, ref=e12]: Person5, Synthetic (DUPR: 3.72)
+    - MenuListPopup
+      - option "Select Player 1" [ref=e70]
+      - option "Person1, Synthetic (DUPR: 3.72)" [ref=e71]
+      - option "Person2, Synthetic (DUPR: 3.72)" [ref=e72]
+      - option "Person3, Synthetic (DUPR: 3.72)" [ref=e73]
+      - option "Person4, Synthetic (DUPR: 3.72)" [ref=e74]
+      - option "Person5, Synthetic (DUPR: 3.72)" [selected, ref=e75]
+      - option "Person6, Synthetic (DUPR: 3.72)" [ref=e76]
+  - combobox [expanded=false, ref=e13]: Person6, Synthetic (DUPR: 3.72)
+    - MenuListPopup
+      - option "Select Player 2" [ref=e77]
+      - option "Person1, Synthetic (DUPR: 3.72)" [ref=e78]
+      - option "Person2, Synthetic (DUPR: 3.72)" [ref=e79]
+      - option "Person3, Synthetic (DUPR: 3.72)" [ref=e80]
+      - option "Person4, Synthetic (DUPR: 3.72)" [ref=e81]
+      - option "Person5, Synthetic (DUPR: 3.72)" [ref=e82]
+      - option "Person6, Synthetic (DUPR: 3.72)" [selected, ref=e83]
+- dialog "Attention needed"
+  - banner
+    - StaticText "LEAGUE MANAGEMENT SYSTEM"
+    - heading "Attention needed" [level=2, ref=e14]
+  - form
+    - paragraph
+      - StaticText "Match setup cannot be saved because current ratings are outside the division requirements.\n\n- Synthetic Person1 needs a valid DUPR rating before being selected.\n- Synthetic Person2 needs a valid DUPR rating before being selected.\n- Synthetic Person3 needs a valid DUPR rating before being selected.\n- Synthetic Person4 needs a valid DUPR rating before being selected.\n- Synthetic Person5 needs a valid DUPR rating before being selected.\n- Synthetic Person6 needs a valid DUPR rating before being selected."
+    - contentinfo
+      - button "OK" [ref=e36]
+- alert

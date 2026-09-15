@@ -1,0 +1,42 @@
+{
+  "fixture": "isolated copied Ratings page and real import API; synthetic auth/database only",
+  "preview": {
+    "commits": 0,
+    "sourceRows": 0
+  },
+  "cancel": {
+    "commits": 0,
+    "sourceRows": 0,
+    "previewRetained": true
+  },
+  "confirm": {
+    "commits": 1,
+    "sourceRows": 2,
+    "seasonUnchanged": true
+  },
+  "repeat": {
+    "ready": 0,
+    "noChange": 2,
+    "commitUnavailable": true
+  },
+  "finalOwnerClarification": {
+    "sourceRfShown": [
+      29,
+      30
+    ],
+    "derivedClassificationShown": false,
+    "hardcodedCutoff": false
+  },
+  "confirmationIncludes": [
+    "seasonName",
+    "seasonId",
+    "counts",
+    "sourceFields",
+    "protectedFields"
+  ],
+  "runtimeErrors": [],
+  "screenshots": [
+    "season-ratings-browser.png",
+    "season-ratings-preview.png"
+  ]
+}

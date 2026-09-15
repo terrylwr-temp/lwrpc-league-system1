@@ -1,0 +1,2 @@
+{"id":"Q90","status":"generated","calls":1,"answer":"For the PrimeTime DUPR League, age is based on the age a player will attain as of December 31 of the current calendar year. PrimeTime is for players age 65 and older, and a player is age-eligible for the entire season even if they have not yet turned 65 by the season’s start date.","materialPass":true}
+{"calls":1,"statuses":{"generated":1}}

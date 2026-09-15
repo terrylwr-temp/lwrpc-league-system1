@@ -60,5 +60,5 @@ for(const index of [0,1,2])test('0720 generation follows completed retry '+index
  resolveSources:async(_db,evidence)=>{assert.equal(calls.length,2);assert.ok(evidence.length);return evidence.map(c=>({...c,citation:c.documentTitle,officialDocumentUrl:'https://example.test/official.pdf'}));},
  fetchImpl:async(_url,options)=>{modelCalls++;assert.equal(calls.length,2);assert.ok(JSON.parse(options.body).input[0].content.includes(fixtures[index].question));return {ok:true,status:200,json:async()=>({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({answer:'Synthetic grounded test response.',conflict:false})}]}]})};}
  });
- assert.equal(modelCalls,1);assert.equal(result.evidenceSufficient,true);assert.equal(managedCalls.length,1);
+ assert.equal(modelCalls,1);assert.equal(result.evidenceSufficient,true);assert.equal(managedCalls.length,fixtures[index].question.includes('comunity')?0:1);
 });

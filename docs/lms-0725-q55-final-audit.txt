@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-09-08T18:45:10.480Z",
+  "version": "LMS-0725 / 0.1.547",
+  "productionAccepted": false,
+  "method": "103-case full regression plus final affected-policy revalidation. The final rating-policy-only instruction does not affect other document answers. Saved official fixtures, actual source revalidation and configured model; not production retrieval/HTTP validation.",
+  "routingPass": 103,
+  "generatedPass": 82,
+  "supplementalPolicyParaphrases": 6,
+  "policyFamilyPass": 12,
+  "finalObservedFailures": {
+    "crossLeagueLeakage": 0,
+    "syntheticExcerptsAccepted": 0,
+    "mechanicsAsApplicability": 0,
+    "stateVsPolicy": 0,
+    "materialQualificationsOmitted": 0,
+    "unsupportedGroundedAnswers": 0,
+    "incorrectDates": 0,
+    "incorrectYears": 0
+  },
+  "historicalLocalFailures": [
+    "Q29 material omission in first full attempt; corrected and revalidated",
+    "Q103 duration omission in full run; corrected and replaced by final affected-policy run",
+    "One provider request failed without a response"
+  ],
+  "ledger": [
+    {
+      "file": "lms-0725-q55-family-network-failure.json",
+      "attempts": 1,
+      "generatedResponses": 0
+    },
+    {
+      "file": "lms-0725-q55-family-before-duration.json",
+      "attempts": 12,
+      "generatedResponses": 12
+    },
+    {
+      "file": "lms-0725-q55-full-Q29-omission.json",
+      "attempts": 23,
+      "generatedResponses": 23
+    },
+    {
+      "file": "lms-0725-q55-full-Q29-model-results.json",
+      "attempts": 1,
+      "generatedResponses": 1
+    },
+    {
+      "file": "lms-0725-q55-full-model-results.json",
+      "attempts": 82,
+      "generatedResponses": 82
+    },
+    {
+      "file": "lms-0725-q55-family-model-results.json",
+      "attempts": 12,
+      "generatedResponses": 12
+    },
+    {
+      "file": "lms-0725-q55-full-Q57-model-results.json",
+      "attempts": 1,
+      "generatedResponses": 1
+    }
+  ],
+  "totalModelAttempts": 132,
+  "completedModelResponses": 131,
+  "embeddingCalls": 0,
+  "liveDataSentToModel": 0,
+  "productionRequests": 0
+}

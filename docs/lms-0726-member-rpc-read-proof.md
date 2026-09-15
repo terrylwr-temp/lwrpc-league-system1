@@ -1,0 +1,11 @@
+# LMS-0726 Member Administration RPC — read-only proof
+
+Read-only production catalog inspection on 2026-09-09 returned `public.admin_member_directory_page(text,boolean,boolean,text,text,integer,integer)`. Caller: normal `/members` -> protected GET `/api/admin/member-directory` -> server-only Supabase RPC POST. The SQL-language function is SECURITY INVOKER, with an empty search_path. Default VOLATILE metadata is not treated as proof of either mutation or purity.
+
+The complete deployed definition is retained as the test-only `lwrpc-admin/test/fixtures/lms0726-member-directory.sql`; it matches the function in `supabase-growth-safety-pagination.sql`. Its CTEs perform SELECTs on members, user_roles, team_members, teams, divisions, leagues and seasons. Expressions call built-in string, JSON and aggregate functions only. There are no INSERT/UPDATE/DELETE statements, session setters, sequence operations, dynamic SQL, or user-defined helper calls. No business or session mutation occurs in the directory body.
+
+The synthetic harness previously classified every POST outside its View-As lifecycle branch as a table write. A directory read RPC POST therefore hit the write allowlist and returned HTTP 500. The new explicit fixture manifest dispatches known read RPCs separately, verifies synthetic server credentials/arguments and runs the exact function in a READ ONLY transaction. Unknown RPCs and writes cannot use that executor. The existing lifecycle dispatcher remains separate because its start/exchange/end/diagnostic operations intentionally mutate protected context state.
+
+Permanent tests verify search, role priority, roster filters, active/inactive state, empty results, pagination and no member-row changes. A deliberately mutating test replacement is rejected by PostgreSQL read-only transaction enforcement. Native PostgreSQL 17.11 also executes the deployed SQL in read-only transactions, then verifies accepted directory and View-As reads after candidate SQL removal, restored column grants, unchanged maintenance and identical public business fingerprints. See `lms-0726-member-fixture-tests.txt` and `lms-0726-member-native-rollback.json`.
+
+No production RPC was invoked for testing; production access was catalog SELECT only. The SQL copy is fixture evidence, not a migration to deploy.

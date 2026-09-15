@@ -1,3 +1,4 @@
+import {isViewAsMode, getViewAsPageState, viewAsDisplayClient, viewAsSelfRows} from "./viewAsPageState.js";
 import { createClient } from "@supabase/supabase-js";
 import { defaultDashboardForRole, hasRole } from "./permissions";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "./memberLookup";
@@ -6,7 +7,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const supabase =
-  globalThis.__lwrpcSupabaseClient ||
+  isViewAsMode() ? viewAsDisplayClient : globalThis.__lwrpcSupabaseClient ||
   createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       flowType: "implicit",
@@ -16,7 +17,7 @@ export const supabase =
     },
   });
 
-if (!globalThis.__lwrpcSupabaseClient) {
+if (!isViewAsMode() && !globalThis.__lwrpcSupabaseClient) {
   globalThis.__lwrpcSupabaseClient = supabase;
 }
 
@@ -35,6 +36,7 @@ export async function getRequestAuthorizationHeaders(headers = {}) {
 }
 
 export async function getCurrentUserRole() {
+  if(isViewAsMode()){const {viewer}=getViewAsPageState();return {session:null,mode:"view_as",role:viewer.role,memberId:viewer.memberId};}
   const { data: sessionData } = await supabase.auth.getSession();
 
   if (!sessionData.session) {
@@ -83,7 +85,7 @@ export async function getCurrentUserRole() {
 export async function requireRole(router, requiredRole) {
   const user = await getCurrentUserRole();
 
-  if (!user.session) {
+  if (!user.session && user.mode !== "view_as") {
     router.push("/login");
     return null;
   }
@@ -95,4 +97,12 @@ export async function requireRole(router, requiredRole) {
   }
 
   return user;
+}
+
+// Normal identity lookup is unchanged; View-As uses the validated durable member.
+export async function getCurrentMemberRows(selection) {
+  if(isViewAsMode()) return viewAsSelfRows();
+  const {data:{user}}=await supabase.auth.getUser();
+  if(!user?.email) return {data:null,error:null,user,identityMissing:true};
+  return {...await findMembersByEmail(supabase,user.email,selection),user};
 }

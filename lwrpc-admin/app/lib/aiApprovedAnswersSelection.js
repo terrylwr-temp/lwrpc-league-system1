@@ -1,5 +1,6 @@
 import {approvedEligible,APPROVED_SOURCE_NAME,safeAuthorityWarnings} from './aiApprovedAnswersShared.js';
 import {schedulingQuestionKind,schedulingPolicyApplies} from './aiSchedulingApplicability.js';
+import {substitutePolicyMatch} from './aiSubstituteApplicability.js';
 // Candidate scoring proposes relevance; fixed scope/authority gates decide eligibility.
 // These conservative thresholds are independently tested against adjacent-topic fixtures.
 export const APPROVED_SEMANTIC_MIN=.65;
@@ -22,6 +23,7 @@ export function meaningfulDiscrepancy(managed,formal){
  return null;
 }
 export function managedQuestionCompatible(question,revision){
+ if(substitutePolicyMatch(question,revision)?.matches===false)return false;
  if(schedulingQuestionKind(revision.canonical_question)==='match_schedule_change'&&!schedulingPolicyApplies(question,revision))return false;
  const days=text=>(String(text).toLowerCase().match(/\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/g)||[]);
  const requested=days(question),defined=days(revision.canonical_question);
@@ -35,7 +37,13 @@ export function managedQuestionCompatible(question,revision){
 // A managed revision cannot establish a standalone exception to rules of play.
 export function managedPlayingRule(text){return /\b(?:volley|volleying|nvz|kitchen|serv(?:e|ing|ice)|rall(?:y|ies)|double.?bounce|foot.?fault|line.?call|hinder|let.?serve|paddle specifications|ball specifications)\b/i.test(text)||/\b(?:ball|paddle)\b[\s\S]*\b(?:crack|break|damag|legal|illegal|replay)/i.test(text);}
 export function chooseApprovedEvidence(question,formal,rows,{date,scope='all',seasonId=null}={}){
- const relevant=(rows||[]).filter(x=>x?.revision?.status==='active'&&managedQuestionCompatible(question,x.revision)&&Number.isFinite(x.semantic_score)&&x.semantic_score>=APPROVED_SEMANTIC_MIN);
+ const considered=(rows||[]).slice(0,4).map(x=>{
+  const equivalent=substitutePolicyMatch(question,x.revision);
+  const reason=x?.revision?.status!=='active'?'not_active':!managedQuestionCompatible(question,x.revision)?(equivalent?.reason||'question_incompatible'):!Number.isFinite(x.semantic_score)?'score_unavailable':x.semantic_score<APPROVED_SEMANTIC_MIN&&!equivalent?.matches?'semantic_below_threshold':!approvedEligible(x.revision,{date,scope,seasonId:seasonId||x.resolved_season_id,manifest:x.manifest})?'lifecycle_scope_or_authority':equivalent?.matches?'substitute_policy_equivalent':'semantic_match';
+  return {item:x,reason};
+ });
+ const finish=result=>({...result,diagnostics:considered.map(({item,reason})=>({revisionId:item.revision?.id,semanticScore:Number.isFinite(item.semantic_score)?Math.round(item.semantic_score*1000)/1000:null,reason,decision:result.selected.some(s=>s.approvedRevisionId===item.revision?.id)?'selected':['semantic_match','substitute_policy_equivalent'].includes(reason)?'not_selected_by_authority_or_ambiguity':'rejected'}))});
+ const relevant=considered.filter(x=>['semantic_match','substitute_policy_equivalent','lifecycle_scope_or_authority'].includes(x.reason)).map(x=>x.item);
  const scopeMatches=r=>r.league_scope==='all'||r.league_scope===scope;
  const warnings=[];
  for(const item of relevant.filter(x=>scopeMatches(x.revision)))for(const source of formal.filter(s=>s.documentType!=='usap_rulebook')){
@@ -48,16 +56,16 @@ export function chooseApprovedEvidence(question,formal,rows,{date,scope='all',se
    && !(schedulingQuestionKind(x.revision.canonical_question)==='match_schedule_change'&&x.revision.related_chunk_id&&!x.validatedRelatedEvidence));
  if(formal.length){
    const complementary=eligible.find(x=>!managedPlayingRule(question)&&!managedPlayingRule(x.revision.approved_answer)&&x.revision.related_chunk_id&&formal.some(f=>f.documentType!=='usap_rulebook'&&f.chunkId===x.revision.related_chunk_id&&(!x.validatedRelatedEvidence||f.content===x.revision.related_passage))&&!formal.some(f=>meaningfulDiscrepancy(x.revision,f)));
-   return {selected:complementary&&formal.length<4?[...formal,managedCandidate(complementary,true)]:formal,warnings:safeAuthorityWarnings(warnings),conflict:false};
+   return finish({selected:complementary&&formal.length<4?[...formal,managedCandidate(complementary,true)]:formal,warnings:safeAuthorityWarnings(warnings),conflict:false});
  }
- if(managedPlayingRule(question)||eligible.some(x=>managedPlayingRule(x.revision.approved_answer)))return {selected:[],warnings:[],conflict:false};
- if(!eligible.length)return {selected:[],warnings:[],conflict:false};
+ if(managedPlayingRule(question)||eligible.some(x=>managedPlayingRule(x.revision.approved_answer)))return finish({selected:[],warnings:[],conflict:false});
+ if(!eligible.length)return finish({selected:[],warnings:[],conflict:false});
  for(let i=0;i<eligible.length;i++)for(let j=i+1;j<eligible.length;j++){
-  if(meaningfulDiscrepancy(eligible[i].revision,{content:eligible[j].revision.approved_answer}))return {selected:[],warnings:[],conflict:true};
+  if(meaningfulDiscrepancy(eligible[i].revision,{content:eligible[j].revision.approved_answer}))return finish({selected:[],warnings:[],conflict:true});
  }
  // Near-tied distinct policies are ambiguous; no arbitrary semantic-rank tie break.
- if(eligible.length>1&&eligible[0].revision.topic_key!==eligible[1].revision.topic_key&&eligible[0].semantic_score-eligible[1].semantic_score<.06)return {selected:[],warnings:[],conflict:false};
- return {selected:[managedCandidate(eligible[0])],warnings:[],conflict:false};
+ if(eligible.length>1&&eligible[0].revision.topic_key!==eligible[1].revision.topic_key&&eligible[0].semantic_score-eligible[1].semantic_score<.06)return finish({selected:[],warnings:[],conflict:false});
+ return finish({selected:[managedCandidate(eligible[0])],warnings:[],conflict:false});
 }
 function managedCandidate(item,materialSupplement=false){
  const r=item.revision;

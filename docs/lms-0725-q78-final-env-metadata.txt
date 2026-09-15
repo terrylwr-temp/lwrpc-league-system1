@@ -1,0 +1,32 @@
+Retrieving project…
+> Environment Variables found for terry-lwrpc/lwrpc-admin [181ms]
+
+ name                               value               environments                created     
+ VIEW_AS_ENCRYPTION_KEY             Encrypted           Production                  22h ago     
+ VIEW_AS_ORIGIN                     Encrypted           Production                  22h ago     
+ LMS_ORIGIN                         Encrypted           Production                  22h ago     
+ AI_QUALITY_HMAC_KEY_VERSION        Encrypted           Production                  3d ago      
+ AI_QUALITY_HMAC_KEY                Encrypted           Production                  3d ago      
+ LWR_AI_ENABLED                     Encrypted           Production                  5d ago      
+ OPENAI_API_KEY                     Encrypted           Production                  5d ago      
+ BREVO_SMS_ORGANIZATION_PREFIX      Encrypted           Production                  8d ago      
+ BREVO_SMS_SENDER                   Encrypted           Production                  8d ago      
+Common next commands:
+- `vercel env add`
+- `vercel env rm`
+ BREVO_REPLY_TO_EMAIL               Encrypted           Preview, Production         59d ago     
+ BREVO_FROM_NAME                    Encrypted           Production, Preview         59d ago     
+ BREVO_FROM_EMAIL                   Encrypted           Production, Preview         59d ago     
+ BREVO_API_KEY                      Encrypted           Production, Preview         59d ago     
+ TURNSTILE_SECRET_KEY               Encrypted           Preview, Production         60d ago     
+ NEXT_PUBLIC_TURNSTILE_SITE_KEY     Encrypted           Production, Preview         60d ago     
+ WEB_PUSH_SUBJECT                   Encrypted           Preview, Production         80d ago     
+ WEB_PUSH_PRIVATE_KEY               Encrypted           Preview, Production         80d ago     
+ NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY    Encrypted           Preview, Production         80d ago     
+ WEB_PUSH_PUBLIC_KEY                Encrypted           Preview, Production         80d ago     
+ CRON_SECRET                        Encrypted           Preview, Production         86d ago     
+ SUPABASE_SERVICE_ROLE_KEY          Encrypted           Preview, Production         110d ago    
+ NEXT_PUBLIC_SUPABASE_ANON_KEY      Encrypted           Production, Preview         112d ago    
+ NEXT_PUBLIC_SUPABASE_URL           Encrypted           Production, Preview         112d ago    
+
+- `vercel env pull`

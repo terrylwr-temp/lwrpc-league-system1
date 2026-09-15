@@ -1,0 +1,55 @@
+{
+  "method": "Owner-authorized SELECT of five controlling active chunks; embedding presence only, no embedding values retrieved.",
+  "rows": [
+    {
+      "chunk_id": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+      "document_version_id": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "is_searchable": true,
+      "embedding_present": true,
+      "review_status": null,
+      "chunk_scope_kind": null,
+      "scope_league": null,
+      "scope_season": null
+    },
+    {
+      "chunk_id": "a951f671-8566-4b6a-b630-8474e5b302e9",
+      "document_version_id": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+      "is_searchable": true,
+      "embedding_present": true,
+      "review_status": null,
+      "chunk_scope_kind": null,
+      "scope_league": null,
+      "scope_season": null
+    },
+    {
+      "chunk_id": "ba65d436-5d3d-431a-b320-1dd78e472c2d",
+      "document_version_id": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+      "is_searchable": true,
+      "embedding_present": true,
+      "review_status": null,
+      "chunk_scope_kind": null,
+      "scope_league": null,
+      "scope_season": null
+    },
+    {
+      "chunk_id": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+      "document_version_id": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "is_searchable": true,
+      "embedding_present": true,
+      "review_status": null,
+      "chunk_scope_kind": null,
+      "scope_league": null,
+      "scope_season": null
+    },
+    {
+      "chunk_id": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+      "document_version_id": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "is_searchable": true,
+      "embedding_present": true,
+      "review_status": null,
+      "chunk_scope_kind": null,
+      "scope_league": null,
+      "scope_season": null
+    }
+  ]
+}

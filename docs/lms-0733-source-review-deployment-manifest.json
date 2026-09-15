@@ -1,0 +1,1316 @@
+{
+  "commit": "c6ee7f067ba3965d7eb2a0d1b92f44389697dcc0",
+  "release": "LMS-0733",
+  "packageVersion": "0.1.555",
+  "deploymentAllowlistOnly": true,
+  "runtimeDeltaFromDeployed": [
+    "lwrpc-admin/app/components/RatingsImportPreview.js",
+    "lwrpc-admin/app/components/SourceRatingsReview.js",
+    "lwrpc-admin/app/lib/seasonRatingsImport.js",
+    "lwrpc-admin/app/lib/seasonRatingsImportServer.js",
+    "lwrpc-admin/app/lib/seasonRatingsReview.js",
+    "lwrpc-admin/app/ratings/page.js"
+  ],
+  "files": [
+    {
+      "file": "lwrpc-admin/.gitignore",
+      "canonicalSha256": "8ad882b9c234f91e0b6dd6d317324c86ab93f5ab25968aee79ee8feecf030970"
+    },
+    {
+      "file": "lwrpc-admin/app/AdminDashboardClient.js",
+      "canonicalSha256": "7c09c069bbc3e6dae21163271510fa36d90a7926eb2db00e6e33552e09957512"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/console/page.js",
+      "canonicalSha256": "4e696f3c39cb23937d46bb0a7b335cd2d9dba1615f715383dd71ad1c205e2742"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/page.js",
+      "canonicalSha256": "d9437de51d21436bd16255aa6df22599eee1fc0a75ffe3b4f12dcd76157fed74"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/review/ApprovedAnswersPanel.js",
+      "canonicalSha256": "6fc62389cd4bb67be9ee1b788144c59a11c2f642efbf8175fae92e004d419c63"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/review/ExistingEvidenceDecision.js",
+      "canonicalSha256": "ebbf7a590cbae2518dd70de3e7ceaf924f12702e6aa09f6e5bb78e83afeabd99"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/review/LiveFeedbackPanel.js",
+      "canonicalSha256": "ed4d53c3e0ca8db2dc17d0b3cac7797243e8ecfda1119899b86e69c8a060585d"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/review/approved.module.css",
+      "canonicalSha256": "2b6843d705e41a9e6cede66683c35cdc095a44321920c9420d41a4ed570ad821"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/review/approvedDraftFeedback.js",
+      "canonicalSha256": "36425a0228333b76613b5128c0d367cd2f73455ab4de990af0b56f69a8dba013"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/review/page.js",
+      "canonicalSha256": "754d54ec85009dba46a767a4ba59b0a79511bfb657cebdb53d10af7b3bb23a68"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-assistant/review/review.module.css",
+      "canonicalSha256": "683678f6fe1e9c0211eb3968b2b7b41f542f32d3cfed12680c7d809980fefe1c"
+    },
+    {
+      "file": "lwrpc-admin/app/ai-insights/page.js",
+      "canonicalSha256": "50a1de34eeee26913cd06eeee700169b061726fef93d5a5294ecece271dbea55"
+    },
+    {
+      "file": "lwrpc-admin/app/api/account-identity/route.js",
+      "canonicalSha256": "8121928d8565ca35618f7a905ae46b1d0926d0004b18898c8a86a27c387e9651"
+    },
+    {
+      "file": "lwrpc-admin/app/api/admin/delete-member/route.js",
+      "canonicalSha256": "ff9cbd8dfdcaa44b02358dac6b50e002a9419fccb197d5d5a8a764c73c26c00d"
+    },
+    {
+      "file": "lwrpc-admin/app/api/admin/member-directory/route.js",
+      "canonicalSha256": "4f30668e9845a14728dd37bb2b1daee9c32279341cd5967aaeef0feee2456ad1"
+    },
+    {
+      "file": "lwrpc-admin/app/api/admin/member-last-login/route.js",
+      "canonicalSha256": "e6a02b4b6d01a4401f5b69bed074534ef8f94cf2b6edefa91d34e92ad6405765"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/answer/route.js",
+      "canonicalSha256": "0684caad6caa18b3b63d9abb3bfc9c820b43d9b13dd3a1086277e0de69c7ebd1"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/approved-answers/route.js",
+      "canonicalSha256": "cda624aafd2db97c60f97286d2855bf4e76e97a5ce00c5ff576fc2cf1cc0f303"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/capture-health/route.js",
+      "canonicalSha256": "f1662e088a61a2831087909f405807d553a8361491b514e9ff0f2ec62fa2f353"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/documents/route.js",
+      "canonicalSha256": "ea107d0dbaf906da3c3766c8825552ac8aae1c3ba1adb58733a726fdb29fa09d"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/live-review/route.js",
+      "canonicalSha256": "9eb90bd0d8f8b735ce9e499fea15b44d13610d6f124093e20ace3e8014d27af7"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/retrieval/route.js",
+      "canonicalSha256": "c5e81fddbf3a30b67ccf470b03bd6a5c972d62c61151a6dae649069f30cca230"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/review/route.js",
+      "canonicalSha256": "05164fa22ce85174faf9ac76686f096820105ad5649cb257b64e5066a1bae560"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-insights/route.js",
+      "canonicalSha256": "6a337e974dd27c6cd4f4fa32856d5941104f5a0ea366fdf689659dcecaf059f0"
+    },
+    {
+      "file": "lwrpc-admin/app/api/app-notifications/public-key/route.js",
+      "canonicalSha256": "aa6c9b2bbee148435d42ded0231e96c0fcd15b219e384d41a6ed6dc76e79b474"
+    },
+    {
+      "file": "lwrpc-admin/app/api/app-notifications/subscribe/route.js",
+      "canonicalSha256": "2a1d954755168927e0edab71d33e5ec57be0826f2ccf9a7cc3bdde6da0163f86"
+    },
+    {
+      "file": "lwrpc-admin/app/api/approved-answer-viewer/route.js",
+      "canonicalSha256": "c68832cb160e26d4fd492a188999cab93ae1ee7cfccfaf254e1447e98ac08245"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ask-lwr/feedback/route.js",
+      "canonicalSha256": "fd509decf0b1efa36bfc666f4b055defcd25ac153730c646285fc9173331baa1"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ask-lwr/route.js",
+      "canonicalSha256": "350a3615d3818c937806dbc876167bdfe6ed71bb3781cc21f6690d86ea53a688"
+    },
+    {
+      "file": "lwrpc-admin/app/api/brevo-diagnostics/route.js",
+      "canonicalSha256": "5077396ca7a3c2690e2cb55ae458d6b28b8b739b42cec8996b66a1e541b0ea7f"
+    },
+    {
+      "file": "lwrpc-admin/app/api/league-communications/route.js",
+      "canonicalSha256": "334b2f46f709fe6e87fa7e966954809f87d77ff74a74d8ca9933ebd3c2c5f38a"
+    },
+    {
+      "file": "lwrpc-admin/app/api/master-reset/route.js",
+      "canonicalSha256": "5835a531f0b7a95394ea58179fd57de448626169556438e8c0402f8dc5a394a8"
+    },
+    {
+      "file": "lwrpc-admin/app/api/match-lineups/route.js",
+      "canonicalSha256": "9e6fe2961bd28c7f57235258ac055102dd5d5dbfecad7c34cdd7925215e39590"
+    },
+    {
+      "file": "lwrpc-admin/app/api/match-setup-reminders/route.js",
+      "canonicalSha256": "1228c054c070dbedf82527b6c846e90c8491ae36fce8504d3f26bcf145025e88"
+    },
+    {
+      "file": "lwrpc-admin/app/api/member-password-reset-check/route.js",
+      "canonicalSha256": "e037d0bb3ef7e691da95f95fb29cadd98f1f3e81e599ab0a07160057794a036c"
+    },
+    {
+      "file": "lwrpc-admin/app/api/notification-template-history/route.js",
+      "canonicalSha256": "c299c349f2567f72ef16a3bb5e944978903680a0f6e5a078baafe986187e0bf4"
+    },
+    {
+      "file": "lwrpc-admin/app/api/notification-templates/route.js",
+      "canonicalSha256": "6ccf58495405053e398ee8c2f4916c51e61afeff259e08567cb7b131761c3f9f"
+    },
+    {
+      "file": "lwrpc-admin/app/api/notifications/route.js",
+      "canonicalSha256": "1ce4a09ae05e77606c55b4fe6a267b7b82b788a0ef69e8dcef63307cc95f82af"
+    },
+    {
+      "file": "lwrpc-admin/app/api/official-document-viewer/pdf/route.js",
+      "canonicalSha256": "1af65997ee2604d65021bd52b259cc2c5b9e610b7bcc88761baaa5562501bd18"
+    },
+    {
+      "file": "lwrpc-admin/app/api/official-document-viewer/route.js",
+      "canonicalSha256": "8467537e783c2808767fd9ff991be9c8697f2bdf41d501355ea4bdfb5dc13c7f"
+    },
+    {
+      "file": "lwrpc-admin/app/api/pbcc/reminders/route.js",
+      "canonicalSha256": "f83cabed707749b501e6537093075576772e5499263f425742e806926d89e76d"
+    },
+    {
+      "file": "lwrpc-admin/app/api/ratings/import/route.js",
+      "canonicalSha256": "0f18ecae5cda8b55a4371cd164ec021cb3ece54ab4a3f88339c9417c5513b886"
+    },
+    {
+      "file": "lwrpc-admin/app/api/round-robin/action/route.js",
+      "canonicalSha256": "ed1a481109cbdfae8cd7b3936680ca179d0820c670cb002626e8e9f0670e3eab"
+    },
+    {
+      "file": "lwrpc-admin/app/api/round-robin/admin/route.js",
+      "canonicalSha256": "03bd2473e7415dc1dd887fdd7f9bdf5b64072f33d324cc8d9da1e6c967a20608"
+    },
+    {
+      "file": "lwrpc-admin/app/api/round-robin/player/route.js",
+      "canonicalSha256": "b1a14883fc0f1846b4d3940dce89306d74153b169495e70501f3378aeb4c747f"
+    },
+    {
+      "file": "lwrpc-admin/app/api/score-notification/route.js",
+      "canonicalSha256": "36f751d60db5cb671ada1c561dcc6cf0f69ec3b249b2c8703c6ee18d551b086d"
+    },
+    {
+      "file": "lwrpc-admin/app/api/season-reset/route.js",
+      "canonicalSha256": "f3b2375bb6af50e1bec7beafcbf21f11f45cdcd73bddba681a8b6b5295be2721"
+    },
+    {
+      "file": "lwrpc-admin/app/api/season-rollover/route.js",
+      "canonicalSha256": "b8170fa93029e97ed9f622b57f963e1c2a62ace4502da0140e862c8f1961ab88"
+    },
+    {
+      "file": "lwrpc-admin/app/api/system-settings/route.js",
+      "canonicalSha256": "31a8cae55625c74c70787eb6112159156758333ff4f865426b6c856df825dc1d"
+    },
+    {
+      "file": "lwrpc-admin/app/api/teams/delete/route.js",
+      "canonicalSha256": "f0e0323b6e8d70b2354f242bee6f93bf2d6c1573a1cfe1d7c574f14d8fdd0dab"
+    },
+    {
+      "file": "lwrpc-admin/app/api/tournaments/action/route.js",
+      "canonicalSha256": "bf27134eb387d4f9936ad3d9e61f11b7e086008fdf4adbfb44e61dccbc232ec2"
+    },
+    {
+      "file": "lwrpc-admin/app/api/tournaments/admin/route.js",
+      "canonicalSha256": "24960a25cdf15448c20545ec4a03674c165ff565d8b4c014ae5ecc10362c4739"
+    },
+    {
+      "file": "lwrpc-admin/app/api/tournaments/sms/route.js",
+      "canonicalSha256": "0a474556639effb1ec225a7b0b04b3948d776ae4b7793c247c7913818e6b7c74"
+    },
+    {
+      "file": "lwrpc-admin/app/api/user-last-logins/route.js",
+      "canonicalSha256": "066767bd550f71f977458114b023ed515734078a9f0cd4951e7810c140be7a44"
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/bootstrap/route.js",
+      "canonicalSha256": "7dceb3e1051f08e10e38b47150ed6a8561767954ad007d0b9a64a05834344f66"
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/exchange/route.js",
+      "canonicalSha256": "416e8a05c0775e9e94b620d90988ffc189a1b593de472740b75c5a033d4391c0"
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/read/route.js",
+      "canonicalSha256": "655d4d275d559a6052f9addedcb5a5778d0403d0a57e0a5b082fa368c161f119"
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/start/route.js",
+      "canonicalSha256": "9f5b5d5258d9735329daee2f500a82e2368653eb783d74a94d121e0075b29aab"
+    },
+    {
+      "file": "lwrpc-admin/app/approved-answer/[citation]/page.js",
+      "canonicalSha256": "842b7512c7e6986ce0193b11ffbcfbdb40d6279196a5bd0d82982580f7e4ec5c"
+    },
+    {
+      "file": "lwrpc-admin/app/ask-lwr/page.js",
+      "canonicalSha256": "e5f91fdc62006169b53ffb0fa083a4db07b8a99d36700f5fc34de7a2757df042"
+    },
+    {
+      "file": "lwrpc-admin/app/captain-dashboard/page.js",
+      "canonicalSha256": "b9a5c169ca3ff71679e180058cfbee19cf4911cd3578bea42cd797dfa80c4dc7"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AppDialogProvider.js",
+      "canonicalSha256": "65660bbfe2e6c50ee928eb05a63430595bd12842c09f01a2c19c00cd7fdcb17a"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AppHeader.js",
+      "canonicalSha256": "f3b087fe083c53c2f6883cb9eb772eea382334f9bf09770b83838f45e32bec44"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AppNotificationsButton.js",
+      "canonicalSha256": "6d7e0dac469974a443eee24d37344d436b21f997c8debfbda10358dab9792767"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AskLwrAssistant.js",
+      "canonicalSha256": "dbc1dc36a9189752b4272465e7d790fe7eab17c1ef1e80389badc3507a1dd722"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AskLwrAssistant.module.css",
+      "canonicalSha256": "2d1023efb098bb8f936957cd0e4d397110385ee41c15ab6b21be001125a7c487"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AskLwrChoices.js",
+      "canonicalSha256": "25aa720deaf7da15e0fe93fc93edd6eaf5c2fc3f7e866cb5e7a59ce0612dda01"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AskLwrTrigger.js",
+      "canonicalSha256": "7f6b4defe1f9a033ba37450dca95835fe41476b8ebe7a6d35614fe8580da2f02"
+    },
+    {
+      "file": "lwrpc-admin/app/components/AskLwrWelcome.js",
+      "canonicalSha256": "164b6afdb0936c0d5e32b41e2032e2498d771aff1d02728367c0e17b754fc1db"
+    },
+    {
+      "file": "lwrpc-admin/app/components/BrowserTitle.js",
+      "canonicalSha256": "862f504927963d32c19eb5a90632f1c246d1472bc171b7dca3c6824079e0b4a9"
+    },
+    {
+      "file": "lwrpc-admin/app/components/DashboardPlayHistoryModal.js",
+      "canonicalSha256": "66c166c683b53d2ac4f72cf64656467338acc8cf22c964cbb518e5f3065ea8c0"
+    },
+    {
+      "file": "lwrpc-admin/app/components/DashboardProfileDialog.js",
+      "canonicalSha256": "4ce4bbae53032913094482762a72fd9410280a5f04f0c9df3b484d37ede262fc"
+    },
+    {
+      "file": "lwrpc-admin/app/components/DivisionStandingsBarChart.js",
+      "canonicalSha256": "5125631a5478443c3983f964532f25e6eb0375793171ed8797a8b0183ab9482d"
+    },
+    {
+      "file": "lwrpc-admin/app/components/DivisionStandingsModal.js",
+      "canonicalSha256": "cf8b403f2c49acb5f34bd439e92d21b62294b8037409d33722ecc6e0d36c4813"
+    },
+    {
+      "file": "lwrpc-admin/app/components/InactivitySessionTimeout.js",
+      "canonicalSha256": "5ac24d691d180cde54f7a70ec15bb69670024457b7325b591a07c1abc027b9a6"
+    },
+    {
+      "file": "lwrpc-admin/app/components/ListingCount.js",
+      "canonicalSha256": "b0fce9b9fbdb92a6b3d69fb0137217dad1454e1738099f013dabfd2a7c4b74ca"
+    },
+    {
+      "file": "lwrpc-admin/app/components/LmsInstallButton.js",
+      "canonicalSha256": "a9ce3d6a060cdfc2240821c54ec2c863b1cee66b25a75614b761c20bd0a71574"
+    },
+    {
+      "file": "lwrpc-admin/app/components/LmsPwaRegister.js",
+      "canonicalSha256": "9ab5869dee746f41549ce5548c0703f05e33a52987b91e38c28ae0b37561c0a2"
+    },
+    {
+      "file": "lwrpc-admin/app/components/LoadingScreen.js",
+      "canonicalSha256": "11dc8b93f0e39fefd0d980aa22b20c18270975b0680c55f9bd8c61a12f579e7c"
+    },
+    {
+      "file": "lwrpc-admin/app/components/LoginMessageModal.js",
+      "canonicalSha256": "b9e98fea07c89bea34b8c9fd707f0ed78f857b92124e298c85b802f382132b57"
+    },
+    {
+      "file": "lwrpc-admin/app/components/MiniStandingsLeaders.js",
+      "canonicalSha256": "25fb2ec794c19532e3f78a00bb957b7f040284996a7e68e6ea376193433815f5"
+    },
+    {
+      "file": "lwrpc-admin/app/components/OfficialDocumentViewer.js",
+      "canonicalSha256": "bd035240ce09501f033db595440107a52a89b3977e6ad8f6c2082190709963ca"
+    },
+    {
+      "file": "lwrpc-admin/app/components/PbccFooter.js",
+      "canonicalSha256": "c895629123c224f95acfacf06286b22b10ed82d15c7b6e615f5fdd10251a8595"
+    },
+    {
+      "file": "lwrpc-admin/app/components/PbccInstallButton.js",
+      "canonicalSha256": "e6469c7a97d128e65c3a4827c80fdddc945ce59274a40166c129f78b8110456a"
+    },
+    {
+      "file": "lwrpc-admin/app/components/PbccPwaRegister.js",
+      "canonicalSha256": "0e1d157ce7d11a2a210fb2a91cabc99c2b1d490a4ab7da3902277c8e3485b4c9"
+    },
+    {
+      "file": "lwrpc-admin/app/components/PdfDocumentModal.js",
+      "canonicalSha256": "93189a54d05352898aaccdeb5b7845e89b4cf52366c033888d623058e4cea0f9"
+    },
+    {
+      "file": "lwrpc-admin/app/components/PdfDocumentModalClient.js",
+      "canonicalSha256": "df4d18cd97bc42d6da94f20c4216fa215d1e2399dbfa32c9bc3b37546dff00df"
+    },
+    {
+      "file": "lwrpc-admin/app/components/PlayerHistoryDetailsModal.js",
+      "canonicalSha256": "f3c78b21bc0cb8b2f5261e1f2f3e68748f922b8f81540bad289a33f169e294ff"
+    },
+    {
+      "file": "lwrpc-admin/app/components/PlayerHistoryPanel.js",
+      "canonicalSha256": "5dc0212c76dfdb96fa4a20c0e0320e268e0b52020987de75654a26618947638b"
+    },
+    {
+      "file": "lwrpc-admin/app/components/RatingsImportPreview.js",
+      "canonicalSha256": "fee60c894671fa3d1fad50d3458173cff261664b569be4f42e41595b2e6a22b3"
+    },
+    {
+      "file": "lwrpc-admin/app/components/RoleCapabilityModal.js",
+      "canonicalSha256": "a15953f80421793cd2550df4ac0c0f605d6927092bf4110952405e24bf80a99c"
+    },
+    {
+      "file": "lwrpc-admin/app/components/SourceRatingsReview.js",
+      "canonicalSha256": "66cfec65f5443fccc32102867d12331d65f80c486a390e9ec1544e15db99266e"
+    },
+    {
+      "file": "lwrpc-admin/app/components/StandingsTiebreakDetails.js",
+      "canonicalSha256": "95edd3c66485f83876fa54637a96fe63289d14e06552615ffafa88c57582665e"
+    },
+    {
+      "file": "lwrpc-admin/app/components/SystemFooter.js",
+      "canonicalSha256": "a81ef3686f6b7b0fcc7f8e35d3dc81b5e43bf412c218b6741b11dfcaf75cd447"
+    },
+    {
+      "file": "lwrpc-admin/app/components/TeamScheduleModal.js",
+      "canonicalSha256": "42dee14c3978335c6fa17c0aa1423650b8f06609292dc9aedef73e4ee22d63f5"
+    },
+    {
+      "file": "lwrpc-admin/app/components/TurnstileWidget.js",
+      "canonicalSha256": "03e48c2089d14a544015b5656077068ba080272aad00cc8e5452aafd63025742"
+    },
+    {
+      "file": "lwrpc-admin/app/components/ViewAsSharedPages.js",
+      "canonicalSha256": "00c084aa9c6c783279a89dfde9f1fa96b6c1b436bfac9567cca995ebde9d398e"
+    },
+    {
+      "file": "lwrpc-admin/app/components/ViewAsStartButton.js",
+      "canonicalSha256": "041bd284219bc9f6a1329cf32c40610be581dd20da78959e184f09e4c7c3da79"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/DashboardAppearanceControls.js",
+      "canonicalSha256": "ab92a38366dc442a4da3bddcd76e1026b2f5fc14f285c91f7db68e2efc773863"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/DesignPreviewView.js",
+      "canonicalSha256": "b96502fcc95981a857e7fcf59947251e0092ceea6495ec12d6e4bfb9ce40c4c9"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/admin/AdminDesignPreviewView.js",
+      "canonicalSha256": "8a633a3f7f223571a4b927951d77ca0195137d0bf477cb63bdf650b12eb92d5e"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/admin/admin.module.css",
+      "canonicalSha256": "7349bd634c450e135f13594f9541d1043af8c3d1dc80c75afb2a41599bff2ccc"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/admin/page.js",
+      "canonicalSha256": "3e07878a6bc5e5d2d832f1bbb60734fadd4b636d2e09a8be4c2f55bf71e390c5"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/captain/CaptainDesignPreviewView.js",
+      "canonicalSha256": "85f023622e2898784df352561a48610e07324abc462b745161a657fd7bb5bc23"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/captain/captain.module.css",
+      "canonicalSha256": "197ec5d4f43e6df6a53f2170c9569fe59c2568e5fa76a05a860fda528dff61e1"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/captain/page.js",
+      "canonicalSha256": "98dc618797de2fa6f13d5763fd2bfac45a620276f881c3f58dc45fab2b8c5572"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/page.js",
+      "canonicalSha256": "c31b7f6552d9c6bd54eb6f8baa9edc102758781faec6a1cce226883d4ab1d0f3"
+    },
+    {
+      "file": "lwrpc-admin/app/design-preview/page.module.css",
+      "canonicalSha256": "41b6f5dc8f0c92af0d54a3dfb9bb22b739f5a97e9c39e315b6155bb55a08ed57"
+    },
+    {
+      "file": "lwrpc-admin/app/divisions/[id]/page.js",
+      "canonicalSha256": "e968cb23d2c5078c60c7402b5b37cfc6d4d4d9ddc04864487d5b60d697d65e9c"
+    },
+    {
+      "file": "lwrpc-admin/app/divisions/page.js",
+      "canonicalSha256": "9381bf143e37d23748a745c9230b1323cd4641269394e2dc3fbc8b927419d583"
+    },
+    {
+      "file": "lwrpc-admin/app/email-options/page.js",
+      "canonicalSha256": "68a6fbb2cb1d1edfa8c88ffc2ce471d027159e81cfc114e042f173a2a3cdc07e"
+    },
+    {
+      "file": "lwrpc-admin/app/favicon.ico",
+      "canonicalSha256": "5f12c6868fcd1e9a7d603ec1a70d133f5ef5981fe8faf927da381177fa32f1dc"
+    },
+    {
+      "file": "lwrpc-admin/app/globals.css",
+      "canonicalSha256": "f0e3745a3a4fa53dc64ecef1a0dd2ae8410716912cb62e515d13d7b2441d5634"
+    },
+    {
+      "file": "lwrpc-admin/app/help/[role]/HelpCenterClient.js",
+      "canonicalSha256": "e54982ba194977c72e1f9a3726dbe2d55e19f157593bfe6aa02b87610a4e3af2"
+    },
+    {
+      "file": "lwrpc-admin/app/help/[role]/page.js",
+      "canonicalSha256": "9ec96b983fdb8dc1892efb18b801d11f4ff9dffcc2ef99d61f9134b845e799d9"
+    },
+    {
+      "file": "lwrpc-admin/app/layout.tsx",
+      "canonicalSha256": "13c3a5a47dfb0fe1d83c4fb8b262f239192aaae8641f300ded58719990616e6a"
+    },
+    {
+      "file": "lwrpc-admin/app/league-communications/page.js",
+      "canonicalSha256": "dce9a7d8e5cc36d2c1874fa9e97fab10dd00dd1bd16d8d22c94d4162fdbac250"
+    },
+    {
+      "file": "lwrpc-admin/app/leagues/page.js",
+      "canonicalSha256": "a87d688947b0ea3cce4abc058983e6c7217142a46b47ff035c7e1c57d37a4cbf"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/accountIdentity.js",
+      "canonicalSha256": "afadad67c05cf66fdbf7795bc4de9c7cc1bf28298b61c170707989e5e2612dfb"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/adminNavigation.js",
+      "canonicalSha256": "9af9501970f9c9c8e5bd78dc857a9d28e5f7f355ff65edb1fe120af508714c98"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiAgeReferencePolicy.js",
+      "canonicalSha256": "2ab11cc451703273055b9090f89aef0086e5bab41538798f987c8cf61702c954"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiAnswerGeneration.js",
+      "canonicalSha256": "a5494397e455325e397d979cffa0fefbe61354af5f3ca9cd6c2f4dacb1a22979"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiApprovedAnswerViewer.js",
+      "canonicalSha256": "542d0bc33fdae0c8c0634150ee57e0ffe44dd9184218a9c0239a988138519dbd"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiApprovedAnswersSelection.js",
+      "canonicalSha256": "6dd74605c117078f9fb9c09758f6922e9a7cc6683a71325b94e1b8d55cf1d1fa"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiApprovedAnswersService.js",
+      "canonicalSha256": "7de9cf39c4919dd760bbf24756c2e02e1ca3da99fad601e719f3353f3d51c931"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiApprovedAnswersShared.js",
+      "canonicalSha256": "a4255fdde8e7159c7c3f2769a0aedf2d166076e6df8d6703339e875e56af5959"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiApprovedRelatedEvidence.js",
+      "canonicalSha256": "0c9c574bdbdc3290077950f3d004185b8cb87059d336da6c3a0dcc6c4b23989b"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiApprovedSourceBinding.js",
+      "canonicalSha256": "ff5fe99f9c6cd2f0805e160997ed0468dc70acd9754f338f15cf103e5d4af365"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiAssistantConfig.js",
+      "canonicalSha256": "823f695ed263e7d66393256996cb7b36a3b59eb88f69092c827326d8f5d99417"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiClarificationChoices.js",
+      "canonicalSha256": "d40fb7e57134703f49d14dcc8d798debd6f9623a50fa062fe22fdab87d9ef560"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiCommunityIntent.js",
+      "canonicalSha256": "89328837bdfab910a625318ee5b36d6875c8601d3fb07febe29e3a88807866a2"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiConversation.js",
+      "canonicalSha256": "da6c7e0e707dcbc27481a5697e4797ba6e2c8394b40f8ab4e2544030b1b6ac81"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiConversationDiagnostics.js",
+      "canonicalSha256": "0a33296158966d0d2c7285c6cf22abcb41538018581c7296441800d98a1a75be"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiDocumentActivation.js",
+      "canonicalSha256": "1f70868b53f9be220afe59edb4305042f712b55c93211812a6a52ffc318af143"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiDocumentMetadata.js",
+      "canonicalSha256": "d7a21c17952287f8eb222eb427e90afe3d9c789bef73dbda65b1f0062a74ea83"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiDocumentNavigation.js",
+      "canonicalSha256": "6c106370ace98f323e2f9dd37ec0379a18e952c38710e0982aa4eba168841a37"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiDocumentProcessing.js",
+      "canonicalSha256": "858739377e3fbb3ab4ef1b5172a0246db3c76815f986473fe607587405d5fb20"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiEligibilityIntent.js",
+      "canonicalSha256": "9ccdd1f1a29dd3b8ea094d23fa9ea67931e7abe8cc69c0e918e9285eebf33db1"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiEligibilityPolicy.js",
+      "canonicalSha256": "c9276eeccde44b280c7077531e8886ebc508cf8ec590d4763fd2cb049c2ff1e5"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiEligibilityService.js",
+      "canonicalSha256": "de2b027da3b3f6467b705ece0016ee4bb8c11e7ff5a0396d4a43cc008bf616c9"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiEquipmentIntents.js",
+      "canonicalSha256": "c7bec5cb806cf7f4323a2a493c25f8adb3d7f97c472d9e4e1f1fbe2a461746cd"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiEvidenceExcerpts.js",
+      "canonicalSha256": "9ab4d5effd17d5b5985194006c1383b68d75267cbdbbbdd2d25f4deac8c93853"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiExistingEvidenceDecision.js",
+      "canonicalSha256": "1529ee6f6acb3eebb66610a365e6f79561b6fa7cd6c1d6a74bc48af4b374de89"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiGoverningSources.js",
+      "canonicalSha256": "0cd6c6f059feee7533327dc0f9323d2c40ae7bb965166344dea5ebb792f3b8fb"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiLeagueDateEvidence.js",
+      "canonicalSha256": "fb10cc2a42cd0ee06ce7e9150262e7730e99e509e04c0a184b251168e6aa203d"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiLeagueDateFacts.js",
+      "canonicalSha256": "cedbfa4775bcfa59539779811a72a5fc8cf809958aabdce0625a429ef3254a13"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiMaterialQualifications.js",
+      "canonicalSha256": "4d37a69e3bd0a6f03a1cff692327ad134464c647b0132364f9825d695cfc6889"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiOfficialApplicability.js",
+      "canonicalSha256": "15bbf1022bb327c4278c332f0727a1d674b5f43e6d6a6776d1d6dfbd2340f352"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiOfficialDocumentViewer.js",
+      "canonicalSha256": "7a283f134fd56b050b2fe7d00a2ed28222e373c963c7166d15f75acc8aa2be47"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiPassageContinuations.js",
+      "canonicalSha256": "3c7a45ab1d243d5b56797650a9ae1f70d94ebc9e8303dd722446c8e9810bd14d"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiPolicyDiagnostics.js",
+      "canonicalSha256": "12986c48177a36212981f719e8e73a5da3a110b9c0ee07aa7dbe35d2961045a2"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiPolicyEvidence.js",
+      "canonicalSha256": "dbfe6b1b06c18e059938df61ea9d6630ff26673485bbfb143375cbca25e127d5"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQualityCapture.js",
+      "canonicalSha256": "5acec1a2cba1de07b3a63ac4253ac0ec829ebacd5790ae2c833dfbba65c5571e"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQualityGrouping.js",
+      "canonicalSha256": "6cba4db29562f0b93c3e5579a29cce1c015faf16be490c093e0b5309a29be8a0"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQualityNameClassification.js",
+      "canonicalSha256": "5e1358d683b146f35861672dd5d49b15eb839468a22a28c24d5c4da01dbc9e36"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQualityPersistence.js",
+      "canonicalSha256": "39883922ed59da0573151346a4703ed0b01027df608fcf961b9a9c5a3ea5c01d"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQualitySnapshots.js",
+      "canonicalSha256": "850ce6c35513cc9d62205b8b66e4e2eea3d6c1825af859b36631fa5b0d2f4222"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQuestionApplicability.js",
+      "canonicalSha256": "bbfbdee16e43b7951f890c2a5b64313939ffb673c7f47452e0b3d8defb33c361"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQuestionConcepts.js",
+      "canonicalSha256": "009654f3aa30297b8a8c7e466e09fa03953baa1b1ec8548e814494f49bba6409"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiQuestionInterpretation.js",
+      "canonicalSha256": "b6cb6a8ea05a0da293829a1a426bca010f0c7b51f1dcfcf9cf0343572f1a97d9"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiRegistrationEvidence.js",
+      "canonicalSha256": "cdcacab617baef3f6a29858c9d2a7cc21fd9585ecc1d8f89284cd78cc9740a88"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiRegistrationReleaseIntent.js",
+      "canonicalSha256": "fd6e34b6d53665f68f244740d3a53ed131ed9e0ad456ac9151f715a5d99dffd3"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiRequestIntent.js",
+      "canonicalSha256": "f1c3929862117b7066b38cda454acc7f382810525c724dff776fb9485f21532b"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiResultSource.js",
+      "canonicalSha256": "0ffad10970401efa72de8d04dbde958e261f3ade208a621f71ab034cbe4e8d0e"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiRetrieval.js",
+      "canonicalSha256": "df247492b5bbda078d629d36330d3812c29f4e9b3c8a3c211b7493bec539d74c"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiRetrievalEvaluation.js",
+      "canonicalSha256": "3b5df47a4a07a2589ca7bdafd4bb4c5db1f50968a79e78d0b62357a1cfd466a3"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiReviewHttp.js",
+      "canonicalSha256": "71dd78075321da29c0d365ad31dd2c21b3b6af12ab563357501ab632fea51daf"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiReviewService.js",
+      "canonicalSha256": "d956cd47f7241cfac1002c76d066db238833ab81bd26483cdea8aab9fafb9da5"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiReviewShared.js",
+      "canonicalSha256": "d16d65ef91da5ef35ac6e4693bb43126cbea82cd5a922173733a445601aa3792"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiRosterTroubleshooting.js",
+      "canonicalSha256": "a92dc35acf5b4c130bdc90f86209eab627f766cee0dbf5270526c56540568577"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiSchedulingApplicability.js",
+      "canonicalSha256": "093781437ead37daff3b77575d45db64b0797a5bfe74461fc6023be839a09b84"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiSelectedRuleIdentity.js",
+      "canonicalSha256": "682ffdf9f3bb372f932ecd6c0204d414478e02adc7ee3daa43b7dc64ca705660"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiSubstituteApplicability.js",
+      "canonicalSha256": "c412c42a874639696f193e893dc4eda98fdb80406fb1e3e7f02fb56fbc8b2697"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiSupplementContract.js",
+      "canonicalSha256": "c9b1323f2a80c104efd7a7d0a3dbb77326392031afea70fd4937c1bc134534ec"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/appDialog.js",
+      "canonicalSha256": "08e085d0dd3af1907c0a9f8d90ab7b41c26786e0fdb2fd1040ef0cfde6b97ad8"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/appNotifications.js",
+      "canonicalSha256": "0ab14dd90f04c7f3a94d1ff45990355d98ec1680dc48cd85d7f721fba8e1ee94"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/askLwrAssistantConfig.js",
+      "canonicalSha256": "7b0b01892e09841ed85d14165b7853071649210f2350a5fd8418b66df5f83ac8"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/askLwrConversationState.js",
+      "canonicalSha256": "53b26d9b4201415c0f930a6fb71aca2d68939974ea490a644dbee4da6188e5f9"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/askLwrFeedbackState.js",
+      "canonicalSha256": "b69270205487fa2a79e7767a1a525d22617dd53b921ba0a5b54d6d923f0454f7"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/askLwrPlayerAnswer.js",
+      "canonicalSha256": "889c0572aa70c80c2032dece2775d2811d8ccb2fb4c68efa9790062c02ee02e9"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/auth.js",
+      "canonicalSha256": "ac8bed3b80536580d8385d4dedd95e1864910be37f4ad1f1adef7ffafe539be3"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/confirmDelete.js",
+      "canonicalSha256": "d4f955135a33333ab60df7cb9f69b90300a68f9ec99ef717cd311669cd4fbeb7"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/dashboardGuides.js",
+      "canonicalSha256": "33c314c98f0738d806be1002f44a1a4df02202e30f465e90bf2ab4af4757c0bc"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/dateTime.js",
+      "canonicalSha256": "1a46b412c5fc6fc95cfaa8b85a0f8a2c0befd540657b16b3d2f016028675dd78"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/divisionOptions.js",
+      "canonicalSha256": "07cb62948219503ca21a0f51a84979da99a296a4e7df4c56f035b70de216dd56"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/email.js",
+      "canonicalSha256": "4733eb5c0d4322e88c80fa357812af7785e548c2b9ec9034ac79d77d1523a089"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/emailTemplates.js",
+      "canonicalSha256": "eea32a26bc9cc8c00502c88d22b8ce50a202b900c30b83cf9a3a66d90d56ee4f"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/helpContent.js",
+      "canonicalSha256": "0c87a089771b32378d84ed2532d30881c20a0a3b40757bfa7429133c873aa9b5"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/identityRoleWriter.js",
+      "canonicalSha256": "0843baa4a53b58da0db19e144dcc16af74f53263e7dbb8a9392d477a99332ec9"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/leagueDocuments.js",
+      "canonicalSha256": "aaa3b0edff0fe50c9beb6fcf12a8f586b941edeee28746cb7bed8a1780efc2d7"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/liveLmsIntent.js",
+      "canonicalSha256": "c4b0b5deb88ddc3f5235d50325c80cd2458bbe22ae30ca93849cd181152ec368"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/liveLmsReceipts.js",
+      "canonicalSha256": "ed092f8f8267c4897e36ec6dce0193a006be250898293e1325ff3783aa04dc08"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/liveLmsService.js",
+      "canonicalSha256": "debe037efa4a98b75fff5a7765d61c2429ab07309be8d0b28a9d25cdfe1a88b6"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/liveTeamRecord.js",
+      "canonicalSha256": "9a1108255021dd0d3b49e568bfc8a29623cec710254adb0a9e3fe224ee9ce2b5"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/matchRatingSnapshots.js",
+      "canonicalSha256": "f4198762655e51bf4cfe42aab93a35ce48cf0812a925b205f4a12337741f730f"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/matchScoring.js",
+      "canonicalSha256": "91b549ec4e4d1a03fd49a9553023710f0cb3c089336ceb3cf6ae1aa2c9f3da00"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/matchSetupReminders.js",
+      "canonicalSha256": "57ad9869672440a06821b202b9f6bae785c9f81820158ab21963887de6c7f11b"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/memberImportLocation.js",
+      "canonicalSha256": "fc30ab88c0b319a9da5a5498ab7ab55ac92e1e64d193cd47b32703ee77bb5ada"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/memberLookup.js",
+      "canonicalSha256": "8365c179327ced250bd014d8be3545f33f1e845bc7d9d9181975b44a04b28da3"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/navigationActiveState.js",
+      "canonicalSha256": "60bb6badd92fc0e086803058464df598d9c48e65562c63725d13383e0d3aaf54"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/notificationPreferences.js",
+      "canonicalSha256": "bab5e3e6c797672aba33797cc411a06e04aa7cb5bd2774c2b70c0ef8f9e0be74"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/notifications.js",
+      "canonicalSha256": "26ded4c9e8bedbd31e9fff53f1427e8acd31772b90cf03b3f3b218a4940e0478"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/passkeyErrors.js",
+      "canonicalSha256": "3f53240de3ab47dbbf843110f5dc4402f0b6239a511e5e04c76c0a15ca2f83c6"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/pbccReminders.js",
+      "canonicalSha256": "6756e302cd026ce58e26985480986b04898043610379e2983ca48aaa7e6d637a"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/pdfViewerPage.js",
+      "canonicalSha256": "cdf74cc2df74e2f6e66e05147a6c1beb41037aaefa310655de01990ce961cf7f"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/permissions.js",
+      "canonicalSha256": "03e8679316bda6ada9029d5e790826aab1367a91b46f432633cbf70da50385f3"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/phone.js",
+      "canonicalSha256": "ac9991d43aae6cc1a8025dadf067f80e34df16d2ca6a9080b7c6e3aa9fcee694"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/playHistory.js",
+      "canonicalSha256": "6e922f940815b25c81d38cbc7753e20bebaa94975f35f45b956f6379d2d83327"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/profilePhotos.js",
+      "canonicalSha256": "6455c9be8b1d2af6efc8469afd9ac42491858bb0f89728268d4ce6f3efc9b913"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/publicOrganizationalContacts.js",
+      "canonicalSha256": "01b7ef0bfe7fcf2e010fbabd118bc36504fba34e6d72c24ea349d1a301b7b8c9"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/ratingEligibility.js",
+      "canonicalSha256": "c71aa034f44c7fced5fa0b1d82eb940476268e7e8489b5b6dc1359c5bdb75fac"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/rfPolicy.js",
+      "canonicalSha256": "3dbb5aa0d71a9d365922cb9f3cf4b261f371ebe8be753c1e38fe457287788595"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/roleGuards.js",
+      "canonicalSha256": "e26197e28a9593fcb5f38eda89741cbfa04e3957536aac5ee04fb64b42d90232"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/roundRobinLadderRankings.js",
+      "canonicalSha256": "057ed3aeab5abdaabe9362eaa82dac235a312c136882f11e3647c18b2c54210a"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/roundRobinSchedule.js",
+      "canonicalSha256": "e8405f4016de3c1b8e9efa58a6489d2cc11165304b6030f76730769a9b794507"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/roundRobins.js",
+      "canonicalSha256": "a6e83a67ad940152a253f3e38b2d69233f8f36fc8826be3dfef03e960bdcfdd9"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/scheduleCaptainNames.js",
+      "canonicalSha256": "7af6118012f3a3a880b8dc34b684f0f158f7e406b08f102ada74a035ff0f0160"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/scoreSheetTemplates.js",
+      "canonicalSha256": "0d23854cc118d08b3558c018e6809e013366bdb77aa261f4ec38873f1136cf46"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/seasonRatingsImport.js",
+      "canonicalSha256": "32f32663bddfaa8e4851d39e631197f4933d3047ce2c2c1c21bc8dfb4f64fe9b"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/seasonRatingsImportServer.js",
+      "canonicalSha256": "a321e84674cc8de0f18a3d03d595faa2a8ff4909f5be57423a885f2e89394b9c"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/seasonRatingsReview.js",
+      "canonicalSha256": "65659c8339099034406867b8be0f3d71d89fd3c5994bef41e00fe362e2b19167"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/serverEmailTemplates.js",
+      "canonicalSha256": "546d850ed3d99da83d011dc04a57617a682462b9279f012ce44cf98fcaa666ae"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/serverSupabase.js",
+      "canonicalSha256": "2942c9806ab151b29e92a757c10f263c965858e234535950b57ec7c57a12590e"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/specialMatchResults.js",
+      "canonicalSha256": "24bcf49c8bbd35e8cbdd88991db8501b43dd35800e78045943e4bfcd3a465be0"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/standingsRebuild.js",
+      "canonicalSha256": "be18a394278f1c2feead3927dcfd70b72deee004c9ad5dd06f7b31b3409535e2"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/standingsSort.js",
+      "canonicalSha256": "c6e5b02308c02949b168549cac2ca485667b01aad68db8fe8240631ba86fa01e"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/standingsTiebreaks.js",
+      "canonicalSha256": "cfc825fb19179d6e5a3cdfda832b80afd2f621316c1e1d7e9e4f47a6377b1370"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/systemSettings.js",
+      "canonicalSha256": "fbb0894b333856c3d67a9cec2af5cb26bd3093bb04f279f11bfa6c966061faac"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/tournaments.js",
+      "canonicalSha256": "173b227d5ac9a576eef12d29a0bdeba4629906c84f73870e5bb3a51e56b72d0f"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/useUnsavedChangesWarning.js",
+      "canonicalSha256": "8b60ce433ca9b90910fc2e76eba0adffbcab8cd749c9f0c0993ff890fd3aeaa2"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/version.js",
+      "canonicalSha256": "10d1a60d3cae78228b63f284f79c286583c2019a52a8a5836525eb43263aadcc"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsBoundary.js",
+      "canonicalSha256": "ba294bdfa21a54f3a25b5f9ec4c582ea3c0d107c3d541b77a189d28d090c9de2"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsCrypto.js",
+      "canonicalSha256": "b81e78bc8a397acd221d195feb4983953e3a47e46aafd0b0fc36fd2651ad7d47"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsPageAssets.js",
+      "canonicalSha256": "9faaf4f3475940701b2a0410e176aa33f71c8a87ac53c59a443eddb76b2a1c24"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsPageState.js",
+      "canonicalSha256": "7e7b85a241aff372abbae4d690640bd86265c0af118228906fe20d0b0b8ee262"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsProjectionClient.js",
+      "canonicalSha256": "7cfb03b57e0926cc3481ad75721fd26b941a5c69e8270f68b644f041e486ff9c"
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsServer.js",
+      "canonicalSha256": "02843146727c42e19d8a5970d87e0e018d421b614262d62f8e750376265f58d6"
+    },
+    {
+      "file": "lwrpc-admin/app/live-match/[id]/page.js",
+      "canonicalSha256": "e7cd9ee3ba924cc84c7459cb40e6c5e2ce04a1c402818ad7531dc83eb212067a"
+    },
+    {
+      "file": "lwrpc-admin/app/locations/page.js",
+      "canonicalSha256": "581839cf3dd6073713d252ff2ccbab46858b6a776f0287055f3e12b0892afa76"
+    },
+    {
+      "file": "lwrpc-admin/app/login/page.js",
+      "canonicalSha256": "0b133b6d8ecbf55ee45e5b3e4cf6684391fa66444cf436b51a33554cb4047aaf"
+    },
+    {
+      "file": "lwrpc-admin/app/matches/[id]/page.js",
+      "canonicalSha256": "ac5fb152d89bfd292005f87f9f580fccc14f804017b11f4defdc61542739d49c"
+    },
+    {
+      "file": "lwrpc-admin/app/matches/page.js",
+      "canonicalSha256": "2ec92c1c7cd8e0caa1dea2f994eb10cf1057e913d5537be95d0040d9437a9b5d"
+    },
+    {
+      "file": "lwrpc-admin/app/member-import/page.js",
+      "canonicalSha256": "3436772c0d576784802ee898b4c970eaa3c9c4299437f1a7c67867d04283ca77"
+    },
+    {
+      "file": "lwrpc-admin/app/members/[id]/page.js",
+      "canonicalSha256": "4f0299620dc65fff03ada34de7574638f05c86756197a8ded10a42f95aa9e6e5"
+    },
+    {
+      "file": "lwrpc-admin/app/members/page.js",
+      "canonicalSha256": "ed5025a1300a1fd36b676f7cf42c6de323aba3b9954a0103f552d6eacfe3ab12"
+    },
+    {
+      "file": "lwrpc-admin/app/official-document/[citation]/page.js",
+      "canonicalSha256": "569964b10ba8ddd8f2693d207854813bd7df700649be882785394e4180bbc750"
+    },
+    {
+      "file": "lwrpc-admin/app/page.js",
+      "canonicalSha256": "31ff63379f2ab4966bc31a37bc25192c7b4133d302cda79a3bada15561292385"
+    },
+    {
+      "file": "lwrpc-admin/app/pageOLD.tsx",
+      "canonicalSha256": "359fd0c734c7632e73f8299501bda0765a07ab36d0e26e42d92cc93f6ba983c2"
+    },
+    {
+      "file": "lwrpc-admin/app/player-dashboard/page.js",
+      "canonicalSha256": "a6a171edc0c963fce1b23c7798a4857b835a2c9627bfafb2695053849a9479af"
+    },
+    {
+      "file": "lwrpc-admin/app/print/page.js",
+      "canonicalSha256": "68280275fea615e42c4651d94174c6baf86d2df12c4da98d04c7967b15be8aac"
+    },
+    {
+      "file": "lwrpc-admin/app/ratings/page.js",
+      "canonicalSha256": "8da49bd1f2b66df9bac60c4d4be303704ae75361185371e23ef83dfcd987ecdd"
+    },
+    {
+      "file": "lwrpc-admin/app/reset-password/page.js",
+      "canonicalSha256": "bb16d10c1a6a703db330fc2235df6b3608995fda6639d12858418edff1470ff5"
+    },
+    {
+      "file": "lwrpc-admin/app/round-robin/[id]/admin/page.js",
+      "canonicalSha256": "cd9f1abf2a29f82570652019800cac420add25e82b9bd736f670ae4121dc4f7f"
+    },
+    {
+      "file": "lwrpc-admin/app/round-robin/[id]/page.js",
+      "canonicalSha256": "55cad125a15dd0767fc124ca4e0d6608d37db177b1b9deec4f98c0f005d2726f"
+    },
+    {
+      "file": "lwrpc-admin/app/round-robin/[id]/player/page.js",
+      "canonicalSha256": "c61cbb21340415c161e1f3ad5e7ce04ac5cde2be4db4d914ca1332a98d24694f"
+    },
+    {
+      "file": "lwrpc-admin/app/round-robin/page.js",
+      "canonicalSha256": "112dd34a5087c150bcf0dd3d6df630ad48296476450507fdeee197d7a6570548"
+    },
+    {
+      "file": "lwrpc-admin/app/schedule-editor/page.js",
+      "canonicalSha256": "0af5db4d566aed3e0b035b52861a38699c14005770d5ed057af2f05bea43ba76"
+    },
+    {
+      "file": "lwrpc-admin/app/scheduling/page.js",
+      "canonicalSha256": "98ee3a1c8ace5ebc0a4ce8a05fc1b2ca618aebad53e161f78939b85707792ee5"
+    },
+    {
+      "file": "lwrpc-admin/app/score-entry/[id]/page.js",
+      "canonicalSha256": "8bd8442c1180ec018a6e66791e874d9ec84b6c547db319886f554814c2074106"
+    },
+    {
+      "file": "lwrpc-admin/app/score-sheets/page.js",
+      "canonicalSha256": "46db1a9265bf1ebba44dcaea1bdb02e2820e39b47a57fdaa24f46f5032248238"
+    },
+    {
+      "file": "lwrpc-admin/app/scoring/page.js",
+      "canonicalSha256": "c0a34c2a1d928c299b00e7605f5d0095d82853ae0d6558442593e954fe793abe"
+    },
+    {
+      "file": "lwrpc-admin/app/seasons/page.js",
+      "canonicalSha256": "d0059ebfefddee51efa85e6f729e9b7542a1c144680b1b85674245b25a7f18d8"
+    },
+    {
+      "file": "lwrpc-admin/app/standings/page.js",
+      "canonicalSha256": "97c98ea1deea0c98f23d7152852f30840dc27c6a9d912b2b98e7fd1ab44c5743"
+    },
+    {
+      "file": "lwrpc-admin/app/system-setup/page.js",
+      "canonicalSha256": "defba9650cdd79b5feeb638912d0461d36f20513b2a76ad9f38adc58246da7d0"
+    },
+    {
+      "file": "lwrpc-admin/app/teams/[id]/page.js",
+      "canonicalSha256": "27befe663a6cf3f26eeafbafb4ed65ad379efa790779c669a08f8fd84eba7a46"
+    },
+    {
+      "file": "lwrpc-admin/app/teams/page.js",
+      "canonicalSha256": "546aed52e8a9522b5a99922f7538e2419ad761d1a67cde8b84c889a03b996bdf"
+    },
+    {
+      "file": "lwrpc-admin/app/tournaments/[id]/admin/page.js",
+      "canonicalSha256": "13a6cdc83979813444265412b4c9d4f50812e1304401f181691fdf56ac2c4978"
+    },
+    {
+      "file": "lwrpc-admin/app/tournaments/[id]/display/page.js",
+      "canonicalSha256": "647720d1ff79111ffe8dcb6479191b46e2058393f77d0c8b5cb1eaf632845906"
+    },
+    {
+      "file": "lwrpc-admin/app/tournaments/[id]/page.js",
+      "canonicalSha256": "012329ba2acae8e4fd29c081e4043901bdf7b9e5371b5df28843ba5e02b4b3cf"
+    },
+    {
+      "file": "lwrpc-admin/app/tournaments/[id]/player/page.js",
+      "canonicalSha256": "4100977255c7ddf86ae54af3b28598bc293500e302684866c5f02437ad10d6ab"
+    },
+    {
+      "file": "lwrpc-admin/app/tournaments/[id]/standings/page.js",
+      "canonicalSha256": "74aa7cc66079a898681070dffeea3fc24f97e9d16f3543f82df1f6636795b31f"
+    },
+    {
+      "file": "lwrpc-admin/app/tournaments/page.js",
+      "canonicalSha256": "84343e4e9418f6d813294acdcad67cd600b4017a7c7171219fbc48ca1ae51105"
+    },
+    {
+      "file": "lwrpc-admin/app/view-as/page.js",
+      "canonicalSha256": "ad777fd6f44ab083e589abfdc23e7321d9ab73b4cb35d0de021bf4bb850a5663"
+    },
+    {
+      "file": "lwrpc-admin/content/help/captain/01-overview.md",
+      "canonicalSha256": "39062b2d50b1756d01e461c539d50188f6495545644c9b27ed4c4eb945d6aa03"
+    },
+    {
+      "file": "lwrpc-admin/content/help/captain/02-rosters.md",
+      "canonicalSha256": "23ba82687c63cef54dc3e32f5556c0d58da446e43c5eb863fdc1908f5e5183c5"
+    },
+    {
+      "file": "lwrpc-admin/content/help/captain/03-match-setup.md",
+      "canonicalSha256": "0806e1ea17b5454569270683611445a4d9fb1fe35a2a461614cf934ddf08957e"
+    },
+    {
+      "file": "lwrpc-admin/content/help/captain/04-score-entry.md",
+      "canonicalSha256": "98e94bf3287020dab5289fefaf3b64dd8a5725538603464f532411de6e79378f"
+    },
+    {
+      "file": "lwrpc-admin/content/help/captain/05-verification.md",
+      "canonicalSha256": "8513dd8740a226038886092d87a66c693a1ba0c0e87c9d23dedc34f6d61d786f"
+    },
+    {
+      "file": "lwrpc-admin/content/help/captain/06-player-dashboard.md",
+      "canonicalSha256": "f61b0729dc36dcb9caf501cea083ea2f674214d7b3c5916600737899fc92a42e"
+    },
+    {
+      "file": "lwrpc-admin/next-env.d.ts",
+      "canonicalSha256": "7b550dda9686c16f36a17bf9051d5dbf31e98555b30d114ac49fc49a1e712651"
+    },
+    {
+      "file": "lwrpc-admin/next.config.ts",
+      "canonicalSha256": "1562d6ac69be1a92a25b7629c70d1b0df536b0c27a9747707fa18daaa99f1c90"
+    },
+    {
+      "file": "lwrpc-admin/package-lock.json",
+      "canonicalSha256": "b3cb768005b63dc5c62c30d1a09bb06cee71c355fab42056485f289a7e89b21b"
+    },
+    {
+      "file": "lwrpc-admin/package.json",
+      "canonicalSha256": "a79ee1e17eb953fc75c90b5dbb8f1de519adf8d64b9551c7d1e4026318f6ec82"
+    },
+    {
+      "file": "lwrpc-admin/postcss.config.mjs",
+      "canonicalSha256": "dfac7ac2d86d326a0e5adb024e7943c181393ed17a5fcb8f0315b24c7da6ddde"
+    },
+    {
+      "file": "lwrpc-admin/proxy.js",
+      "canonicalSha256": "2db1937c2d437cbf372abbd047edf83680e507ccae92c5d2053221606674f8ec"
+    },
+    {
+      "file": "lwrpc-admin/public/file.svg",
+      "canonicalSha256": "2b67812c325c199a02536cdbeea0c593a72f707d323b72ee3e08dbab06753bd4"
+    },
+    {
+      "file": "lwrpc-admin/public/globe.svg",
+      "canonicalSha256": "b614b9bf183925957661ac851498fe1d8029fd43a62fbfed86f9e2624a57e7cf"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/.gitkeep",
+      "canonicalSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/captain-dashboard.png",
+      "canonicalSha256": "c045f760ae1b3b679ecc7f2fa50ac50afd03340404ff5dce799a07b2db33f46f"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/completed-matches.png",
+      "canonicalSha256": "d2fad297b7c13a4d0ea841b897c887e52e2961a2321f1eab34a181f008f771fc"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/division-captains.png",
+      "canonicalSha256": "8b9bd2c378bf0f60a11309859eda4893b8c13d319b0d9acb2a0fb5b94f754b5d"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/division-captains2.png",
+      "canonicalSha256": "1daa18b1f21756f6ab1440bcc66b9b55f3bb9e0ec33097ed8b54e1159c8f3aea"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/enter-match-scores.png",
+      "canonicalSha256": "2fd8aa7c45c8ece7149f3a19b96abdec9d6973e8e04955db6334ae102f716929"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/initial-login-screen.png",
+      "canonicalSha256": "2f2c571a185412bf4c9ebfc970f0b17e5c954448c194929a2e2c099416518cfd"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/match-score-details.png",
+      "canonicalSha256": "d72957a26032764c8ece0a8108e887d16dbbe6df2476aea5ee32067e3c0fd400"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/match-scoresheet.png",
+      "canonicalSha256": "43f5ebae654417a78ec4a19557b83c0d3012d065385f9d0f0470e27b43cfefd9"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/match-setup.png",
+      "canonicalSha256": "71bcbe47eb9f47d8a8f650dd476a38486772be96dda5a881a3c361c9fe0eddae"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/pending-score-verification.png",
+      "canonicalSha256": "de7c9d92b34c4d86e9a0b7d52e688b2e3a5d0b8a8b4c0a1010e77be144b089ce"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/player-pulldown.png",
+      "canonicalSha256": "16d670d2befd8b9888a5d5ef3c3dcfaa7d213884360ee608900ba46ae8f84c14"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/roster-management.png",
+      "canonicalSha256": "362e5b440767fa9653b868c6b02263475865b3f173ecfb9ce15ee17a4452d577"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/schedules-standings.png",
+      "canonicalSha256": "e86ab5678fbd5aa3beb7dd69c3ea1f29ed5706053480a8c9d6ffec9aece8c657"
+    },
+    {
+      "file": "lwrpc-admin/public/help/captain/screenshots/upcoming-matches.png",
+      "canonicalSha256": "1f41c020f8a03b841980f3d4d25049adb3040de9b7c9e834d51d15164c3ae696"
+    },
+    {
+      "file": "lwrpc-admin/public/lms-icon-192.png",
+      "canonicalSha256": "243c31788b064843169c3dbad5101e19f30a916fb307e29d7553bf8d14f614cc"
+    },
+    {
+      "file": "lwrpc-admin/public/lms-icon-512.png",
+      "canonicalSha256": "d2608908c71506f79b936ce1b91c218758b4f85628b3c4a90cfcdaf1d7e1da10"
+    },
+    {
+      "file": "lwrpc-admin/public/lms-manifest.webmanifest",
+      "canonicalSha256": "fcf7d3f79e7a0614a297276921cb7c423b07ad49080a00d2140345ea6a8d0999"
+    },
+    {
+      "file": "lwrpc-admin/public/lms-sw.js",
+      "canonicalSha256": "551d98c1ae4e9f2801fb173fd577910ab92db9d2080735ca94b2442909a59959"
+    },
+    {
+      "file": "lwrpc-admin/public/next.svg",
+      "canonicalSha256": "55995dfad6ecb4945a1e856ddca03c5e16aa5bf13fd21b4df6a74ae79357bcfc"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-header-pickleball-icon-192.png",
+      "canonicalSha256": "82e978ed8e4685246e8fb8066fe32164ad0798c37a98e741782f1781304fa7fc"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-header-pickleball-icon-512.png",
+      "canonicalSha256": "728c93ba12762b53a23564460e67310c428af024a55cfdac713adda3b0ccdc68"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-header-pickleball-transparent-icon-192.png",
+      "canonicalSha256": "82e978ed8e4685246e8fb8066fe32164ad0798c37a98e741782f1781304fa7fc"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-header-pickleball-transparent-icon-512.png",
+      "canonicalSha256": "728c93ba12762b53a23564460e67310c428af024a55cfdac713adda3b0ccdc68"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-icon-192.png",
+      "canonicalSha256": "65653ab9e18ee2687d2dcfe6404b90e8ce5b3ea505679ba3995a95e4c6480fc1"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-icon-512.png",
+      "canonicalSha256": "64b4085faae7a041b969a68bc709142d8599553e6b9de1d50fb78380569439c6"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-manifest.webmanifest",
+      "canonicalSha256": "ebdbfe6c13baa76b7f7a082d25c2f19b9b534e99abf1553f0a1eae3186814959"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-pickleball-full-icon-192.png",
+      "canonicalSha256": "d7d134581576c4127822a0bd75ea0fa773798c62039046403be94aa20d2366de"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-pickleball-full-icon-512.png",
+      "canonicalSha256": "a6e1f319201ab8691775577f5141a259fd1dab139f98e1c4da30a4b4178babe5"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-pickleball-icon-192.png",
+      "canonicalSha256": "65653ab9e18ee2687d2dcfe6404b90e8ce5b3ea505679ba3995a95e4c6480fc1"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-pickleball-icon-512.png",
+      "canonicalSha256": "64b4085faae7a041b969a68bc709142d8599553e6b9de1d50fb78380569439c6"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-pickleball-safe-icon-192.png",
+      "canonicalSha256": "5b526eb258461c100787928df32cae83b4edde31edc66b05f486749d0bfdf76d"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-pickleball-safe-icon-512.png",
+      "canonicalSha256": "6bdb496eeec1ca3d22dacf923a692fb2ee859e66e3ed387b60b32aaaa191f144"
+    },
+    {
+      "file": "lwrpc-admin/public/pbcc-sw.js",
+      "canonicalSha256": "2f0652a914a40e6b19da16c2068567a567ca3fb1571b4941295d465b076c7847"
+    },
+    {
+      "file": "lwrpc-admin/public/vercel.svg",
+      "canonicalSha256": "f081337b2fee635b455b63275406a3e7f39d6a014e25ad90dab5a67e62a12ac4"
+    },
+    {
+      "file": "lwrpc-admin/public/website-emblem.png",
+      "canonicalSha256": "2a82ea62ef1ace62e77d210c871a7ff88d6a66127995ca50cd6c54d662a4152d"
+    },
+    {
+      "file": "lwrpc-admin/public/window.svg",
+      "canonicalSha256": "644768c4aaeb4767bce293344eeb0c125fb804a94d801440424072202d85e3a1"
+    },
+    {
+      "file": "lwrpc-admin/tsconfig.json",
+      "canonicalSha256": "be18523b23b78b6e1a876ddd107d330f0168bddf09d751b57e0b5edce69c66f3"
+    }
+  ]
+}

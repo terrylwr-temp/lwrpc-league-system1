@@ -1,0 +1,120 @@
+Local synthetic verification — Season Ratings
+Ratings Filters
+Current Rosters Only
+DUPR Filters
+Hide Data Tools
+PLAYERS
+2 of 2
+Season
+Select Season
+Synthetic Fall
+Search Players
+Clear Filters
+Ratings Import
+Upload Ratings CSV
+Clean Ratings
+Delete Season Ratings
+Copy From Season
+Select Source Season
+Synthetic Fall
+Copy To Season
+Select Target Season
+Synthetic Fall
+Copy Ratings
+SEASON RATINGS STATUS
+Previewed 2 rows. No data has changed.
+Source ratings — Synthetic Fall
+
+Current source information only. Season DUPR, PrimeTime Season DUPR, season RF and member details are preserved. Clean Ratings is not run.
+
+Total rows
+2
+Matched by DUPR ID
+2
+Not found
+0
+Missing DUPR ID
+0
+Duplicate / ambiguous
+0
+Ready to update
+2
+No change
+0
+Skipped
+0
+Invalid ratings
+0
+
+Matched is an identity count. Ready, no change, skipped and invalid are the action totals. Protected season fields are excluded from every update.
+
+Import Matched Ratings
+CSV line	Action	LMS member / CSV reference	DUPR ID	Source Reliability Factor	Exact source changes	Reason
+2	UPDATE	Synthetic Manager	ABC123	29
+Source only; no season reclassification
+	
+DUPR Doubles: blank → 3.237
+Reliability Factor: blank → 29
+Age-based DUPR: blank → 4.744
+Age metric: blank → over_65
+Age metric absent in file: blank → false
+RF absent in file: blank → false
+Doubles absent in file: blank → false
+	Refresh source only; season values preserved.
+Preserved season values: DUPR 4; PrimeTime 4.2; RF 29.
+
+3	UPDATE	Synthetic Player	DEF456	30
+Source only; no season reclassification
+	
+DUPR Doubles: blank → 3.485
+Reliability Factor: blank → 30
+Age metric absent in file: blank → true
+RF absent in file: blank → false
+Doubles absent in file: blank → false
+	Refresh source only; season values preserved. No applicable age metric; previous source age preserved.
+Preserved season values: DUPR 3; PrimeTime 3.3; RF 30.
+Previous
+Page 1 of 1
+Next
+Showing 1 to 2 of 2 playersBASED ON THE SYNTHETIC FALL
+Previous
+Page 1 of 1
+Next
+ASC
+Player
+	
+Added
+	
+DUPR ID
+	
+DUPR Doubles
+	
+Reliability Rating
+	
+Season DUPR
+	
+Age-Based
+	DUPR NOTES
+
+Manager, Synthetic
+	12/31/2025						
+
+Player, Synthetic
+	12/31/2025						
+Previous
+Page 1 of 1
+Next
+!
+LEAGUE MANAGEMENT SYSTEM
+Confirm Source Ratings Import
+
+Target Season: Synthetic Fall
+Rows to update: 2
+No change: 0
+Skipped/invalid: 0
+Season ID: 00000000-0000-0000-0000-000000000020
+Source fields: DUPR Doubles, Reliability Factor, Age-based DUPR, age metric, age presence, RF presence, Doubles presence
+Season DUPR, PrimeTime Season DUPR, season RF, notes and member details are preserved. Clean Ratings will not run.
+
+Cancel
+Import Matched Ratings

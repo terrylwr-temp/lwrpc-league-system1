@@ -1,0 +1,93 @@
+(node:11684) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF01 below (2.2243ms)
+✔ RF02 fraction (0.3151ms)
+✔ RF03 boundary (0.2034ms)
+✔ RF04 above (0.288ms)
+✔ RF05 missing (0.3325ms)
+✔ RF06 numeric NR (0.1897ms)
+✔ RF07 rated below (0.3136ms)
+✔ RF08 rated inside (0.1728ms)
+✔ RF09 rated above (0.2144ms)
+✔ RF10 independent NR (0.4278ms)
+✔ RF11 independent unknown (0.3296ms)
+✔ RF12 pair unknown (0.1444ms)
+✔ Exact official source gate + NR precedence + sanitized single telemetry outcome (16.1974ms)
+✔ Policy only never reads SELF (6.3301ms)
+✔ PT9 conflict blocks personal lookup; no crossing to Weekday rules (6.5518ms)
+✔ PrimeTime age policy includes exact 6.3.2 source; no live lookup (2.6291ms)
+✔ Clarification binds subject session, exact choice and current source (7.7049ms)
+✔ Inactive or unavailable SDUPR5 does not substitute another division (1.1326ms)
+✔ Missing RF stays unknown and denied subject remains protected (8.7446ms)
+✔ Telemetry exceptions fail open with exactly one logical attempt (5.5641ms)
+✔ Standalone other-player RF is protected before catalog or provider (0.6202ms)
+✔ Changed policy version, future season and missing continuation fail closed (0.5176ms)
+(node:10268) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ A/B: empty trailing header and ordinary ten-column export preserve every field (6.3548ms)
+✔ C named extra header remains invalid (0.4759ms)
+✔ D short data row remains invalid (0.2288ms)
+✔ E populated extra data field remains invalid (0.1361ms)
+✔ F unnamed interior header remains invalid (0.1793ms)
+✔ punctuation-only named suffix is not padding remains invalid (0.1824ms)
+✔ duplicate normalized header remains invalid (0.1797ms)
+✔ trailing header padding does not allow extra populated data remains invalid (0.2285ms)
+✔ G/H: quotes, commas, escaped quotes, BOM and LF/CRLF retain positional empty cells (0.9075ms)
+✔ a trailing comma is a real empty data field, never stripped to repair width (0.6416ms)
+✔ 879-row export-shaped fixture reaches the complete preview service without writes (53.4953ms)
+(node:28604) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 879-row scrubbed actual export reconciles source fields and recorded identity categories (43.9774ms)
+✔ DUPR only, normalized exact match, missing/unmatched and all duplicate rows rejected (0.8732ms)
+✔ missing age preserves existing source age without touching locked inputs; unchanged repeat is no-op (1.7858ms)
+✔ invalid values do not become ratings: {"doubles":"3abc"} (0.2986ms)
+✔ invalid values do not become ratings: {"doubles":"-3"} (0.1853ms)
+✔ invalid values do not become ratings: {"doubles":"Infinity"} (0.1509ms)
+✔ invalid values do not become ratings: {"doubles":"8.1"} (0.1266ms)
+✔ invalid values do not become ratings: {"doubles":"3.2345"} (0.1595ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29%"} (0.2544ms)
+✔ invalid values do not become ratings: {"doublesReliability":"-1"} (0.3185ms)
+✔ invalid values do not become ratings: {"doublesReliability":"101"} (0.2393ms)
+✔ invalid values do not become ratings: {"doublesReliability":"1e1"} (0.2063ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29","doublesRe":"30"} (0.254ms)
+✔ invalid values do not become ratings: {"metrics":"{broken"} (0.2197ms)
+✔ invalid values do not become ratings: {"metrics":"[]"} (0.1777ms)
+✔ invalid values do not become ratings: {"metrics":"{\"subscores\":{\"doubles\":{\"over_65\":\"bad\",\"over_50\":\"3.4\"}}}"} (0.2148ms)
+✔ full RF header is primary; short alias works only when primary absent (0.2804ms)
+✔ strict CSV multiline, escaping, duplicate headers, width and row bound (1.1937ms)
+✔ signed exact preview rejects tampering, wrong session, expiration and wrong purpose (1.3335ms)
+✔ preview calls only read RPC; commit requires explicit confirmation and same season (2.8293ms)
+✔ current-policy RF 28 (0.3443ms)
+✔ current-policy RF 29 (0.0759ms)
+✔ current-policy RF 30 (0.0514ms)
+✔ current-policy RF 29.0 (0.0494ms)
+✔ current-policy RF 29.01 (0.0461ms)
+✔ Ask LWR supplied RF: My Reliability Factor is 29. Am I NR? (6.4121ms)
+✔ Ask LWR supplied RF: Is a Reliability Factor of 30 considered NR? (2.1014ms)
+✔ Ask LWR supplied RF: What happens if my RF is 28? (2.3285ms)
+✔ unchanged substitute Approved Answer applies current NR rules at RF29 (4.3313ms)
+✔ import rejects View-As credentials before authentication or database access (38.0505ms)
+✔ RF cutoff comes from evidence, with no implicit fallback or importer classification (0.7577ms)
+✔ source-only transaction, rollback, identity revalidation, role boundary and idempotency (4497.8251ms)
+(node:12488) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityPolicy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ owner resolution synchronizes cleanup and Ask LWR at RF 29 (2.1983ms)
+✔ RF=29 retains actual cleanup rating result and existing eligibility result (0.6649ms)
+✔ owner resolution preserves cleanup threshold opt-out and missing RF behavior (0.3222ms)
+✔ current CSV import contains no cleanup or eligibility-classification calls (0.6867ms)
+ℹ tests 69
+ℹ suites 0
+ℹ pass 69
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10851.0961

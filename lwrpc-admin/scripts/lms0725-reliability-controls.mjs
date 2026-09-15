@@ -1,0 +1,21 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+import {eligibilityPolicy,evaluateEligibility,divisionOptions} from '../app/lib/aiEligibilityPolicy.js';
+import {eligibilityIntent} from '../app/lib/aiEligibilityIntent.js';
+import {catalog} from '../test/helpers/eligibilityFixture.mjs';
+const policy=eligibilityPolicy(catalog.candidates,divisionOptions(catalog.divisions,eligibilityIntent('Can I play DUPR5?'))[0]);
+const check=(rf,value,sourceIsNr=false)=>evaluateEligibility(policy,{rf,value,sourceIsNr});
+const rows=[];function control(id,assertion,note){assertion();rows.push({id,status:'PASS',note});}
+control('RF01',()=>assert.equal(check(80,2.5).outcome,'PARTIALLY_CONFIRMED'),'Rated individual pass; overall partial.');
+control('RF02',()=>assert.equal(check(28,4).classification,'NR'),'RF below threshold takes precedence.');
+control('RF03',()=>assert.equal(check(20,4,true).individual,'NR_RULES'),'Numeric adjusted rating plus NR is not a conflict.');
+control('RF04',()=>assert.equal(check(null,2.5).outcome,'CANNOT_DETERMINE'),'Missing RF cannot imply Rated.');
+control('RF05',()=>assert.equal(check(80,1.9).individual,'FAIL'),'Rated below range.');
+control('RF06',()=>assert.equal(check(80,2.5).individual,'PASS'),'Rated in range.');
+control('RF07',()=>assert.equal(check(80,3).individual,'FAIL'),'Rated above range.');
+control('RF08',()=>assert.equal(check(20,4).individual,'NR_RULES'),'Rule 4.5 placement permission, overall partial.');
+control('RF09',()=>assert.equal(check(20,9,true).outcome,'PARTIALLY_CONFIRMED'),'Negative guard: current minimum inputs establish no independent failed NR condition. No invented NR failure from an out-of-range adjusted rating. A positive independent-condition failure is outside this bounded projection.');
+control('RF10',()=>assert.ok(check(80,2.5).unresolved.includes('PAIR_AGGREGATE_UNKNOWN')),'No invented partner or highest adjusted rating.');
+control('RF11',()=>{const p=eligibilityPolicy(catalog.candidates,divisionOptions(catalog.divisions,eligibilityIntent('Can I play PrimeTime 9?'))[0]);assert.equal(evaluateEligibility(p,{rf:20,value:9}).outcome,'POLICY_CONFIGURATION_CONFLICT');},'PT9 conflict blocks determination.');
+control('RF12',()=>{const pg=JSON.parse(fs.readFileSync('../docs/lms-0725-eligibility-postgres-results.json'));assert.equal(pg.effectiveRf,'PASS');assert.equal(pg.forgedViewTarget,'DENIED');},'Real PostgreSQL companion matrix includes effective-user NR answer with contrasting real-actor RF.');
+assert.equal(check(28.999,4).classification,'NR');assert.equal(check(29,2.5).classification,'RATED');
+fs.writeFileSync('../docs/lms-0725-reliability-control-results.json',JSON.stringify({modelCalls:0,scenarioControls:rows,boundary28_999:'PASS',boundary29:'PASS',scopeNote:'RF09 is a no-false-failure guard, not certification of an unavailable participation/pair failure capability.'},null,2));console.log('12 RF controls passed; RF09 bounded no-false-failure guard; 28.999 and 29 boundaries passed; zero model calls.');

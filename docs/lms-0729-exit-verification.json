@@ -1,0 +1,10 @@
+{
+  "verified": "2026-09-09",
+  "contexts": ["07b24a9f-c3bf-4e64-ac88-0d082164de8d", "b1b0cc27-44b9-43f0-b3df-72cf6f235dee", "476d83c6-daf0-403a-a49c-4b4386d58908"],
+  "all_explicit_exit": true,
+  "all_code_null": true,
+  "all_context_null": true,
+  "all_credential_null": true,
+  "binding_and_browser_retained": true,
+  "note": "Separate read-only per-field production verification. The initial credentials_cleared predicate in final-evidence.json incorrectly required retained binding/browser hashes to be null. Existing LMS-0724 end-context source clears code, context, credential only; all passed."
+}

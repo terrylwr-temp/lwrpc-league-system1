@@ -1,0 +1,1037 @@
+{
+  "purpose": "Local working-tree baseline before rescoped UI implementation. Includes accepted uncommitted LMS-0724/0725 work; not a production data snapshot or proof of deployed source identity.",
+  "files": [
+    {
+      "file": "app/AdminDashboardClient.js",
+      "sha256": "c207af6bd054fa830cb091a967fc66b94864286da3464fdee671dc1b95064375"
+    },
+    {
+      "file": "app/ai-assistant/console/page.js",
+      "sha256": "611cf18d2456bdd1464b600f6fb496399a93090f11223911b4af302e19dcd70d"
+    },
+    {
+      "file": "app/ai-assistant/page.js",
+      "sha256": "38f1a0b1d8612b6857438bf1cde069329692a01d8515709539d0855c8c583e4f"
+    },
+    {
+      "file": "app/ai-assistant/review/ApprovedAnswersPanel.js",
+      "sha256": "f570cf85c7794eda2cd0a4e375cd8f1130e244ec907da5cc9719c31e64f6726d"
+    },
+    {
+      "file": "app/ai-assistant/review/ExistingEvidenceDecision.js",
+      "sha256": "42dce26f93c88ba3665028983b750d892a8483ae2822b9573da4b06c25fd4d41"
+    },
+    {
+      "file": "app/ai-assistant/review/LiveFeedbackPanel.js",
+      "sha256": "ed4d53c3e0ca8db2dc17d0b3cac7797243e8ecfda1119899b86e69c8a060585d"
+    },
+    {
+      "file": "app/ai-assistant/review/approved.module.css",
+      "sha256": "8c95e8c773cde7c28113704e1bc1152c52aafcb4d060c2fd1045d6b9d08f4fd7"
+    },
+    {
+      "file": "app/ai-assistant/review/page.js",
+      "sha256": "0919aff6a162ea3ec0fe817b55eee70735b90b0793440bcc2d14d250a2709a37"
+    },
+    {
+      "file": "app/ai-assistant/review/review.module.css",
+      "sha256": "daef1ef65b77228f8655aea70a058c5d8acffe02e1a491ad15154d2a9ea4513a"
+    },
+    {
+      "file": "app/ai-insights/page.js",
+      "sha256": "50a1de34eeee26913cd06eeee700169b061726fef93d5a5294ecece271dbea55"
+    },
+    {
+      "file": "app/api/account-identity/route.js",
+      "sha256": "8121928d8565ca35618f7a905ae46b1d0926d0004b18898c8a86a27c387e9651"
+    },
+    {
+      "file": "app/api/admin/delete-member/route.js",
+      "sha256": "ff9cbd8dfdcaa44b02358dac6b50e002a9419fccb197d5d5a8a764c73c26c00d"
+    },
+    {
+      "file": "app/api/admin/member-directory/route.js",
+      "sha256": "9d85d9bbfdd00bf58fff601380707c3c39dc7e813fc44285d2ed263012a00afe"
+    },
+    {
+      "file": "app/api/admin/member-last-login/route.js",
+      "sha256": "e6a02b4b6d01a4401f5b69bed074534ef8f94cf2b6edefa91d34e92ad6405765"
+    },
+    {
+      "file": "app/api/ai-assistant/answer/route.js",
+      "sha256": "bfc7151c15ad611102ac393d14c31c0f2781488b720b32f89132193df0ce9a3f"
+    },
+    {
+      "file": "app/api/ai-assistant/approved-answers/route.js",
+      "sha256": "cda624aafd2db97c60f97286d2855bf4e76e97a5ce00c5ff576fc2cf1cc0f303"
+    },
+    {
+      "file": "app/api/ai-assistant/capture-health/route.js",
+      "sha256": "fb60d219f762ee241eb6a03b7de5ca42cdf260bd187916985acbc16693cbe82f"
+    },
+    {
+      "file": "app/api/ai-assistant/documents/route.js",
+      "sha256": "9cf6567ba960e5a7972f589c415d7a239e210d800724c13d59ebbbe5fd178272"
+    },
+    {
+      "file": "app/api/ai-assistant/live-review/route.js",
+      "sha256": "f48c3fae40dfd3ca4a25b108dfee4ab6b48546ba5af6d3299cd37266f4467587"
+    },
+    {
+      "file": "app/api/ai-assistant/retrieval/route.js",
+      "sha256": "a13193c2a1c5b83912a1ebfab02191c6dabc75aadc2e246534ce4f0c3cca15b7"
+    },
+    {
+      "file": "app/api/ai-assistant/review/route.js",
+      "sha256": "05164fa22ce85174faf9ac76686f096820105ad5649cb257b64e5066a1bae560"
+    },
+    {
+      "file": "app/api/ai-insights/route.js",
+      "sha256": "6a337e974dd27c6cd4f4fa32856d5941104f5a0ea366fdf689659dcecaf059f0"
+    },
+    {
+      "file": "app/api/app-notifications/public-key/route.js",
+      "sha256": "aa6c9b2bbee148435d42ded0231e96c0fcd15b219e384d41a6ed6dc76e79b474"
+    },
+    {
+      "file": "app/api/app-notifications/subscribe/route.js",
+      "sha256": "2a1d954755168927e0edab71d33e5ec57be0826f2ccf9a7cc3bdde6da0163f86"
+    },
+    {
+      "file": "app/api/approved-answer-viewer/route.js",
+      "sha256": "c68832cb160e26d4fd492a188999cab93ae1ee7cfccfaf254e1447e98ac08245"
+    },
+    {
+      "file": "app/api/ask-lwr/feedback/route.js",
+      "sha256": "6e2f84e1f2840bd6fbf90746d530bcf8cfc5cab02ab447c4085ada518327be76"
+    },
+    {
+      "file": "app/api/ask-lwr/route.js",
+      "sha256": "591d462a0cf15252ef7c035f162d015df3a2e3606b654b7327ba57e1f7aeab95"
+    },
+    {
+      "file": "app/api/brevo-diagnostics/route.js",
+      "sha256": "5077396ca7a3c2690e2cb55ae458d6b28b8b739b42cec8996b66a1e541b0ea7f"
+    },
+    {
+      "file": "app/api/league-communications/route.js",
+      "sha256": "334b2f46f709fe6e87fa7e966954809f87d77ff74a74d8ca9933ebd3c2c5f38a"
+    },
+    {
+      "file": "app/api/master-reset/route.js",
+      "sha256": "7e8df34fbf1fcdd1f1717842886215eb0bd641a327c87f5aecd12ca555ec46a9"
+    },
+    {
+      "file": "app/api/match-lineups/route.js",
+      "sha256": "9e6fe2961bd28c7f57235258ac055102dd5d5dbfecad7c34cdd7925215e39590"
+    },
+    {
+      "file": "app/api/match-setup-reminders/route.js",
+      "sha256": "1228c054c070dbedf82527b6c846e90c8491ae36fce8504d3f26bcf145025e88"
+    },
+    {
+      "file": "app/api/member-password-reset-check/route.js",
+      "sha256": "e037d0bb3ef7e691da95f95fb29cadd98f1f3e81e599ab0a07160057794a036c"
+    },
+    {
+      "file": "app/api/notification-template-history/route.js",
+      "sha256": "c299c349f2567f72ef16a3bb5e944978903680a0f6e5a078baafe986187e0bf4"
+    },
+    {
+      "file": "app/api/notification-templates/route.js",
+      "sha256": "c6704f7d03d4b2e385b149faa1450204faa80199ec95aa066bc92f10937d1ed8"
+    },
+    {
+      "file": "app/api/notifications/route.js",
+      "sha256": "1ce4a09ae05e77606c55b4fe6a267b7b82b788a0ef69e8dcef63307cc95f82af"
+    },
+    {
+      "file": "app/api/official-document-viewer/pdf/route.js",
+      "sha256": "1af65997ee2604d65021bd52b259cc2c5b9e610b7bcc88761baaa5562501bd18"
+    },
+    {
+      "file": "app/api/official-document-viewer/route.js",
+      "sha256": "8467537e783c2808767fd9ff991be9c8697f2bdf41d501355ea4bdfb5dc13c7f"
+    },
+    {
+      "file": "app/api/pbcc/reminders/route.js",
+      "sha256": "f83cabed707749b501e6537093075576772e5499263f425742e806926d89e76d"
+    },
+    {
+      "file": "app/api/round-robin/action/route.js",
+      "sha256": "ed1a481109cbdfae8cd7b3936680ca179d0820c670cb002626e8e9f0670e3eab"
+    },
+    {
+      "file": "app/api/round-robin/admin/route.js",
+      "sha256": "03bd2473e7415dc1dd887fdd7f9bdf5b64072f33d324cc8d9da1e6c967a20608"
+    },
+    {
+      "file": "app/api/round-robin/player/route.js",
+      "sha256": "b1a14883fc0f1846b4d3940dce89306d74153b169495e70501f3378aeb4c747f"
+    },
+    {
+      "file": "app/api/score-notification/route.js",
+      "sha256": "9a00ccd0e321886df77e5b648e03b491ef33093de1568461c0088a534d7a0f0a"
+    },
+    {
+      "file": "app/api/season-reset/route.js",
+      "sha256": "844c2eb8fbbfd13822d45bc479a4fe714f2c0da871655e42cc9d1f97369bb6e0"
+    },
+    {
+      "file": "app/api/season-rollover/route.js",
+      "sha256": "b8170fa93029e97ed9f622b57f963e1c2a62ace4502da0140e862c8f1961ab88"
+    },
+    {
+      "file": "app/api/system-settings/route.js",
+      "sha256": "31a8cae55625c74c70787eb6112159156758333ff4f865426b6c856df825dc1d"
+    },
+    {
+      "file": "app/api/teams/delete/route.js",
+      "sha256": "f0e0323b6e8d70b2354f242bee6f93bf2d6c1573a1cfe1d7c574f14d8fdd0dab"
+    },
+    {
+      "file": "app/api/tournaments/action/route.js",
+      "sha256": "bf27134eb387d4f9936ad3d9e61f11b7e086008fdf4adbfb44e61dccbc232ec2"
+    },
+    {
+      "file": "app/api/tournaments/admin/route.js",
+      "sha256": "24960a25cdf15448c20545ec4a03674c165ff565d8b4c014ae5ecc10362c4739"
+    },
+    {
+      "file": "app/api/tournaments/sms/route.js",
+      "sha256": "0a474556639effb1ec225a7b0b04b3948d776ae4b7793c247c7913818e6b7c74"
+    },
+    {
+      "file": "app/api/user-last-logins/route.js",
+      "sha256": "066767bd550f71f977458114b023ed515734078a9f0cd4951e7810c140be7a44"
+    },
+    {
+      "file": "app/api/view-as/bootstrap/route.js",
+      "sha256": "7dceb3e1051f08e10e38b47150ed6a8561767954ad007d0b9a64a05834344f66"
+    },
+    {
+      "file": "app/api/view-as/exchange/route.js",
+      "sha256": "416e8a05c0775e9e94b620d90988ffc189a1b593de472740b75c5a033d4391c0"
+    },
+    {
+      "file": "app/api/view-as/read/route.js",
+      "sha256": "441b65407efdb50cbba6a1d31b4c66edd53266037f42049b70db7a0cf0dcbd95"
+    },
+    {
+      "file": "app/api/view-as/start/route.js",
+      "sha256": "d97d93c08daf7735254b5ceb462669b2171d21ae9ced2d22bbb3200ebcbd8974"
+    },
+    {
+      "file": "app/approved-answer/[citation]/page.js",
+      "sha256": "17b4e50477d580145ec45ad35f58610c77e00daf5739a23ed09beeddbd64efec"
+    },
+    {
+      "file": "app/ask-lwr/page.js",
+      "sha256": "e5f91fdc62006169b53ffb0fa083a4db07b8a99d36700f5fc34de7a2757df042"
+    },
+    {
+      "file": "app/captain-dashboard/page.js",
+      "sha256": "a3f79d586e58887e55f5bc2b42986bbc72814affe2e1e3e976f72c7f5f607a83"
+    },
+    {
+      "file": "app/components/AppDialogProvider.js",
+      "sha256": "65660bbfe2e6c50ee928eb05a63430595bd12842c09f01a2c19c00cd7fdcb17a"
+    },
+    {
+      "file": "app/components/AppHeader.js",
+      "sha256": "417d825700856ea563e1bc6ba28325f07b757d6cd66741c310c9ab3fa82730e5"
+    },
+    {
+      "file": "app/components/AppNotificationsButton.js",
+      "sha256": "6d7e0dac469974a443eee24d37344d436b21f997c8debfbda10358dab9792767"
+    },
+    {
+      "file": "app/components/AskLwrAssistant.js",
+      "sha256": "da46e840a9dd572eb7a41290c12cb05688f8c647862aa60b20c36488e813cae6"
+    },
+    {
+      "file": "app/components/AskLwrAssistant.module.css",
+      "sha256": "9c1fd714d71dcadc6b77510fbbc82410399a1ae69811a02a7b2251a195f80be9"
+    },
+    {
+      "file": "app/components/AskLwrChoices.js",
+      "sha256": "985fdf408f706058347d2031c268b8f17a44ea9b9e35f2ef80a952d552ed29b6"
+    },
+    {
+      "file": "app/components/AskLwrTrigger.js",
+      "sha256": "7f6b4defe1f9a033ba37450dca95835fe41476b8ebe7a6d35614fe8580da2f02"
+    },
+    {
+      "file": "app/components/AskLwrWelcome.js",
+      "sha256": "91e333b43f461c0e76fc0e26f8308540e020a5dd65b2defeae9e27f41f29dca3"
+    },
+    {
+      "file": "app/components/BrowserTitle.js",
+      "sha256": "862f504927963d32c19eb5a90632f1c246d1472bc171b7dca3c6824079e0b4a9"
+    },
+    {
+      "file": "app/components/DashboardPlayHistoryModal.js",
+      "sha256": "66c166c683b53d2ac4f72cf64656467338acc8cf22c964cbb518e5f3065ea8c0"
+    },
+    {
+      "file": "app/components/DashboardProfileDialog.js",
+      "sha256": "375823eaeacb62ae1fe77d91c7a1fa42352f0962efc73a4bc9f27a5360b2b296"
+    },
+    {
+      "file": "app/components/DivisionStandingsBarChart.js",
+      "sha256": "5125631a5478443c3983f964532f25e6eb0375793171ed8797a8b0183ab9482d"
+    },
+    {
+      "file": "app/components/DivisionStandingsModal.js",
+      "sha256": "cf8b403f2c49acb5f34bd439e92d21b62294b8037409d33722ecc6e0d36c4813"
+    },
+    {
+      "file": "app/components/InactivitySessionTimeout.js",
+      "sha256": "5ac24d691d180cde54f7a70ec15bb69670024457b7325b591a07c1abc027b9a6"
+    },
+    {
+      "file": "app/components/ListingCount.js",
+      "sha256": "b0fce9b9fbdb92a6b3d69fb0137217dad1454e1738099f013dabfd2a7c4b74ca"
+    },
+    {
+      "file": "app/components/LmsInstallButton.js",
+      "sha256": "a9ce3d6a060cdfc2240821c54ec2c863b1cee66b25a75614b761c20bd0a71574"
+    },
+    {
+      "file": "app/components/LmsPwaRegister.js",
+      "sha256": "9ab5869dee746f41549ce5548c0703f05e33a52987b91e38c28ae0b37561c0a2"
+    },
+    {
+      "file": "app/components/LoadingScreen.js",
+      "sha256": "7fe123573eaf8299674d83edbbceb0811d532df8900dee519040092d73f69795"
+    },
+    {
+      "file": "app/components/LoginMessageModal.js",
+      "sha256": "b9e98fea07c89bea34b8c9fd707f0ed78f857b92124e298c85b802f382132b57"
+    },
+    {
+      "file": "app/components/MiniStandingsLeaders.js",
+      "sha256": "25fb2ec794c19532e3f78a00bb957b7f040284996a7e68e6ea376193433815f5"
+    },
+    {
+      "file": "app/components/OfficialDocumentViewer.js",
+      "sha256": "754152186f3edb631f45a1dfb74c82ecde9c54e41ca1dfef7e773d58ab60a9fc"
+    },
+    {
+      "file": "app/components/PbccFooter.js",
+      "sha256": "c895629123c224f95acfacf06286b22b10ed82d15c7b6e615f5fdd10251a8595"
+    },
+    {
+      "file": "app/components/PbccInstallButton.js",
+      "sha256": "e6469c7a97d128e65c3a4827c80fdddc945ce59274a40166c129f78b8110456a"
+    },
+    {
+      "file": "app/components/PbccPwaRegister.js",
+      "sha256": "0e1d157ce7d11a2a210fb2a91cabc99c2b1d490a4ab7da3902277c8e3485b4c9"
+    },
+    {
+      "file": "app/components/PdfDocumentModal.js",
+      "sha256": "93189a54d05352898aaccdeb5b7845e89b4cf52366c033888d623058e4cea0f9"
+    },
+    {
+      "file": "app/components/PdfDocumentModalClient.js",
+      "sha256": "df4d18cd97bc42d6da94f20c4216fa215d1e2399dbfa32c9bc3b37546dff00df"
+    },
+    {
+      "file": "app/components/PlayerHistoryDetailsModal.js",
+      "sha256": "f3c78b21bc0cb8b2f5261e1f2f3e68748f922b8f81540bad289a33f169e294ff"
+    },
+    {
+      "file": "app/components/PlayerHistoryPanel.js",
+      "sha256": "5dc0212c76dfdb96fa4a20c0e0320e268e0b52020987de75654a26618947638b"
+    },
+    {
+      "file": "app/components/RoleCapabilityModal.js",
+      "sha256": "a15953f80421793cd2550df4ac0c0f605d6927092bf4110952405e24bf80a99c"
+    },
+    {
+      "file": "app/components/StandingsTiebreakDetails.js",
+      "sha256": "95edd3c66485f83876fa54637a96fe63289d14e06552615ffafa88c57582665e"
+    },
+    {
+      "file": "app/components/SystemFooter.js",
+      "sha256": "52851094c0c990a9e4205609561bcc7f46d4fb15cbc3660077224c5d334115ab"
+    },
+    {
+      "file": "app/components/TeamScheduleModal.js",
+      "sha256": "42dee14c3978335c6fa17c0aa1423650b8f06609292dc9aedef73e4ee22d63f5"
+    },
+    {
+      "file": "app/components/TurnstileWidget.js",
+      "sha256": "03e48c2089d14a544015b5656077068ba080272aad00cc8e5452aafd63025742"
+    },
+    {
+      "file": "app/components/ViewAsStartButton.js",
+      "sha256": "baf243a6899460c4e2ddd7812a3eddf036888b7a3f031dabd7bef9091d0ca8eb"
+    },
+    {
+      "file": "app/design-preview/DashboardAppearanceControls.js",
+      "sha256": "ab92a38366dc442a4da3bddcd76e1026b2f5fc14f285c91f7db68e2efc773863"
+    },
+    {
+      "file": "app/design-preview/DesignPreviewView.js",
+      "sha256": "b96502fcc95981a857e7fcf59947251e0092ceea6495ec12d6e4bfb9ce40c4c9"
+    },
+    {
+      "file": "app/design-preview/admin/AdminDesignPreviewView.js",
+      "sha256": "ae46028176729d3bed5a39325416e873559e60532a6fad6854e2848155223ae8"
+    },
+    {
+      "file": "app/design-preview/admin/admin.module.css",
+      "sha256": "7349bd634c450e135f13594f9541d1043af8c3d1dc80c75afb2a41599bff2ccc"
+    },
+    {
+      "file": "app/design-preview/admin/page.js",
+      "sha256": "3e07878a6bc5e5d2d832f1bbb60734fadd4b636d2e09a8be4c2f55bf71e390c5"
+    },
+    {
+      "file": "app/design-preview/captain/CaptainDesignPreviewView.js",
+      "sha256": "867a239468a602131f10a928c41814da601293e288f09dacd53f1bf79e4a7aeb"
+    },
+    {
+      "file": "app/design-preview/captain/captain.module.css",
+      "sha256": "81edfc0de9d4150d0949b1241241e47195f25600e3f80e768ee5e0a0b8677774"
+    },
+    {
+      "file": "app/design-preview/captain/page.js",
+      "sha256": "98dc618797de2fa6f13d5763fd2bfac45a620276f881c3f58dc45fab2b8c5572"
+    },
+    {
+      "file": "app/design-preview/page.js",
+      "sha256": "c31b7f6552d9c6bd54eb6f8baa9edc102758781faec6a1cce226883d4ab1d0f3"
+    },
+    {
+      "file": "app/design-preview/page.module.css",
+      "sha256": "41b6f5dc8f0c92af0d54a3dfb9bb22b739f5a97e9c39e315b6155bb55a08ed57"
+    },
+    {
+      "file": "app/divisions/[id]/page.js",
+      "sha256": "2d5979b758cdbc880b6ad3ef3db01758d32e795671815d1c4c9067f785a007af"
+    },
+    {
+      "file": "app/divisions/page.js",
+      "sha256": "4c3b000cc4db097f72b7a3bd12594347d11fbc82aeffcaaf826f6023c5ccfb08"
+    },
+    {
+      "file": "app/email-options/page.js",
+      "sha256": "a9067f8f0dd81ac88a05d1fbd14cbc29d81fa80638429973692846faba46cd76"
+    },
+    {
+      "file": "app/globals.css",
+      "sha256": "f0e3745a3a4fa53dc64ecef1a0dd2ae8410716912cb62e515d13d7b2441d5634"
+    },
+    {
+      "file": "app/help/[role]/HelpCenterClient.js",
+      "sha256": "e54982ba194977c72e1f9a3726dbe2d55e19f157593bfe6aa02b87610a4e3af2"
+    },
+    {
+      "file": "app/help/[role]/page.js",
+      "sha256": "9ec96b983fdb8dc1892efb18b801d11f4ff9dffcc2ef99d61f9134b845e799d9"
+    },
+    {
+      "file": "app/layout.tsx",
+      "sha256": "4d607f4f46921c38c1c1f0fbd49613b8b5073ecc459fdc4e9e22e2e9e7eb0b8d"
+    },
+    {
+      "file": "app/league-communications/page.js",
+      "sha256": "dce9a7d8e5cc36d2c1874fa9e97fab10dd00dd1bd16d8d22c94d4162fdbac250"
+    },
+    {
+      "file": "app/leagues/page.js",
+      "sha256": "a87d688947b0ea3cce4abc058983e6c7217142a46b47ff035c7e1c57d37a4cbf"
+    },
+    {
+      "file": "app/lib/accountIdentity.js",
+      "sha256": "afadad67c05cf66fdbf7795bc4de9c7cc1bf28298b61c170707989e5e2612dfb"
+    },
+    {
+      "file": "app/lib/adminNavigation.js",
+      "sha256": "7ac967c16f965bf01603dc6cdeb255eccf3221b6fd965abbcf9459529a37695e"
+    },
+    {
+      "file": "app/lib/aiAgeReferencePolicy.js",
+      "sha256": "4496b247ada05da14caeb4ead41700a662832635a03901831d598b3da01ab657"
+    },
+    {
+      "file": "app/lib/aiAnswerGeneration.js",
+      "sha256": "81bcbb9164a49d93e6fb7495c6a921f6ab30085b9e43574a9b4adac046119aaa"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswerViewer.js",
+      "sha256": "542d0bc33fdae0c8c0634150ee57e0ffe44dd9184218a9c0239a988138519dbd"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswersSelection.js",
+      "sha256": "e1a60783413a0d413259b8722c0f60fa1de6f0de5472ff5229c60cf6b597bf7c"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswersService.js",
+      "sha256": "20a337f4c3b171bdb434d12691816bc12e7267253329f22d771303ee9997805e"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswersShared.js",
+      "sha256": "a4255fdde8e7159c7c3f2769a0aedf2d166076e6df8d6703339e875e56af5959"
+    },
+    {
+      "file": "app/lib/aiApprovedRelatedEvidence.js",
+      "sha256": "0c9c574bdbdc3290077950f3d004185b8cb87059d336da6c3a0dcc6c4b23989b"
+    },
+    {
+      "file": "app/lib/aiApprovedSourceBinding.js",
+      "sha256": "ff5fe99f9c6cd2f0805e160997ed0468dc70acd9754f338f15cf103e5d4af365"
+    },
+    {
+      "file": "app/lib/aiAssistantConfig.js",
+      "sha256": "823f695ed263e7d66393256996cb7b36a3b59eb88f69092c827326d8f5d99417"
+    },
+    {
+      "file": "app/lib/aiClarificationChoices.js",
+      "sha256": "1a4ca2b4c088a0d5df81f1852ee2f0b35f72472c332340e5a1a22ada826c796b"
+    },
+    {
+      "file": "app/lib/aiConversation.js",
+      "sha256": "e08e84f11c67bbb4be0d27cb2fa3903c45a79b1038881670bb00becce0f6d667"
+    },
+    {
+      "file": "app/lib/aiConversationDiagnostics.js",
+      "sha256": "a3b5f1869c1b180c0bb5c371b35638e69eb4234e187cc1070be5953f35932a47"
+    },
+    {
+      "file": "app/lib/aiDocumentActivation.js",
+      "sha256": "55cbfe3cbf207945a0d5b5cb3477aa85b9dfbcbddaa0bc2f6a3c0126497116ac"
+    },
+    {
+      "file": "app/lib/aiDocumentMetadata.js",
+      "sha256": "e6045ce176e85c0fdb5e102984dc3ae93809115814dfa30d7de7c0d2a2fcffd6"
+    },
+    {
+      "file": "app/lib/aiDocumentNavigation.js",
+      "sha256": "276580da512f2e8061476d61ae43aca3348a8ba3e371a8a4508d1538265a2ff5"
+    },
+    {
+      "file": "app/lib/aiDocumentProcessing.js",
+      "sha256": "858739377e3fbb3ab4ef1b5172a0246db3c76815f986473fe607587405d5fb20"
+    },
+    {
+      "file": "app/lib/aiEligibilityIntent.js",
+      "sha256": "f0cdabc9c3d1f8a49963cc125452c48f4db314c53bb93b9f2918aed02f8ef9f8"
+    },
+    {
+      "file": "app/lib/aiEligibilityPolicy.js",
+      "sha256": "8db51ea31bcaee70f5a1c9772c25ab60c2a5e8e5f158dbc66eec500acade8ce4"
+    },
+    {
+      "file": "app/lib/aiEligibilityService.js",
+      "sha256": "de166e2e08039cc2e6615ef7eecd15f6ec63b31a0168e3134e0b3dbb843695d3"
+    },
+    {
+      "file": "app/lib/aiEquipmentIntents.js",
+      "sha256": "c7bec5cb806cf7f4323a2a493c25f8adb3d7f97c472d9e4e1f1fbe2a461746cd"
+    },
+    {
+      "file": "app/lib/aiEvidenceExcerpts.js",
+      "sha256": "cf3aba36f34ce98f42dd37830932c03e63eb89aed92bc258e231713c2dc571d3"
+    },
+    {
+      "file": "app/lib/aiExistingEvidenceDecision.js",
+      "sha256": "1529ee6f6acb3eebb66610a365e6f79561b6fa7cd6c1d6a74bc48af4b374de89"
+    },
+    {
+      "file": "app/lib/aiGoverningSources.js",
+      "sha256": "4f09911fd8e1d2c118c169b7088d409acb7dff5eff96341169f62cd62c29643f"
+    },
+    {
+      "file": "app/lib/aiLeagueDateEvidence.js",
+      "sha256": "2ea2c3028784f3ed09325d1733b6479651066db89b55dc3cf9c24192d8851f08"
+    },
+    {
+      "file": "app/lib/aiLeagueDateFacts.js",
+      "sha256": "f5fd18f747dbd75f76a7b9bfa01c1e29a8172a455424616b31ba82e863f82855"
+    },
+    {
+      "file": "app/lib/aiMaterialQualifications.js",
+      "sha256": "4d37a69e3bd0a6f03a1cff692327ad134464c647b0132364f9825d695cfc6889"
+    },
+    {
+      "file": "app/lib/aiOfficialApplicability.js",
+      "sha256": "c23d2662edfe13da789c77a5760422a9c0bbe3c92df3886db091c0e62f6c503d"
+    },
+    {
+      "file": "app/lib/aiOfficialDocumentViewer.js",
+      "sha256": "7a283f134fd56b050b2fe7d00a2ed28222e373c963c7166d15f75acc8aa2be47"
+    },
+    {
+      "file": "app/lib/aiPassageContinuations.js",
+      "sha256": "12d307b55d4cfa4d6b3cda13545f621b424a73213dacd0f1e6d7f4088a5a476a"
+    },
+    {
+      "file": "app/lib/aiPolicyDiagnostics.js",
+      "sha256": "ab63dae307b584e7484686cf82f69a5b6e7bebdabad8844797bf82edcf9b2c57"
+    },
+    {
+      "file": "app/lib/aiPolicyEvidence.js",
+      "sha256": "cc6d1df43e13ea80c055bbb4fc97e7dac8245eb2c3b5917f1becdb92e287f02b"
+    },
+    {
+      "file": "app/lib/aiQualityCapture.js",
+      "sha256": "89643a40cc845ae867e7bf069fa1ba1e4d492ed1296193c037a6bcb270e7bf3c"
+    },
+    {
+      "file": "app/lib/aiQualityGrouping.js",
+      "sha256": "1f9441832e790629dfc8d3c8fd522a809cd5c90b4b9eeb4df936795b15284309"
+    },
+    {
+      "file": "app/lib/aiQualityNameClassification.js",
+      "sha256": "5e1358d683b146f35861672dd5d49b15eb839468a22a28c24d5c4da01dbc9e36"
+    },
+    {
+      "file": "app/lib/aiQualityPersistence.js",
+      "sha256": "39883922ed59da0573151346a4703ed0b01027df608fcf961b9a9c5a3ea5c01d"
+    },
+    {
+      "file": "app/lib/aiQualitySnapshots.js",
+      "sha256": "f48f954181e2cd3fcb097b9b6bf2da2c6443efa5c492ce6a0fa37b9581f254e4"
+    },
+    {
+      "file": "app/lib/aiQuestionApplicability.js",
+      "sha256": "39c769c9414b9aea96422ccbd33cd5d4dbf15c6f2f18f5c8c9a9377606b32cdc"
+    },
+    {
+      "file": "app/lib/aiQuestionConcepts.js",
+      "sha256": "a844e1f9464fd76727ca93aa6d808b69dc48df52b064015c5563f6effa14e1aa"
+    },
+    {
+      "file": "app/lib/aiQuestionInterpretation.js",
+      "sha256": "74ca571c2956fbd27663565f576c7ab3a8177bf88b9b25a82dead3b3675d9370"
+    },
+    {
+      "file": "app/lib/aiRequestIntent.js",
+      "sha256": "d5c2a92f6526eab904f5681d008fbe6578e5e765891daaab3b9388028aa80bdd"
+    },
+    {
+      "file": "app/lib/aiResultSource.js",
+      "sha256": "25e37657af6fff5b6a670b9d119915e77b9441b1587f0eb9f22f515b41c507df"
+    },
+    {
+      "file": "app/lib/aiRetrieval.js",
+      "sha256": "92b3a204d8f54e10943b9d0dd0e4954a1835cdc7bf42065bf13ba24d5442cefb"
+    },
+    {
+      "file": "app/lib/aiRetrievalEvaluation.js",
+      "sha256": "3b5df47a4a07a2589ca7bdafd4bb4c5db1f50968a79e78d0b62357a1cfd466a3"
+    },
+    {
+      "file": "app/lib/aiReviewHttp.js",
+      "sha256": "71dd78075321da29c0d365ad31dd2c21b3b6af12ab563357501ab632fea51daf"
+    },
+    {
+      "file": "app/lib/aiReviewService.js",
+      "sha256": "29ac232e1116f57870f7c2e549d983b7f2a1952e2b0b440e2e804b719b471344"
+    },
+    {
+      "file": "app/lib/aiReviewShared.js",
+      "sha256": "d16d65ef91da5ef35ac6e4693bb43126cbea82cd5a922173733a445601aa3792"
+    },
+    {
+      "file": "app/lib/aiRosterTroubleshooting.js",
+      "sha256": "a71cf1827e95062370215cedf9d476f7e7d5b731fb6b3a4a53f0b8c134bdcbd1"
+    },
+    {
+      "file": "app/lib/aiSchedulingApplicability.js",
+      "sha256": "093781437ead37daff3b77575d45db64b0797a5bfe74461fc6023be839a09b84"
+    },
+    {
+      "file": "app/lib/aiSelectedRuleIdentity.js",
+      "sha256": "072686bd29338522f0cdb1a04b4bca0914e7eb70512edc2188dfd2914b1356c7"
+    },
+    {
+      "file": "app/lib/aiSupplementContract.js",
+      "sha256": "c9b1323f2a80c104efd7a7d0a3dbb77326392031afea70fd4937c1bc134534ec"
+    },
+    {
+      "file": "app/lib/appDialog.js",
+      "sha256": "08e085d0dd3af1907c0a9f8d90ab7b41c26786e0fdb2fd1040ef0cfde6b97ad8"
+    },
+    {
+      "file": "app/lib/appNotifications.js",
+      "sha256": "0ab14dd90f04c7f3a94d1ff45990355d98ec1680dc48cd85d7f721fba8e1ee94"
+    },
+    {
+      "file": "app/lib/askLwrAssistantConfig.js",
+      "sha256": "844c6887bdc3e01e454aeb1a7e39d3f2804ef895a8b162bce401c53c1fb5d177"
+    },
+    {
+      "file": "app/lib/askLwrConversationState.js",
+      "sha256": "494c9ce1c044cc9aa954cd0bf1694b05c4c3e441b5b91613ac0626f268fda6d9"
+    },
+    {
+      "file": "app/lib/askLwrFeedbackState.js",
+      "sha256": "0cd43e8c29c0e26a3473b6c115de51d36da882b18e27f5c19e285cd28feaa680"
+    },
+    {
+      "file": "app/lib/askLwrPlayerAnswer.js",
+      "sha256": "55791b890b334afc0f727a93200b964bb21bfe1949879829453a3459cba9c322"
+    },
+    {
+      "file": "app/lib/auth.js",
+      "sha256": "f61355cba36df159f5667edae0e3cdf5ce8d1aee19163bb16d2ac6b9f204e5b7"
+    },
+    {
+      "file": "app/lib/confirmDelete.js",
+      "sha256": "d4f955135a33333ab60df7cb9f69b90300a68f9ec99ef717cd311669cd4fbeb7"
+    },
+    {
+      "file": "app/lib/dashboardGuides.js",
+      "sha256": "3d8a75fe4bc9ff5322599b3e5a33e9a5dbadf777fea2be4e6e838bf1cf759939"
+    },
+    {
+      "file": "app/lib/dateTime.js",
+      "sha256": "1a46b412c5fc6fc95cfaa8b85a0f8a2c0befd540657b16b3d2f016028675dd78"
+    },
+    {
+      "file": "app/lib/divisionOptions.js",
+      "sha256": "07cb62948219503ca21a0f51a84979da99a296a4e7df4c56f035b70de216dd56"
+    },
+    {
+      "file": "app/lib/email.js",
+      "sha256": "4733eb5c0d4322e88c80fa357812af7785e548c2b9ec9034ac79d77d1523a089"
+    },
+    {
+      "file": "app/lib/emailTemplates.js",
+      "sha256": "eadd350d792b58630df84316ecac09f9fdba10f59223d72cec56268899bf6c45"
+    },
+    {
+      "file": "app/lib/helpContent.js",
+      "sha256": "0c87a089771b32378d84ed2532d30881c20a0a3b40757bfa7429133c873aa9b5"
+    },
+    {
+      "file": "app/lib/identityRoleWriter.js",
+      "sha256": "0843baa4a53b58da0db19e144dcc16af74f53263e7dbb8a9392d477a99332ec9"
+    },
+    {
+      "file": "app/lib/leagueDocuments.js",
+      "sha256": "aaa3b0edff0fe50c9beb6fcf12a8f586b941edeee28746cb7bed8a1780efc2d7"
+    },
+    {
+      "file": "app/lib/liveLmsIntent.js",
+      "sha256": "f74de90d91f0a1f39242f351def23e55b5b3d6a9578c5a50e39e97d21913997d"
+    },
+    {
+      "file": "app/lib/liveLmsReceipts.js",
+      "sha256": "3b7fc9a219cc197ce0885268ae881c6a12f6449dc395087959059048dda1f8b5"
+    },
+    {
+      "file": "app/lib/liveLmsService.js",
+      "sha256": "e48de586d037fe14730696dca486c6fb651c3ebef2ad0861a45d79d1faffac2a"
+    },
+    {
+      "file": "app/lib/lmsViewer.js",
+      "sha256": "75ef31f0ec9584c9dfa29cc94cd853b6ad454da3cb573ba1643536b2e4f5ee6f"
+    },
+    {
+      "file": "app/lib/matchRatingSnapshots.js",
+      "sha256": "f4198762655e51bf4cfe42aab93a35ce48cf0812a925b205f4a12337741f730f"
+    },
+    {
+      "file": "app/lib/matchScoring.js",
+      "sha256": "91b549ec4e4d1a03fd49a9553023710f0cb3c089336ceb3cf6ae1aa2c9f3da00"
+    },
+    {
+      "file": "app/lib/matchSetupReminders.js",
+      "sha256": "57ad9869672440a06821b202b9f6bae785c9f81820158ab21963887de6c7f11b"
+    },
+    {
+      "file": "app/lib/memberImportLocation.js",
+      "sha256": "fc30ab88c0b319a9da5a5498ab7ab55ac92e1e64d193cd47b32703ee77bb5ada"
+    },
+    {
+      "file": "app/lib/memberLookup.js",
+      "sha256": "8365c179327ced250bd014d8be3545f33f1e845bc7d9d9181975b44a04b28da3"
+    },
+    {
+      "file": "app/lib/navigationActiveState.js",
+      "sha256": "f88641f47a502ab48783e3f60c5046f838d265b21093dd8cb8acbb6478e8ee8d"
+    },
+    {
+      "file": "app/lib/notificationPreferences.js",
+      "sha256": "bab5e3e6c797672aba33797cc411a06e04aa7cb5bd2774c2b70c0ef8f9e0be74"
+    },
+    {
+      "file": "app/lib/notifications.js",
+      "sha256": "5078b0657a7b14680833326b33758aae5ac0956e6a3a705404322b7ddf749f15"
+    },
+    {
+      "file": "app/lib/passkeyErrors.js",
+      "sha256": "3f53240de3ab47dbbf843110f5dc4402f0b6239a511e5e04c76c0a15ca2f83c6"
+    },
+    {
+      "file": "app/lib/pbccReminders.js",
+      "sha256": "6756e302cd026ce58e26985480986b04898043610379e2983ca48aaa7e6d637a"
+    },
+    {
+      "file": "app/lib/pdfViewerPage.js",
+      "sha256": "cdf74cc2df74e2f6e66e05147a6c1beb41037aaefa310655de01990ce961cf7f"
+    },
+    {
+      "file": "app/lib/permissions.js",
+      "sha256": "1ee61a0c6942ac8fb2f70ccfb25e7ccd4ffc4e34dbea56da75047134414fff7c"
+    },
+    {
+      "file": "app/lib/phone.js",
+      "sha256": "ac9991d43aae6cc1a8025dadf067f80e34df16d2ca6a9080b7c6e3aa9fcee694"
+    },
+    {
+      "file": "app/lib/playHistory.js",
+      "sha256": "6e922f940815b25c81d38cbc7753e20bebaa94975f35f45b956f6379d2d83327"
+    },
+    {
+      "file": "app/lib/profilePhotos.js",
+      "sha256": "6455c9be8b1d2af6efc8469afd9ac42491858bb0f89728268d4ce6f3efc9b913"
+    },
+    {
+      "file": "app/lib/publicOrganizationalContacts.js",
+      "sha256": "01b7ef0bfe7fcf2e010fbabd118bc36504fba34e6d72c24ea349d1a301b7b8c9"
+    },
+    {
+      "file": "app/lib/ratingEligibility.js",
+      "sha256": "c71aa034f44c7fced5fa0b1d82eb940476268e7e8489b5b6dc1359c5bdb75fac"
+    },
+    {
+      "file": "app/lib/roleGuards.js",
+      "sha256": "e26197e28a9593fcb5f38eda89741cbfa04e3957536aac5ee04fb64b42d90232"
+    },
+    {
+      "file": "app/lib/roundRobinLadderRankings.js",
+      "sha256": "057ed3aeab5abdaabe9362eaa82dac235a312c136882f11e3647c18b2c54210a"
+    },
+    {
+      "file": "app/lib/roundRobinSchedule.js",
+      "sha256": "e8405f4016de3c1b8e9efa58a6489d2cc11165304b6030f76730769a9b794507"
+    },
+    {
+      "file": "app/lib/roundRobins.js",
+      "sha256": "a6e83a67ad940152a253f3e38b2d69233f8f36fc8826be3dfef03e960bdcfdd9"
+    },
+    {
+      "file": "app/lib/scoreSheetTemplates.js",
+      "sha256": "0d23854cc118d08b3558c018e6809e013366bdb77aa261f4ec38873f1136cf46"
+    },
+    {
+      "file": "app/lib/serverEmailTemplates.js",
+      "sha256": "546d850ed3d99da83d011dc04a57617a682462b9279f012ce44cf98fcaa666ae"
+    },
+    {
+      "file": "app/lib/serverSupabase.js",
+      "sha256": "3f3376e46adb02c2369cf300331ca315cf5a3b923cca0de47f61e5f6347359ab"
+    },
+    {
+      "file": "app/lib/specialMatchResults.js",
+      "sha256": "24bcf49c8bbd35e8cbdd88991db8501b43dd35800e78045943e4bfcd3a465be0"
+    },
+    {
+      "file": "app/lib/standingsRebuild.js",
+      "sha256": "be18a394278f1c2feead3927dcfd70b72deee004c9ad5dd06f7b31b3409535e2"
+    },
+    {
+      "file": "app/lib/standingsSort.js",
+      "sha256": "c6e5b02308c02949b168549cac2ca485667b01aad68db8fe8240631ba86fa01e"
+    },
+    {
+      "file": "app/lib/standingsTiebreaks.js",
+      "sha256": "cfc825fb19179d6e5a3cdfda832b80afd2f621316c1e1d7e9e4f47a6377b1370"
+    },
+    {
+      "file": "app/lib/systemSettings.js",
+      "sha256": "d07bbd72453b145888e1ce12a57bbf08db845e1db61634f533643e063f59d8f8"
+    },
+    {
+      "file": "app/lib/tournaments.js",
+      "sha256": "173b227d5ac9a576eef12d29a0bdeba4629906c84f73870e5bb3a51e56b72d0f"
+    },
+    {
+      "file": "app/lib/useUnsavedChangesWarning.js",
+      "sha256": "8b60ce433ca9b90910fc2e76eba0adffbcab8cd749c9f0c0993ff890fd3aeaa2"
+    },
+    {
+      "file": "app/lib/version.js",
+      "sha256": "8f01aafc0bc16f9170e82d3eb5ef08af11b88d976c97f9ea2e14fef067b1c5dc"
+    },
+    {
+      "file": "app/lib/viewAsBoundary.js",
+      "sha256": "5615a12cd6afa9a2d7bca5352969610ebcc40d3da244ab03c160137aefad77ec"
+    },
+    {
+      "file": "app/lib/viewAsCrypto.js",
+      "sha256": "b81e78bc8a397acd221d195feb4983953e3a47e46aafd0b0fc36fd2651ad7d47"
+    },
+    {
+      "file": "app/lib/viewAsServer.js",
+      "sha256": "02843146727c42e19d8a5970d87e0e018d421b614262d62f8e750376265f58d6"
+    },
+    {
+      "file": "app/live-match/[id]/page.js",
+      "sha256": "6c3513b35d90a730642942ad733c621cbf5c161144bf232fb0465431f5ed86e5"
+    },
+    {
+      "file": "app/locations/page.js",
+      "sha256": "f5966f38f622bd8582157f9924a3d109e3cbf5dca118de79c75e91850f7afb37"
+    },
+    {
+      "file": "app/login/page.js",
+      "sha256": "14f16c5bfbb542100a7f7b4985f4f67684c6889b5f700d3f30ad82fd43291122"
+    },
+    {
+      "file": "app/matches/[id]/page.js",
+      "sha256": "be8b747cd2670667386a748b5c23991a089d9a9e20f46f5aaa9f39900dc52618"
+    },
+    {
+      "file": "app/matches/page.js",
+      "sha256": "9e25901180aee04d3e953d009c282a35b21abc027841979acb56f89e6db284bc"
+    },
+    {
+      "file": "app/member-import/page.js",
+      "sha256": "473b8491badb768a4454986f4eef006c1d7249eea87f1ef93825bf48369334ed"
+    },
+    {
+      "file": "app/members/[id]/page.js",
+      "sha256": "d78876873a8d8a5c493d7dd3834c233ffb9cc6994fc19c23b8a4c905b4a1bf78"
+    },
+    {
+      "file": "app/members/page.js",
+      "sha256": "624a864303ff95d585641200ab3428fe2ea2e0e28bcddac83b330a336c864d00"
+    },
+    {
+      "file": "app/official-document/[citation]/page.js",
+      "sha256": "569964b10ba8ddd8f2693d207854813bd7df700649be882785394e4180bbc750"
+    },
+    {
+      "file": "app/page.js",
+      "sha256": "31ff63379f2ab4966bc31a37bc25192c7b4133d302cda79a3bada15561292385"
+    },
+    {
+      "file": "app/pageOLD.tsx",
+      "sha256": "359fd0c734c7632e73f8299501bda0765a07ab36d0e26e42d92cc93f6ba983c2"
+    },
+    {
+      "file": "app/player-dashboard/page.js",
+      "sha256": "3a913b0ff90813516a2e7ed2d8ca5f48f9c3f1f6a0fb4e354b942417337ef758"
+    },
+    {
+      "file": "app/print/page.js",
+      "sha256": "68280275fea615e42c4651d94174c6baf86d2df12c4da98d04c7967b15be8aac"
+    },
+    {
+      "file": "app/ratings/page.js",
+      "sha256": "420aea99510d51a49b08020e7ac681969e9f038bc96c6f2c8577b6a429086193"
+    },
+    {
+      "file": "app/reset-password/page.js",
+      "sha256": "175adc9e1b40d50f2c0db35475ffab4e7af6f869b6fa2c8ede3539bc445e57f2"
+    },
+    {
+      "file": "app/round-robin/[id]/admin/page.js",
+      "sha256": "335b79c5d09ce2614981cf49f2e5aef744af1dc4a9f2bbf08cb963ed6b32ac84"
+    },
+    {
+      "file": "app/round-robin/[id]/page.js",
+      "sha256": "55cad125a15dd0767fc124ca4e0d6608d37db177b1b9deec4f98c0f005d2726f"
+    },
+    {
+      "file": "app/round-robin/[id]/player/page.js",
+      "sha256": "c61cbb21340415c161e1f3ad5e7ce04ac5cde2be4db4d914ca1332a98d24694f"
+    },
+    {
+      "file": "app/round-robin/page.js",
+      "sha256": "112dd34a5087c150bcf0dd3d6df630ad48296476450507fdeee197d7a6570548"
+    },
+    {
+      "file": "app/schedule-editor/page.js",
+      "sha256": "fb17f8526077bd020ff24f419b5340d9093971a975547e7cad768e1a2e876391"
+    },
+    {
+      "file": "app/scheduling/page.js",
+      "sha256": "0e004f3f9059bb78f46e1bbd9a03caf6cea8a545033443de6fa8f6094d32cccd"
+    },
+    {
+      "file": "app/score-entry/[id]/page.js",
+      "sha256": "8bd8442c1180ec018a6e66791e874d9ec84b6c547db319886f554814c2074106"
+    },
+    {
+      "file": "app/score-sheets/page.js",
+      "sha256": "46db1a9265bf1ebba44dcaea1bdb02e2820e39b47a57fdaa24f46f5032248238"
+    },
+    {
+      "file": "app/scoring/page.js",
+      "sha256": "e728b00ccdddef0e63a2d6ee3d6c6b843676715b291962c5da8be4d6a1e568e5"
+    },
+    {
+      "file": "app/seasons/page.js",
+      "sha256": "d0059ebfefddee51efa85e6f729e9b7542a1c144680b1b85674245b25a7f18d8"
+    },
+    {
+      "file": "app/standings/page.js",
+      "sha256": "9b23af68d6c298c080a0fcb06690d258bdc2e4194e15f9d8c006238960cff442"
+    },
+    {
+      "file": "app/system-setup/page.js",
+      "sha256": "defba9650cdd79b5feeb638912d0461d36f20513b2a76ad9f38adc58246da7d0"
+    },
+    {
+      "file": "app/teams/[id]/page.js",
+      "sha256": "03cb2110afd42edd5f711fbc166fd153c4d890bbe448b4a13b98e5f191a461c3"
+    },
+    {
+      "file": "app/teams/page.js",
+      "sha256": "0623ce34dec8945804a95ba88b8104af3fc8e02d515ce93af7650120d63d8b45"
+    },
+    {
+      "file": "app/tournaments/[id]/admin/page.js",
+      "sha256": "13a6cdc83979813444265412b4c9d4f50812e1304401f181691fdf56ac2c4978"
+    },
+    {
+      "file": "app/tournaments/[id]/display/page.js",
+      "sha256": "647720d1ff79111ffe8dcb6479191b46e2058393f77d0c8b5cb1eaf632845906"
+    },
+    {
+      "file": "app/tournaments/[id]/page.js",
+      "sha256": "012329ba2acae8e4fd29c081e4043901bdf7b9e5371b5df28843ba5e02b4b3cf"
+    },
+    {
+      "file": "app/tournaments/[id]/player/page.js",
+      "sha256": "4100977255c7ddf86ae54af3b28598bc293500e302684866c5f02437ad10d6ab"
+    },
+    {
+      "file": "app/tournaments/[id]/standings/page.js",
+      "sha256": "74aa7cc66079a898681070dffeea3fc24f97e9d16f3543f82df1f6636795b31f"
+    },
+    {
+      "file": "app/tournaments/page.js",
+      "sha256": "84343e4e9418f6d813294acdcad67cd600b4017a7c7171219fbc48ca1ae51105"
+    },
+    {
+      "file": "app/view-as/page.js",
+      "sha256": "45e5dd350c068c40f0d2c37ecc7551f588ebba4e6aa68058af70a717cd2230b1"
+    },
+    {
+      "file": "next.config.ts",
+      "sha256": "139efa2c2dcf35db3d78e21a6a4ebccfec20a547b763314fef3b0d8f2532a354"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "5e6a1ed6dbfe59b40a4c182223aec3007fb85ea1d675a74e0cb0f742b96398bb"
+    },
+    {
+      "file": "package.json",
+      "sha256": "d658ac4c1b868ed1af086ff98c3bf676e4536880efffd7d82ef128f4c058192d"
+    },
+    {
+      "file": "proxy.js",
+      "sha256": "78fa77e4568eff261e083deddcbed68e10376a1002cc45b3d7f1de7914e2d247"
+    }
+  ]
+}

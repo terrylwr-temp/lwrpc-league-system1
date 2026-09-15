@@ -1,4 +1,8 @@
 "use client";
+import {viewAsLeagueDocument} from "../lib/viewAsPageState.js";
+import {scheduleTeamsWithNames} from "../lib/viewAsPageState.js";
+import {displaySystemSettings, isViewAsMode, getViewAsPageState} from "../lib/viewAsPageState.js";
+import {getCurrentMemberRows} from "../lib/auth";
 
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -30,7 +34,7 @@ import {
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
-import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
+import { memberEmailResolution } from "../lib/memberLookup";
 import { buildActiveDivisionOptions } from "../lib/divisionOptions";
 import {
   isSpecialMatchResult,
@@ -171,13 +175,27 @@ export default function CaptainDashboardPage() {
   }, [router]);
 
   const loadSystemSettings = useCallback(async function loadSystemSettings() {
-    const response = await fetch("/api/system-settings");
+    const response = await displaySystemSettings();
     const result = await response.json().catch(() => ({}));
 
     if (result.settings) {
       setSystemSettings(mergeSystemSettings(result.settings));
     }
   }, []);
+
+  useEffect(() => {
+    if (!isViewAsMode() || !setupMatch) return;
+    const trigger=document.activeElement;
+    const modal=document.querySelector('[data-view-as-setup="true"]');
+    const focusable=()=>Array.from(modal?.querySelectorAll('button:not(:disabled),a[href],select:not(:disabled),input:not(:disabled),[tabindex="0"]')||[]);
+    focusable()[0]?.focus();
+    const keydown=event=>{
+      if(event.key==='Escape'){event.preventDefault();setSetupMatch(null);setSetupTeam(null);setSetupDirty(false);}
+      if(event.key==='Tab'){const items=focusable(),first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
+    };
+    document.addEventListener('keydown',keydown);
+    return()=>{document.removeEventListener('keydown',keydown);if(trigger?.isConnected)trigger.focus();};
+  },[setupMatch]);
 
   const loadMatchSetupStatus = useCallback(async function loadMatchSetupStatus(matchRows) {
     const matchIds = matchRows.map((match) => match.id).filter(Boolean);
@@ -197,7 +215,9 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    setMatchSetupStatus(buildMatchSetupStatus(matchRows, data || []));
+    const status=buildMatchSetupStatus(matchRows, data || []);
+    if(isViewAsMode()){const counts=getViewAsPageState().tables.match_setup_counts;for(const match of matchRows)for(const teamId of [match.home_team_id,match.away_team_id]){const count=Number(counts.find(r=>r.match_id===match.id&&r.team_id===teamId)?.completed||0);const expectedLines=matchSetupLineCount(match.divisions);status[matchSetupKey(match.id,teamId)]={complete:count>=expectedLines,completedLines:count,expectedLines};}}
+    setMatchSetupStatus(status);
   }, []);
 
   const loadData = useCallback(async function loadData() {
@@ -206,20 +226,9 @@ export default function CaptainDashboardPage() {
 
     const startedAt = Date.now();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const {data:memberRows,error:memberError,identityMissing} = await getCurrentMemberRows("*");
 
-    if (!user?.email) {
-      setLoading(false);
-      return;
-    }
-
-    const { data: memberRows, error: memberError } = await findMembersByEmail(
-      supabase,
-      user.email,
-      "*"
-    );
+    if (identityMissing) { setLoading(false); return; }
 
     if (memberError) {
       alert(memberError.message);
@@ -1363,7 +1372,7 @@ export default function CaptainDashboardPage() {
                 <button
                   type="button"
                   onClick={() => emailOpposingCaptains(match)}
-                  disabled={opposingEmails.length === 0}
+                  disabled={isViewAsMode() || opposingEmails.length === 0}
                   className="w-full rounded-lg bg-sky-700 px-3 py-2 text-sm font-bold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
                   title={opposingEmails.length > 0 ? `Email ${opposingEmails.length} opposing captain contact${opposingEmails.length === 1 ? "" : "s"}` : "No opposing captain email addresses found"}
                 >
@@ -1391,7 +1400,7 @@ export default function CaptainDashboardPage() {
                   onClick={() => {
                     if (flexScheduleAllowed) openFlexSchedule(match);
                   }}
-                  disabled={!flexScheduleAllowed}
+                  disabled={isViewAsMode() || !flexScheduleAllowed}
                   className="w-full rounded-lg bg-violet-700 px-3 py-2 text-sm font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
                   title={flexScheduleAllowed ? "Modify this Flex League match date/time" : "Only the home team captain or co-captain can modify this Flex League match date/time"}
                 >
@@ -1401,7 +1410,7 @@ export default function CaptainDashboardPage() {
 
               <button
                 type="button"
-                disabled={!canEnterScores}
+                disabled={isViewAsMode() || !canEnterScores}
                 onClick={async () => {
                   if (scoreButtonAction) {
                     scoreButtonAction(match);
@@ -1582,6 +1591,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function saveFlexSchedule() {
+    if (isViewAsMode()) return;
     if (!flexScheduleMatch || savingFlexSchedule) return;
 
     if (!canManageFlexSchedule(flexScheduleMatch)) {
@@ -1657,6 +1667,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function sendFlexScheduleNotification(match, previousMatch = null) {
+    if (isViewAsMode()) return;
     const { emails, phones } = splitNotificationRecipients(teamCaptainContactsOnly(match.away_team));
 
     if (emails.length === 0 && phones.length === 0) {
@@ -1852,6 +1863,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function openMatchScoreSheet(match) {
+    if(isViewAsMode()){alert("The combined score sheet is not currently available in View As mode. Open Match Setup to view your authorized team setup.");return;}
     const [{ data, error }, { data: defaultTemplateData, error: defaultTemplateError }] = await Promise.all([
       supabase
       .from("match_lineups")
@@ -2134,6 +2146,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function saveMatchSetup() {
+    if (isViewAsMode()) return;
     if (!setupMatch || !setupTeam) return;
 
     let currentRatings = setupRatings;
@@ -2267,6 +2280,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function sendMatchSetupNotification() {
+    if (isViewAsMode()) return;
     const opponentTeam =
       String(setupMatch.home_team_id) === String(setupTeam.id)
         ? setupMatch.away_team
@@ -2364,6 +2378,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function emailMatchSetupPlayers() {
+    if (isViewAsMode()) return;
     if (!setupMatch || !setupTeam) return;
 
     const emails = setupPlayerEmailRecipients({
@@ -2443,6 +2458,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function displayDivisionCaptains(team) {
+    if(isViewAsMode()){alert("This contact list is not currently available in View As mode.");return;}
     if (!team?.division_id) {
       alert("This team is not assigned to a division.");
       return;
@@ -2535,6 +2551,7 @@ export default function CaptainDashboardPage() {
             co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, full_name, email)
           `)
           .eq("division_id", team.division_id)
+          .eq("is_active", true)
           .order("name", { ascending: true }),
         supabase
           .from("matches")
@@ -2669,7 +2686,7 @@ export default function CaptainDashboardPage() {
       (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
     );
 
-    const nextDivisionTeams = (divisionTeams || []).map((divisionTeam) => ({
+    const nextDivisionTeams = (await scheduleTeamsWithNames(divisionTeams || [], team.division_id)).map((divisionTeam) => ({
         ...divisionTeam,
         standing: standingsByTeamId[String(divisionTeam.id)] || null,
       })).sort(compareDivisionScheduleTeams);
@@ -2721,8 +2738,7 @@ export default function CaptainDashboardPage() {
     const bucket = normalizeLeagueDocumentBucket(
       league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET
     );
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    const documentUrl = data?.publicUrl || "";
+    const documentUrl = isViewAsMode() ? await viewAsLeagueDocument(league.id,documentType.key) : supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || "";
 
     if (!documentUrl) {
       documentWindow?.close();
@@ -2750,6 +2766,7 @@ export default function CaptainDashboardPage() {
   }
 
   async function saveCaptainProfileImage(file) {
+    if (isViewAsMode()) return;
     const saved = await saveProfilePhoto({ client: supabase, member: currentMember, file });
     setCurrentMember((current) => ({ ...current, profile_image_urls: saved.profileImageUrls }));
     return saved.publicUrl;
@@ -2781,8 +2798,8 @@ export default function CaptainDashboardPage() {
   const matchSetupModal = (
     <>
         {setupMatch && setupTeam && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
-          <div className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
+          <div style={isViewAsMode() ? {bottom:"var(--view-as-banner-height, 0px)"} : undefined} className="fixed inset-0 z-50 flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
+          <div style={isViewAsMode() ? {maxHeight:"calc(100dvh - var(--view-as-banner-height, 0px) - 1rem)"} : undefined} data-view-as-setup={isViewAsMode() ? "true" : undefined} role={isViewAsMode() ? "dialog" : undefined} aria-modal={isViewAsMode() ? true : undefined} aria-label={isViewAsMode() ? "Read-only Match Setup" : undefined} className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
             <div className="bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] p-5 text-white">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
@@ -2822,7 +2839,7 @@ export default function CaptainDashboardPage() {
                 <button
                   type="button"
                   onClick={saveMatchSetup}
-                  disabled={savingSetup || emailingSetupPlayers}
+                  disabled={isViewAsMode() || savingSetup || emailingSetupPlayers}
                   className="rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white hover:bg-[#124bb4] disabled:opacity-50"
                 >
                   {savingSetup ? "Saving..." : "Save Match Setup"}
@@ -2831,7 +2848,7 @@ export default function CaptainDashboardPage() {
                 <button
                   type="button"
                   onClick={requestEmailMatchSetupPlayers}
-                  disabled={savingSetup || emailingSetupPlayers}
+                  disabled={isViewAsMode() || savingSetup || emailingSetupPlayers}
                   className="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-black text-white hover:bg-emerald-800 disabled:opacity-50"
                 >
                   {emailingSetupPlayers ? "Emailing..." : "Email Players"}
@@ -2886,6 +2903,7 @@ export default function CaptainDashboardPage() {
 
                     <div className="space-y-2 p-4">
                       <select
+                        disabled={isViewAsMode()}
                         value={lineup.player_1_member_id}
                         onChange={(e) => updateSetupLineup(lineup.line_number, "player_1_member_id", e.target.value)}
                         className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm sm:py-2"
@@ -2903,6 +2921,7 @@ export default function CaptainDashboardPage() {
                       </select>
 
                       <select
+                        disabled={isViewAsMode()}
                         value={lineup.player_2_member_id}
                         onChange={(e) => updateSetupLineup(lineup.line_number, "player_2_member_id", e.target.value)}
                         className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm sm:py-2"
@@ -3033,6 +3052,7 @@ export default function CaptainDashboardPage() {
       <>
         <CaptainDesignPreviewView
           dashboard={{
+            readOnly: isViewAsMode(),
             member: currentMember,
             role: currentRole,
             teams: visibleTeams,
@@ -3327,7 +3347,7 @@ export default function CaptainDashboardPage() {
                   <button
                     type="button"
                     onClick={saveFlexSchedule}
-                    disabled={savingFlexSchedule}
+                    disabled={isViewAsMode() || savingFlexSchedule}
                     className="rounded-xl bg-violet-700 px-4 py-3 text-sm font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                   >
                     {savingFlexSchedule ? "Sending..." : "Save and Notify"}
@@ -3336,7 +3356,7 @@ export default function CaptainDashboardPage() {
                   <button
                     type="button"
                     onClick={closeFlexSchedule}
-                    disabled={savingFlexSchedule}
+                    disabled={isViewAsMode() || savingFlexSchedule}
                     className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Cancel

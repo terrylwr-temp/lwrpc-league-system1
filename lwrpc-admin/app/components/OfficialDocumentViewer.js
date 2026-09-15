@@ -1,4 +1,5 @@
 "use client";
+import {isViewAsMode,viewAsRequest} from "../lib/viewAsPageState.js";
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -16,6 +17,12 @@ export default function OfficialDocumentViewer({ citation }) {
     let active = true;
     async function load() {
       try {
+        if(isViewAsMode()){
+          const response=await viewAsRequest({operation:'source',source:'/official-document/'+encodeURIComponent(citation)});
+          const bytes=new Uint8Array(await response.arrayBuffer());
+          if(active)setDocument({title:decodeURIComponent(response.headers.get('x-document-title')||'Official Document'),citation:decodeURIComponent(response.headers.get('x-document-citation')||''),initialPageNumber:Number(response.headers.get('x-document-page')||1),file:{data:bytes}});
+          return;
+        }
         const headers = await getRequestAuthorizationHeaders({ "Content-Type": "application/json" });
         const response = await fetch("/api/official-document-viewer", { method: "POST", headers, body: JSON.stringify({ citation }) });
         const result = await response.json().catch(() => ({}));
@@ -37,6 +44,7 @@ export default function OfficialDocumentViewer({ citation }) {
   }, [citation]);
 
   function closeViewer() {
+    if(isViewAsMode()){router.back();return;}
     window.close();
     window.setTimeout(() => {
       if (window.closed) return;

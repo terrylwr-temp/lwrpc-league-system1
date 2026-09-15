@@ -1,0 +1,14 @@
+{
+  "originalSHA256": "690f3c2777f760b84fee2b756ef64060c844924ded304d7ae22344e015d28125",
+  "correctedSHA256": "e46a527351d8dd1cef6c4f23e4cda2a9e3a2389308846c115b89e0cbc28fa207",
+  "allFiveFunctionBodiesUnchanged": true,
+  "functions": [
+    "lms_read_private.lock_viewer",
+    "lms_read_private.competition",
+    "lms_read_private.people",
+    "view_as_private.page_read",
+    "public.lms_view_as"
+  ],
+  "applicationPackageFilesUnchanged": 312,
+  "changedAppFiles": []
+}

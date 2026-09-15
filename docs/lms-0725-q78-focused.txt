@@ -1,0 +1,140 @@
+(node:10320) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityGrouping.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ai_quality_capture {
+  event: 'capture_failed',
+  stage: 'observer',
+  assistant_version: 'LMS-0725'
+}
+✔ 0716 Unicode expansion retained; byte boundary and boundary+1 (2.5701ms)
+✔ 0716 conservative versioned fingerprints preserve material distinctions (1.6194ms)
+✔ 0716 unvoted grounded metadata only; correlated receipt and unchanged result keys (30.7956ms)
+✔ 0716 automatic insufficient_evidence detail without vote (2.1164ms)
+✔ 0716 automatic conflict detail without vote (0.2977ms)
+✔ 0716 candidate conflict hint alone creates no occurrence (0.196ms)
+✔ 0716 protected no text, group or feedback (0.2365ms)
+✔ 0716 clarification no text, group or feedback (0.1744ms)
+✔ 0716 clarification ending in no source retains bounded resolver only (0.3981ms)
+✔ 0716 manager tests separate and ineligible (0.2632ms)
+✔ 0716 legacy receipt and four-click append-only transition unchanged (0.9138ms)
+✔ 0716 privacy redaction isolates group and excludes chunks/URLs/vectors (0.4791ms)
+✔ 0716 build/oversize/write/logger/timeout failures fail open (12.7247ms)
+✔ 0716 technical failure operational only and original error preserved (0.51ms)
+✔ 0716 static migration and player payload boundaries (4.2303ms)
+(node:34080) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 policy operation: When is my Season DUPR established? (33.6969ms)
+✔ 0725 policy operation: When is Season DUPR established? (2.2882ms)
+✔ 0725 policy operation: When is my Season DUPR set? (2.3512ms)
+✔ 0725 policy operation: When is my Season DUPR locked? (5.0937ms)
+✔ 0725 policy operation: When does my Season DUPR lock? (2.162ms)
+✔ 0725 policy operation: Can my Season DUPR change during the season? (3.745ms)
+✔ 0725 policy operation: Does my Season DUPR stay the same all season? (1.4161ms)
+✔ 0725 policy operation: How long does my Season DUPR remain in effect? (3.7038ms)
+✔ 0725 policy operation: Can my rating be reset during the season? (5.1615ms)
+✔ 0725 policy operation: How is my Season DUPR determined? (2.6814ms)
+✔ 0725 policy operation: When is my PrimeTime Season DUPR established? (2.0818ms)
+✔ 0725 policy operation: When is my season rating updated? (2.5995ms)
+✔ 0725 value contrast season (2.1397ms)
+✔ 0725 value contrast primetime (1.0049ms)
+✔ 0725 value contrast unsupported (0.399ms)
+✔ 0725 completion failure and dedup conflict remain empty with safe reasons (3.0023ms)
+✔ 0725 duration selects separately documented reset qualification (2.5997ms)
+✔ 0725 bounded telemetry reason build (0.731ms)
+✔ 0725 bounded telemetry reason rpc (0.5536ms)
+✔ 0725 bounded telemetry reason timeout (10.1867ms)
+ai_policy_evidence {
+  event: 'policy_evidence_failed',
+  time: '2026-09-08T19:37:50.702Z',
+  correlationId: null,
+  origin: null,
+  intent: 'policy_date',
+  object: 'rating',
+  scope: [],
+  candidateCount: 109,
+  completionCount: 109,
+  candidates: [
+    {
+      chunkId: 'd51e615b-a4f2-460f-8a81-da9abfbd46af',
+      versionId: 'f0aad5ad-cf08-46c2-94fd-686ceb1271c0',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'c4ab8544-decb-4ea1-b856-2df4a2d196f1',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9f05921-2ee9-46fc-9b44-e5a861d7dd6f',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: '950a54ab-aa3b-4f43-9c51-88ce0ca803ae',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9e04de7-e031-4446-b14d-ad4484157cd2',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '6cab8beb-ccf1-4c30-b8ba-a032f3e582d6',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'af393e89-06b0-406c-99ab-eaffeb369c7c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'ea519f19-a038-4eb5-b391-3868da7efe2c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    }
+  ],
+  referencesTruncated: true,
+  selectedCount: 4,
+  applicability: 'SELECTED',
+  validation: 'SOURCE_REVALIDATION_FAILED',
+  finalCount: 0,
+  zeroStage: 'validation',
+  completion: 'complete',
+  completionStage: null,
+  completionReason: null,
+  completionMs: 0
+}
+✔ 0725 diagnostic snapshot fits existing PostgreSQL and replay remains idempotent (2828.8112ms)
+✔ 0725 no evidence or failed source validation never invokes model (49.8209ms)
+✔ 0725 private injected diagnostics are sanitized; View-As stays separate (1.6165ms)
+✔ 0725 View-As policy clears Live clarification without a lookup or provider call (144.3213ms)
+(node:37564) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityPersistence.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 Q78 450ms success (6.526ms)
+✔ 0725 Q78 deadline then found (2.8507ms)
+✔ 0725 Q78 deadline absent then retry (1.5579ms)
+✔ 0725 Q78 late first commit races retry (1.8611ms)
+✔ 0725 Q78 reconciliation timeout (1.3125ms)
+✔ 0725 Q78 reconciliation failure (0.837ms)
+✔ 0725 Q78 second deadline then found (1.1097ms)
+✔ 0725 Q78 second deadline absent (1.8019ms)
+✔ 0725 Q78 mismatch never retries (0.852ms)
+✔ 0725 Q78 safe answer returns before recovery and no answer rerun (4.9814ms)
+✔ 0725 reconciliation cannot accept an older positive occurrence for missing negative review case (0.4432ms)
+✔ 0725 recovery scheduling failure is visible and never runs detached (0.8837ms)
+✔ 0725 recovery keeps origin and never introduces actor or effective member identifiers (1.719ms)
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3477.2524

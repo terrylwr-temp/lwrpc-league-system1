@@ -1,0 +1,52 @@
+{
+  "postgres": "17.11",
+  "passed": true,
+  "cases": [
+    {
+      "division": "10",
+      "league": "1",
+      "status": "verified",
+      "ids": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "division": "20",
+      "league": "1",
+      "status": "verified",
+      "ids": [
+        5
+      ]
+    },
+    {
+      "division": "10",
+      "league": "2",
+      "status": "verified",
+      "ids": [
+        6
+      ]
+    },
+    {
+      "division": "10",
+      "league": "1",
+      "status": "pending",
+      "ids": [
+        7
+      ]
+    },
+    {
+      "division": "99",
+      "league": "1",
+      "status": "verified",
+      "ids": []
+    },
+    {
+      "division": "",
+      "league": "1",
+      "status": "verified",
+      "ids": []
+    }
+  ]
+}

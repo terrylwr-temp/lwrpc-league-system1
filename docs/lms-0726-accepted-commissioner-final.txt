@@ -1,0 +1,291 @@
+- main
+  - complementary "Admin dashboard navigation; hover to expand when collapsed"
+    - link "Lakewood Ranch Pickleball Club Lakewood Ranch Pickleball Club" [ref=e1]
+      - image "Lakewood Ranch Pickleball Club"
+      - strong
+        - StaticText "Lakewood Ranch Pickleball Club"
+    - navigation "League Management navigation" [ref=e2]
+      - button "Dashboard ›" [expanded=false, ref=e3]
+        - StaticText "Dashboard"
+        - StaticText "›"
+      - button "People & Teams ›" [expanded=false, ref=e4]
+        - StaticText "People & Teams"
+        - StaticText "›"
+      - button "Match Operations ›" [expanded=false, ref=e5]
+        - StaticText "Match Operations"
+        - StaticText "›"
+      - button "League Structure ›" [expanded=false, ref=e6]
+        - StaticText "League Structure"
+        - StaticText "›"
+      - button "System Setup ›" [expanded=false, ref=e7]
+        - StaticText "System Setup"
+        - StaticText "›"
+      - button "Modules ›" [expanded=false, ref=e8]
+        - StaticText "Modules"
+        - StaticText "›"
+      - button "League Documents ›" [expanded=false, ref=e9]
+        - StaticText "League Documents"
+        - StaticText "›"
+    - StaticText "SELECTED SCOPE"
+    - strong
+      - StaticText "Active Seasons"
+    - StaticText "Admin operations"
+    - paragraph
+      - StaticText "© 2026 Lakewood Ranch Pickleball Club"
+  - generic
+    - sectionheader
+      - StaticText "ADMIN DASHBOARD"
+      - heading "Welcome Synthetic" [level=1, ref=e10]
+        - StaticText "Welcome Synthetic"
+      - button "Ask LWR Pickleball Club AI" [ref=e11]
+      - strong
+        - StaticText "Synthetic Person8"
+      - StaticText "Commissioner"
+      - button "SP" [ref=e12]
+        - StaticText "SP"
+    - generic
+      - sectionheader
+        - StaticText "SYSTEM SNAPSHOT"
+        - heading "Club Operational Overview" [level=2, ref=e45]
+        - paragraph
+          - StaticText "League health, participation, scheduling, and scoring for the selected scope."
+        - LabelText
+          - StaticText "DASHBOARD SCOPE"
+          - combobox "DASHBOARD SCOPE" [expanded=false, ref=e53]: Active Seasons
+            - MenuListPopup
+              - option "Active Seasons" [selected, ref=e57]
+              - option "Not Active (Current Entries)" [ref=e58]
+              - option "All Seasons" [ref=e59]
+              - group "Seasons"
+                - option "Synthetic Current" [ref=e60]
+              - group "Leagues"
+                - option "Synthetic League" [ref=e61]
+              - group "Divisions"
+                - option "Synthetic Division" [ref=e62]
+      - article
+        - StaticText "ACTIVE MEMBERS"
+        - strong
+          - StaticText "--"
+        - StaticText "Current club members"
+      - article
+        - StaticText "PLAYERS ON TEAMS"
+        - strong
+          - StaticText "--"
+        - StaticText "Roster assignments"
+        - button "All Players" [ref=e46]
+        - button "Unique" [ref=e47]
+      - article
+        - StaticText "TEAMS"
+        - strong
+          - StaticText "--"
+        - StaticText "Selected-scope teams"
+      - article
+        - StaticText "AVERAGE DUPR RATING"
+        - strong
+          - StaticText "--"
+        - StaticText "Season DUPR roster average"
+        - group "Average team rating type"
+          - button "DUPR Doubles" [ref=e54]
+          - button "Season DUPR" [ref=e55]
+          - button "Age-Based" [ref=e56]
+      - button "PENDING MATCH SCORE ENTRY/VALIDATIONS -- Overdue score entry or score review" [ref=e13]
+        - StaticText "PENDING MATCH SCORE ENTRY/VALIDATIONS"
+        - strong
+          - StaticText "--"
+        - StaticText "Overdue score entry or score review"
+      - button "MATCHES PLAYED -- Verified matches" [ref=e14]
+        - StaticText "MATCHES PLAYED"
+        - strong
+          - StaticText "--"
+        - StaticText "Verified matches"
+      - button "GAMES PLAYED -- Verified game scores" [ref=e15]
+        - StaticText "GAMES PLAYED"
+        - strong
+          - StaticText "--"
+        - StaticText "Verified game scores"
+      - button "MATCHES THIS WEEK -- Scheduled matches" [ref=e16]
+        - StaticText "MATCHES THIS WEEK"
+        - strong
+          - StaticText "--"
+        - StaticText "Scheduled matches"
+    - StaticText "EXECUTIVE DASHBOARD"
+    - heading "League Analytics" [level=3, ref=e17]
+    - paragraph
+      - StaticText "Charts, progress, standings leaders, and division-level trend views for active seasons operations."
+    - StaticText "DASHBOARD SCOPE"
+    - StaticText "Active Seasons"
+    - button "SHOW ANALYTICS" [expanded=false, ref=e18]
+    - StaticText "League Analytics is collapsed by default. Expand it when you want charts and standings leaders for the selected dashboard scope."
+    - generic
+      - sectionheader
+        - StaticText "ADMINISTRATION"
+        - heading "People And Teams" [level=2, ref=e48]
+        - paragraph
+          - StaticText "Keep player records, captains, ratings, teams, and access current."
+        - strong
+          - StaticText "5 Tools"
+      - button "MB Members Search, edit, and review member records." [ref=e19]
+        - StaticText "MB"
+        - strong
+          - StaticText "Members"
+        - StaticText "Search, edit, and review member records."
+      - button "RT Season Ratings Update DUPR and PrimeTime ratings." [ref=e20]
+        - StaticText "RT"
+        - strong
+          - StaticText "Season Ratings"
+        - StaticText "Update DUPR and PrimeTime ratings."
+      - button "TR Teams & Rosters Create teams and manage rosters." [ref=e21]
+        - StaticText "TR"
+        - strong
+          - StaticText "Teams & Rosters"
+        - StaticText "Create teams and manage rosters."
+      - button "DS Division Standings Review every current division's standings." [ref=e22]
+        - StaticText "DS"
+        - strong
+          - StaticText "Division Standings"
+        - StaticText "Review every current division's standings."
+      - button "SC Division Schedules Review team schedules for any current division." [ref=e23]
+        - StaticText "SC"
+        - strong
+          - StaticText "Division Schedules"
+        - StaticText "Review team schedules for any current division."
+    - generic
+      - sectionheader
+        - StaticText "ADMINISTRATION"
+        - heading "Match Operations" [level=2, ref=e49]
+        - paragraph
+          - StaticText "Generate, edit, publish, reset, score, and export matches."
+        - strong
+          - StaticText "5 Tools"
+      - button "SA Scheduling Admin Rules, blackout dates, and initial schedule generation." [ref=e24]
+        - StaticText "SA"
+        - strong
+          - StaticText "Scheduling Admin"
+        - StaticText "Rules, blackout dates, and initial schedule generation."
+      - button "SE Schedule Editor Review, edit, publish, and reset matches." [ref=e25]
+        - StaticText "SE"
+        - strong
+          - StaticText "Schedule Editor"
+        - StaticText "Review, edit, publish, and reset matches."
+      - button "SC Scoring Operations Create and manage matches, send score reminders, review verification, and export to DUPR." [ref=e26]
+        - StaticText "SC"
+        - strong
+          - StaticText "Scoring Operations"
+        - StaticText "Create and manage matches, send score reminders, review verification, and export to DUPR."
+      - button "DM Dashboard Messages Create dashboard login messages and review message history." [ref=e27]
+        - StaticText "DM"
+        - strong
+          - StaticText "Dashboard Messages"
+        - StaticText "Create dashboard login messages and review message history."
+      - button "LC League Communications Compose, preview, send, and review scoped league emails." [ref=e28]
+        - StaticText "LC"
+        - strong
+          - StaticText "League Communications"
+        - StaticText "Compose, preview, send, and review scoped league emails."
+    - generic
+      - sectionheader
+        - StaticText "ADMINISTRATION"
+        - heading "League Structure" [level=2, ref=e50]
+        - paragraph
+          - StaticText "Set up the season framework before teams start playing."
+        - strong
+          - StaticText "4 Tools"
+      - button "SN Seasons Create seasons and maintain season date ranges." [ref=e29]
+        - StaticText "SN"
+        - strong
+          - StaticText "Seasons"
+        - StaticText "Create seasons and maintain season date ranges."
+      - button "LG Leagues Manage leagues and roster locking." [ref=e30]
+        - StaticText "LG"
+        - strong
+          - StaticText "Leagues"
+        - StaticText "Manage leagues and roster locking."
+      - button "DV Divisions Manage division rules, DUPR limits, and game lines." [ref=e31]
+        - StaticText "DV"
+        - strong
+          - StaticText "Divisions"
+        - StaticText "Manage division rules, DUPR limits, and game lines."
+      - button "LC Locations Maintain clubs, courts, and court availability." [ref=e32]
+        - StaticText "LC"
+        - strong
+          - StaticText "Locations"
+        - StaticText "Maintain clubs, courts, and court availability."
+    - generic
+      - sectionheader
+        - StaticText "ADMINISTRATION"
+        - heading "System Setup" [level=2, ref=e51]
+        - paragraph
+          - StaticText "Configure system-wide communication, score sheets, club settings, and controlled reset operations."
+        - strong
+          - StaticText "9 Tools"
+      - button "EO Email Options Edit automated email templates and send test notifications." [ref=e33]
+        - StaticText "EO"
+        - strong
+          - StaticText "Email Options"
+        - StaticText "Edit automated email templates and send test notifications."
+      - button "SS Score Sheets Manage printable score sheet templates." [ref=e34]
+        - StaticText "SS"
+        - strong
+          - StaticText "Score Sheets"
+        - StaticText "Manage printable score sheet templates."
+      - button "DG Dashboard Guides Select the PDF guides shown on each dashboard." [ref=e35]
+        - StaticText "DG"
+        - strong
+          - StaticText "Dashboard Guides"
+        - StaticText "Select the PDF guides shown on each dashboard."
+      - button "AI AI Assistant Management Manage official AI rule sources and inspect PDF processing." [ref=e36]
+        - StaticText "AI"
+        - strong
+          - StaticText "AI Assistant Management"
+        - StaticText "Manage official AI rule sources and inspect PDF processing."
+      - button "AT Test AI Assistant Test grounded official-document answers with retrieval diagnostics." [ref=e37]
+        - StaticText "AT"
+        - strong
+          - StaticText "Test AI Assistant"
+        - StaticText "Test grounded official-document answers with retrieval diagnostics."
+      - button "AR AI Feedback & Review Review answer feedback, unanswered questions and manager decisions." [ref=e38]
+        - StaticText "AR"
+        - strong
+          - StaticText "AI Feedback & Review"
+        - StaticText "Review answer feedback, unanswered questions and manager decisions."
+      - button "CS Club Setup Configure club branding and contact defaults." [ref=e39]
+        - StaticText "CS"
+        - strong
+          - StaticText "Club Setup"
+        - StaticText "Configure club branding and contact defaults."
+      - button "SR Season Reset Prepare one season for rollover while preserving match history." [ref=e40]
+        - StaticText "SR"
+        - strong
+          - StaticText "Season Reset"
+        - StaticText "Prepare one season for rollover while preserving match history."
+      - button "MR Master Reset All Open the protected full-system operations reset." [ref=e41]
+        - StaticText "MR"
+        - strong
+          - StaticText "Master Reset All"
+        - StaticText "Open the protected full-system operations reset."
+    - generic
+      - sectionheader
+        - StaticText "CONNECTED TOOLS"
+        - heading "Modules" [level=2, ref=e52]
+        - paragraph
+          - StaticText "Standalone tools that share club data with the main league system."
+        - strong
+          - StaticText "3 Tools"
+      - button "TN Tournaments Open public tournament displays and event-code tournament operations." [ref=e42]
+        - StaticText "TN"
+        - strong
+          - StaticText "Tournaments"
+        - StaticText "Open public tournament displays and event-code tournament operations."
+      - button "PB PBCourtCommand Run round robin and ladder sessions with saved players, lineups, scores, and texts." [ref=e43]
+        - StaticText "PB"
+        - strong
+          - StaticText "PBCourtCommand"
+        - StaticText "Run round robin and ladder sessions with saved players, lineups, scores, and texts."
+      - button "AI AI League Insights Ask LMS, weekly health, anomalies, lineup gaps, and cleanup suggestions." [ref=e44]
+        - StaticText "AI"
+        - strong
+          - StaticText "AI League Insights"
+        - StaticText "Ask LMS, weekly health, anomalies, lineup gaps, and cleanup suggestions."
+    - paragraph
+      - StaticText "LIVE ADMIN DASHBOARD - CURRENT PERMISSIONS, SCOPE FILTERS, COUNTS, AND NAVIGATION"
+- alert

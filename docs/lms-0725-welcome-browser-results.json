@@ -1,0 +1,38 @@
+[
+  {
+    "width": 1440,
+    "inputVisible": true,
+    "noHorizontalOverflow": true,
+    "semanticDialogAndHeadings": true,
+    "keyboardTrap": true,
+    "escapeClosesOnlyHelp": true,
+    "focusReturned": true,
+    "visibleFocus": "2px",
+    "exactExamplesSubmitted": 12,
+    "consoleErrors": []
+  },
+  {
+    "width": 390,
+    "inputVisible": true,
+    "noHorizontalOverflow": true,
+    "semanticDialogAndHeadings": true,
+    "keyboardTrap": true,
+    "escapeClosesOnlyHelp": true,
+    "focusReturned": true,
+    "visibleFocus": "2px",
+    "exactExamplesSubmitted": 12,
+    "consoleErrors": []
+  },
+  {
+    "width": 320,
+    "inputVisible": true,
+    "noHorizontalOverflow": true,
+    "semanticDialogAndHeadings": true,
+    "keyboardTrap": true,
+    "escapeClosesOnlyHelp": true,
+    "focusReturned": true,
+    "visibleFocus": "2px",
+    "exactExamplesSubmitted": 12,
+    "consoleErrors": []
+  }
+]

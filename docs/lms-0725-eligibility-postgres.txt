@@ -1,0 +1,5 @@
+(node:52912) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"postgresVersion":"17.11","loopbackOnly":true,"productionAccess":false,"modelCalls":0,"rollback":"PASS","telemetryOutcomes":3,"rlsUnchanged":true,"inactiveMember":"DENIED","revokedRole":"DENIED","apply":"PASS","replay":"PASS","secondReplay":"PASS","metadataPreserved":true,"selfRoles":7,"wrongSubject":"DENIED","browser":"DENIED","forgedViewTarget":"DENIED","effectiveRf":"PASS","audit":"PASS"}

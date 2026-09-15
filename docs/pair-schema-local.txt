@@ -1,0 +1,222 @@
+(node:14144) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[
+  {
+    table_name: 'divisions',
+    column_name: 'id',
+    is_nullable: 'NO',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'league_id',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'name',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'is_active',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'skill_level',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'sort_order',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'created_at',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'updated_at',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'min_dupr',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'max_dupr',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'number_of_lines',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'default_game_format',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'games_per_line',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'points_to_win',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'win_by',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'third_game_format',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'picklebreaker_enabled',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'picklebreaker_points',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'line_notes',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'rating_type',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'standings_win_points',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'standings_tie_points',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'standings_loss_points',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'standings_tiebreak_1',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'standings_tiebreak_2',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'standings_tiebreak_3',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'picklebreaker_win_points',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'picklebreaker_loss_points',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'default_lines_config',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'team_dupr_max',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'playoff_team_count',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'score_sheet_template_id',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'primary_team_type',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'secondary_number_of_lines',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'secondary_team_type',
+    is_nullable: 'YES',
+    column_default: null
+  },
+  {
+    table_name: 'divisions',
+    column_name: 'flex_league',
+    is_nullable: 'YES',
+    column_default: null
+  }
+]

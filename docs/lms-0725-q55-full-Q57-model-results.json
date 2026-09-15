@@ -1,0 +1,109 @@
+{
+  "recordedAt": "2026-09-08T18:42:27.498Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q57",
+      "question": "When are Season DUPR ratings recorded for Saturday?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1160,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the Saturday DUPR League, Season DUPR ratings are recorded on Sept. 27, 2026.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1872,
+        "sourceResolutionMs": 12,
+        "totalMs": 1987,
+        "inputTokens": 1592,
+        "outputTokens": 41,
+        "totalTokens": 1633,
+        "estimatedGenerationCostUsd": 0.00919
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

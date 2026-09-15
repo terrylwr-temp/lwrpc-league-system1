@@ -1,0 +1,57 @@
+{
+  "results": [
+    {
+      "role": "captain",
+      "normal": "Captains: Synthetic Very Long Captain Display Name Person9, synthetic6@example.invalid, Synthetic Person7",
+      "names": "Captains: Synthetic Very Long Captain Display Name Person9, Synthetic Person7",
+      "scheduleFieldsEqual": true,
+      "teamIdsEqual": true,
+      "keyboardFocus": true,
+      "refresh": true,
+      "directRoute": true,
+      "closeControl": true,
+      "widths": [
+        1280,
+        390,
+        320
+      ],
+      "exit": true
+    },
+    {
+      "role": "player",
+      "normal": "Captains: Synthetic Very Long Captain Display Name Person9, synthetic6@example.invalid, Synthetic Person7",
+      "names": "Captains: Synthetic Very Long Captain Display Name Person9, Synthetic Person7",
+      "scheduleFieldsEqual": true,
+      "teamIdsEqual": true,
+      "keyboardFocus": true,
+      "refresh": true,
+      "directRoute": true,
+      "closeControl": true,
+      "widths": [
+        1280,
+        390,
+        320
+      ],
+      "exit": true
+    },
+    {
+      "role": "club_pro",
+      "normal": "Captains: Synthetic Very Long Captain Display Name Person9, synthetic6@example.invalid, Synthetic Person7",
+      "names": "Captains: Synthetic Very Long Captain Display Name Person9, Synthetic Person7",
+      "scheduleFieldsEqual": true,
+      "teamIdsEqual": true,
+      "keyboardFocus": true,
+      "refresh": true,
+      "directRoute": true,
+      "closeControl": true,
+      "widths": [
+        1280,
+        390,
+        320
+      ],
+      "exit": true
+    }
+  ],
+  "errors": [],
+  "modelCalls": 0
+}

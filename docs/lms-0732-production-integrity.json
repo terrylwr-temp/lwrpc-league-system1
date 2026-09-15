@@ -1,0 +1,319 @@
+{
+  "deployment": "dpl_414rqyGtFAFrcQ6JNRTVH9Qs2cGU",
+  "business": [
+    {
+      "captured_at": "2026-09-10 13:01:49.411962+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "cdfd3f3f2db16ddc9eaf724ccbf97ba8"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "d5e1694ffbf36f7a5116d87a1a0f9b69"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "bd1f5eec145f2086ad580191640395de"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "f353cfede9d8696c69d69ac94ba7c643"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "f02587eb2cd398e80b980b47ef05fc37"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "abdbf57a60804e4c1e525a724869fd18"
+        },
+        {
+          "name": "locations",
+          "rows": 137,
+          "fingerprint": "db5570fcb19efc798a3807a613b2108e"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1012,
+          "fingerprint": "bdee7d0d12f3e166ea326939c8ec6ed5"
+        },
+        {
+          "name": "members",
+          "rows": 1974,
+          "fingerprint": "e9b196fdfeea52e99763bed6493178b8"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "c0e44315f230e29d84b7b0b14bc83d8b"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 104,
+          "fingerprint": "cbeb01d13f4fce9ea6425c83895c9b55"
+        },
+        {
+          "name": "user_roles",
+          "rows": 181,
+          "fingerprint": "0af71e913f1510b59181b294a2cce4cc"
+        }
+      ]
+    }
+  ],
+  "securityMatches": true,
+  "approvedRevisions": [
+    {
+      "revision_count": 3,
+      "fingerprint": "1eb1ea4466c6da986ba303c0993d07de"
+    }
+  ],
+  "activeCatalog": [
+    {
+      "id": "1c9bcadf-79b9-4493-b426-3c3e3528766e",
+      "active_version_id": "1ea2ccf1-598e-4d0c-b0a4-b20f833805f0",
+      "status": "active",
+      "processing_status": "ready",
+      "version_label": "v20260903215545-1ea2ccf1"
+    },
+    {
+      "id": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "active_version_id": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "status": "active",
+      "processing_status": "ready",
+      "version_label": "v20260904231917-00c2e2bb"
+    },
+    {
+      "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+      "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "status": "active",
+      "processing_status": "ready",
+      "version_label": "v20260903215721-7ec16cf5"
+    },
+    {
+      "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+      "active_version_id": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+      "status": "active",
+      "processing_status": "ready",
+      "version_label": "v20260908144326-816a2cd7"
+    },
+    {
+      "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "active_version_id": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+      "status": "active",
+      "processing_status": "ready",
+      "version_label": "v20260908162017-f0aad5ad"
+    },
+    {
+      "id": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+      "active_version_id": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "status": "active",
+      "processing_status": "ready",
+      "version_label": "v20260904112405-f811e60f"
+    },
+    {
+      "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "status": "active",
+      "processing_status": "ready",
+      "version_label": "v20260903215657-939baf3b"
+    }
+  ],
+  "catalogMatches": true,
+  "productionAcceptance": {
+    "calls": 11,
+    "input": 31617,
+    "output": 1968,
+    "total": 33585,
+    "cached": null,
+    "estimatedCost": 0.217125
+  },
+  "otherPlayerInterface": {
+    "calls": 2,
+    "input": 4530,
+    "output": 128,
+    "total": 4658,
+    "cached": null,
+    "estimatedCost": 0.02649
+  },
+  "usage": [
+    {
+      "completed_at": "2026-09-10 12:51:16.453+00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 2265,
+      "output_tokens": 65
+    },
+    {
+      "completed_at": "2026-09-10 12:51:43.582+00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 2265,
+      "output_tokens": 63
+    },
+    {
+      "completed_at": "2026-09-10 12:53:01.114+00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 3921,
+      "output_tokens": 368
+    },
+    {
+      "completed_at": "2026-09-10 12:54:04.658+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 3907,
+      "output_tokens": 292
+    },
+    {
+      "completed_at": "2026-09-10 12:58:12.557+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 2265,
+      "output_tokens": 65
+    },
+    {
+      "completed_at": "2026-09-10 12:58:37.307+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 3911,
+      "output_tokens": 304
+    },
+    {
+      "completed_at": "2026-09-10 12:59:09.553+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 3909,
+      "output_tokens": 320
+    },
+    {
+      "completed_at": "2026-09-10 12:59:18.982+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 2264,
+      "output_tokens": 66
+    },
+    {
+      "completed_at": "2026-09-10 12:59:33.011+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 2263,
+      "output_tokens": 64
+    },
+    {
+      "completed_at": "2026-09-10 12:59:50.374+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1559,
+      "output_tokens": 44
+    },
+    {
+      "completed_at": "2026-09-10 13:00:09.103+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 3900,
+      "output_tokens": 301
+    },
+    {
+      "completed_at": "2026-09-10 13:00:41.997+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 2263,
+      "output_tokens": 61
+    },
+    {
+      "completed_at": "2026-09-10 13:00:59.315+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1455,
+      "output_tokens": 83
+    },
+    {
+      "completed_at": "2026-09-10 13:01:15.002+00",
+      "origin": "manager_test",
+      "final_kind": "clarification",
+      "model": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "completed_at": "2026-09-10 13:02:07.059+00",
+      "origin": "manager_test",
+      "final_kind": "protected",
+      "model": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "completed_at": "2026-09-10 13:02:19.188+00",
+      "origin": "manager_test",
+      "final_kind": "clarification",
+      "model": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "completed_at": "2026-09-10 13:02:40.227+00",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "model": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    }
+  ],
+  "note": "Acceptance includes the 12:53:01 original registration panel request plus 10 manager test generations. Two earlier player-interface requests are other traffic, purpose unknown. Cached token count unavailable; uncached estimate excludes embeddings. No prompt content retained for accounting."
+}

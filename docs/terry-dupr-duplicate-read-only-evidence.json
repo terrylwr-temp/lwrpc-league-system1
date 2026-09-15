@@ -1,0 +1,534 @@
+{
+  "members": [
+    {
+      "id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "first_name": "Terry",
+      "last_name": "Adelman",
+      "full_name": "Terry Adelman",
+      "email_masked": "te***@lwrpickleballclub.com",
+      "dupr_id": "1R9LNE",
+      "is_active_member": true,
+      "is_active": true,
+      "membership_status": "Active",
+      "membership_level": null,
+      "membership_levels": null,
+      "membershipworks_id": "6970334d03ecc53a270a5350",
+      "membershipworks_account_id": "6970334d03ecc53a270a5350",
+      "join_date": "2022-02-12",
+      "renewal_date": "2027-12-31",
+      "created_at": "2026-05-06 00:19:48.951277",
+      "updated_at": "2026-09-11 15:40:34.925",
+      "last_imported_at": "2026-05-06 00:36:17.849",
+      "last_membership_sync_at": "2026-05-18 18:59:20.011089+00",
+      "labels": null,
+      "notes": "DUPR Spring '26 / MDUPR8 / Esplanade Kitchen Killers\nSaturday '25-'26 / LWRPC8 / Don't Dink and Drive",
+      "member_comment": null,
+      "roles": [
+        {
+          "role": "commissioner",
+          "user_id": "430a30c1-c161-4217-84db-bd6c7940959c"
+        }
+      ],
+      "auth_accounts": [
+        {
+          "id": "430a30c1-c161-4217-84db-bd6c7940959c",
+          "role_link": true,
+          "created_at": "2026-05-06T01:42:59.126749+00:00",
+          "deleted_at": null,
+          "banned_until": null,
+          "confirmed_at": "2026-05-06T01:42:59.154656+00:00",
+          "email_masked": "te***@lwrpickleballclub.com",
+          "last_sign_in_at": "2026-09-11T11:40:01.33101+00:00"
+        }
+      ]
+    },
+    {
+      "id": "a6cc5885-f6da-41f2-8bdc-88596b176d96",
+      "first_name": "Terry",
+      "last_name": "Captain",
+      "full_name": null,
+      "email_masked": "te***@gmail.com",
+      "dupr_id": "1R9LNE",
+      "is_active_member": true,
+      "is_active": true,
+      "membership_status": null,
+      "membership_level": null,
+      "membership_levels": null,
+      "membershipworks_id": null,
+      "membershipworks_account_id": "manual:d45682ba-2b2e-44c4-a9a5-17b6c5a3d83a",
+      "join_date": null,
+      "renewal_date": null,
+      "created_at": "2026-05-21 21:13:22.442559",
+      "updated_at": "2026-07-16 21:41:48.191496",
+      "last_imported_at": null,
+      "last_membership_sync_at": null,
+      "labels": null,
+      "notes": null,
+      "member_comment": null,
+      "roles": [
+        {
+          "role": "player",
+          "user_id": "246d0c7d-1561-4cf0-a766-cb9d0a50f933"
+        }
+      ],
+      "auth_accounts": [
+        {
+          "id": "246d0c7d-1561-4cf0-a766-cb9d0a50f933",
+          "role_link": true,
+          "created_at": "2026-05-22T01:49:14.696117+00:00",
+          "deleted_at": null,
+          "banned_until": null,
+          "confirmed_at": "2026-05-22T01:52:43.358499+00:00",
+          "email_masked": "te***@gmail.com",
+          "last_sign_in_at": "2026-07-20T13:44:38.412379+00:00"
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "dupr_id": "1R9LNE",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+          "name": "Terry Adelman",
+          "status": "Active"
+        },
+        {
+          "id": "a6cc5885-f6da-41f2-8bdc-88596b176d96",
+          "name": "Terry Captain",
+          "status": null
+        }
+      ]
+    },
+    {
+      "dupr_id": "309R64",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "b403b17c-5d61-4768-b2aa-544fb2bd3df2",
+          "name": "Liam Daly",
+          "status": "Active"
+        },
+        {
+          "id": "f3a5cb6d-4a58-4b57-8c19-632ffed2418d",
+          "name": "Liam Daly",
+          "status": "Active"
+        }
+      ]
+    },
+    {
+      "dupr_id": "67POVE",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "a6c5a49b-71b7-48fc-b9c8-ee632e12c6c5",
+          "name": "Jay Solomon",
+          "status": "Active"
+        },
+        {
+          "id": "350969f0-cca3-4a55-be4f-eab7184eed44",
+          "name": "Jay Solomon",
+          "status": "Active"
+        }
+      ]
+    },
+    {
+      "dupr_id": "EGL7GM",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "d0f2a815-88c9-4811-b4b7-b0d1d47d4dcb",
+          "name": "Sharon Hunt",
+          "status": "Active"
+        },
+        {
+          "id": "193fc856-4c23-4982-b0dd-74edbf593423",
+          "name": "Sharon Hunt",
+          "status": "Active"
+        }
+      ]
+    },
+    {
+      "dupr_id": "JJVRPW",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "d2a864c1-417f-4c37-8b7d-910ec7558d3a",
+          "name": "John Ledford",
+          "status": "Active"
+        },
+        {
+          "id": "380f458a-1007-4e25-9324-a3f0db3c645f",
+          "name": "John Ledford",
+          "status": "Active"
+        }
+      ]
+    },
+    {
+      "dupr_id": "MYLYJD",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "7afbd4f0-3462-461d-86d5-6b9da2c4a3dc",
+          "name": "Kristin Markey",
+          "status": "Active"
+        },
+        {
+          "id": "4b60fde5-3c7d-4661-9dd5-a7ff6d1e2ea2",
+          "name": "Kristin Markey",
+          "status": "Active"
+        }
+      ]
+    },
+    {
+      "dupr_id": "QP7W65",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "6420be8c-ce13-4eb0-b1a4-817b24888e5c",
+          "name": "Barbara Ritter",
+          "status": "Active"
+        },
+        {
+          "id": "bba725bf-1dac-4109-bd76-08d438235722",
+          "name": "Barbara Ritter",
+          "status": "Active"
+        }
+      ]
+    },
+    {
+      "dupr_id": "RW4QDD",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "5395a480-f166-4a20-9fcd-29fb146129e9",
+          "name": "Kelly Depalo",
+          "status": "Active"
+        },
+        {
+          "id": "a1cc1434-5b80-4c6d-a36a-fde49914a864",
+          "name": "Kelly Depalo",
+          "status": "Active"
+        }
+      ]
+    },
+    {
+      "dupr_id": "ZN5DGM",
+      "active_count": 2,
+      "members": [
+        {
+          "id": "0613742f-20b9-493b-b8fe-fb2dd2c39f5a",
+          "name": "Kathleen Vacca",
+          "status": "Active"
+        },
+        {
+          "id": "4d8925e7-15fe-470a-89cc-e52a286a02fc",
+          "name": "Kathleen Vacca",
+          "status": "Active"
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "reference": "identity_repair_private.events.member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 1
+    },
+    {
+      "reference": "identity_repair_private.reviewed.member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 1
+    },
+    {
+      "reference": "public.ai_answer_feedback_events.member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 29
+    },
+    {
+      "reference": "public.ai_document_versions.activated_by_member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 5
+    },
+    {
+      "reference": "public.ai_document_versions.processed_by_member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 27
+    },
+    {
+      "reference": "public.ai_documents.created_by_member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 7
+    },
+    {
+      "reference": "public.ai_documents.updated_by_member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 7
+    },
+    {
+      "reference": "public.member_import_batches.imported_by_member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 56
+    },
+    {
+      "reference": "public.member_season_ratings.member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 1
+    },
+    {
+      "reference": "public.notification_template_history.saved_by_member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 6
+    },
+    {
+      "reference": "public.round_robin_players.member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 1
+    },
+    {
+      "reference": "public.teams.captain_member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 3
+    },
+    {
+      "reference": "public.user_roles.member_id",
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "row_count": 1
+    },
+    {
+      "reference": "public.member_season_ratings.member_id",
+      "member_id": "a6cc5885-f6da-41f2-8bdc-88596b176d96",
+      "row_count": 1
+    },
+    {
+      "reference": "public.tournament_team_contacts.member_id",
+      "member_id": "a6cc5885-f6da-41f2-8bdc-88596b176d96",
+      "row_count": 1
+    },
+    {
+      "reference": "public.user_roles.member_id",
+      "member_id": "a6cc5885-f6da-41f2-8bdc-88596b176d96",
+      "row_count": 1
+    }
+  ],
+  "teams": [
+    {
+      "id": "4d084755-ed08-4913-8c73-ef332055369d",
+      "name": "LHC Cove-rt Ops",
+      "is_active": false,
+      "division": "SDUPR7",
+      "league": "Saturday DUPR League",
+      "season": "26/27 Saturday Season",
+      "captain_member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "co_captain_member_id": null,
+      "co_captain_2_member_id": null,
+      "roster_rows": 0
+    },
+    {
+      "id": "047bcaaf-b88b-4429-b183-f8e03030fa8f",
+      "name": "Liquid Ranch Renegades",
+      "is_active": false,
+      "division": "SDUPR7",
+      "league": "Saturday DUPR League",
+      "season": "26/27 Saturday Season",
+      "captain_member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "co_captain_member_id": null,
+      "co_captain_2_member_id": null,
+      "roster_rows": 0
+    },
+    {
+      "id": "632e1e60-494a-4bd1-bd3c-e276dac9c231",
+      "name": "LWN Pickle Posse",
+      "is_active": false,
+      "division": "SDUPR7",
+      "league": "Saturday DUPR League",
+      "season": "26/27 Saturday Season",
+      "captain_member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "co_captain_member_id": null,
+      "co_captain_2_member_id": null,
+      "roster_rows": 0
+    }
+  ],
+  "tournamentAndRoundRobin": [
+    {
+      "member_id": "a6cc5885-f6da-41f2-8bdc-88596b176d96",
+      "team_name": "Esplanade Net Ninjas (Esp GCC)",
+      "contact_id": "7d17f276-682a-45ad-ad39-bcaa0a103bbe",
+      "created_at": "2026-06-23T00:38:25.740482+00:00",
+      "player_slot": 1,
+      "display_name": "Terry Player",
+      "tournament_id": "a450eb3b-3734-4688-99a0-86da99b8e5da",
+      "tournament_team_id": "d8dd1cae-669f-4349-badf-e03c6048436a"
+    }
+  ],
+  "referenceColumnsChecked": [
+    [
+      "public",
+      "ai_answer_feedback_events",
+      "member_id"
+    ],
+    [
+      "public",
+      "ai_document_versions",
+      "activated_by_member_id"
+    ],
+    [
+      "public",
+      "ai_document_versions",
+      "processed_by_member_id"
+    ],
+    [
+      "public",
+      "ai_documents",
+      "created_by_member_id"
+    ],
+    [
+      "public",
+      "ai_documents",
+      "updated_by_member_id"
+    ],
+    [
+      "public",
+      "locations",
+      "club_pro_2_member_id"
+    ],
+    [
+      "public",
+      "locations",
+      "club_pro_member_id"
+    ],
+    [
+      "public",
+      "match_lines",
+      "away_player_1_id"
+    ],
+    [
+      "public",
+      "match_lines",
+      "away_player_2_id"
+    ],
+    [
+      "public",
+      "match_lines",
+      "home_player_1_id"
+    ],
+    [
+      "public",
+      "match_lines",
+      "home_player_2_id"
+    ],
+    [
+      "public",
+      "match_lines",
+      "verified_by_member_id"
+    ],
+    [
+      "public",
+      "match_lineups",
+      "player_1_member_id"
+    ],
+    [
+      "public",
+      "match_lineups",
+      "player_2_member_id"
+    ],
+    [
+      "public",
+      "matches",
+      "score_entered_by_member_id"
+    ],
+    [
+      "public",
+      "matches",
+      "score_verified_by_member_id"
+    ],
+    [
+      "public",
+      "member_import_batches",
+      "imported_by_member_id"
+    ],
+    [
+      "public",
+      "member_season_ratings",
+      "member_id"
+    ],
+    [
+      "public",
+      "notification_template_history",
+      "saved_by_member_id"
+    ],
+    [
+      "public",
+      "round_robin_players",
+      "member_id"
+    ],
+    [
+      "public",
+      "team_members",
+      "member_id"
+    ],
+    [
+      "public",
+      "teams",
+      "captain_member_id"
+    ],
+    [
+      "public",
+      "teams",
+      "club_pro_member_id"
+    ],
+    [
+      "public",
+      "teams",
+      "co_captain_2_member_id"
+    ],
+    [
+      "public",
+      "teams",
+      "co_captain_member_id"
+    ],
+    [
+      "public",
+      "tournament_team_contacts",
+      "member_id"
+    ],
+    [
+      "public",
+      "user_roles",
+      "member_id"
+    ],
+    [
+      "identity_repair_private",
+      "events",
+      "member_id"
+    ],
+    [
+      "identity_repair_private",
+      "reviewed",
+      "member_id"
+    ],
+    [
+      "ratings_initialization_private",
+      "provenance",
+      "member_id"
+    ],
+    [
+      "ratings_source_private",
+      "sources",
+      "member_id"
+    ],
+    [
+      "ratings_workflow_private",
+      "input_state",
+      "member_id"
+    ],
+    [
+      "view_as_private",
+      "audit_events",
+      "effective_member"
+    ]
+  ],
+  "readOnly": true
+}

@@ -1,0 +1,58 @@
+(node:11216) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-normal-actions/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-normal-actions\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF cutoff validation has no implicit default (2.2379ms)
+✔ selected RF drives BOTH fields; signed receipt, audit provenance, dynamic Rules default (4175.9344ms)
+✔ both NR lifecycles: blank, actual roster, explicit Clean, higher/lower roster, retain all removed; RF boundary (4734.9055ms)
+✔ stale cutoff, legacy receipt, changed Rules/input/roster/finals fail without writes (6261.0185ms)
+✔ atomic rollback, Rated age input independent of roster/doubles, missing age defers only PrimeTime (7396.7054ms)
+✔ 659-row reviewed local snapshot: combined 538 regular / 489 PrimeTime with selected Rules default (12769.3183ms)
+(node:19496) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-normal-actions/lwrpc-admin/app/lib/seasonRatingsInitialization.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-normal-actions\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Phase 1 boundaries, missing/invalid/conflicting input, independent protected value (2.1002ms)
+✔ atomic success, source immutable, PrimeTime untouched, provenance retained and idempotency (5070.3567ms)
+✔ unexpected failure rolls back earlier writes, records failed audit, no provenance; stale inputs fail (5320.3619ms)
+✔ manual established rating and changed source/rules block stale preview (20846.7139ms)
+✔ server receipt tampering, origin actor/session binding and write-disabled gate (6.0322ms)
+✔ private grants, unauthorized actor denied and snapshot works read-only (4746.4385ms)
+(node:15032) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-normal-actions/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-normal-actions\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ gate OFF: authorized Upload/Clean issue receipts and commit once through reviewed transactions (5908.4594ms)
+✔ gate OFF: missing, forged, expired, wrong session/season/operation and cutoff receipts deny before writes (7038.5556ms)
+✔ gate OFF: existing League Manager authorization permits both normal signed actions (8022.54ms)
+✔ gate OFF: Player/Captain cannot preview or commit; revoked administrator rejected at commit (6305.0163ms)
+✔ gate OFF: Transfer/Clear remain unsigned and deny even a valid maintenance receipt; unknown operations deny (5158.4898ms)
+✔ gate OFF: fresh receipt required after input state changes; zero ready rows have no receipt (4636.011ms)
+(node:1168) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-normal-actions/lwrpc-admin/app/lib/seasonRatingsClean.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-normal-actions\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Upload: selection/preview/reselect/cancel retain file; summary action precedes table; success resets (24.3911ms)
+✔ Upload: zero ready rows explain and cannot import; a new file invalidates the old preview (8.6916ms)
+✔ Clean: Rules default, summary action, full combined confirmation, cancel retains preview, cutoff re-previews (7.9299ms)
+✔ Clean: confirmation pending disables cutoff and generation change rejects outdated confirmation (17.4905ms)
+✔ normal controls expose Upload and Clean, retain explicit Delete/Copy, and hide maintenance operations (9.5637ms)
+✔ one Upload records history and fills only blank inputs; repeat preserves inputs and never invokes Clean (7979.4493ms)
+✔ integrated Upload, field-independent preservation, Clear and explicit Clean; immutable finals and notes (9342.0944ms)
+✔ NR nine lifecycle states, read-only candidate, failed admission, explicit Clean, higher/lower and retain after all removed (7820.4561ms)
+✔ stale conflict, atomic rollback after partial work, replay and grants (5622.6289ms)
+(node:28076) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-normal-actions/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-normal-actions\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ receipt ties actor/session/season/operation; write-disabled route makes no RPC (15.8784ms)
+✔ each transaction rolls back its own partial writes and rejects changed Rules/roster/input/source (11527.0023ms)
+✔ DUPR-only matching skips inactive/not-found/ambiguous and invalid source; numeric truncation and missing age (6195.1426ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 43120.1056

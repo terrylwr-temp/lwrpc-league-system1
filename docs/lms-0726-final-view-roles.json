@@ -1,0 +1,23 @@
+[
+  {
+    "target": 1,
+    "role": "Player",
+    "realUi": true,
+    "banner": true,
+    "url": "http://127.0.0.1:3076/"
+  },
+  {
+    "target": 2,
+    "role": "Captain",
+    "realUi": true,
+    "banner": true,
+    "url": "http://127.0.0.1:3076/captain-dashboard"
+  },
+  {
+    "target": 5,
+    "role": "Club Pro",
+    "realUi": true,
+    "banner": true,
+    "url": "http://127.0.0.1:3076/captain-dashboard"
+  }
+]

@@ -1,0 +1,93 @@
+(node:15932) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityGrouping.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ai_quality_capture {
+  event: 'capture_failed',
+  stage: 'observer',
+  assistant_version: 'LMS-0725'
+}
+✔ 0716 Unicode expansion retained; byte boundary and boundary+1 (3.7ms)
+✔ 0716 conservative versioned fingerprints preserve material distinctions (9.2567ms)
+✔ 0716 unvoted grounded metadata only; correlated receipt and unchanged result keys (45.4541ms)
+✔ 0716 automatic insufficient_evidence detail without vote (3.7101ms)
+✔ 0716 automatic conflict detail without vote (0.626ms)
+✔ 0716 candidate conflict hint alone creates no occurrence (0.3567ms)
+✔ 0716 protected no text, group or feedback (0.362ms)
+✔ 0716 clarification no text, group or feedback (0.2946ms)
+✔ 0716 clarification ending in no source retains bounded resolver only (0.7907ms)
+✔ 0716 manager tests separate and ineligible (0.3481ms)
+✔ 0716 legacy receipt and four-click append-only transition unchanged (1.7429ms)
+✔ 0716 privacy redaction isolates group and excludes chunks/URLs/vectors (1.6599ms)
+✔ 0716 build/oversize/write/logger/timeout failures fail open (12.4136ms)
+✔ 0716 technical failure operational only and original error preserved (0.8316ms)
+✔ 0716 static migration and player payload boundaries (12.3075ms)
+(node:47412) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/askLwrAssistantConfig.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ centralizes page-aware suggestions without fabricating LMS scope IDs (1.9863ms)
+✔ player response is deliberately limited to plain answer and trusted citations (9.5295ms)
+✔ player-safe sources preserve the validated page-aware URL without rebuilding it (4.6697ms)
+✔ personal or live LMS questions do not enter document RAG without a future data tool (24.2481ms)
+✔ normalizes generic question framing so FTS keeps the substantive Balls term (14.7917ms)
+✔ player route passes realistic unrelated-page context to the shared Stage 3/4 pipeline without scope filtering (52.1318ms)
+✔ unsupported and insufficient paths do not manufacture an operational or aggressive-serve answer (3.6148ms)
+✔ guide browsing mirrors existing role entry points without changing RAG scope (0.4565ms)
+✔ the shared AI trigger covers every authenticated header shell without changing guide access (12.1322ms)
+✔ the standard authenticated route shell retains the shared AI trigger (8.4457ms)
+(node:33064) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Document-only What are the requirements for DUPR5? (24.1576ms)
+✔ Document-only What DUPR range is allowed in DUPR5? (7.2825ms)
+✔ Document-only How does NR work for DUPR5? (7.5608ms)
+✔ Hybrid Can I play on a DUPR5 team? (5.8799ms)
+✔ Hybrid Am I eligible for DUPR5? (6.37ms)
+✔ Existing document policy When is my Season DUPR established? (5.9346ms)
+✔ Existing document policy Can my Season DUPR change during the season? (2.9458ms)
+✔ Existing document policy How does NR eligibility work? (2.7581ms)
+✔ Existing document policy What does the Reliability Factor rule say? (3.2291ms)
+✔ Existing Live SELF_RATING remains live-only (1.4637ms)
+✔ Authorized missing RF is consulted and hybrid but UNKNOWN (5.1815ms)
+✔ No successful personal inputs: denied (0.8409ms)
+✔ No successful personal inputs: not_found (0.7964ms)
+✔ No successful personal inputs: rate_limited (2.0425ms)
+✔ No successful personal inputs: unsupported (0.4456ms)
+✔ No successful personal inputs: ambiguous (1.3165ms)
+✔ No successful personal inputs: no_season (5.6094ms)
+✔ Planned personal access not performed Can I play PrimeTime 9? (5.1311ms)
+✔ Planned personal access not performed Can I play DUPR7? (0.5147ms)
+✔ Planned personal access not performed Can I play SDUPR5? (0.1412ms)
+✔ Failed source validation cannot claim successful personal comparison (0.6235ms)
+✔ View-As uses identical trusted source classifications with no role inference (19.6187ms)
+✔ Source metadata contains no private values or member identifiers (8.7479ms)
+✔ Privacy history is independent of document-only badge and stale result.live (5.8495ms)
+✔ Normal and View-As UI use shared presentation and avoid hardcoded eligibility LIVE banner (1.3753ms)
+✔ Actual player Exchange markup renders official/hybrid/live badges and timestamp truthfully (50.4793ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When is my Season DUPR established? (4.5015ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When is my Season DUPR locked? (2.4362ms)
+✔ Actual document adapter, serialization, render and telemetry parity: Can my Season DUPR change during the season? (2.6733ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When can I start entering my roster? (1.9651ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When does the Women's Weekday DUPR League start? (3.033ms)
+✔ Actual document adapter, serialization, render and telemetry parity: What date is age based on for PrimeTime? (1.9339ms)
+✔ Actual document adapter, serialization, render and telemetry parity: Does the Weekday DUPR League use Rally Scoring? (2.5688ms)
+✔ Actual document adapter, serialization, render and telemetry parity: How does Rally Scoring work? (2.8404ms)
+✔ Trusted document processing family league_rules (0.8871ms)
+✔ Trusted document processing family usap_rulebook (0.6344ms)
+✔ Trusted document processing family important_dates (0.4568ms)
+✔ Trusted document processing family approved_answer (0.3907ms)
+✔ Mixed official document families retain telemetry distinction and document badge (0.393ms)
+✔ Non-success document processing has no successful source badge: insufficient_evidence (0.2851ms)
+✔ Non-success document processing has no successful source badge: conflict (0.2499ms)
+✔ Manager document response propagates identical trusted provenance (1.5983ms)
+✔ Live roster stays Live even with arbitrary prose or source citations (0.1844ms)
+ℹ tests 68
+ℹ suites 0
+ℹ pass 68
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1358.9069

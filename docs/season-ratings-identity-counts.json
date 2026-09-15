@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-10",
+  "project": "glikrmmgirilnmamxxyl",
+  "season": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+  "normalization": "upper(trim(dupr_id)); all members including inactive",
+  "counts": {
+    "total": 879,
+    "not_found": 178,
+    "uniquely_matched": 695,
+    "ambiguous": 6,
+    "inactive_matches": 36,
+    "existing_season_rows": 0,
+    "populated_season_dupr": 0,
+    "populated_primetime": 0
+  },
+  "note": "Read-only snapshot. Counts are not import authorization or final ready/locked dispositions."
+}

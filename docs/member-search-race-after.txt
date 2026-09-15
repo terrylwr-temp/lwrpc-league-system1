@@ -1,0 +1,15 @@
+✔ fast Steve typing: older broad response cannot overwrite final rows, count or logins (10.355ms)
+✔ slow typing still updates normally and preserves request filters (4.7916ms)
+✔ Clear Search wins over an in-flight named search (1.8608ms)
+✔ filter, page and sort changes keep only latest response (3.2768ms)
+✔ superseded authorization cannot launch an older search (3.0326ms)
+✔ stale API error is ignored; current API error remains actionable (3.7266ms)
+✔ unmount/effect cleanup invalidates late responses (2.0532ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1376.2278

@@ -1,0 +1,80 @@
+{
+  "at": "2026-09-08T19:22:01.730Z",
+  "method": "Read-only REST HEAD counts and allowlisted metadata GET; no SQL. Counts do not certify full-row content integrity.",
+  "counts": [
+    {
+      "table": "ai_documents",
+      "status": 206,
+      "count": "0-0/7"
+    },
+    {
+      "table": "ai_document_versions",
+      "status": 206,
+      "count": "0-0/25"
+    },
+    {
+      "table": "ai_document_chunks",
+      "status": 206,
+      "count": "0-0/1893"
+    },
+    {
+      "table": "ai_approved_answers",
+      "status": 200,
+      "count": "0-0/1"
+    },
+    {
+      "table": "ai_approved_answer_revisions",
+      "status": 206,
+      "count": "0-0/2"
+    },
+    {
+      "table": "ai_approved_answer_events",
+      "status": 206,
+      "count": "0-0/7"
+    }
+  ],
+  "documents": [
+    {
+      "id": "1c9bcadf-79b9-4493-b426-3c3e3528766e",
+      "status": "active",
+      "active_version_id": "1ea2ccf1-598e-4d0c-b0a4-b20f833805f0"
+    },
+    {
+      "id": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "status": "active",
+      "active_version_id": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+    },
+    {
+      "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+      "status": "active",
+      "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+    },
+    {
+      "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+      "status": "active",
+      "active_version_id": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+    },
+    {
+      "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "status": "active",
+      "active_version_id": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+    },
+    {
+      "id": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+      "status": "active",
+      "active_version_id": "f811e60f-9af8-444f-b009-9594a530acd6"
+    },
+    {
+      "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "status": "active",
+      "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+    }
+  ],
+  "historicalQ55": [
+    {
+      "id": "c4fa447f-9949-427d-8022-26b8b6b08ef8",
+      "final_kind": "insufficient_evidence",
+      "reason_code": "stage4_no_applicable_evidence"
+    }
+  ]
+}

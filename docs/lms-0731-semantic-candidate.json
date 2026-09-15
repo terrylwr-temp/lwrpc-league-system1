@@ -1,0 +1,21 @@
+{
+  "changed": [
+    "app/lib/aiAnswerGeneration.js",
+    "app/lib/aiApprovedAnswersSelection.js"
+  ],
+  "new": "app/lib/aiSubstituteApplicability.js",
+  "files": [
+    {
+      "file": "app/lib/aiApprovedAnswersSelection.js",
+      "sha256": "6dd74605c117078f9fb9c09758f6922e9a7cc6683a71325b94e1b8d55cf1d1fa"
+    },
+    {
+      "file": "app/lib/aiAnswerGeneration.js",
+      "sha256": "abbcbf199a3e15978f3f6ec55a089f2b3edccbd03a8d59cf03ffc42389b53440"
+    },
+    {
+      "file": "app/lib/aiSubstituteApplicability.js",
+      "sha256": "c412c42a874639696f193e893dc4eda98fdb80406fb1e3e7f02fb56fbc8b2697"
+    }
+  ]
+}

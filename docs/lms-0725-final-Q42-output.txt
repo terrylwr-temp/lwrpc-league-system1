@@ -1,0 +1,6 @@
+(node:48268) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"id":"Q42","status":"generated","calls":1,"answer":"No. Regular PrimeTime games use the governing default scoring method: Standard Scoring, unless a particular game or match format expressly requires Rally Scoring.\n\nThe PrimeTime Rally Scoring exception is limited to the Picklebreaker™ only: when the PrimeTime match is tied 2–2 after all preceding rounds, the Picklebreaker™ is one game to 15, win by 2, using Rally Scoring.","materialPass":true}
+{"calls":1,"statuses":{"generated":1}}

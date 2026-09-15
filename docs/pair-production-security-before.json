@@ -1,0 +1,710 @@
+{
+  "actor": {
+    "user": "430a30c1-c161-4217-84db-bd6c7940959c",
+    "member": "43e1e363-82f1-47d7-a869-befed4c967b8"
+  },
+  "wrapper": "CREATE OR REPLACE FUNCTION public.ai_live_lookup(p_actor uuid, p_request uuid, p_query jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\ndeclare result jsonb;\nbegin\n result:=ai_live_private.lookup(p_actor,p_request,p_query);\n if result->>'status' in ('denied','not_found','rate_limited') and p_query->>'intent' in ('PLAYER_CONTACT','PLAYER_RATING','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH','ELIGIBILITY_SELF')\n and p_actor is not null then\n  insert into ai_live_private.access_audit(actor,request_id,intent,decision) values(p_actor,p_request,p_query->>'intent',result->>'status');\n end if;\n return result;\nend $function$\n",
+  "policies": "f56e61a9a7981bb4fecb72bd53bf217b",
+  "security": [
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=ar/postgres",
+        "ai_live_retention=rd/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "access_audit",
+      "schema": "ai_live_private"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=ar/postgres",
+        "ai_live_retention=rd/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "attempts",
+      "schema": "ai_live_private"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=ar/postgres",
+        "ai_live_retention=rd/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "feedback",
+      "schema": "ai_live_private"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=r/postgres",
+        "ai_live_retention=a/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "retention_runs",
+      "schema": "ai_live_private"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_answer_feedback_events",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=r/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_approved_answer_events",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=r/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_approved_answer_revisions",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=r/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_approved_answers",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_document_chunks",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_document_versions",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_documents",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arw/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_manager_review_cases",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=ar/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_manager_review_events",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arw/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_question_fingerprint_routes",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arw/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_question_groups",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=ar/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_request_outcomes",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arw/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "ai_review_occurrences",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "app_notification_subscriptions",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "division_lines",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "divisions",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "league_blackout_dates",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "league_schedule_settings",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "leagues",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "line_games",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "location_court_availability",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "locations",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "match_lines",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "match_lineups",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "matches",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "member_import_batches",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "member_import_rows",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "member_season_ratings",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "members",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "notification_template_history",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "notification_templates",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "password_reset_rate_limits",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_activity_log",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_courts",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_groups",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_matches",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_player_group_members",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_player_groups",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_player_session_results",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_players",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_session_players",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "round_robin_sessions",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "score_sheet_templates",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "seasons",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "system_settings",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "team_byes",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "team_members",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "team_standings",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "teams",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "tournament_activity_log",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "tournament_courts",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "tournament_divisions",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "tournament_matches",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "tournament_team_contacts",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "tournament_teams",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "tournaments",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "force": false,
+      "table": "user_roles",
+      "schema": "public"
+    }
+  ]
+}

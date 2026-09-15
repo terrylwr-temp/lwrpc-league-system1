@@ -1,0 +1,97 @@
+{
+  "capturedAt": "2026-09-11T12:46:01.001Z",
+  "method": "Read-only REST SELECT and existing source snapshot RPC; no SQL or mutation calls",
+  "tables": {
+    "division_lines": {
+      "rows": 204,
+      "sha256": "7cd1434a0ccf0ebec192a8abba5fd48fa09803e5bc5ae26a3b37e42b54410a86"
+    },
+    "divisions": {
+      "rows": 18,
+      "sha256": "6d4c1aef93a861081ff1a9c2aefd8b718a168b278ea70c33a5793028db06ae56"
+    },
+    "league_blackout_dates": {
+      "rows": 7,
+      "sha256": "4ee6827627aa29c2b3e0f8576611c0058b0d8d84edd61d1af8854f8ead4760a5"
+    },
+    "league_schedule_settings": {
+      "rows": 9,
+      "sha256": "f9710ce12b5a479c4129aafdc7b83774a3dd389d57198206826729d1a312b546"
+    },
+    "leagues": {
+      "rows": 3,
+      "sha256": "4456b944fd91d23b25c4697a1d528402ea9161bd7b94ea9b87db7c139719c953"
+    },
+    "line_games": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "location_court_availability": {
+      "rows": 1,
+      "sha256": "ed1b0eb8cf00041df0908797c39b483ef227fb7178731da9631dc6a7d9a0719e"
+    },
+    "locations": {
+      "rows": 138,
+      "sha256": "e77a3d04c9f077e86250b8dd1922335f4ba8c402acc5660e06c954523ad744dc"
+    },
+    "match_lines": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "match_lineups": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "matches": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "member_season_ratings": {
+      "rows": 1010,
+      "sha256": "cca8b14c6546d54531b5db25892c5b13a430fe3bbf9fe4f8a56bf7c9295451f8"
+    },
+    "members": {
+      "rows": 1980,
+      "sha256": "ab4b1fa552d24a622d5a5135df46b9f873340f68d32a50e814c293aa41980598"
+    },
+    "seasons": {
+      "rows": 2,
+      "sha256": "99d83f718246ba69f8cb75751d97c7bda5bf219208fe4adbe08913b126c05713"
+    },
+    "team_byes": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "team_members": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "team_standings": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "teams": {
+      "rows": 106,
+      "sha256": "20a2a8d52d2156cf21ab6608bd7cc097bcb83c70ad8981c126351fa41ed47077"
+    },
+    "user_roles": {
+      "rows": 188,
+      "sha256": "e61add5b53a39c0e30c1c10b44c0a6e92277a79523c8dd04a77d6a95bde4d61c"
+    }
+  },
+  "sources": {
+    "3780e56b-adeb-46be-ab1c-b754bc8aa737": {
+      "rows": 659,
+      "sha256": "db1854aa800bfd14132a788a251a1752ba43b9099889d8395eb1bb56553816ce",
+      "lastSuccessfulImport": {
+        "rowCount": 659,
+        "importedAt": "2026-09-10T15:47:26.791625+00:00"
+      }
+    },
+    "073a4b31-7e66-460c-87bb-65ff29d1d341": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lastSuccessfulImport": null
+    }
+  }
+}

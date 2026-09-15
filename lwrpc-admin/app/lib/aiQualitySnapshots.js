@@ -1,3 +1,6 @@
+import {documentSourceFamily as sourceFamily} from './aiResultSource.js';
+import {safePolicyDiagnostic} from './aiPolicyDiagnostics.js';
+import {excerptReferences} from './aiEvidenceExcerpts.js';
 import {approvedSourceIdentity,safeAuthorityWarnings} from "./aiApprovedAnswersShared.js";
 import { APP_VERSION } from "./version.js";
 import { qualityFingerprint } from "./aiQualityGrouping.js";
@@ -17,14 +20,9 @@ export function redactQualityText(value, limit) {
   return { text: sensitive ? "[detail omitted for privacy]" : short(text,limit), redacted: sensitive || [...text].length>limit };
 }
 function safeLabel(v,n) { return redactQualityText(v,n).text; }
-function source(s) { return { ...approvedSourceIdentity(s), documentId:uuid(s?.documentId), documentVersionId:uuid(s?.documentVersionId), chunkId:uuid(s?.chunkId), documentTitle:safeLabel(s?.documentTitle,300), pageNumber:integer(s?.pageNumber), ruleNumber:safeLabel(s?.ruleNumber,120), sectionLabel:safeLabel(s?.sectionLabel,300), heading:safeLabel(s?.heading,300), citation:safeLabel(s?.citation,600) }; }
+function source(s) { return { ...approvedSourceIdentity(s), ...excerptReferences(s), documentId:uuid(s?.documentId), documentVersionId:uuid(s?.documentVersionId), chunkId:uuid(s?.chunkId), documentTitle:safeLabel(s?.documentTitle,300), pageNumber:integer(s?.pageNumber), ruleNumber:safeLabel(s?.ruleNumber,120), sectionLabel:safeLabel(s?.sectionLabel,300), heading:safeLabel(s?.heading,300), citation:safeLabel(s?.citation,600) }; }
 function evidence(s) { return { ...source(s), documentType:code(s?.documentType,80), sourceClassification:code(s?.sourceClassification,80), evidenceRole:safeLabel(s?.evidenceRole,160), evidenceSelectionReason:safeLabel(s?.evidenceSelectionReason,500), combinedScore:typeof s?.combinedScore==='number' && Number.isFinite(s.combinedScore) ? s.combinedScore : null }; }
-function sourceFamily(items) {
-  const types = items.map(x=>x?.documentType || x?.sourceClassification).filter(Boolean);
-  if (!types.length) return items.length ? "unknown" : "none";
-  const usap=types.some(t=>/usap/i.test(t)), lwr=types.some(t=>!/usap/i.test(t));
-  return usap && lwr ? "mixed" : usap ? "usap" : "lwr";
-}
+
 function resolver(r) { return { classification:code(r?.classification), priorContextAvailable:Boolean(r?.priorContextAvailable), clarificationConsumed:Boolean(r?.clarificationConsumed), contextSuperseded:Boolean(r?.contextSuperseded), rawLiveDataGuard:r?.rawLiveDataGuard===true, effectiveLiveDataGuard:r?.effectiveLiveDataGuard===true }; }
 export function qualityOutcome({ id, origin, started, completed, execution={}, stage3Invoked=false, technicalError=false }) {
   const { result={}, answer={}, retrieval, conversationResolution:r }=execution;
@@ -40,7 +38,7 @@ export function qualityOutcome({ id, origin, started, completed, execution={}, s
     stage3_invoked:protectedIntent ? false : Boolean(stage3Invoked || retrieval), model_call_skipped:protectedIntent || kind==='clarification' && !answer.model ? true : typeof answer.modelCallSkipped==='boolean' ? answer.modelCallSkipped : null,
     guard_classification:protectedIntent ? r?.rawLiveDataGuard ? 'raw_live_data_guard' : r?.effectiveLiveDataGuard ? 'effective_live_data_guard' : 'protected' : null,
     resolver_classification:code(r?.classification),
-    diagnostic_snapshot:protectedIntent ? {} : { ...(safeAuthorityWarnings(retrieval?.authorityWarnings).length ? {authorityWarnings:safeAuthorityWarnings(retrieval.authorityWarnings)} : {}), configurationVersion:APP_VERSION, candidateCount:integer(array(retrieval?.candidates).length), evidenceThreshold:retrieval?.environment?.evidenceThreshold===.35 ? .35 : null, retrievalLimit:integer(retrieval?.environment?.retrievalLimit), authorityReviewLimit:integer(retrieval?.environment?.authorityReviewLimit), embeddingModel:code(retrieval?.environment?.embeddingModel), stage3Sufficient:retrieval?.evidence?.sufficient===true, equipmentProbeInvoked:Boolean(retrieval?.lwrMatchEquipmentProbe), equipmentProbeRetrieved:retrieval?.lwrMatchEquipmentProbe?.retrieved===true },
+    diagnostic_snapshot:protectedIntent ? {} : { ...(retrieval?.policyDiagnostic?{policy:safePolicyDiagnostic(retrieval.policyDiagnostic)}:{}), ...(safeAuthorityWarnings(retrieval?.authorityWarnings).length ? {authorityWarnings:safeAuthorityWarnings(retrieval.authorityWarnings)} : {}), configurationVersion:APP_VERSION, candidateCount:integer(array(retrieval?.candidates).length), evidenceThreshold:retrieval?.environment?.evidenceThreshold===.35 ? .35 : null, retrievalLimit:integer(retrieval?.environment?.retrievalLimit), authorityReviewLimit:integer(retrieval?.environment?.authorityReviewLimit), embeddingModel:code(retrieval?.environment?.embeddingModel), stage3Sufficient:retrieval?.evidence?.sufficient===true, equipmentProbeInvoked:Boolean(retrieval?.lwrMatchEquipmentProbe), equipmentProbeRetrieved:retrieval?.lwrMatchEquipmentProbe?.retrieved===true },
     total_ms:integer(Math.max(0,completed-started)), input_tokens:protectedIntent ? null : integer(answer.metrics?.inputTokens), output_tokens:protectedIntent ? null : integer(answer.metrics?.outputTokens), telemetry_version:1,
   };
 }

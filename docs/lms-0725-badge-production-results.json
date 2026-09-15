@@ -1,0 +1,192 @@
+{
+  "status": "PRODUCTION_ACCEPTED",
+  "version": "LMS-0725 / 0.1.547",
+  "deployment": {
+    "id": "dpl_7V7DQdKkpz8w9T39eGt6KbqeeMN8",
+    "url": "https://lwrpc-admin-apgexgfqt-terry-lwrpc.vercel.app",
+    "state": "READY"
+  },
+  "outcomes": [
+    {
+      "id": "1ff16130-362c-430f-b761-6e6c661aff99",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "source_family": "lwr",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 2535,
+      "output_tokens": 94,
+      "personal_reads": 0
+    },
+    {
+      "id": "fcec4b2e-299c-4e90-a988-6b433686c649",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "source_family": "lwr",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 2537,
+      "output_tokens": 97,
+      "personal_reads": 0
+    },
+    {
+      "id": "f8c756b6-f40c-446c-9b23-26c29f3a16db",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "source_family": "lwr",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 2535,
+      "output_tokens": 94,
+      "personal_reads": 0
+    },
+    {
+      "id": "5e784763-1858-4a86-a98a-defa792521d6",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "source_family": "lwr",
+      "model": null,
+      "model_call_skipped": true,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "personal_reads": 0
+    },
+    {
+      "id": "b4c15c4f-1953-475f-97b8-648927c52f62",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "source_family": "LIVE_LMS_DATA",
+      "model": null,
+      "model_call_skipped": true,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "personal_reads": 1
+    },
+    {
+      "id": "1db44dcf-3608-433c-9b90-6502bb0b972e",
+      "origin": "player_interface",
+      "final_kind": "clarification",
+      "source_family": "LIVE_LMS_DATA",
+      "model": null,
+      "model_call_skipped": true,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "personal_reads": 0
+    },
+    {
+      "id": "4baea0ca-2ab7-451b-9bef-31a00e773b7e",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "source_family": "LIVE_LMS_DATA",
+      "model": null,
+      "model_call_skipped": true,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "personal_reads": 0
+    },
+    {
+      "id": "c2cf2615-3006-4ac6-a896-180c33e91cad",
+      "origin": "manager_test",
+      "final_kind": "answer",
+      "source_family": "lwr",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 2535,
+      "output_tokens": 95,
+      "personal_reads": 0
+    },
+    {
+      "id": "e41a0825-efae-4aa9-9dfc-a8bc40d554fb",
+      "origin": "player_interface",
+      "final_kind": "clarification",
+      "source_family": "none",
+      "model": null,
+      "model_call_skipped": true,
+      "input_tokens": null,
+      "output_tokens": null,
+      "personal_reads": 0
+    },
+    {
+      "id": "942676f9-10b2-4c94-a4b0-24b2ab3db6f7",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "source_family": "lwr",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 1578,
+      "output_tokens": 46,
+      "personal_reads": 0
+    },
+    {
+      "id": "10d44ccc-0197-4dc5-a78f-3dca7b7a408b",
+      "origin": "player_interface",
+      "final_kind": "insufficient_evidence",
+      "source_family": "none",
+      "model": null,
+      "model_call_skipped": true,
+      "input_tokens": null,
+      "output_tokens": null,
+      "personal_reads": 0
+    }
+  ],
+  "viewAs": [
+    {
+      "id": "94d62dd6-4156-47b7-887a-6f9d18dcec63",
+      "family": "document",
+      "mode": "DOCUMENT_ONLY",
+      "personalReads": 0,
+      "renderVerified": true
+    },
+    {
+      "id": "a05a231d-ca15-4d5b-9ebe-efb77099986d",
+      "family": "LIVE_LMS_DATA",
+      "mode": "HYBRID_DOCUMENT_LIVE",
+      "personalReads": 1,
+      "effectiveSubjectOnly": true,
+      "renderVerified": false,
+      "limitation": "Normal session expiration before rendered observation"
+    },
+    {
+      "id": "dd18493a-e0ec-4a1e-abcd-4881fa6053f6",
+      "family": "LIVE_LMS_DATA",
+      "mode": "HYBRID_DOCUMENT_LIVE",
+      "personalReads": 1,
+      "effectiveSubjectOnly": true,
+      "renderVerified": true
+    }
+  ],
+  "cost": {
+    "recordedGenerations": 5,
+    "viewAsGenerations": 1,
+    "recordedInputTokens": 11720,
+    "recordedOutputTokens": 426,
+    "recordedUncachedEstimateUsd": 0.07138,
+    "viewAsTokens": null,
+    "viewAsCost": null,
+    "totalExactCost": null,
+    "allTrafficPurpose": "PRODUCTION_ACCEPTANCE",
+    "embeddingsExcluded": true
+  },
+  "quality": {
+    "localTests": 990,
+    "classificationControls": 44,
+    "deterministicCases": 120,
+    "duplicateLogicalEvents": 0
+  },
+  "integrity": {
+    "policiesHash": "8332780b6beb0b4b4ff3b57889784ef8",
+    "functionsHash": "72794ad23457657e96f86302463a91e9",
+    "documentsHash": "5af82a4f29738bb7b4546f9c455b88d0",
+    "beforeAfterHashesMatch": true,
+    "observedBusinessAndCorpusUpdates": 0,
+    "approvedAnswers": 1,
+    "brokenNonnullIdentityLinks": 0,
+    "privateTablesExposed": 0,
+    "maintenanceFailures": 0,
+    "testContextsRemaining": 0,
+    "secretValuesCompared": false
+  },
+  "sqlApplied": false,
+  "modelChanged": false,
+  "viewAsParityStarted": false
+}

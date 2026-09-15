@@ -1,3 +1,7 @@
+import {revalidateExcerptItems,bindOfficialExcerpts,officialDocumentPeriod} from './aiEvidenceExcerpts.js';
+import {selectPolicyEvidence,needsPolicyEvidence,policyCalendarContext} from './aiPolicyEvidence.js';
+import {questionIntent} from './aiRequestIntent.js';
+import {policyValidationDiagnostic} from './aiPolicyDiagnostics.js';
 import { officialQuestionConcept } from './aiQuestionConcepts.js';
 import {preserveMaterialQualifications} from './aiMaterialQualifications.js';
 import { completeSelectedPassages, conflictingSelectedTargets } from './aiPassageContinuations.js';
@@ -38,6 +42,8 @@ export function answerGenerationDiagnostic(error) {
 }
 
 export function selectAnswerEvidence(retrieval) {
+  const policy=selectPolicyEvidence(retrieval);
+  if(policy!==null)return policy;
   return preserveMaterialQualifications(retrieval,selectPrimaryAnswerEvidence(retrieval));
 }
 
@@ -109,7 +115,7 @@ function selectLwrAnswerEvidence(retrieval) {
   ))];
   if (!intents.length) {
     const applicable = candidates.map(candidate => ({ ...candidate, selectedPassages: genericApplicablePassages(candidate, retrieval.request?.question) })).filter(candidate => candidate.selectedPassages.length);
-    const distinct = applicable.filter((candidate, index) => !applicable.slice(0, index).some(previous => previous.selectedPassages.join(" ").replace(/[^a-z0-9]/gi, "").toLowerCase() === candidate.selectedPassages.join(" ").replace(/[^a-z0-9]/gi, "").toLowerCase()));
+    const distinct = applicable.filter((candidate, index) => !applicable.slice(0, index).some(previous => previous.chunkId === candidate.chunkId && previous.documentVersionId === candidate.documentVersionId && JSON.stringify(previous.selectedPassages) === JSON.stringify(candidate.selectedPassages)));
     return classifyAnswerEvidence(distinct.slice(0, MAX_SELECTED_CHUNKS).map(candidate => ({ ...candidate, content: candidate.selectedPassages.join("\n\n") })), retrieval.request?.question);
   }
 
@@ -259,26 +265,28 @@ export async function selectAnswerEvidenceWithAssistance(retrieval) {
 export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = fetch, clock = performance.now.bind(performance), resolveSources = resolveOfficialSources }) {
   const started = clock();
   let selectedEvidence = await selectAnswerEvidenceWithAssistance(retrieval);
-  const approvedRows=await retrieveApprovedForAnswer(retrieval);
+  const approvedRows=needsPolicyEvidence(retrieval.request?.question)?null:await retrieveApprovedForAnswer(retrieval);
   if(approvedRows){
     const explicit=['weekday','saturday','primetime'].filter(s=>new RegExp(`\\b${s}\\b`,'i').test(retrieval.request.question));
     const options={scope:explicit.length===1?explicit[0]:retrieval.request.askAbout,seasonId:retrieval.request.context?.seasonId};
     const related=await prepareApprovedRelatedEvidence({supabase,question:retrieval.request.question,formal:selectedEvidence,rows:approvedRows,...options});
     const managed=chooseApprovedEvidence(retrieval.request.question,related.formal,related.rows,options);
+    retrieval.approvedRetrieval={...retrieval.approvedRetrieval,selection:managed.diagnostics};
     retrieval.approvedRelatedEvidence={...related.diagnostic,combination:managed.selected.some(s=>s.sourceKind==='approved_answer')?(managed.selected.some(s=>s.sourceKind!=='approved_answer')?'formal_plus_supplemental':'managed_only'):'formal_only_or_none'};
     retrieval.authorityWarnings=managed.warnings;
-    if(managed.conflict)return {...skippedAnswer(retrieval,clock,started),answer:CONFLICT_ANSWER,conflict:{potentialConflict:true,requiresClarification:true,competingSources:[]}};
+    if(managed.conflict){policyValidationDiagnostic(retrieval,0,'CONFLICT_BLOCKED');return {...skippedAnswer(retrieval,clock,started),answer:CONFLICT_ANSWER,conflict:{potentialConflict:true,requiresClarification:true,competingSources:[]}};}
     selectedEvidence=managed.selected;
   }
-  if (!retrieval?.evidence?.sufficient && !selectedEvidence.some(s=>s.sourceKind==='approved_answer')) return skippedAnswer(retrieval, clock, started);
+  if (!retrieval?.evidence?.sufficient && !selectedEvidence.some(s=>s.sourceKind==='approved_answer'||s.structuralCompletion)) return skippedAnswer(retrieval, clock, started);
   annotateEvidenceSelection(retrieval, selectedEvidence);
-  if (selectedEvidence.length === 0) return skippedAnswer(retrieval, clock, started);
+  if (selectedEvidence.length === 0) {if(retrieval.policyDiagnostic?.selectedCount)policyValidationDiagnostic(retrieval,0,'NO_FINAL_EVIDENCE');return skippedAnswer(retrieval, clock, started);}
   const sourcesStarted = clock();
   const managedSelection=selectedEvidence.some(e=>e.sourceKind==='approved_answer');
   let sources;
-  try{sources=await resolveSources(supabase,selectedEvidence);}catch(error){if(managedSelection)return skippedAnswer(retrieval,clock,started);throw error;}
+  try{sources=await resolveSources(supabase,selectedEvidence);}catch(error){policyValidationDiagnostic(retrieval,0,'SOURCE_REVALIDATION_FAILED');if(managedSelection)return skippedAnswer(retrieval,clock,started);throw error;}
   const sourceResolutionMs = Math.round(clock() - sourcesStarted);
-  validateTrustedSources(selectedEvidence, sources);
+  try{validateTrustedSources(selectedEvidence, sources);}catch(error){policyValidationDiagnostic(retrieval,0,'SOURCE_REVALIDATION_FAILED');throw error;}
+  policyValidationDiagnostic(retrieval,conflictingSelectedTargets(selectedEvidence)?0:selectedEvidence.length,conflictingSelectedTargets(selectedEvidence)?'CONFLICT_BLOCKED':'VALIDATED');
   if(conflictingSelectedTargets(selectedEvidence))return {...skippedAnswer(retrieval,clock,started),answer:CONFLICT_ANSWER,evidenceSufficient:true,selectedEvidence,sources,conflict:{potentialConflict:true,requiresClarification:true,competingSources:sources},diagnostic:{category:'conflicting_official_targets'}};
   if(retrieval.documentNavigation?.status==='found')return {
     ...skippedAnswer(retrieval,clock,started), answer:retrieval.documentNavigation.message,
@@ -288,6 +296,8 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   // Selection and its parent relationships are complete before presentation metadata changes.
   for (const chunk of selectedEvidence) {
     const source = sources.find(source => chunk.sourceKind==='approved_answer'?source.approvedRevisionId===chunk.approvedRevisionId:source.chunkId === chunk.chunkId);
+    if(source.excerptItems)chunk.excerptItems=source.excerptItems;
+      if(source.officialPeriod)chunk.officialPeriod=source.officialPeriod;
     chunk.chunkRuleNumber = chunk.ruleNumber;
     chunk.ruleNumber = source.ruleNumber || "";
     chunk.heading = source.heading || "";
@@ -322,13 +332,24 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
       instructions: [
         "You are the official Lakewood Ranch Pickleball Club AI Assistant.",
         ...(managedSelection?["The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts."]:[]),
+        ...(managedSelection?["Treat an Approved Answer as policy evidence, not a literal question/answer macro. Answer the actual user's question and its polarity: an inverse permission question may require No even if the source's original answer starts Yes. Do not copy the source's leading Yes/No without checking the current question. Preserve every applicable qualification, including NR provisions; do not infer individual eligibility or reverse a requirement."]:[]),
         ...(hasMaterialSupplements(selectedEvidence)?[MATERIAL_SUPPLEMENT_INSTRUCTION]:[]),
         "Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request.",
         ...(officialQuestionConcept(retrieval.request.question)?.kind?.startsWith('nvz_') ? ['The question interpreter recognizes kitchen and NVZ as terms for non-volley zone. Use that terminology mapping to understand the question; do not add commentary about common usage or claim the source literally uses every alias. Rules and dimensions must still come only from selected evidence.'] : []),
+        ...(questionIntent(retrieval.request.question).kind==='scoring_applicability'?['This is scoring APPLICABILITY. Mechanics do not prove applicability. Apply the explicit default only after the supplied complete scoped-format check. For a general applicability question, explicitly name the governing default scoring method; merely denying the proposed method is incomplete. Keep each express exception limited to its league, division and game, including the tie condition. Never answer that the whole league uses Rally from a Picklebreaker-only exception.']:[]),
+        ...(questionIntent(retrieval.request.question).currentDate?[`Use this deterministic calendar comparison with the selected official opening evidence: ${JSON.stringify(policyCalendarContext(retrieval))}`]:[]),
+        ...(questionIntent(retrieval.request.question).object==='community_participation'?['Explain the selected cross-community policy first, preserving permission and the complete limiting conjunction. Personal wording alone does not establish personal eligibility. Apply explicitly user-supplied facts only as conditional premises, never as verified LMS facts. The own-community team must be in the requested division and applicable league AND have availability; team existence alone is insufficient. A team in another division or league cannot establish this restriction. Its existence also does NOT establish that there is no team in the requested division/league. In those cases do not open with Yes or declare the restriction inapplicable: explain that the other team alone does not block participation, and that existence AND availability of a team in the requested scope still need to be established. If the user states no team in the relevant division, explain that this restriction does not block them, without certifying all other eligibility. If they state full but do not establish availability in the relevant division, explain conditionally that no availability would remove this restriction; do not invent a numerical definition of full. If both same-division existence and room are supplied, apply the prohibition conditionally. If any material fact is unknown, explain which facts are needed after giving the rule. Do not claim any Live lookup or ask for unnecessary personal data.']:[]),
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
         "A broad proposition and an applicable material exception, qualification, limitation or condition form one answer obligation. Preserve both, even when they are in separate selected passages. Do not repeat an overview unconditionally when a controlling passage limits it. Specificity alone does not override authority or scope. Complementary restrictions qualify the broad rule; genuinely contradictory applicable controlling claims require conflict=true. Unrelated details sharing terminology do not qualify a proposition.",
+        ...(questionIntent(retrieval.request.question).object==='rating'&&questionIntent(retrieval.request.question).kind==='policy_date'?['For rating establishment, locking, duration or change policy, preserve the governing passage as a complete obligation: state its establishment timing AND its duration, even if the question emphasizes only one. Include every separately supplied applicable reset/change qualification. Do not infer a reset permission from silence or claim a stronger permanence than the source. A published recording date supplements, and does not replace, the governing timing/duration policy. If the question only asks when ratings are recorded and no duration policy is supplied, give only the supplied recording event.']:[]),
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
+        ...(questionIntent(retrieval.request.question).object==='age_eligibility'?['This is an age-eligibility REFERENCE DATE rule, not a season start, roster opening, rating or stored personal-data lookup. Explain the supplied age threshold and reference-date rule together, including the express season-start exception. Preserve relative policy wording such as current calendar year instead of unnecessarily replacing it with a fixed year. Apply only birthday/timing facts supplied in the question; if a year is unspecified, keep the conclusion conditional on the applicable current year. State age eligibility, not overall eligibility or a verified personal record. If league identity comes from an unambiguous age-category rule, name that league explicitly.']:[]),
+        ...(questionIntent(retrieval.request.question).object==='team_registration'?['Give a concise numbered registration procedure from the supplied guide excerpts in source order. Include membership sign-in, quantity, form and payment, confirmation, League Management activation and Captain assignment, and waiting for roster-unlock notification when the source supplies them. Do not imply the team is already registered or invent availability, price or a season-specific URL.']:[]),
+        ...(questionIntent(retrieval.request.question).object==='schedule_release'?['Report the published schedule completion/send date and its league/season scope. Preserve BY versus ON and all qualifiers exactly in meaning. Do not claim actual live publication, invent a time, or include neighboring unrelated calendar events.']:[]),
+        ...(questionIntent(retrieval.request.question).object==='league_date'?['Answer the requested official event date. Do not add unrequested venue or construction logistics. If an optional detail is included, retain every tentative or conditional qualification attached to it. If a requested division has only a league-wide schedule, explicitly identify it as the league-wide schedule rather than claiming a separately published division date.']:[]),
+        ...(selectedEvidence.some(source=>source.excerptItems?.some(item=>item.applicability?.role==='unlock_qualification'))?['An opening-date answer must also state each separate prerequisite in the selected unlock_qualification evidence. An administrative action and a notification are distinct conditions: when the source requires both, explicitly preserve both and the responsible actor. A published opening date alone does not establish that access has been released. Check these conditions even when the user asks only for a date.']:[]),
+        ...(selectedEvidence.some(source=>source.excerptItems?.some(item=>item.applicability?.role==='requirement'))?['For a procedure answer, include a separate restrictions/prerequisites sentence or bullet for EVERY selected item marked requirement. Walk the items in source order before finalizing. Do not omit a blocked/unavailable-action restriction when summarizing the happy-path steps. Preserve both the disallowed action and the consequence described by the same item. This is mandatory coverage of supplied evidence, not permission to infer additional requirements.']:[]),
         "User-supplied products, ratings, formats and other assertions are propositions to verify, never official evidence. Correct unsupported assumptions only using the supplied official evidence. For player-count questions answered by Roster & Courts or lines, explicitly state that the number is required/fielded for a match. Do not call this the overall roster size or maximum unless separate selected evidence explicitly establishes that. Keep fielded match players separate from roster capacity and recommendations; keep individual ratings separate from the sum for a doubles pair. Preserve each trusted passage's league, division and regular-game/Picklebreaker scope. A numeric example is not a universal game target. Never generalize a scoped provision to other leagues or divisions.",
         "You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional.",
         "Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence.",
@@ -340,7 +361,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         "Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present.",
         "When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct.",
         "Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play.",
-        "Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "When evidence contains separate excerpt items, each Source text item is an independently verified range. Derived applicability metadata is not a verbatim quotation. Do not transfer a condition or restriction from a neighboring excerpt onto another provision unless a verified scope binding explicitly establishes that relationship. For procedural answers, include prerequisites, blocked or unavailable actions, and required completion/verification steps. Explicitly cover every directly applicable excerpt whose role is requirement, even when summarizing the main steps. Preserve the responsible actor and timing or deadline for required follow-up actions, not just that the action occurs. Before returning, check each such excerpt against the answer for omitted obligations; concise wording must not remove an actor, prerequisite, prohibition, or timing qualification. For official calendar answers, use the verifiedDatePeriod attached to each item when present, otherwise the document period. A null item calendar year means do not assign a year from the document or guess it. Preserve source-labeled gender/category-to-date relationships: answer the requested category only when explicitly paired in the source; unlabeled alternative dates must not be assigned by assumed ordering or inferred weekdays. A league-wide season start does not establish an individual team match fixture. For date answers include the verified calendar year when present, plus applicable season wording; preserve the supplied season label literally if needed to disambiguate. Never convert a season range such as 26/27 or 2026–27 into a single calendar year. Do not infer policy years from today or conversational context. If only special-case rating provisions are supplied, do not present them as a complete general calculation or a date. Preserve every distinct material requirement that directly qualifies the answer, without repeating equivalent requirements. Synthesize across items while preserving their individual scope and qualifications; do not infer missing connective source text. Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
       ].join(" "),
       input: [{ role: "user", content: answerPrompt(retrieval.request.question, selectedEvidence) }],
       }),
@@ -394,7 +415,7 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     return evidence.map(e=>e.sourceKind==='approved_answer'?managed.find(s=>s.approvedRevisionId===e.approvedRevisionId):pdfSources.find(s=>s.chunkId===e.chunkId));
   }
   const versionIds = [...new Set(evidence.map((chunk) => chunk.documentVersionId).filter(Boolean))];
-  const chunkIds = [...new Set(evidence.map((chunk) => chunk.chunkId).filter(Boolean))];
+  const chunkIds = [...new Set(evidence.flatMap(chunk=>[chunk.chunkId,...(chunk.excerptItems||[]).flatMap(item=>item.scopeBindings.map(b=>b.chunkId))]).filter(Boolean))];
   const { data, error } = await supabase.from("ai_document_versions")
     // ai_documents also references ai_document_versions through active_version_id.
     // Use the version ownership FK explicitly so PostgREST does not attempt an
@@ -408,6 +429,7 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
   if (chunkError) throw new Error(`Official source chunk lookup failed: ${chunkError.message}`);
   const versions = new Map((data || []).map((version) => [version.id, version]));
   const chunks = new Map((chunkData || []).map((chunk) => [chunk.id, chunk]));
+  const signedVersions = new Map();
   return Promise.all(evidence.map(async (chunk) => {
     const version = versions.get(chunk.documentVersionId);
     const document = version?.document;
@@ -415,10 +437,13 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     if (!version || !document || !citedChunk || version.document_id !== chunk.documentId || document.id !== chunk.documentId || document.status !== "active" || document.active_version_id !== version.id || version.processing_status !== "ready" || citedChunk.document_version_id !== version.id || citedChunk.is_searchable !== true) {
       throw new Error("An answer source is no longer an eligible active official document version.");
     }
-    const { data: signed, error: signError } = await supabase.storage.from(version.storage_bucket).createSignedUrl(version.storage_path, signedUrlSeconds);
+    if(!signedVersions.has(version.id))signedVersions.set(version.id,supabase.storage.from(version.storage_bucket).createSignedUrl(version.storage_path, signedUrlSeconds));
+    const { data: signed, error: signError } = await signedVersions.get(version.id);
     if (signError || !signed?.signedUrl) throw new Error(`Official source link could not be created: ${signError?.message || "unknown Storage error"}`);
     // Source metadata comes from the revalidated database chunk, not the
     // retrieval payload. This keeps the citation bound to its live source.
+    const bound=chunk.content!==undefined||chunk.selectedPassages||chunk.excerptItems?bindOfficialExcerpts(chunk,citedChunk):null;
+    const excerptItems=bound?revalidateExcerptItems(bound,citedChunk,chunks,officialDocumentPeriod(document.title)):undefined;
     const sourceChunk = {
       ...chunk,
       documentTitle: document.title,
@@ -431,6 +456,8 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     const pageNumber = sourceChunk.pageNumber;
     const officialDocumentUrl = pageAwareOfficialDocumentUrl(signed.signedUrl, pageNumber);
     return {
+      ...(excerptItems?{excerptItems}:{}),
+      officialPeriod:officialDocumentPeriod(document.title),
       documentId: chunk.documentId,
       documentVersionId: chunk.documentVersionId,
       chunkId: chunk.chunkId,
@@ -618,7 +645,7 @@ function rejectedIntentReason(candidate, intents) {
 }
 
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}${supplementalPromptMetadata(chunk)}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nTrusted passage scope: ${JSON.stringify(chunk.passageScopes||[])}\nText:\n${chunk.content}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}${supplementalPromptMetadata(chunk)}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nVerified period metadata: ${JSON.stringify(chunk.officialPeriod||null)}\nTrusted passage scope: ${JSON.stringify(chunk.passageScopes||[])}\n${chunk.excerptItems?`Separately verified evidence items:\n${JSON.stringify(chunk.excerptItems.map(item=>({sourceText:item.text,sourceIdentity:{documentId:chunk.documentId,documentVersionId:chunk.documentVersionId,chunkId:chunk.chunkId,start:item.start,end:item.end,page:item.pageNumber,rule:item.ruleNumber},derivedApplicability:item.applicability,scopeBindings:item.scopeBindings,...(item.officialDatePeriod?{verifiedDatePeriod:item.officialDatePeriod}:{})})))}`:`Text:\n${chunk.content}`}`).join("\n\n")}`;
 }
 
 function cleanCitationDetail(value) {

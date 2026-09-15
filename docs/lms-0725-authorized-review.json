@@ -1,0 +1,579 @@
+{
+  "calls": 42,
+  "routesPassed": 63,
+  "sourceFidelity": {
+    "passed": 41,
+    "failed": [
+      "Q57"
+    ]
+  },
+  "review": [
+    {
+      "id": "Q01",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q02",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q03",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q04",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q05",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q06",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q07",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q08",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q09",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q10",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q11",
+      "status": "clarification_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "needs_review",
+      "note": "Clarifies player-entry object instead of producing the requested roster-date variant; review intent behavior."
+    },
+    {
+      "id": "Q12",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q13",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q14",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q15",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q16",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q17",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q18",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q19",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q20",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q21",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Correct month/day and 2026 citation; answer prose omits the required explicit year."
+    },
+    {
+      "id": "Q22",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q23",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q24",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q25",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q26",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q27",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q28",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q29",
+      "status": "no_selected_evidence",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "needs_review",
+      "note": "No selected evidence in saved snapshot; no model call. Saved guide pages do not include a full score-entry procedure."
+    },
+    {
+      "id": "Q30",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q31",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q32",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q33",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q34",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q35",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q36",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q37",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q38",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q39",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q40",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q41",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q42",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q43",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q44",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q45",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q46",
+      "status": "no_selected_evidence",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "needs_review",
+      "note": "No selected evidence; no model call. Unscoped Picklebreaker mechanics do not pass the existing scoped selector."
+    },
+    {
+      "id": "Q47",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q48",
+      "status": "clarification_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q49",
+      "status": "clarification_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q50",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q51",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q52",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q53",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q54",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Model explicitly says selected evidence does not establish timing; grounded-answer coverage gap."
+    },
+    {
+      "id": "Q55",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Answers conditional rating assignment/use instead of WHEN the rating is established; intent/completeness failure."
+    },
+    {
+      "id": "Q56",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": true,
+      "review": "needs_review",
+      "note": "Only NR and multi-division special cases selected; general Season DUPR calculation is not established."
+    },
+    {
+      "id": "Q57",
+      "status": "generated",
+      "calls": 1,
+      "routePass": true,
+      "exactSource": false,
+      "review": "needs_review",
+      "note": "Legacy synthetic heading + nonadjacent bullet passed existing validator; strict exact-source audit FAIL. Model prose also omits year."
+    },
+    {
+      "id": "Q58",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q59",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q60",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q61",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q62",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    },
+    {
+      "id": "Q63",
+      "status": "deterministic_no_model",
+      "calls": 0,
+      "routePass": true,
+      "exactSource": null,
+      "review": "pass_in_tested_scope",
+      "note": ""
+    }
+  ]
+}

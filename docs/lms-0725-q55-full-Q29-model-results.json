@@ -1,0 +1,339 @@
+{
+  "recordedAt": "2026-09-08T18:36:22.114Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q29",
+      "question": "How do I enter match scores?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWRPC-Captains Guide to the LMS",
+          "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+          "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+          "pageNumber": 13,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 0,
+              "end": 328,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 329,
+              "end": 480,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 481,
+              "end": 704,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 705,
+              "end": 968,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 328,
+              "sha256": "ef1cb6e1e0006c7ec2a236877739cb47e93be0876f101d0972c19eaa452a1ae5"
+            },
+            {
+              "characters": 151,
+              "sha256": "a47b2f02ecc7c10f280912a2c37b54cb59bdd791c4da58c8bf176d9451551eeb"
+            },
+            {
+              "characters": 223,
+              "sha256": "8b29994ab6be98185576cedb8868f2fbb0086259d4aadf102bc09ed402239997"
+            },
+            {
+              "characters": 263,
+              "sha256": "da9cd427939e9d3e0927e4a6223c87930a6b7b0548d1a66df1043f01d21262f1"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+          "pageNumber": 9,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 180,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 181,
+              "end": 373,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 374,
+              "end": 626,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 627,
+              "end": 1068,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 1069,
+              "end": 1243,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 180,
+              "sha256": "2f0d00a1963efa4e0f4abc92550ef5a35680d415ac04b1ccf27bba41fd4d6dec"
+            },
+            {
+              "characters": 192,
+              "sha256": "4e032c5c58c988739491ee14e73719b727d76ca192956c9341b53bb5be1dc7d0"
+            },
+            {
+              "characters": 252,
+              "sha256": "f41823eacf12b7f41edfc12048860c3667038bc1ece4d7170b74d723c1f80046"
+            },
+            {
+              "characters": 441,
+              "sha256": "b05cdcd3c5c91f1a51945e7747771d52f3bea3a764afbc416b4c7daa5ba8e1ee"
+            },
+            {
+              "characters": 174,
+              "sha256": "350e13b4ce762ab6b81730fa15773415128391bd14abbbcc91beb97a7441077d"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 6043,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "To enter match scores, click the red “Enter Match Scores” button in the match. That option is available only on or after the scheduled match date.\n\nThen:\n- Use the dropdown menus to select the players for each game. Normally use “Use this saved team” / the Match Setup players; if there were changes, select the correct player from the individual player dropdown.\n- Enter the scores in each game block.\n- Click Submit when finished. The system will check for errors before saving.\n\nRestrictions / follow-up requirements:\n- For individual game forfeits or retirements, refer to the official League Rules when entering those results.\n- If an entire match date is forfeited, canceled, or cannot be played due to weather or scheduling conflicts, do not enter it into the system; contact/notify League Management at info@lwrpickleballclub.com so they can log/update it.\n- The same eligibility rules apply during score entry. An ineligible player cannot be selected, and score fields are blocked if that line has an eligibility issue.\n- After submission, the opposing captain receives a verification request and must open the match, review the scores, and either verify or dispute them. The visiting team captain must verify match scores promptly so there is enough time to review and enter them into DUPR before the end of the weekend.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 4874,
+        "sourceResolutionMs": 3,
+        "totalMs": 4903,
+        "inputTokens": 3037,
+        "outputTokens": 314,
+        "totalTokens": 3351,
+        "estimatedGenerationCostUsd": 0.024605
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWRPC-Captains Guide to the LMS — Page 13",
+          "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+          "pageNumber": 13,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 0,
+              "end": 328,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 329,
+              "end": 480,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 481,
+              "end": 704,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 705,
+              "end": 968,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — ENTER/VERIFY SCORES — Page 9",
+          "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+          "pageNumber": 9,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 180,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 181,
+              "end": 373,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 374,
+              "end": 626,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 627,
+              "end": 1068,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 1069,
+              "end": 1243,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

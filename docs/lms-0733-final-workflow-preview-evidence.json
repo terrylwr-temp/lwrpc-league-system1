@@ -1,0 +1,317 @@
+{
+  "commit": "12df254965c552c8d21f2b96b81d6843ace7bc84",
+  "deployment": "dpl_9gnFJX1C8rK8VHKrnz5dmE6LWKJ7",
+  "migration": "20260910211313",
+  "before": {
+    "captured_at": "2026-09-10 21:30:35.691147+00",
+    "tables": [
+      {
+        "name": "division_lines",
+        "rows": 204,
+        "fingerprint": "dd28041d5831bde799870753445056c9"
+      },
+      {
+        "name": "divisions",
+        "rows": 18,
+        "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+      },
+      {
+        "name": "league_blackout_dates",
+        "rows": 7,
+        "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+      },
+      {
+        "name": "league_schedule_settings",
+        "rows": 9,
+        "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+      },
+      {
+        "name": "leagues",
+        "rows": 3,
+        "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+      },
+      {
+        "name": "line_games",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "location_court_availability",
+        "rows": 1,
+        "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+      },
+      {
+        "name": "locations",
+        "rows": 138,
+        "fingerprint": "c2090d6cae9483b243920a774db4b7f1"
+      },
+      {
+        "name": "match_lines",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "match_lineups",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "matches",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "member_season_ratings",
+        "rows": 1012,
+        "fingerprint": "45213079f14e8e6374c4cb7876d0e6e7"
+      },
+      {
+        "name": "members",
+        "rows": 1974,
+        "fingerprint": "acb38ad517cdda551422a97f2ad78f36"
+      },
+      {
+        "name": "seasons",
+        "rows": 2,
+        "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+      },
+      {
+        "name": "team_byes",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "team_members",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "team_standings",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "teams",
+        "rows": 105,
+        "fingerprint": "f3b0e29384ba6cd1bae31c0c44e60146"
+      },
+      {
+        "name": "user_roles",
+        "rows": 186,
+        "fingerprint": "990a1f4e09c4e4abfc2061cb88938535"
+      }
+    ]
+  },
+  "after": {
+    "captured_at": "2026-09-10 21:42:24.112901+00",
+    "tables": [
+      {
+        "name": "division_lines",
+        "rows": 204,
+        "fingerprint": "dd28041d5831bde799870753445056c9"
+      },
+      {
+        "name": "divisions",
+        "rows": 18,
+        "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+      },
+      {
+        "name": "league_blackout_dates",
+        "rows": 7,
+        "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+      },
+      {
+        "name": "league_schedule_settings",
+        "rows": 9,
+        "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+      },
+      {
+        "name": "leagues",
+        "rows": 3,
+        "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+      },
+      {
+        "name": "line_games",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "location_court_availability",
+        "rows": 1,
+        "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+      },
+      {
+        "name": "locations",
+        "rows": 138,
+        "fingerprint": "c2090d6cae9483b243920a774db4b7f1"
+      },
+      {
+        "name": "match_lines",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "match_lineups",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "matches",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "member_season_ratings",
+        "rows": 1012,
+        "fingerprint": "45213079f14e8e6374c4cb7876d0e6e7"
+      },
+      {
+        "name": "members",
+        "rows": 1974,
+        "fingerprint": "acb38ad517cdda551422a97f2ad78f36"
+      },
+      {
+        "name": "seasons",
+        "rows": 2,
+        "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+      },
+      {
+        "name": "team_byes",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "team_members",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "team_standings",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "teams",
+        "rows": 105,
+        "fingerprint": "f3b0e29384ba6cd1bae31c0c44e60146"
+      },
+      {
+        "name": "user_roles",
+        "rows": 186,
+        "fingerprint": "990a1f4e09c4e4abfc2061cb88938535"
+      }
+    ]
+  },
+  "changedTables": [],
+  "zeroWrites": [
+    {
+      "checked_at": "2026-09-10 21:42:30.232063+00",
+      "workflow_runs": 0,
+      "input_state": 0,
+      "initializer_batches": 0,
+      "initializer_provenance": 0,
+      "source_rows": 659,
+      "source_hash": "4f873f55bc9ab6c08c612363a3ce74cc",
+      "import_batches": 1,
+      "import_hash": "95ffd370b162ee7b9df086201e014dd3",
+      "fall_populated": {
+        "rf": 0,
+        "age": 0,
+        "doubles": 0,
+        "regular": 0,
+        "primetime": 0
+      },
+      "migration_count": 1
+    }
+  ],
+  "preview": [
+    {
+      "transfer_counts": {
+        "rf": 659,
+        "age": 551,
+        "total": 1974,
+        "create": 0,
+        "review": 0,
+        "update": 0,
+        "doubles": 659,
+        "missing": 108,
+        "affected": 659,
+        "inactive": 156,
+        "noChange": 0,
+        "nrDeferred": 0,
+        "protectedFields": 0,
+        "primeTimeUpdates": 0
+      },
+      "rules": {
+        "hash": "07fc603d1774fde0c7be41093f69f67c",
+        "scale": 1,
+        "version": "6ae10e5f-fdde-41be-a941-d1b7ed360d1a",
+        "threshold": 29,
+        "adjustment": 0.5,
+        "nrAdmission": true
+      },
+      "hypothetical_clean": {
+        "SKIP": 156,
+        "CREATE": 538,
+        "MISSING": 1159,
+        "NR DEFER": 121
+      },
+      "roster_basis_rows": 0,
+      "existing_regular": 0,
+      "existing_primetime": 0,
+      "missing_age": 108,
+      "protected": {
+        "rf": 0,
+        "age": 0,
+        "doubles": 0
+      },
+      "examples": [
+        {
+          "fills": {
+            "rf": 0,
+            "doubles": "NR"
+          },
+          "source": {
+            "rf": 0,
+            "doubles": "NR",
+            "rfMissing": false,
+            "ageMissing": true,
+            "doublesMissing": false
+          },
+          "current": null,
+          "primetime": null
+        },
+        {
+          "fills": {
+            "rf": 20,
+            "doubles": "3.5"
+          },
+          "source": {
+            "rf": 20,
+            "doubles": "3.505",
+            "rfMissing": false,
+            "ageMissing": true,
+            "doublesMissing": false
+          },
+          "current": null,
+          "primetime": null
+        },
+        {
+          "fills": {
+            "rf": 30,
+            "doubles": "3.5"
+          },
+          "source": {
+            "rf": 30,
+            "doubles": "3.508",
+            "rfMissing": false,
+            "ageMissing": true,
+            "doublesMissing": false
+          },
+          "current": null,
+          "primetime": null
+        }
+      ]
+    }
+  ]
+}

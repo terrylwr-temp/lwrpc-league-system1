@@ -1,0 +1,26 @@
+{
+  "method": "Actual player Exchange SSR with compiled application CSS and synthetic response; external requests blocked.",
+  "results": [
+    {
+      "width": 1440,
+      "badgeVisible": true,
+      "noHorizontalOverflow": true,
+      "accessibleText": true,
+      "citationKeyboardReachable": true
+    },
+    {
+      "width": 390,
+      "badgeVisible": true,
+      "noHorizontalOverflow": true,
+      "accessibleText": true,
+      "citationKeyboardReachable": true
+    },
+    {
+      "width": 320,
+      "badgeVisible": true,
+      "noHorizontalOverflow": true,
+      "accessibleText": true,
+      "citationKeyboardReachable": true
+    }
+  ]
+}

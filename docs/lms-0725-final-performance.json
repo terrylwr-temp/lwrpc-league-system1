@@ -1,0 +1,168 @@
+{
+  "recordedAt": "2026-09-08T15:34:36.539Z",
+  "method": "Offline local CPU timings with current official snapshot and in-memory metadata/signing. 20 warmups and 200 samples per case. No network, provider or embeddings. Binding/range validation is included in source validation, not additive. Model preparation is generation start to intercepted dispatch minus measured selection and source resolution; includes applicability and prompt preparation. No equivalent pre-correction build was benchmarked, so total added production latency is not established.",
+  "cases": [
+    {
+      "question": "What date can I start entering my roster for weekday league",
+      "counts": {
+        "reads": 2,
+        "signs": 2
+      },
+      "selection": {
+        "medianMs": 1.092200000000048,
+        "p95Ms": 1.7736999999999625
+      },
+      "validation": {
+        "medianMs": 0.45719999999982974,
+        "p95Ms": 1.0214999999998327
+      },
+      "bindingAndRangeValidation": {
+        "medianMs": 0.13809999999989486,
+        "p95Ms": 0.3468000000000302
+      },
+      "modelPreparation": {
+        "medianMs": 7.294799999999896,
+        "p95Ms": 10.526899999999841
+      },
+      "totalBeforeDispatch": {
+        "medianMs": 8.892600000000016,
+        "p95Ms": 12.314000000000078
+      }
+    },
+    {
+      "question": "Does the weekday dupr league use rally scoring",
+      "counts": {
+        "reads": 2,
+        "signs": 1
+      },
+      "selection": {
+        "medianMs": 0.8243000000002212,
+        "p95Ms": 1.4830000000001746
+      },
+      "validation": {
+        "medianMs": 0.7035000000000764,
+        "p95Ms": 1.3083999999998923
+      },
+      "bindingAndRangeValidation": {
+        "medianMs": 0.14560000000028595,
+        "p95Ms": 0.36149999999997817
+      },
+      "modelPreparation": {
+        "medianMs": 2.3771999999999025,
+        "p95Ms": 4.280499999999847
+      },
+      "totalBeforeDispatch": {
+        "medianMs": 4.106999999999971,
+        "p95Ms": 6.668500000000222
+      }
+    },
+    {
+      "question": "When are Season DUPR ratings recorded for Saturday?",
+      "counts": {
+        "reads": 2,
+        "signs": 1
+      },
+      "selection": {
+        "medianMs": 0.5639999999993961,
+        "p95Ms": 1.0183999999999287
+      },
+      "validation": {
+        "medianMs": 0.112899999999172,
+        "p95Ms": 0.2562000000007174
+      },
+      "bindingAndRangeValidation": {
+        "medianMs": 0.028099999999994907,
+        "p95Ms": 0.05790000000069995
+      },
+      "modelPreparation": {
+        "medianMs": 2.5405000000005202,
+        "p95Ms": 4.094299999999748
+      },
+      "totalBeforeDispatch": {
+        "medianMs": 3.2393999999994776,
+        "p95Ms": 5.124300000000403
+      }
+    },
+    {
+      "question": "How is my Season DUPR calculated?",
+      "counts": {
+        "reads": 2,
+        "signs": 1
+      },
+      "selection": {
+        "medianMs": 0.5113000000001193,
+        "p95Ms": 0.8654999999998836
+      },
+      "validation": {
+        "medianMs": 0.7975999999998749,
+        "p95Ms": 1.447200000000521
+      },
+      "bindingAndRangeValidation": {
+        "medianMs": 0.16520000000036816,
+        "p95Ms": 0.4225000000005821
+      },
+      "modelPreparation": {
+        "medianMs": 2.0369000000000597,
+        "p95Ms": 3.2435000000004948
+      },
+      "totalBeforeDispatch": {
+        "medianMs": 3.4315999999998894,
+        "p95Ms": 5.2224999999998545
+      }
+    },
+    {
+      "question": "How do I enter match scores?",
+      "counts": {
+        "reads": 2,
+        "signs": 2
+      },
+      "selection": {
+        "medianMs": 0.37550000000010186,
+        "p95Ms": 0.501100000000406
+      },
+      "validation": {
+        "medianMs": 0.345299999999952,
+        "p95Ms": 0.6283999999996013
+      },
+      "bindingAndRangeValidation": {
+        "medianMs": 0.10620000000017171,
+        "p95Ms": 0.20010000000002037
+      },
+      "modelPreparation": {
+        "medianMs": 2.093599999999242,
+        "p95Ms": 2.7560999999996056
+      },
+      "totalBeforeDispatch": {
+        "medianMs": 2.8567999999995664,
+        "p95Ms": 3.850800000000163
+      }
+    },
+    {
+      "question": "How does Rally Scoring work in a Picklebreaker?",
+      "counts": {
+        "reads": 2,
+        "signs": 1
+      },
+      "selection": {
+        "medianMs": 0.30709999999999127,
+        "p95Ms": 0.5151999999998225
+      },
+      "validation": {
+        "medianMs": 0.3180999999995038,
+        "p95Ms": 0.5963000000001557
+      },
+      "bindingAndRangeValidation": {
+        "medianMs": 0.10130000000026484,
+        "p95Ms": 0.18339999999989232
+      },
+      "modelPreparation": {
+        "medianMs": 1.2276000000010754,
+        "p95Ms": 1.9630000000006476
+      },
+      "totalBeforeDispatch": {
+        "medianMs": 1.8802999999998065,
+        "p95Ms": 2.8634000000001834
+      }
+    }
+  ]
+}

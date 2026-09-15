@@ -1,0 +1,1809 @@
+{
+  "deployment": "dpl_7V7DQdKkpz8w9T39eGt6KbqeeMN8",
+  "gitDirty": true,
+  "appFiles": 300,
+  "allMatchDeploymentManifest": true,
+  "files": [
+    {
+      "file": "app/ai-assistant/page.js",
+      "deploymentSha1": "cb92b8268e4eb689fdfce6e88872cf2cd1b8fb4e",
+      "sha256": "38f1a0b1d8612b6857438bf1cde069329692a01d8515709539d0855c8c583e4f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-assistant/review/ApprovedAnswersPanel.js",
+      "deploymentSha1": "1de0d96e55df8c714215705ebbabd37e9d9c94f3",
+      "sha256": "f570cf85c7794eda2cd0a4e375cd8f1130e244ec907da5cc9719c31e64f6726d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-assistant/review/ExistingEvidenceDecision.js",
+      "deploymentSha1": "3a9bf4058bc84aec90d38f63545ca2c05df9a7d8",
+      "sha256": "42dce26f93c88ba3665028983b750d892a8483ae2822b9573da4b06c25fd4d41",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-assistant/review/LiveFeedbackPanel.js",
+      "deploymentSha1": "1c23f48bf48229505b9bbac533d2cf8ee34c4254",
+      "sha256": "ed4d53c3e0ca8db2dc17d0b3cac7797243e8ecfda1119899b86e69c8a060585d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-assistant/review/approved.module.css",
+      "deploymentSha1": "92e52721155cf816bc53d713063df0c1b3a3acb2",
+      "sha256": "8c95e8c773cde7c28113704e1bc1152c52aafcb4d060c2fd1045d6b9d08f4fd7",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-assistant/review/page.js",
+      "deploymentSha1": "6ebe37bd0d98720212667381a569088828092348",
+      "sha256": "0919aff6a162ea3ec0fe817b55eee70735b90b0793440bcc2d14d250a2709a37",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-assistant/review/review.module.css",
+      "deploymentSha1": "87f74683729b5e0c72b088efecf87aeda72e6bfb",
+      "sha256": "daef1ef65b77228f8655aea70a058c5d8acffe02e1a491ad15154d2a9ea4513a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-assistant/console/page.js",
+      "deploymentSha1": "4992544a3d709404440f6b42d630c60d12b4969c",
+      "sha256": "611cf18d2456bdd1464b600f6fb496399a93090f11223911b4af302e19dcd70d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/account-identity/route.js",
+      "deploymentSha1": "550360c22f52bbddfc9e820fa7c536cd772a1b12",
+      "sha256": "8121928d8565ca35618f7a905ae46b1d0926d0004b18898c8a86a27c387e9651",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/admin/delete-member/route.js",
+      "deploymentSha1": "2be400248ee355be9ed1244e0305d9f70ef8269f",
+      "sha256": "ff9cbd8dfdcaa44b02358dac6b50e002a9419fccb197d5d5a8a764c73c26c00d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/admin/member-directory/route.js",
+      "deploymentSha1": "a8fc9b897bab76e56517fb7d1a323fe387a99b1b",
+      "sha256": "9d85d9bbfdd00bf58fff601380707c3c39dc7e813fc44285d2ed263012a00afe",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/admin/member-last-login/route.js",
+      "deploymentSha1": "4ffc03afd9ef8254b5484b584413e01d000a3f36",
+      "sha256": "e6a02b4b6d01a4401f5b69bed074534ef8f94cf2b6edefa91d34e92ad6405765",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-assistant/approved-answers/route.js",
+      "deploymentSha1": "94f33c89e1cd6c7042e421294e4de57219db8836",
+      "sha256": "cda624aafd2db97c60f97286d2855bf4e76e97a5ce00c5ff576fc2cf1cc0f303",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-assistant/capture-health/route.js",
+      "deploymentSha1": "a5c7c0e1d3e90a71686329ae4028ef466ea5fe53",
+      "sha256": "fb60d219f762ee241eb6a03b7de5ca42cdf260bd187916985acbc16693cbe82f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-assistant/documents/route.js",
+      "deploymentSha1": "f57feb37ca16528c056fc9a643b4b6701e163b91",
+      "sha256": "9cf6567ba960e5a7972f589c415d7a239e210d800724c13d59ebbbe5fd178272",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-assistant/live-review/route.js",
+      "deploymentSha1": "e1a03210719e984b391ea1ed6a9bdf34981f654d",
+      "sha256": "f48c3fae40dfd3ca4a25b108dfee4ab6b48546ba5af6d3299cd37266f4467587",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-assistant/retrieval/route.js",
+      "deploymentSha1": "396565a8eaa077436c885ae4e8cac7190019747a",
+      "sha256": "a13193c2a1c5b83912a1ebfab02191c6dabc75aadc2e246534ce4f0c3cca15b7",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-assistant/review/route.js",
+      "deploymentSha1": "ff52f87cca037a2f9a777fe47675636f20c88efd",
+      "sha256": "05164fa22ce85174faf9ac76686f096820105ad5649cb257b64e5066a1bae560",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-assistant/answer/route.js",
+      "deploymentSha1": "59b430be9dd491a7bc58ef56f99929adb022954e",
+      "sha256": "bfc7151c15ad611102ac393d14c31c0f2781488b720b32f89132193df0ce9a3f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ai-insights/route.js",
+      "deploymentSha1": "00258762822e6f8001917d1dd36ec5b399979eeb",
+      "sha256": "6a337e974dd27c6cd4f4fa32856d5941104f5a0ea366fdf689659dcecaf059f0",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/app-notifications/public-key/route.js",
+      "deploymentSha1": "972af2d65de0f3f5a9256e74246d5b8996dbe5ee",
+      "sha256": "aa6c9b2bbee148435d42ded0231e96c0fcd15b219e384d41a6ed6dc76e79b474",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/app-notifications/subscribe/route.js",
+      "deploymentSha1": "0d712059527ba4144a2921ee5869eb8c7448d0f4",
+      "sha256": "2a1d954755168927e0edab71d33e5ec57be0826f2ccf9a7cc3bdde6da0163f86",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/approved-answer-viewer/route.js",
+      "deploymentSha1": "bab4ec501d5fbe927ed5943e63e84c5d37e7c653",
+      "sha256": "c68832cb160e26d4fd492a188999cab93ae1ee7cfccfaf254e1447e98ac08245",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/brevo-diagnostics/route.js",
+      "deploymentSha1": "f813d30c2f714b52f3ddfdfc2c234d98ad5f10b1",
+      "sha256": "5077396ca7a3c2690e2cb55ae458d6b28b8b739b42cec8996b66a1e541b0ea7f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/league-communications/route.js",
+      "deploymentSha1": "b3dcf36e66cbe74c1756694c3a583ff2f02659ae",
+      "sha256": "334b2f46f709fe6e87fa7e966954809f87d77ff74a74d8ca9933ebd3c2c5f38a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/master-reset/route.js",
+      "deploymentSha1": "0dd26e60b9406b7a04431878561ea345f27be01b",
+      "sha256": "7e8df34fbf1fcdd1f1717842886215eb0bd641a327c87f5aecd12ca555ec46a9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/match-lineups/route.js",
+      "deploymentSha1": "de04a47524314916681bcff1d4d460d0804b1ad6",
+      "sha256": "9e6fe2961bd28c7f57235258ac055102dd5d5dbfecad7c34cdd7925215e39590",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/match-setup-reminders/route.js",
+      "deploymentSha1": "9695183a44568c76c9665e865ac742e934b33af3",
+      "sha256": "1228c054c070dbedf82527b6c846e90c8491ae36fce8504d3f26bcf145025e88",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/member-password-reset-check/route.js",
+      "deploymentSha1": "423d14d876842a7df510ffe7f05df269817b8c9f",
+      "sha256": "e037d0bb3ef7e691da95f95fb29cadd98f1f3e81e599ab0a07160057794a036c",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/notification-template-history/route.js",
+      "deploymentSha1": "85270236b9704666696b5c71f70fcbad19a4d804",
+      "sha256": "c299c349f2567f72ef16a3bb5e944978903680a0f6e5a078baafe986187e0bf4",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/notification-templates/route.js",
+      "deploymentSha1": "9d707615a46e449b4962c1f0dcb70fb25083b0b1",
+      "sha256": "c6704f7d03d4b2e385b149faa1450204faa80199ec95aa066bc92f10937d1ed8",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/notifications/route.js",
+      "deploymentSha1": "13a4ca7b2f0623cb78fad9a6e228fa6f329283d8",
+      "sha256": "1ce4a09ae05e77606c55b4fe6a267b7b82b788a0ef69e8dcef63307cc95f82af",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/official-document-viewer/pdf/route.js",
+      "deploymentSha1": "9f4385bb16a00627c37fc969aedd8cc180382d71",
+      "sha256": "1af65997ee2604d65021bd52b259cc2c5b9e610b7bcc88761baaa5562501bd18",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/official-document-viewer/route.js",
+      "deploymentSha1": "a4a86bd255f83d584e527650f0ecadf8b9b57984",
+      "sha256": "8467537e783c2808767fd9ff991be9c8697f2bdf41d501355ea4bdfb5dc13c7f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/pbcc/reminders/route.js",
+      "deploymentSha1": "62c96f1eb9e3fcebc6706439dc2b7c1bfad77323",
+      "sha256": "f83cabed707749b501e6537093075576772e5499263f425742e806926d89e76d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/round-robin/action/route.js",
+      "deploymentSha1": "0c6ea8c75f9c792bd20f249f52668c0bb432e599",
+      "sha256": "ed1a481109cbdfae8cd7b3936680ca179d0820c670cb002626e8e9f0670e3eab",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/round-robin/admin/route.js",
+      "deploymentSha1": "cdb369ce9babfc81ae52b465769e470cda72b45e",
+      "sha256": "03bd2473e7415dc1dd887fdd7f9bdf5b64072f33d324cc8d9da1e6c967a20608",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/round-robin/player/route.js",
+      "deploymentSha1": "ce0366ee0b7450e3dea8f74d473effc1786907e6",
+      "sha256": "b1a14883fc0f1846b4d3940dce89306d74153b169495e70501f3378aeb4c747f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/score-notification/route.js",
+      "deploymentSha1": "132316920a808e9b8e00b208b9d1a9f29242f461",
+      "sha256": "9a00ccd0e321886df77e5b648e03b491ef33093de1568461c0088a534d7a0f0a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/season-reset/route.js",
+      "deploymentSha1": "c6d304c3b9032a0c8fc1a1e510c6ea6a8b32e129",
+      "sha256": "844c2eb8fbbfd13822d45bc479a4fe714f2c0da871655e42cc9d1f97369bb6e0",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/season-rollover/route.js",
+      "deploymentSha1": "85e93bd5a25404c8915b62c83ebbb30dd0646a9f",
+      "sha256": "b8170fa93029e97ed9f622b57f963e1c2a62ace4502da0140e862c8f1961ab88",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/system-settings/route.js",
+      "deploymentSha1": "c6039fb782f8d7c03c3f4279750cbceee7ec74e4",
+      "sha256": "31a8cae55625c74c70787eb6112159156758333ff4f865426b6c856df825dc1d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/teams/delete/route.js",
+      "deploymentSha1": "37c7c8b3396074323614f750129a149679bdb76f",
+      "sha256": "f0e0323b6e8d70b2354f242bee6f93bf2d6c1573a1cfe1d7c574f14d8fdd0dab",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/tournaments/action/route.js",
+      "deploymentSha1": "cdc59addbfc3d514632ae6212c159728137c3967",
+      "sha256": "bf27134eb387d4f9936ad3d9e61f11b7e086008fdf4adbfb44e61dccbc232ec2",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/tournaments/admin/route.js",
+      "deploymentSha1": "34be67f9df4044816497afb666f9cb029cd0ea58",
+      "sha256": "24960a25cdf15448c20545ec4a03674c165ff565d8b4c014ae5ecc10362c4739",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/tournaments/sms/route.js",
+      "deploymentSha1": "29e4f3e3c0bc591c892a5a10e8420fa375e67d97",
+      "sha256": "0a474556639effb1ec225a7b0b04b3948d776ae4b7793c247c7913818e6b7c74",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/user-last-logins/route.js",
+      "deploymentSha1": "a17fbb7b8bb745e8ab3aea21a430c37aaef122d0",
+      "sha256": "066767bd550f71f977458114b023ed515734078a9f0cd4951e7810c140be7a44",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/view-as/bootstrap/route.js",
+      "deploymentSha1": "0f2c7cd546f00cdbcfa308e4920a49a753195d50",
+      "sha256": "7dceb3e1051f08e10e38b47150ed6a8561767954ad007d0b9a64a05834344f66",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/view-as/exchange/route.js",
+      "deploymentSha1": "33f57037ed9edca040bb685b53d3691dc2ed9c52",
+      "sha256": "416e8a05c0775e9e94b620d90988ffc189a1b593de472740b75c5a033d4391c0",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/view-as/start/route.js",
+      "deploymentSha1": "a7d30744218276731fa7c2e450cb921632ca4791",
+      "sha256": "d97d93c08daf7735254b5ceb462669b2171d21ae9ced2d22bbb3200ebcbd8974",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ask-lwr/feedback/route.js",
+      "deploymentSha1": "5bcbe1ec6123dfbdc4d6eba31dc0adce91a9f47c",
+      "sha256": "6e2f84e1f2840bd6fbf90746d530bcf8cfc5cab02ab447c4085ada518327be76",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/ask-lwr/route.js",
+      "deploymentSha1": "15982bf4440238956febcdcb35684012aea16d65",
+      "sha256": "591d462a0cf15252ef7c035f162d015df3a2e3606b654b7327ba57e1f7aeab95",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/AdminDashboardClient.js",
+      "deploymentSha1": "00eb7b6cabb974dfa961784b0b2504762441fe7b",
+      "sha256": "c207af6bd054fa830cb091a967fc66b94864286da3464fdee671dc1b95064375",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ai-insights/page.js",
+      "deploymentSha1": "f1ff2e6a2288bc21f8b5fcb796ad151c4f4b2a00",
+      "sha256": "50a1de34eeee26913cd06eeee700169b061726fef93d5a5294ecece271dbea55",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/approved-answer/[citation]/page.js",
+      "deploymentSha1": "3f5e1b25eb5fae42eccbac03a54965fcb72fe182",
+      "sha256": "17b4e50477d580145ec45ad35f58610c77e00daf5739a23ed09beeddbd64efec",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ask-lwr/page.js",
+      "deploymentSha1": "23085740c946465265e93a5dcb4b4a4e6b6b1ef4",
+      "sha256": "e5f91fdc62006169b53ffb0fa083a4db07b8a99d36700f5fc34de7a2757df042",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/captain-dashboard/page.js",
+      "deploymentSha1": "b741a292a0a1d484ae4baa1a8f2a436deb625dca",
+      "sha256": "a3f79d586e58887e55f5bc2b42986bbc72814affe2e1e3e976f72c7f5f607a83",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/AppDialogProvider.js",
+      "deploymentSha1": "8c39f3b7cc5c89eea7ad703da8e46138e94fbe3d",
+      "sha256": "65660bbfe2e6c50ee928eb05a63430595bd12842c09f01a2c19c00cd7fdcb17a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/AppHeader.js",
+      "deploymentSha1": "0bd30a53893248a9619911f870c9cf81f2d55ccb",
+      "sha256": "417d825700856ea563e1bc6ba28325f07b757d6cd66741c310c9ab3fa82730e5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/AppNotificationsButton.js",
+      "deploymentSha1": "c69b4d466635f6954b2bce25583e40e98573bc1d",
+      "sha256": "6d7e0dac469974a443eee24d37344d436b21f997c8debfbda10358dab9792767",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/AskLwrAssistant.module.css",
+      "deploymentSha1": "e28b07f2445fc0001aa7768473f4da9f5db5753f",
+      "sha256": "9c1fd714d71dcadc6b77510fbbc82410399a1ae69811a02a7b2251a195f80be9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/AskLwrTrigger.js",
+      "deploymentSha1": "8debaad476c9dc712561619ef484c37c063deeb3",
+      "sha256": "7f6b4defe1f9a033ba37450dca95835fe41476b8ebe7a6d35614fe8580da2f02",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/BrowserTitle.js",
+      "deploymentSha1": "a284519da717725e4f44eadea6c91a947611f9f4",
+      "sha256": "862f504927963d32c19eb5a90632f1c246d1472bc171b7dca3c6824079e0b4a9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/DashboardPlayHistoryModal.js",
+      "deploymentSha1": "347b2fa5f88ff5ba4c25f64bb3c03df76903cefb",
+      "sha256": "66c166c683b53d2ac4f72cf64656467338acc8cf22c964cbb518e5f3065ea8c0",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/DashboardProfileDialog.js",
+      "deploymentSha1": "aacc3cadfc7ebd1e0d9c361a01a0cd4862919350",
+      "sha256": "375823eaeacb62ae1fe77d91c7a1fa42352f0962efc73a4bc9f27a5360b2b296",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/DivisionStandingsBarChart.js",
+      "deploymentSha1": "c09a524ea11b5ae53de9fea2972150a74b5ff9c7",
+      "sha256": "5125631a5478443c3983f964532f25e6eb0375793171ed8797a8b0183ab9482d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/DivisionStandingsModal.js",
+      "deploymentSha1": "94f104e71f37c26845fa7b2ab61e05f5bb6c154c",
+      "sha256": "cf8b403f2c49acb5f34bd439e92d21b62294b8037409d33722ecc6e0d36c4813",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/InactivitySessionTimeout.js",
+      "deploymentSha1": "0924e43dc2af54fad4c0df048c921b383e4787cf",
+      "sha256": "5ac24d691d180cde54f7a70ec15bb69670024457b7325b591a07c1abc027b9a6",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/ListingCount.js",
+      "deploymentSha1": "d4ee90f4bccb96774d3099c33745aee400e86e87",
+      "sha256": "b0fce9b9fbdb92a6b3d69fb0137217dad1454e1738099f013dabfd2a7c4b74ca",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/LmsInstallButton.js",
+      "deploymentSha1": "78e44d3c68b2f686a004852c4cd2a4be13ca8769",
+      "sha256": "a9ce3d6a060cdfc2240821c54ec2c863b1cee66b25a75614b761c20bd0a71574",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/LmsPwaRegister.js",
+      "deploymentSha1": "39a0a8489dac29abfbdae56c02b40e55867b8184",
+      "sha256": "9ab5869dee746f41549ce5548c0703f05e33a52987b91e38c28ae0b37561c0a2",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/LoadingScreen.js",
+      "deploymentSha1": "43731591263a6ce728170c81c98adb38ab54e363",
+      "sha256": "7fe123573eaf8299674d83edbbceb0811d532df8900dee519040092d73f69795",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/LoginMessageModal.js",
+      "deploymentSha1": "e14636d40e71f13c3097b47d155bebe039d2f9df",
+      "sha256": "b9e98fea07c89bea34b8c9fd707f0ed78f857b92124e298c85b802f382132b57",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/MiniStandingsLeaders.js",
+      "deploymentSha1": "55ab9ed3b8459598d35a1917e51da84dd8a85b44",
+      "sha256": "25fb2ec794c19532e3f78a00bb957b7f040284996a7e68e6ea376193433815f5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/OfficialDocumentViewer.js",
+      "deploymentSha1": "518c0bbfc806abc5f9f2a6618886dec11abb939e",
+      "sha256": "754152186f3edb631f45a1dfb74c82ecde9c54e41ca1dfef7e773d58ab60a9fc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/PbccFooter.js",
+      "deploymentSha1": "ba0b594b16bb78d95205f60de261f74521b7c77d",
+      "sha256": "c895629123c224f95acfacf06286b22b10ed82d15c7b6e615f5fdd10251a8595",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/PbccInstallButton.js",
+      "deploymentSha1": "4b5b8d5dfc2fdc399b59c95645e994caa5fad8b0",
+      "sha256": "e6469c7a97d128e65c3a4827c80fdddc945ce59274a40166c129f78b8110456a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/PbccPwaRegister.js",
+      "deploymentSha1": "17bbffcb75f57eb42b4d1addc68bee4dca6de736",
+      "sha256": "0e1d157ce7d11a2a210fb2a91cabc99c2b1d490a4ab7da3902277c8e3485b4c9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/PdfDocumentModal.js",
+      "deploymentSha1": "6915f0a9328c00fa3df6075ebb050fcdbc3eca0d",
+      "sha256": "93189a54d05352898aaccdeb5b7845e89b4cf52366c033888d623058e4cea0f9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/PdfDocumentModalClient.js",
+      "deploymentSha1": "3525d9428b6747acb46cba59f823d630fb15b107",
+      "sha256": "df4d18cd97bc42d6da94f20c4216fa215d1e2399dbfa32c9bc3b37546dff00df",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/PlayerHistoryDetailsModal.js",
+      "deploymentSha1": "2b5a822f2f357f46a11505525168d0094a930e5c",
+      "sha256": "f3c78b21bc0cb8b2f5261e1f2f3e68748f922b8f81540bad289a33f169e294ff",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/PlayerHistoryPanel.js",
+      "deploymentSha1": "c8cb1c862af7e7a48a3b9fdcfa3673dd9e47d086",
+      "sha256": "5dc0212c76dfdb96fa4a20c0e0320e268e0b52020987de75654a26618947638b",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/RoleCapabilityModal.js",
+      "deploymentSha1": "237c697c37fbef3eebfb1df5e467e7ed70da8b0a",
+      "sha256": "a15953f80421793cd2550df4ac0c0f605d6927092bf4110952405e24bf80a99c",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/StandingsTiebreakDetails.js",
+      "deploymentSha1": "24f2c46a16baeb9b2959545cd9b459239dccbff6",
+      "sha256": "95edd3c66485f83876fa54637a96fe63289d14e06552615ffafa88c57582665e",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/SystemFooter.js",
+      "deploymentSha1": "1ac6d0d61afcc9caea830b54a22b4999b84be255",
+      "sha256": "52851094c0c990a9e4205609561bcc7f46d4fb15cbc3660077224c5d334115ab",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/TeamScheduleModal.js",
+      "deploymentSha1": "86ba341c8eaf23d31bf73f4a1c6f1dcfbc0d0c4d",
+      "sha256": "42dee14c3978335c6fa17c0aa1423650b8f06609292dc9aedef73e4ee22d63f5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/TurnstileWidget.js",
+      "deploymentSha1": "cafd98351a2e5f0f54b88c59c255224069191de9",
+      "sha256": "03e48c2089d14a544015b5656077068ba080272aad00cc8e5452aafd63025742",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/ViewAsStartButton.js",
+      "deploymentSha1": "f26fd865971ea3343b88b3f81e3c90d68c7fc21b",
+      "sha256": "baf243a6899460c4e2ddd7812a3eddf036888b7a3f031dabd7bef9091d0ca8eb",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/AskLwrChoices.js",
+      "deploymentSha1": "dd8a84837a854e9755bcc6ea2081f7c6407388a9",
+      "sha256": "985fdf408f706058347d2031c268b8f17a44ea9b9e35f2ef80a952d552ed29b6",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/components/AskLwrWelcome.js",
+      "deploymentSha1": "a3900944fcc69c58d1116c8a98931e894565582e",
+      "sha256": "91e333b43f461c0e76fc0e26f8308540e020a5dd65b2defeae9e27f41f29dca3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/DashboardAppearanceControls.js",
+      "deploymentSha1": "c06829562981fb99f5f722926c9cc03885f462dc",
+      "sha256": "ab92a38366dc442a4da3bddcd76e1026b2f5fc14f285c91f7db68e2efc773863",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/DesignPreviewView.js",
+      "deploymentSha1": "2112eae756945b7068fcfd5e1cf58824ae00bf93",
+      "sha256": "b96502fcc95981a857e7fcf59947251e0092ceea6495ec12d6e4bfb9ce40c4c9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/admin/AdminDesignPreviewView.js",
+      "deploymentSha1": "00c189d41f4f6bd114272faf1370875dd61513f0",
+      "sha256": "ae46028176729d3bed5a39325416e873559e60532a6fad6854e2848155223ae8",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/admin/admin.module.css",
+      "deploymentSha1": "2fe60efd46426bed5ad8e5781225a7a3da267c59",
+      "sha256": "7349bd634c450e135f13594f9541d1043af8c3d1dc80c75afb2a41599bff2ccc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/admin/page.js",
+      "deploymentSha1": "c1f7f979e190a1490175fde988c301a3709d81c8",
+      "sha256": "3e07878a6bc5e5d2d832f1bbb60734fadd4b636d2e09a8be4c2f55bf71e390c5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/captain/CaptainDesignPreviewView.js",
+      "deploymentSha1": "418bd861663e88e0ebfc61dd0bf45d3fdd07813b",
+      "sha256": "867a239468a602131f10a928c41814da601293e288f09dacd53f1bf79e4a7aeb",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/captain/captain.module.css",
+      "deploymentSha1": "08f4f035e8bc7437ec169dc6844169449d93a170",
+      "sha256": "81edfc0de9d4150d0949b1241241e47195f25600e3f80e768ee5e0a0b8677774",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/captain/page.js",
+      "deploymentSha1": "fa55c55a5c44f776ad6e70bd4ae05f750b06cdda",
+      "sha256": "98dc618797de2fa6f13d5763fd2bfac45a620276f881c3f58dc45fab2b8c5572",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/page.js",
+      "deploymentSha1": "6da892472b0d67b4096100ddb0d1d4278fa8ea81",
+      "sha256": "c31b7f6552d9c6bd54eb6f8baa9edc102758781faec6a1cce226883d4ab1d0f3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/design-preview/page.module.css",
+      "deploymentSha1": "1ed4aa42f2e5f38e12effef3f2b3e85584a8454d",
+      "sha256": "41b6f5dc8f0c92af0d54a3dfb9bb22b739f5a97e9c39e315b6155bb55a08ed57",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/divisions/[id]/page.js",
+      "deploymentSha1": "cb08b175f4e409e8d381bb2c49cf230204592b83",
+      "sha256": "2d5979b758cdbc880b6ad3ef3db01758d32e795671815d1c4c9067f785a007af",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/divisions/page.js",
+      "deploymentSha1": "620ce4774ad33f88492e24c3d5c6888fe5dd1b84",
+      "sha256": "4c3b000cc4db097f72b7a3bd12594347d11fbc82aeffcaaf826f6023c5ccfb08",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/email-options/page.js",
+      "deploymentSha1": "bea617e6c8be126b68d74604014874a1602a618a",
+      "sha256": "a9067f8f0dd81ac88a05d1fbd14cbc29d81fa80638429973692846faba46cd76",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/favicon.ico",
+      "deploymentSha1": "bf17e2871678ec46a4177dd66f339845780f981c",
+      "sha256": "5f12c6868fcd1e9a7d603ec1a70d133f5ef5981fe8faf927da381177fa32f1dc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/globals.css",
+      "deploymentSha1": "b627125e989ca095aa0c472607d949a837078008",
+      "sha256": "f0e3745a3a4fa53dc64ecef1a0dd2ae8410716912cb62e515d13d7b2441d5634",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/help/[role]/HelpCenterClient.js",
+      "deploymentSha1": "d4905ae474ddd734a6a3340c0a677362b92ef4fa",
+      "sha256": "e54982ba194977c72e1f9a3726dbe2d55e19f157593bfe6aa02b87610a4e3af2",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/help/[role]/page.js",
+      "deploymentSha1": "88d32cedf1bc4b3b0c6ded56345039a534c8ceea",
+      "sha256": "9ec96b983fdb8dc1892efb18b801d11f4ff9dffcc2ef99d61f9134b845e799d9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/league-communications/page.js",
+      "deploymentSha1": "e1e5135f0fa36497d5793429768ea87c85c94184",
+      "sha256": "dce9a7d8e5cc36d2c1874fa9e97fab10dd00dd1bd16d8d22c94d4162fdbac250",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/leagues/page.js",
+      "deploymentSha1": "7779801f975ce0985c7babea89eed1686aea213b",
+      "sha256": "a87d688947b0ea3cce4abc058983e6c7217142a46b47ff035c7e1c57d37a4cbf",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/accountIdentity.js",
+      "deploymentSha1": "6388f0872f80c2a64d4b7a02ad3f8d1ad3a44d78",
+      "sha256": "afadad67c05cf66fdbf7795bc4de9c7cc1bf28298b61c170707989e5e2612dfb",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/adminNavigation.js",
+      "deploymentSha1": "1f3ec223de13c8c03fc90b3a7656f7518f3fc80d",
+      "sha256": "7ac967c16f965bf01603dc6cdeb255eccf3221b6fd965abbcf9459529a37695e",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswerViewer.js",
+      "deploymentSha1": "1e1b51e273c680cea5ba43446b64dbcb421c8c67",
+      "sha256": "542d0bc33fdae0c8c0634150ee57e0ffe44dd9184218a9c0239a988138519dbd",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswersSelection.js",
+      "deploymentSha1": "f2cf1fbe21528260f9c71672336dccaad2c16645",
+      "sha256": "e1a60783413a0d413259b8722c0f60fa1de6f0de5472ff5229c60cf6b597bf7c",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswersService.js",
+      "deploymentSha1": "56ca35f2e6c914a8aea2136aed8e469c268a5d25",
+      "sha256": "20a337f4c3b171bdb434d12691816bc12e7267253329f22d771303ee9997805e",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiApprovedAnswersShared.js",
+      "deploymentSha1": "e280262ecff8d90d8c154ed74ad0363d90e17cf3",
+      "sha256": "a4255fdde8e7159c7c3f2769a0aedf2d166076e6df8d6703339e875e56af5959",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiApprovedRelatedEvidence.js",
+      "deploymentSha1": "32762f9b8bd64b8c6f90571571bc297015a7248d",
+      "sha256": "0c9c574bdbdc3290077950f3d004185b8cb87059d336da6c3a0dcc6c4b23989b",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiApprovedSourceBinding.js",
+      "deploymentSha1": "774e124ea6f6023ea4ebeb3445ebc0fd7aef4d68",
+      "sha256": "ff5fe99f9c6cd2f0805e160997ed0468dc70acd9754f338f15cf103e5d4af365",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiAssistantConfig.js",
+      "deploymentSha1": "680534860f7ea876c662b6eb114f3fef0dbd6e16",
+      "sha256": "823f695ed263e7d66393256996cb7b36a3b59eb88f69092c827326d8f5d99417",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiConversationDiagnostics.js",
+      "deploymentSha1": "42c209672f5f318f6298b7ad4e4064ae4f4dea3c",
+      "sha256": "a3b5f1869c1b180c0bb5c371b35638e69eb4234e187cc1070be5953f35932a47",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiDocumentActivation.js",
+      "deploymentSha1": "5328537254eeeafeecdbfec486e46b7276da64c2",
+      "sha256": "55cbfe3cbf207945a0d5b5cb3477aa85b9dfbcbddaa0bc2f6a3c0126497116ac",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiDocumentMetadata.js",
+      "deploymentSha1": "bc589af90611c767d8bd5af6bae4424c32dbff16",
+      "sha256": "e6045ce176e85c0fdb5e102984dc3ae93809115814dfa30d7de7c0d2a2fcffd6",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiDocumentNavigation.js",
+      "deploymentSha1": "c1581bee6431596a0e216ee524c7bc7eb79fd47a",
+      "sha256": "276580da512f2e8061476d61ae43aca3348a8ba3e371a8a4508d1538265a2ff5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiDocumentProcessing.js",
+      "deploymentSha1": "f074002126ad5a17c37f0be0e9a623ac1c344b6e",
+      "sha256": "858739377e3fbb3ab4ef1b5172a0246db3c76815f986473fe607587405d5fb20",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiEquipmentIntents.js",
+      "deploymentSha1": "9f4b267cf14dbd8a49752ba5c96f216556e7ba4f",
+      "sha256": "c7bec5cb806cf7f4323a2a493c25f8adb3d7f97c472d9e4e1f1fbe2a461746cd",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiExistingEvidenceDecision.js",
+      "deploymentSha1": "c61abcced26c3378a05a17d8b63f08a28f831d00",
+      "sha256": "1529ee6f6acb3eebb66610a365e6f79561b6fa7cd6c1d6a74bc48af4b374de89",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiGoverningSources.js",
+      "deploymentSha1": "e6d2dadd15cacc6f758a64ca9e6dc99a4285ac50",
+      "sha256": "4f09911fd8e1d2c118c169b7088d409acb7dff5eff96341169f62cd62c29643f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiMaterialQualifications.js",
+      "deploymentSha1": "d7f0ec2fb8bf048061bbba245e0f8b2cfe361faf",
+      "sha256": "4d37a69e3bd0a6f03a1cff692327ad134464c647b0132364f9825d695cfc6889",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiOfficialDocumentViewer.js",
+      "deploymentSha1": "17ef1c00f847d3c0f6cdba53496429ec78c0a47c",
+      "sha256": "7a283f134fd56b050b2fe7d00a2ed28222e373c963c7166d15f75acc8aa2be47",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQualityGrouping.js",
+      "deploymentSha1": "99eaba6f35a38417bb69bd3444fbd452bc573ae1",
+      "sha256": "1f9441832e790629dfc8d3c8fd522a809cd5c90b4b9eeb4df936795b15284309",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQualityNameClassification.js",
+      "deploymentSha1": "2ffc6946d00540d8f7ca71f9d9c329125ab9866d",
+      "sha256": "5e1358d683b146f35861672dd5d49b15eb839468a22a28c24d5c4da01dbc9e36",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQuestionConcepts.js",
+      "deploymentSha1": "8220b090ebc35b7760f64ca2c3eb270ad72dbf1c",
+      "sha256": "a844e1f9464fd76727ca93aa6d808b69dc48df52b064015c5563f6effa14e1aa",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiRetrievalEvaluation.js",
+      "deploymentSha1": "5d724793c5f2d6948ae8bea0837d1fd77e961e0b",
+      "sha256": "3b5df47a4a07a2589ca7bdafd4bb4c5db1f50968a79e78d0b62357a1cfd466a3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiReviewHttp.js",
+      "deploymentSha1": "08829d6f67ece23a7111faad486feea7b85769c6",
+      "sha256": "71dd78075321da29c0d365ad31dd2c21b3b6af12ab563357501ab632fea51daf",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiReviewService.js",
+      "deploymentSha1": "26683f6901808ca791988613e3b372da7cb5415e",
+      "sha256": "29ac232e1116f57870f7c2e549d983b7f2a1952e2b0b440e2e804b719b471344",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiReviewShared.js",
+      "deploymentSha1": "637faac55d0c2bf7e7120c9a72a8770a4be4eefd",
+      "sha256": "d16d65ef91da5ef35ac6e4693bb43126cbea82cd5a922173733a445601aa3792",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiRosterTroubleshooting.js",
+      "deploymentSha1": "0f35cf4b2173008d7f3f02fabedee5b428a5ceb2",
+      "sha256": "a71cf1827e95062370215cedf9d476f7e7d5b731fb6b3a4a53f0b8c134bdcbd1",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiSchedulingApplicability.js",
+      "deploymentSha1": "289903d0540b4d256b8ca4a4d592482f1e0163b2",
+      "sha256": "093781437ead37daff3b77575d45db64b0797a5bfe74461fc6023be839a09b84",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiSupplementContract.js",
+      "deploymentSha1": "32c1b3cc731f82ea2f27e4405d94d122a427577d",
+      "sha256": "c9b1323f2a80c104efd7a7d0a3dbb77326392031afea70fd4937c1bc134534ec",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/appDialog.js",
+      "deploymentSha1": "76c529eefc50ac7216940eda2ae080e0ca21fc6c",
+      "sha256": "08e085d0dd3af1907c0a9f8d90ab7b41c26786e0fdb2fd1040ef0cfde6b97ad8",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/appNotifications.js",
+      "deploymentSha1": "443b82b7e397198c947065ec35f5c70e5ae9a9e1",
+      "sha256": "0ab14dd90f04c7f3a94d1ff45990355d98ec1680dc48cd85d7f721fba8e1ee94",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/askLwrFeedbackState.js",
+      "deploymentSha1": "4d659c74a3260869847ac593270998eded601872",
+      "sha256": "0cd43e8c29c0e26a3473b6c115de51d36da882b18e27f5c19e285cd28feaa680",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/auth.js",
+      "deploymentSha1": "fac53b74ab0649a3eb3e33b751e5f6fad61a981c",
+      "sha256": "f61355cba36df159f5667edae0e3cdf5ce8d1aee19163bb16d2ac6b9f204e5b7",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/confirmDelete.js",
+      "deploymentSha1": "31df0a6de063aab9eac02e966e94ee6a43984918",
+      "sha256": "d4f955135a33333ab60df7cb9f69b90300a68f9ec99ef717cd311669cd4fbeb7",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/dashboardGuides.js",
+      "deploymentSha1": "42a26a520859023f7287f88685b17aa6540f2735",
+      "sha256": "3d8a75fe4bc9ff5322599b3e5a33e9a5dbadf777fea2be4e6e838bf1cf759939",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/dateTime.js",
+      "deploymentSha1": "de47692c5133dea3d41440f0b020cf149238158a",
+      "sha256": "1a46b412c5fc6fc95cfaa8b85a0f8a2c0befd540657b16b3d2f016028675dd78",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/divisionOptions.js",
+      "deploymentSha1": "cfb0629d232b335e953d945f3f70f9048e84956e",
+      "sha256": "07cb62948219503ca21a0f51a84979da99a296a4e7df4c56f035b70de216dd56",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/email.js",
+      "deploymentSha1": "3a95995453a8d96dbe605f6c2fdb032d84797f7c",
+      "sha256": "4733eb5c0d4322e88c80fa357812af7785e548c2b9ec9034ac79d77d1523a089",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/emailTemplates.js",
+      "deploymentSha1": "02fb2895185e729e6d99945293d1ca4ecb37eb50",
+      "sha256": "eadd350d792b58630df84316ecac09f9fdba10f59223d72cec56268899bf6c45",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/helpContent.js",
+      "deploymentSha1": "8f6237ee8713afc2088a50aad495de0cbfe4391e",
+      "sha256": "0c87a089771b32378d84ed2532d30881c20a0a3b40757bfa7429133c873aa9b5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/identityRoleWriter.js",
+      "deploymentSha1": "083b0feca88e1fae21720eff752933c629010f0f",
+      "sha256": "0843baa4a53b58da0db19e144dcc16af74f53263e7dbb8a9392d477a99332ec9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/leagueDocuments.js",
+      "deploymentSha1": "77b9726f23c35343f0b85379ce3cc106ab0b5a19",
+      "sha256": "aaa3b0edff0fe50c9beb6fcf12a8f586b941edeee28746cb7bed8a1780efc2d7",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/liveLmsReceipts.js",
+      "deploymentSha1": "8dc7a02efebfef6f2e6e0d7931c1638eba18a44b",
+      "sha256": "3b7fc9a219cc197ce0885268ae881c6a12f6449dc395087959059048dda1f8b5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/matchRatingSnapshots.js",
+      "deploymentSha1": "3e1d6717599b6f23190b4824012be5ac372eba6d",
+      "sha256": "f4198762655e51bf4cfe42aab93a35ce48cf0812a925b205f4a12337741f730f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/matchScoring.js",
+      "deploymentSha1": "399376d7842d46e21b9b7f1eb656194be1cb2339",
+      "sha256": "91b549ec4e4d1a03fd49a9553023710f0cb3c089336ceb3cf6ae1aa2c9f3da00",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/matchSetupReminders.js",
+      "deploymentSha1": "9fea9a56b4fd8f50a50561c0bde2737011bbadb2",
+      "sha256": "57ad9869672440a06821b202b9f6bae785c9f81820158ab21963887de6c7f11b",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/memberImportLocation.js",
+      "deploymentSha1": "ed8a3a3ab5e3ac146f0ab255e7dbd0311d3fb7db",
+      "sha256": "fc30ab88c0b319a9da5a5498ab7ab55ac92e1e64d193cd47b32703ee77bb5ada",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/memberLookup.js",
+      "deploymentSha1": "02ea01bf025bd3dcc569c266c04d5d821fa75e48",
+      "sha256": "8365c179327ced250bd014d8be3545f33f1e845bc7d9d9181975b44a04b28da3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/navigationActiveState.js",
+      "deploymentSha1": "0c923f8a465d80fb848c46a437fba9d3c1a7a427",
+      "sha256": "f88641f47a502ab48783e3f60c5046f838d265b21093dd8cb8acbb6478e8ee8d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/notificationPreferences.js",
+      "deploymentSha1": "487b009b1847091b22b205898b7a18173133fe8c",
+      "sha256": "bab5e3e6c797672aba33797cc411a06e04aa7cb5bd2774c2b70c0ef8f9e0be74",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/notifications.js",
+      "deploymentSha1": "bf9460c211675a3781e29f38ee1568d343372dea",
+      "sha256": "5078b0657a7b14680833326b33758aae5ac0956e6a3a705404322b7ddf749f15",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/passkeyErrors.js",
+      "deploymentSha1": "0dce856cacbc0c0ca5d2d05c703f613979e52f61",
+      "sha256": "3f53240de3ab47dbbf843110f5dc4402f0b6239a511e5e04c76c0a15ca2f83c6",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/pbccReminders.js",
+      "deploymentSha1": "01be980a16fc7db27e06e4efd071a778cce37f67",
+      "sha256": "6756e302cd026ce58e26985480986b04898043610379e2983ca48aaa7e6d637a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/pdfViewerPage.js",
+      "deploymentSha1": "06b465d61c3d632b28302eea085a8cf4eefedea3",
+      "sha256": "cdf74cc2df74e2f6e66e05147a6c1beb41037aaefa310655de01990ce961cf7f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/permissions.js",
+      "deploymentSha1": "6c3a03db5a2204099626ac46808ad1f36507e2ea",
+      "sha256": "1ee61a0c6942ac8fb2f70ccfb25e7ccd4ffc4e34dbea56da75047134414fff7c",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/phone.js",
+      "deploymentSha1": "9d25b5a55dc86c9258d6fb20e15bcbfb74db92e6",
+      "sha256": "ac9991d43aae6cc1a8025dadf067f80e34df16d2ca6a9080b7c6e3aa9fcee694",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/playHistory.js",
+      "deploymentSha1": "bffa92f0ebd740382c9663c0c6785e0af5279bf7",
+      "sha256": "6e922f940815b25c81d38cbc7753e20bebaa94975f35f45b956f6379d2d83327",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/profilePhotos.js",
+      "deploymentSha1": "0e22eebf616c1945f7dc119d015495bff035fe39",
+      "sha256": "6455c9be8b1d2af6efc8469afd9ac42491858bb0f89728268d4ce6f3efc9b913",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/publicOrganizationalContacts.js",
+      "deploymentSha1": "4939a7f8211a355f6a84859c61c261325f0f2966",
+      "sha256": "01b7ef0bfe7fcf2e010fbabd118bc36504fba34e6d72c24ea349d1a301b7b8c9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/ratingEligibility.js",
+      "deploymentSha1": "c0825813c32485161af89e3c1ac710dd95080ee6",
+      "sha256": "c71aa034f44c7fced5fa0b1d82eb940476268e7e8489b5b6dc1359c5bdb75fac",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/roleGuards.js",
+      "deploymentSha1": "242271b526fd4f8ded08741a5c71137e1b98de73",
+      "sha256": "e26197e28a9593fcb5f38eda89741cbfa04e3957536aac5ee04fb64b42d90232",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/roundRobinLadderRankings.js",
+      "deploymentSha1": "6bca64e902f099ed16097910ed0cc9830c2141cc",
+      "sha256": "057ed3aeab5abdaabe9362eaa82dac235a312c136882f11e3647c18b2c54210a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/roundRobinSchedule.js",
+      "deploymentSha1": "c5cf762afaf1d2a0a2fc047f906ae3463ddc7c22",
+      "sha256": "e8405f4016de3c1b8e9efa58a6489d2cc11165304b6030f76730769a9b794507",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/roundRobins.js",
+      "deploymentSha1": "a8d40085f6042b44a39fcda7f461539800c141cd",
+      "sha256": "a6e83a67ad940152a253f3e38b2d69233f8f36fc8826be3dfef03e960bdcfdd9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/scoreSheetTemplates.js",
+      "deploymentSha1": "ffd5031c134526336ce4ac9f2beb8cde330a8d29",
+      "sha256": "0d23854cc118d08b3558c018e6809e013366bdb77aa261f4ec38873f1136cf46",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/serverEmailTemplates.js",
+      "deploymentSha1": "daa2a9d4440e9639c0021e9b634a7a089e19696a",
+      "sha256": "546d850ed3d99da83d011dc04a57617a682462b9279f012ce44cf98fcaa666ae",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/serverSupabase.js",
+      "deploymentSha1": "4df7fe3a6ed47f0215d6a7dd7d15a7aff81aa481",
+      "sha256": "3f3376e46adb02c2369cf300331ca315cf5a3b923cca0de47f61e5f6347359ab",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/specialMatchResults.js",
+      "deploymentSha1": "270bb8209aa43a391558144fde47bf09f44528d3",
+      "sha256": "24bcf49c8bbd35e8cbdd88991db8501b43dd35800e78045943e4bfcd3a465be0",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/standingsRebuild.js",
+      "deploymentSha1": "6644def38a268f0f222af116b38f8970e1ee1722",
+      "sha256": "be18a394278f1c2feead3927dcfd70b72deee004c9ad5dd06f7b31b3409535e2",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/standingsSort.js",
+      "deploymentSha1": "956a08550dd15b1e70db0fa42c2c68096db916ef",
+      "sha256": "c6e5b02308c02949b168549cac2ca485667b01aad68db8fe8240631ba86fa01e",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/standingsTiebreaks.js",
+      "deploymentSha1": "4b689b14ae1a57898a332e9d4254017dbd053ebf",
+      "sha256": "cfc825fb19179d6e5a3cdfda832b80afd2f621316c1e1d7e9e4f47a6377b1370",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/systemSettings.js",
+      "deploymentSha1": "2e784e9d76d3397b4009ce9f182e201593b10169",
+      "sha256": "d07bbd72453b145888e1ce12a57bbf08db845e1db61634f533643e063f59d8f8",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/tournaments.js",
+      "deploymentSha1": "474a178304f2e2cb75ae1e9022837464c23a53f7",
+      "sha256": "173b227d5ac9a576eef12d29a0bdeba4629906c84f73870e5bb3a51e56b72d0f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/useUnsavedChangesWarning.js",
+      "deploymentSha1": "3e95fe28527a1b2ec0ea724e672cb3fd607ce506",
+      "sha256": "8b60ce433ca9b90910fc2e76eba0adffbcab8cd749c9f0c0993ff890fd3aeaa2",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/viewAsBoundary.js",
+      "deploymentSha1": "e7533a0b6b42c5159b9cacf5b6537e879a546b8a",
+      "sha256": "5615a12cd6afa9a2d7bca5352969610ebcc40d3da244ab03c160137aefad77ec",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/viewAsCrypto.js",
+      "deploymentSha1": "e438f86b5b331b35180e7d522f7169f332499d06",
+      "sha256": "b81e78bc8a397acd221d195feb4983953e3a47e46aafd0b0fc36fd2651ad7d47",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/viewAsServer.js",
+      "deploymentSha1": "5188c067680c3d26a8a6907f5e27faa5509907cd",
+      "sha256": "02843146727c42e19d8a5970d87e0e018d421b614262d62f8e750376265f58d6",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiAgeReferencePolicy.js",
+      "deploymentSha1": "95c8b8f56684179f9667e238c69e6a3d0d10e2aa",
+      "sha256": "4496b247ada05da14caeb4ead41700a662832635a03901831d598b3da01ab657",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiAnswerGeneration.js",
+      "deploymentSha1": "cbacb82d70a05fa2dc319bebb6733092d9280bfa",
+      "sha256": "81bcbb9164a49d93e6fb7495c6a921f6ab30085b9e43574a9b4adac046119aaa",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiClarificationChoices.js",
+      "deploymentSha1": "dd18dfad5c0541c623b0789e203be1ce39032239",
+      "sha256": "1a4ca2b4c088a0d5df81f1852ee2f0b35f72472c332340e5a1a22ada826c796b",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiConversation.js",
+      "deploymentSha1": "f31eee0e6886baa9f996dd54309b2dcf6fe5a546",
+      "sha256": "e08e84f11c67bbb4be0d27cb2fa3903c45a79b1038881670bb00becce0f6d667",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiEligibilityIntent.js",
+      "deploymentSha1": "e29544cce8d8f1eb63548f6e754aee0b5edac778",
+      "sha256": "f0cdabc9c3d1f8a49963cc125452c48f4db314c53bb93b9f2918aed02f8ef9f8",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiEligibilityPolicy.js",
+      "deploymentSha1": "24bbfe35cb89e9a3852fe843ce85190ada2c62d6",
+      "sha256": "8db51ea31bcaee70f5a1c9772c25ab60c2a5e8e5f158dbc66eec500acade8ce4",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiEligibilityService.js",
+      "deploymentSha1": "31067a81ba1136e342e125f49ed04d17268f80ae",
+      "sha256": "de166e2e08039cc2e6615ef7eecd15f6ec63b31a0168e3134e0b3dbb843695d3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiEvidenceExcerpts.js",
+      "deploymentSha1": "5227feb7f0271b1336b46e8974ed16f514e4b176",
+      "sha256": "cf3aba36f34ce98f42dd37830932c03e63eb89aed92bc258e231713c2dc571d3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiLeagueDateEvidence.js",
+      "deploymentSha1": "92e02649a32e9b6b1cf3b967685a4bb6432293ea",
+      "sha256": "2ea2c3028784f3ed09325d1733b6479651066db89b55dc3cf9c24192d8851f08",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiLeagueDateFacts.js",
+      "deploymentSha1": "8daa0a5abca217a0f7b5d170733758af2f46695a",
+      "sha256": "f5fd18f747dbd75f76a7b9bfa01c1e29a8172a455424616b31ba82e863f82855",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiOfficialApplicability.js",
+      "deploymentSha1": "a16f9d6e4f7bd1ddbdc1750cfd279808ca6b921d",
+      "sha256": "c23d2662edfe13da789c77a5760422a9c0bbe3c92df3886db091c0e62f6c503d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiPassageContinuations.js",
+      "deploymentSha1": "7a543c78d112bc3db01272c5794394b667e6953b",
+      "sha256": "12d307b55d4cfa4d6b3cda13545f621b424a73213dacd0f1e6d7f4088a5a476a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiPolicyDiagnostics.js",
+      "deploymentSha1": "368d3abe1a1520b99ba7fab32061ed43c7c145da",
+      "sha256": "ab63dae307b584e7484686cf82f69a5b6e7bebdabad8844797bf82edcf9b2c57",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiPolicyEvidence.js",
+      "deploymentSha1": "f00becb8a1c0471cf675e3f6fa283af126d00532",
+      "sha256": "cc6d1df43e13ea80c055bbb4fc97e7dac8245eb2c3b5917f1becdb92e287f02b",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQualityCapture.js",
+      "deploymentSha1": "2ec022538c8804ad794c480d19edd73b26d3533e",
+      "sha256": "89643a40cc845ae867e7bf069fa1ba1e4d492ed1296193c037a6bcb270e7bf3c",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQualityPersistence.js",
+      "deploymentSha1": "da991aa2119345849a3fcda627662421f09743d8",
+      "sha256": "39883922ed59da0573151346a4703ed0b01027df608fcf961b9a9c5a3ea5c01d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQualitySnapshots.js",
+      "deploymentSha1": "044a33e678c300185e28567d8630a0b2ea222548",
+      "sha256": "f48f954181e2cd3fcb097b9b6bf2da2c6443efa5c492ce6a0fa37b9581f254e4",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQuestionApplicability.js",
+      "deploymentSha1": "b52c2d027660b601640c25a09ce0fdb0b97f43e7",
+      "sha256": "39c769c9414b9aea96422ccbd33cd5d4dbf15c6f2f18f5c8c9a9377606b32cdc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiQuestionInterpretation.js",
+      "deploymentSha1": "278dab1eec3012bdf0fb1949b09100c8aa0876e7",
+      "sha256": "74ca571c2956fbd27663565f576c7ab3a8177bf88b9b25a82dead3b3675d9370",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiRequestIntent.js",
+      "deploymentSha1": "ffa06fa488125ade89926f98a30ea872616f39b9",
+      "sha256": "d5c2a92f6526eab904f5681d008fbe6578e5e765891daaab3b9388028aa80bdd",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiResultSource.js",
+      "deploymentSha1": "9a2a5d971578c2fa267f4d9d2f5daf5d5ac93b1c",
+      "sha256": "25e37657af6fff5b6a670b9d119915e77b9441b1587f0eb9f22f515b41c507df",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiRetrieval.js",
+      "deploymentSha1": "649af4b25fad6237edf96b980a0499a2cf4f597a",
+      "sha256": "92b3a204d8f54e10943b9d0dd0e4954a1835cdc7bf42065bf13ba24d5442cefb",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/aiSelectedRuleIdentity.js",
+      "deploymentSha1": "1aededa61f2e93db7f80cab7b158760f8c8270b8",
+      "sha256": "072686bd29338522f0cdb1a04b4bca0914e7eb70512edc2188dfd2914b1356c7",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/askLwrAssistantConfig.js",
+      "deploymentSha1": "e4c28ecd734175bf9141bcb6d7f345535cbdcb2e",
+      "sha256": "844c6887bdc3e01e454aeb1a7e39d3f2804ef895a8b162bce401c53c1fb5d177",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/askLwrConversationState.js",
+      "deploymentSha1": "89f9ff7c5f3ad880a5a1478214ac6e9cd6a72b3d",
+      "sha256": "494c9ce1c044cc9aa954cd0bf1694b05c4c3e441b5b91613ac0626f268fda6d9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/askLwrPlayerAnswer.js",
+      "deploymentSha1": "27d859b40d066f58c412aa3449dc253246b7bc77",
+      "sha256": "55791b890b334afc0f727a93200b964bb21bfe1949879829453a3459cba9c322",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/liveLmsIntent.js",
+      "deploymentSha1": "5a4eb7f4030baff4533ffaf7eef55db2bcde0416",
+      "sha256": "f74de90d91f0a1f39242f351def23e55b5b3d6a9578c5a50e39e97d21913997d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/liveLmsService.js",
+      "deploymentSha1": "7181e97832200e0a8fb6dc3ea6254ef68c8a17fd",
+      "sha256": "e48de586d037fe14730696dca486c6fb651c3ebef2ad0861a45d79d1faffac2a",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/lib/version.js",
+      "deploymentSha1": "ef99880b9dda23f5324b71b4e8d7dd588b182036",
+      "sha256": "8f01aafc0bc16f9170e82d3eb5ef08af11b88d976c97f9ea2e14fef067b1c5dc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/live-match/[id]/page.js",
+      "deploymentSha1": "2e36cfe46d972faa8baa6e99523190d6b0a072e0",
+      "sha256": "6c3513b35d90a730642942ad733c621cbf5c161144bf232fb0465431f5ed86e5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/locations/page.js",
+      "deploymentSha1": "eea08cc073ae0239fecdcadfff97a7298e351c95",
+      "sha256": "f5966f38f622bd8582157f9924a3d109e3cbf5dca118de79c75e91850f7afb37",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/login/page.js",
+      "deploymentSha1": "0f6e75be48f8473d7094f1693ee435b89ad711ce",
+      "sha256": "14f16c5bfbb542100a7f7b4985f4f67684c6889b5f700d3f30ad82fd43291122",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/matches/[id]/page.js",
+      "deploymentSha1": "f2da0b4a23fdb3b96f5afe7809ea131f30448e73",
+      "sha256": "be8b747cd2670667386a748b5c23991a089d9a9e20f46f5aaa9f39900dc52618",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/matches/page.js",
+      "deploymentSha1": "8181a700c24726af6a08d33c7a33b7af664237c7",
+      "sha256": "9e25901180aee04d3e953d009c282a35b21abc027841979acb56f89e6db284bc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/member-import/page.js",
+      "deploymentSha1": "7198aaef14a2e6a8575adb5ee5e74ee660abcb92",
+      "sha256": "473b8491badb768a4454986f4eef006c1d7249eea87f1ef93825bf48369334ed",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/members/[id]/page.js",
+      "deploymentSha1": "14f4e582c36151633ea175cbecc9c22724f1f096",
+      "sha256": "d78876873a8d8a5c493d7dd3834c233ffb9cc6994fc19c23b8a4c905b4a1bf78",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/members/page.js",
+      "deploymentSha1": "2481fa0dd2ce7235ace75795db3c363bc99c46ce",
+      "sha256": "624a864303ff95d585641200ab3428fe2ea2e0e28bcddac83b330a336c864d00",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/official-document/[citation]/page.js",
+      "deploymentSha1": "9f3d36176e2261b20015496c6d900680753c8687",
+      "sha256": "569964b10ba8ddd8f2693d207854813bd7df700649be882785394e4180bbc750",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/page.js",
+      "deploymentSha1": "38398cf2659cc0cb09dac4b285f9c47d77d4b6f8",
+      "sha256": "31ff63379f2ab4966bc31a37bc25192c7b4133d302cda79a3bada15561292385",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/pageOLD.tsx",
+      "deploymentSha1": "1861fa587c51f711966f56475dcf556848f2d8ba",
+      "sha256": "359fd0c734c7632e73f8299501bda0765a07ab36d0e26e42d92cc93f6ba983c2",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/player-dashboard/page.js",
+      "deploymentSha1": "84c1c2e4974b5f11c44e9475a0ff58c71ee7bd0d",
+      "sha256": "3a913b0ff90813516a2e7ed2d8ca5f48f9c3f1f6a0fb4e354b942417337ef758",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/print/page.js",
+      "deploymentSha1": "a08912e96a1cb9af30767df6989806e365314dfe",
+      "sha256": "68280275fea615e42c4651d94174c6baf86d2df12c4da98d04c7967b15be8aac",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/ratings/page.js",
+      "deploymentSha1": "d080aa6608ed33385e936d055b5cbbd478432881",
+      "sha256": "420aea99510d51a49b08020e7ac681969e9f038bc96c6f2c8577b6a429086193",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/reset-password/page.js",
+      "deploymentSha1": "43c78d7c7b60d049ca2ed727279bb1ebd5c88b8d",
+      "sha256": "175adc9e1b40d50f2c0db35475ffab4e7af6f869b6fa2c8ede3539bc445e57f2",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/round-robin/[id]/admin/page.js",
+      "deploymentSha1": "22b9c16586bc85c763116cd5b5d91d427b8c5dd6",
+      "sha256": "335b79c5d09ce2614981cf49f2e5aef744af1dc4a9f2bbf08cb963ed6b32ac84",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/round-robin/[id]/page.js",
+      "deploymentSha1": "920918d6df5a1ed9aff3ab675ad6f321a6b65746",
+      "sha256": "55cad125a15dd0767fc124ca4e0d6608d37db177b1b9deec4f98c0f005d2726f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/round-robin/[id]/player/page.js",
+      "deploymentSha1": "19ba439794eeb02564b2a0243238e1dfb3bfe51a",
+      "sha256": "c61cbb21340415c161e1f3ad5e7ce04ac5cde2be4db4d914ca1332a98d24694f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/round-robin/page.js",
+      "deploymentSha1": "022bd1ed11dc1ebae99adff670ce90be10e20618",
+      "sha256": "112dd34a5087c150bcf0dd3d6df630ad48296476450507fdeee197d7a6570548",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/schedule-editor/page.js",
+      "deploymentSha1": "bf063cd33b6fbf54ddb4d61520181c9d0d6502df",
+      "sha256": "fb17f8526077bd020ff24f419b5340d9093971a975547e7cad768e1a2e876391",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/scheduling/page.js",
+      "deploymentSha1": "bab5dc3c86558940fa1875fd39aa4c9ba6476fbf",
+      "sha256": "0e004f3f9059bb78f46e1bbd9a03caf6cea8a545033443de6fa8f6094d32cccd",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/score-entry/[id]/page.js",
+      "deploymentSha1": "e011c4b1b9e389d96fc324521b65016d9d5b468d",
+      "sha256": "8bd8442c1180ec018a6e66791e874d9ec84b6c547db319886f554814c2074106",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/score-sheets/page.js",
+      "deploymentSha1": "c6a8842a2c993932da0997a4afe446d8f7be3ed8",
+      "sha256": "46db1a9265bf1ebba44dcaea1bdb02e2820e39b47a57fdaa24f46f5032248238",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/scoring/page.js",
+      "deploymentSha1": "5a635a55656d252f7a56a658574f3156cca06921",
+      "sha256": "e728b00ccdddef0e63a2d6ee3d6c6b843676715b291962c5da8be4d6a1e568e5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/seasons/page.js",
+      "deploymentSha1": "a1c75cba5b935de87dfb1ac24a1ff8dee775a558",
+      "sha256": "d0059ebfefddee51efa85e6f729e9b7542a1c144680b1b85674245b25a7f18d8",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/standings/page.js",
+      "deploymentSha1": "7f871fd86d1ce6157b682d9622216e2e9678f4cc",
+      "sha256": "9b23af68d6c298c080a0fcb06690d258bdc2e4194e15f9d8c006238960cff442",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/system-setup/page.js",
+      "deploymentSha1": "2c3f0876ad428d889439b8e9bf0688ce93ba68e0",
+      "sha256": "defba9650cdd79b5feeb638912d0461d36f20513b2a76ad9f38adc58246da7d0",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/teams/[id]/page.js",
+      "deploymentSha1": "cffb236ed75ba7586330e9c0e34fbc9762c9739d",
+      "sha256": "03cb2110afd42edd5f711fbc166fd153c4d890bbe448b4a13b98e5f191a461c3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/teams/page.js",
+      "deploymentSha1": "9c821f3dc9cbb7a530b511502e9ab57931d7b9ea",
+      "sha256": "0623ce34dec8945804a95ba88b8104af3fc8e02d515ce93af7650120d63d8b45",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/tournaments/[id]/admin/page.js",
+      "deploymentSha1": "fa63eb7029321da20fac41c8a40844768f4b16af",
+      "sha256": "13a6cdc83979813444265412b4c9d4f50812e1304401f181691fdf56ac2c4978",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/tournaments/[id]/display/page.js",
+      "deploymentSha1": "3a6ae4822c2babf931e52ed407886d162624639c",
+      "sha256": "647720d1ff79111ffe8dcb6479191b46e2058393f77d0c8b5cb1eaf632845906",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/tournaments/[id]/page.js",
+      "deploymentSha1": "3c904ebcf4f041e1b6622bbc3eb3384a74f5265a",
+      "sha256": "012329ba2acae8e4fd29c081e4043901bdf7b9e5371b5df28843ba5e02b4b3cf",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/tournaments/[id]/player/page.js",
+      "deploymentSha1": "087bfe19f19660c00f46a454957d03b83d36003b",
+      "sha256": "4100977255c7ddf86ae54af3b28598bc293500e302684866c5f02437ad10d6ab",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/tournaments/[id]/standings/page.js",
+      "deploymentSha1": "6856e2d2784c05610d0d539b9688364b43dd0268",
+      "sha256": "74aa7cc66079a898681070dffeea3fc24f97e9d16f3543f82df1f6636795b31f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/tournaments/page.js",
+      "deploymentSha1": "fcc69d59d92b9587f2888f43ae8eecb2dcc47ced",
+      "sha256": "84343e4e9418f6d813294acdcad67cd600b4017a7c7171219fbc48ca1ae51105",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/layout.tsx",
+      "deploymentSha1": "7b8892d0db42181d9d1c74adcfd3b6a446b1a4dc",
+      "sha256": "4d607f4f46921c38c1c1f0fbd49613b8b5073ecc459fdc4e9e22e2e9e7eb0b8d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/view-as/page.js",
+      "deploymentSha1": "596466fada023ee4aedc9ab3479414c49b371685",
+      "sha256": "45e5dd350c068c40f0d2c37ecc7551f588ebba4e6aa68058af70a717cd2230b1",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "postcss.config.mjs",
+      "deploymentSha1": "8f8be689e9af58f80351df6e6b551146822f42a4",
+      "sha256": "dfac7ac2d86d326a0e5adb024e7943c181393ed17a5fcb8f0315b24c7da6ddde",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "proxy.js",
+      "deploymentSha1": "8fcf7992c8aa369f4a332ac1b86e236ca696c23f",
+      "sha256": "78fa77e4568eff261e083deddcbed68e10376a1002cc45b3d7f1de7914e2d247",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/file.svg",
+      "deploymentSha1": "fb380eeffe87d50b597383664c02982964d0d28c",
+      "sha256": "2b67812c325c199a02536cdbeea0c593a72f707d323b72ee3e08dbab06753bd4",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/globe.svg",
+      "deploymentSha1": "2eba23b01a46733bb8423e6d38ebf5f7e95abec5",
+      "sha256": "b614b9bf183925957661ac851498fe1d8029fd43a62fbfed86f9e2624a57e7cf",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/.gitkeep",
+      "deploymentSha1": "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/captain-dashboard.png",
+      "deploymentSha1": "1f471bdc8576d722a48f944b91169e1898bf3fc2",
+      "sha256": "c045f760ae1b3b679ecc7f2fa50ac50afd03340404ff5dce799a07b2db33f46f",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/completed-matches.png",
+      "deploymentSha1": "505580a8b866289d37a8d984eb5613a2a76eb73c",
+      "sha256": "d2fad297b7c13a4d0ea841b897c887e52e2961a2321f1eab34a181f008f771fc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/division-captains.png",
+      "deploymentSha1": "f54376bbc70a877fbe52a028cd4dff356860fb86",
+      "sha256": "8b9bd2c378bf0f60a11309859eda4893b8c13d319b0d9acb2a0fb5b94f754b5d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/division-captains2.png",
+      "deploymentSha1": "d9e88271e7225c561415b2ce98aa0ee124c85d29",
+      "sha256": "1daa18b1f21756f6ab1440bcc66b9b55f3bb9e0ec33097ed8b54e1159c8f3aea",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/enter-match-scores.png",
+      "deploymentSha1": "12e1d0a1d7649c0ef0020b05c1c0b5fe0addb858",
+      "sha256": "2fd8aa7c45c8ece7149f3a19b96abdec9d6973e8e04955db6334ae102f716929",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/initial-login-screen.png",
+      "deploymentSha1": "ea01d452ea06dfcda4ad5e4bb7cb492b6d6a9dc4",
+      "sha256": "2f2c571a185412bf4c9ebfc970f0b17e5c954448c194929a2e2c099416518cfd",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/match-score-details.png",
+      "deploymentSha1": "304b13334594313b4dbb498ef36fdf0acc7707fa",
+      "sha256": "d72957a26032764c8ece0a8108e887d16dbbe6df2476aea5ee32067e3c0fd400",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/match-scoresheet.png",
+      "deploymentSha1": "061f3470300b5b0b1972629e72ee59fb58d451c2",
+      "sha256": "43f5ebae654417a78ec4a19557b83c0d3012d065385f9d0f0470e27b43cfefd9",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/match-setup.png",
+      "deploymentSha1": "8a1b7784b071f3df427531efb0b97f566eecd9ee",
+      "sha256": "71bcbe47eb9f47d8a8f650dd476a38486772be96dda5a881a3c361c9fe0eddae",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/pending-score-verification.png",
+      "deploymentSha1": "60ee8977a42cfc9c127190a46df60c6ab3147857",
+      "sha256": "de7c9d92b34c4d86e9a0b7d52e688b2e3a5d0b8a8b4c0a1010e77be144b089ce",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/player-pulldown.png",
+      "deploymentSha1": "6aec528c7ac1b054d7c1965d89b2ea58bb2c6a0d",
+      "sha256": "16d670d2befd8b9888a5d5ef3c3dcfaa7d213884360ee608900ba46ae8f84c14",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/roster-management.png",
+      "deploymentSha1": "1ed7881106760bcda4f0d75d9d429c110768087b",
+      "sha256": "362e5b440767fa9653b868c6b02263475865b3f173ecfb9ce15ee17a4452d577",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/schedules-standings.png",
+      "deploymentSha1": "84001278eb8e542e63f1e7fc97f674aad59353ed",
+      "sha256": "e86ab5678fbd5aa3beb7dd69c3ea1f29ed5706053480a8c9d6ffec9aece8c657",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/help/captain/screenshots/upcoming-matches.png",
+      "deploymentSha1": "e9fcbb680b064226105b00191bae19cb5ff80d5b",
+      "sha256": "1f41c020f8a03b841980f3d4d25049adb3040de9b7c9e834d51d15164c3ae696",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/lms-icon-192.png",
+      "deploymentSha1": "3337e70eb3a65d7a79b05879da902cbb84b71d1d",
+      "sha256": "243c31788b064843169c3dbad5101e19f30a916fb307e29d7553bf8d14f614cc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/lms-icon-512.png",
+      "deploymentSha1": "32b6aa1bd06db544f92900eb4f79080f9c57f5cd",
+      "sha256": "d2608908c71506f79b936ce1b91c218758b4f85628b3c4a90cfcdaf1d7e1da10",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/lms-manifest.webmanifest",
+      "deploymentSha1": "b702b6f5432ce4e6f34b7d41dc27e6c45beee957",
+      "sha256": "fcf7d3f79e7a0614a297276921cb7c423b07ad49080a00d2140345ea6a8d0999",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/lms-sw.js",
+      "deploymentSha1": "17701b27d1d56aa1d354902fa526f1ca5c0603c7",
+      "sha256": "551d98c1ae4e9f2801fb173fd577910ab92db9d2080735ca94b2442909a59959",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/next.svg",
+      "deploymentSha1": "3f3e95622612b989c5bd6a03299a308c6f3c7e6b",
+      "sha256": "55995dfad6ecb4945a1e856ddca03c5e16aa5bf13fd21b4df6a74ae79357bcfc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-header-pickleball-icon-192.png",
+      "deploymentSha1": "57c3d41315df648b3b5c4ff1b6d302c4296c4834",
+      "sha256": "82e978ed8e4685246e8fb8066fe32164ad0798c37a98e741782f1781304fa7fc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-header-pickleball-transparent-icon-192.png",
+      "deploymentSha1": "57c3d41315df648b3b5c4ff1b6d302c4296c4834",
+      "sha256": "82e978ed8e4685246e8fb8066fe32164ad0798c37a98e741782f1781304fa7fc",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-header-pickleball-icon-512.png",
+      "deploymentSha1": "b650d931a9af1836f62714c9d065af8fc2076249",
+      "sha256": "728c93ba12762b53a23564460e67310c428af024a55cfdac713adda3b0ccdc68",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-header-pickleball-transparent-icon-512.png",
+      "deploymentSha1": "b650d931a9af1836f62714c9d065af8fc2076249",
+      "sha256": "728c93ba12762b53a23564460e67310c428af024a55cfdac713adda3b0ccdc68",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-icon-192.png",
+      "deploymentSha1": "c7b437c2255f83e7024da91c007ab410a526cd5f",
+      "sha256": "65653ab9e18ee2687d2dcfe6404b90e8ce5b3ea505679ba3995a95e4c6480fc1",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-pickleball-icon-192.png",
+      "deploymentSha1": "c7b437c2255f83e7024da91c007ab410a526cd5f",
+      "sha256": "65653ab9e18ee2687d2dcfe6404b90e8ce5b3ea505679ba3995a95e4c6480fc1",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-icon-512.png",
+      "deploymentSha1": "b4ff790b728b8aa26b7994363ca33a9d3aaccc3c",
+      "sha256": "64b4085faae7a041b969a68bc709142d8599553e6b9de1d50fb78380569439c6",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-pickleball-icon-512.png",
+      "deploymentSha1": "b4ff790b728b8aa26b7994363ca33a9d3aaccc3c",
+      "sha256": "64b4085faae7a041b969a68bc709142d8599553e6b9de1d50fb78380569439c6",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-manifest.webmanifest",
+      "deploymentSha1": "dd7de2ec534a1726a18738ae0278ebabb20feebe",
+      "sha256": "ebdbfe6c13baa76b7f7a082d25c2f19b9b534e99abf1553f0a1eae3186814959",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-pickleball-full-icon-192.png",
+      "deploymentSha1": "1c1890e0b677397195fbc79e2bb85e21df632941",
+      "sha256": "d7d134581576c4127822a0bd75ea0fa773798c62039046403be94aa20d2366de",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-pickleball-full-icon-512.png",
+      "deploymentSha1": "b2e59bfa4948e04c292aa3e190a6d9328b03bda3",
+      "sha256": "a6e1f319201ab8691775577f5141a259fd1dab139f98e1c4da30a4b4178babe5",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-pickleball-safe-icon-192.png",
+      "deploymentSha1": "e03ddd4ef3329ebf800eef07d092c473135ab765",
+      "sha256": "5b526eb258461c100787928df32cae83b4edde31edc66b05f486749d0bfdf76d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-pickleball-safe-icon-512.png",
+      "deploymentSha1": "0a7fa0be942da5493df71bb35841ae67803dfbcf",
+      "sha256": "6bdb496eeec1ca3d22dacf923a692fb2ee859e66e3ed387b60b32aaaa191f144",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/pbcc-sw.js",
+      "deploymentSha1": "9a6c1c384d02e2c9e9ea6d3e862c675714eb733a",
+      "sha256": "2f0652a914a40e6b19da16c2068567a567ca3fb1571b4941295d465b076c7847",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/vercel.svg",
+      "deploymentSha1": "cebb8852d58c8886be3e9051a26957f42bb82f1a",
+      "sha256": "f081337b2fee635b455b63275406a3e7f39d6a014e25ad90dab5a67e62a12ac4",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/website-emblem.png",
+      "deploymentSha1": "031819079ef25d9c116cfcfe2f03ac3cb09857fd",
+      "sha256": "2a82ea62ef1ace62e77d210c871a7ff88d6a66127995ca50cd6c54d662a4152d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "public/window.svg",
+      "deploymentSha1": "54c48e0daa6caa317fe1b4c419007fd93e948db9",
+      "sha256": "644768c4aaeb4767bce293344eeb0c125fb804a94d801440424072202d85e3a1",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "tsconfig.json",
+      "deploymentSha1": "3cce6f8b2540d983756b909e9e5c181034da4c38",
+      "sha256": "be18523b23b78b6e1a876ddd107d330f0168bddf09d751b57e0b5edce69c66f3",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "next-env.d.ts",
+      "deploymentSha1": "9bfff799abb9a4d30186f7a8b68f91ac35157611",
+      "sha256": "7b550dda9686c16f36a17bf9051d5dbf31e98555b30d114ac49fc49a1e712651",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "next.config.ts",
+      "deploymentSha1": "f4c9ffac4e5fefc57f5e4251a15362126dadd4cd",
+      "sha256": "139efa2c2dcf35db3d78e21a6a4ebccfec20a547b763314fef3b0d8f2532a354",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "package-lock.json",
+      "deploymentSha1": "3ced79301f3b24028c0e921803aa70c2b289acc5",
+      "sha256": "5e6a1ed6dbfe59b40a4c182223aec3007fb85ea1d675a74e0cb0f742b96398bb",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "package.json",
+      "deploymentSha1": "0c4db1182e73ae37f4bf81894d440a85c7690cbc",
+      "sha256": "d658ac4c1b868ed1af086ff98c3bf676e4536880efffd7d82ef128f4c058192d",
+      "source": "local bytes matched deployment manifest"
+    },
+    {
+      "file": "app/api/view-as/read/route.js",
+      "deploymentSha1": "88248aa037029342b6d3b5abcf998c07eadd2e5e",
+      "sha256": "441b65407efdb50cbba6a1d31b4c66edd53266037f42049b70db7a0cf0dcbd95",
+      "source": "Vercel accepted deployment file API"
+    },
+    {
+      "file": "app/components/AskLwrAssistant.js",
+      "deploymentSha1": "6e8a0ca5b374b2812a624bbd1146a8f5c2822fad",
+      "sha256": "da46e840a9dd572eb7a41290c12cb05688f8c647862aa60b20c36488e813cae6",
+      "source": "Vercel accepted deployment file API"
+    }
+  ],
+  "limits": "Source/config/public assets only. No environment secrets downloaded; isolated synthetic services substitute hosted services."
+}

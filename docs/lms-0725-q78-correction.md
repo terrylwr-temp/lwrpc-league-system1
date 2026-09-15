@@ -1,0 +1,63 @@
+# LMS-0725 / 0.1.547 — Q78 telemetry reliability correction
+
+**IMPLEMENTED AND LOCALLY VALIDATED; STOP BEFORE DEPLOYMENT.** Production remains NOT accepted; 11 production cases remain unrun. No OpenAI requests, production questions, SQL mutations, backfills, deployment or View-As parity work were performed for this correction. Q78's underlying delay and historical Q23/Q36 causes remain unproven.
+
+1. **Exact implementation files.**
+
+   | File | Change in this correction |
+   |---|---|
+   | `lwrpc-admin/app/lib/aiQualityPersistence.js` (new) | Frozen payload, bounded persistence/reconciliation/retry, safe stage diagnostics |
+   | `lwrpc-admin/app/lib/aiQualityCapture.js` | Delegate persistence to new module; pass recovery scheduler through observer/feedback; preserve existing exports |
+   | `lwrpc-admin/app/lib/liveLmsService.js` | Forward optional recovery scheduler for ordinary Live metadata capture |
+   | `lwrpc-admin/app/api/ask-lwr/route.js` | Supply Next.js `after` for ordinary document/Live capture recovery |
+   | `lwrpc-admin/app/api/ai-assistant/answer/route.js` | Supply `after` while preserving manager-test origin |
+   | `lwrpc-admin/app/api/ask-lwr/feedback/route.js` | Supply `after` for existing feedback observation capture; no feedback insertion replay |
+   | `lwrpc-admin/test/lms0725TelemetryRecovery.test.mjs` (new) | Fifteen deterministic failure/reconciliation/lifecycle/privacy tests |
+   | `lwrpc-admin/scripts/lms0725-q78-postgres.mjs` (new) | Isolated real PostgreSQL transaction/idempotency/feedback race proof |
+
+   Documentation: this report, `docs/project-roadmap.md`, and `docs/lms-0725-q78-*.txt`/`lms-0725-q78-postgres-results.json` validation artifacts. Earlier pending release changes remain intact; the repository's whole diff also contains those pre-existing changes.
+
+2. **Frozen payload.** Invoke the existing sanitized builder once, serialize once, detach via JSON parsing, and recursively freeze the JSON object. Both write attempts receive the same frozen object. A mutation of the original builder object after the deadline cannot alter retry metadata. No new question, answer, source excerpt, retrieval or member fact is added for recovery. Existing exception/feedback sanitization semantics remain unchanged.
+
+3. **Stable identity.** Preserve the original outcome ID or occurrence answer ID, existing feedback ID, request/completion timestamps, classifications, source references and sanitized metadata. Retry never invokes the observer's `run`, retrieval, generation, Live lookup or feedback-insertion handler. RPC idempotency remains the existing per-answer advisory transaction lock, primary-key outcome and equality checks. A changed payload is rejected, not treated as a successful replay.
+
+4. **Stage instrumentation.** Bounded diagnostics retain build/sanitization elapsed, initial invocation offset, initial RPC elapsed, client acknowledgement offset, initial deadline offset, reconciliation elapsed, retry elapsed and total lifecycle elapsed. Also retain payload byte count, diagnostic key count, reference count, correlation, origin/result class, operation, attempt count, safe reason/SQLSTATE and commit status. Durations are bounded numeric values. `acknowledgement_ms` means client-observed successful RPC acknowledgement, not database execution time. Network, connection acquisition and database execution are not falsely separated. Reconciliation-read time can include several required transaction postcondition reads under one shared read deadline.
+
+5. **Deadline semantics.** Initial capture budget stays **500 ms**, including payload construction. No simple timeout increase. If construction has already exhausted the budget, no RPC is sent. If the initial write's timer wins, emit `capture_pending`, reason `DEADLINE`, commit status `UNKNOWN`; it is not a terminal failed-commit assertion. The player receives the already-created result after that bounded initial wait. Next.js `after()` owns recovery after response delivery. No detached fire-and-forget task or several-second recovery wait is added to the player response. If scheduling is unavailable/fails, retain a terminal unknown-status failure rather than silently starting unowned work.
+
+6. **Reconciliation.** Read by the stable identity using the existing service-side client. For outcomes, compare supplied logical fields, ignoring database-generated `recorded_at` and normalizing timestamp representations. For exceptions/feedback, also compare the existing occurrence's immutable payload fields. A prior positive-feedback occurrence alone is insufficient for later negative feedback: confirm the feedback correlation and the required review-case postcondition. Matching complete state is `FOUND` and succeeds without another write. Missing required state is `NOT_FOUND` at that read point. A mismatch stops recovery. Read error/timeout/unknown status stops without a blind retry. All reads are bounded and use no new RPC or schema.
+
+7. **Retry policy.** Only an initial application deadline followed by successful `NOT_FOUND` reconciliation permits **one retry**. Use the identical frozen arguments and existing RPC. Non-deadline validation/database/authorization failures do not enter this retry path. Recovery gets a **1,500 ms active budget after it starts**: up to 500 ms reconciliation, up to 500 ms retry and, only if retry also times out, a final reconciliation using the remaining budget. The same established 500 ms per-operation ceiling is retained; no sleep or speculative grace period is added. A final absence, mismatch or unknown is visible in a terminal failure log. Final `NOT_FOUND` still describes the read point, not a promise that an in-flight server transaction cannot commit later. No further automatic attempt follows. Callback reentry returns the same recovery promise and cannot create extra attempts or terminal logs.
+
+8. **Late-commit race.** `NOT_FOUND` is not assumed to exclude an in-flight transaction. In the hardest tested sequence, attempt 1 inserted an uncommitted outcome, the independent reader saw no row, attempt 1 committed, then retry executed. The existing RPC recognized the identical outcome and did not insert again. A separate concurrent replay test starts an identical call while the first transaction remains open, then releases the first transaction; the database serializes both using the existing lock. No safety claim depends on an arbitrary delay.
+
+9. **Duplicate-prevention proof.** Real PostgreSQL tests found one outcome after the late-commit/retry race and one outcome after concurrent identical replay. A modified payload raised `quality_outcome_mismatch`. Concurrent exception replay produced one occurrence and one review event. Concurrent feedback observation replay preserved one existing feedback event, one occurrence, one nonempty source snapshot and one review event. Unit tests assert one builder invocation, object-identical retries, at most two writes and one terminal lifecycle diagnostic. The initial `capture_pending` is a distinct nonterminal state, not another logical outcome or duplicate terminal event.
+
+10. **Real PostgreSQL results.** **PostgreSQL 17.11 PASS**, in a new temporary loopback-only database on 127.0.0.1:56178. Existing Stage 6/7 schema/RPC definitions were applied only to that synthetic database. Persistence used service_role permissions and separate psql sessions for writer, reader and competing replay. The production function's existing idempotency logic was exercised, not replaced by a mocked uniqueness function. Client timeout/acknowledgement loss was deliberately injected around that real database adapter; this is a concurrency proof, not a production PostgREST latency benchmark. The temporary server was stopped. [Machine-readable results](lms-0725-q78-postgres-results.json).
+
+11. **Privacy.** Logs contain only bounded counts/timings, allowlisted classifications, safe error codes and existing correlation references. No payload, raw error string, answer, official excerpt, email, credential, receipt or Live member value is logged. Reconciliation stays server-side under the already-authorized client and does not alter authorization. Existing sanitized exception/feedback records are compared internally; they are not emitted to logs or added to the player response. Cost policy/model configuration remain unchanged; accounting enhancements previously queued for maintenance were not folded into this correction.
+
+12. **Q78 injected control.** The saved successful Q78-shaped answer (“Registration opens September 7, 2026”) remains the same result object with exactly one answer-generation callback. At the simulated 500 ms initial deadline, that result returns while recovery is merely queued. Recovery then reconciles and safely retries frozen metadata. Injection cases cover 450 ms success, deadline before commit, late commit observed by reconciliation, absent result/retry success, reconciliation timeout/failure, retry late commit, retry deadline/absence, mismatch, scheduler failure, external source-object mutation and callback reentry. No OpenAI or real Live lookup runs in these controls. **15/15 targeted tests PASS.**
+
+13. **View-As.** Dedicated View-As diagnostic capture remains unchanged and is not routed into normal-player Stage 7 capture. Its explicit `persist:async()=>{}` suppression and separate `call('diagnostic', ...)` remain in the effective-context path. Existing real-actor/effective-user binding, revalidation and feedback suppression are preserved. Focused regression verifies that `view_as` origin cannot change during a frozen retry, and that the dedicated route still uses its own diagnostic path. Full existing View-As tests pass in the deterministic suite. No production View-As test or UI parity change is claimed.
+
+14. **Full validation.**
+
+   | Check | Result |
+   |---|---|
+   | `npm test` | **921/921 PASS** |
+   | Targeted recovery failure-injection suite | **15/15 PASS** |
+   | Real PostgreSQL late-commit/concurrent/idempotency/feedback/source tests | **PASS** |
+   | `npm run lint` | PASS; 10 existing warnings, zero errors |
+   | `npx tsc --noEmit --incremental false` | PASS |
+   | `npm run verify:ai-pdf-server-bundle` | PASS against final build |
+   | `npm run build` | PASS |
+   | `git diff --check` | PASS |
+
+   The first sandboxed build compiled but could not write `.next/cache/.tsbuildinfo` (EPERM). Its log was preserved; the authorized outside-sandbox local build passed. The first local PostgreSQL start was blocked in the sandbox; the approved isolated run outside it passed. No deployment occurred. Existing 103/103 routing, 82/82 generated answers and Q55 production pass are retained; no full generated benchmark rerun. No generation/routing/evidence logic changed.
+
+15. **SQL requirement and limits.** **No SQL/schema/RPC migration is required. No production SQL was executed.** Local SQL was used only in the explicitly approved isolated database tests. Existing uniqueness, advisory locking, exact-payload matching and transactional occurrence logic supply late-commit safety. This is bounded recovery, not a durable queue: platform termination or sustained storage unavailability can still prevent capture, and unknown/failed state stays operationally visible. The underlying Q78 delay is not claimed fixed or identified. Historical Q23/Q36/Q78 events are untouched; no replacement payload was invented.
+
+16. **Production continuation after separate review/deployment approval.** Deploy only the reviewed application correction. Read historical Q78 correlation `77848361-efa8-400c-be6b-dbb8648039b2` for reconciliation without writing/backfilling it. Run one fresh approved Q78 acceptance event, verify its correct document answer, final telemetry status, stable attempt identity, no duplicate logical records and recorded cost usage. Stop for any material answer/capture/unknown/mismatch failure. If it passes, run only **Q79–Q89**, reconciling telemetry and recording acceptance usage as each completes. Preserve earlier passes; no full OpenAI benchmark or paraphrase sweep. Complete outstanding production mobile/View-As/integrity gates under their existing scope, then assess final acceptance. Do not start another version or View-As parity until the required acceptance/review conditions are satisfied.
+
+**Current status: LMS-0725 / 0.1.547 — locally corrected; NOT PRODUCTION ACCEPTED; STOP FOR REVIEW BEFORE DEPLOYMENT.**

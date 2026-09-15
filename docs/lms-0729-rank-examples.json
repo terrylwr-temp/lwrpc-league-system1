@@ -1,0 +1,196 @@
+{
+  "synthetic": true,
+  "productionWrites": 0,
+  "modelCalls": 0,
+  "cases": [
+    {
+      "case": "Configuration changed since rebuild",
+      "rows": [
+        {
+          "team_name": "Alpha",
+          "teams": {
+            "name": "Alpha",
+            "is_active": true
+          },
+          "rank": 1,
+          "standings_points": 10,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        },
+        {
+          "team_name": "Beta",
+          "teams": {
+            "name": "Beta",
+            "is_active": true
+          },
+          "rank": 2,
+          "standings_points": 20,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        }
+      ],
+      "oldRules": {
+        "standings_tiebreak_1": "line_wins",
+        "standings_tiebreak_2": "point_differential",
+        "standings_tiebreak_3": "points_for"
+      },
+      "currentRules": {
+        "standings_tiebreak_1": "standings_points",
+        "standings_tiebreak_2": "line_wins",
+        "standings_tiebreak_3": "point_differential"
+      },
+      "storedOrder": [
+        "Alpha",
+        "Beta"
+      ],
+      "dynamicOrder": [
+        "Beta",
+        "Alpha"
+      ]
+    },
+    {
+      "case": "Blank rules: rebuild skips; display supplies defaults",
+      "rows": [
+        {
+          "team_name": "Alpha",
+          "teams": {
+            "name": "Alpha",
+            "is_active": true
+          },
+          "rank": 1,
+          "standings_points": 0,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        },
+        {
+          "team_name": "Beta",
+          "teams": {
+            "name": "Beta",
+            "is_active": true
+          },
+          "rank": 2,
+          "standings_points": 10,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        }
+      ],
+      "rules": {},
+      "rebuildOrder": [
+        "Alpha",
+        "Beta"
+      ],
+      "dynamicOrder": [
+        "Beta",
+        "Alpha"
+      ]
+    },
+    {
+      "case": "All metrics tied: name versus previous rank",
+      "rows": [
+        {
+          "team_name": "Alpha",
+          "teams": {
+            "name": "Alpha",
+            "is_active": true
+          },
+          "rank": 2,
+          "standings_points": 10,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        },
+        {
+          "team_name": "Beta",
+          "teams": {
+            "name": "Beta",
+            "is_active": true
+          },
+          "rank": 1,
+          "standings_points": 10,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        }
+      ],
+      "rules": {
+        "standings_tiebreak_1": "standings_points",
+        "standings_tiebreak_2": "line_wins",
+        "standings_tiebreak_3": "point_differential"
+      },
+      "rebuildOrder": [
+        "Alpha",
+        "Beta"
+      ],
+      "dynamicOrder": [
+        "Beta",
+        "Alpha"
+      ]
+    },
+    {
+      "case": "Inactive team filtered then display position renumbered",
+      "rows": [
+        {
+          "team_name": "Alpha",
+          "teams": {
+            "name": "Alpha",
+            "is_active": false
+          },
+          "rank": 1,
+          "standings_points": 30,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        },
+        {
+          "team_name": "Beta",
+          "teams": {
+            "name": "Beta",
+            "is_active": true
+          },
+          "rank": 2,
+          "standings_points": 20,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        },
+        {
+          "team_name": "Gamma",
+          "teams": {
+            "name": "Gamma",
+            "is_active": true
+          },
+          "rank": 3,
+          "standings_points": 10,
+          "line_wins": 1,
+          "line_losses": 1,
+          "line_ties": 0,
+          "point_differential": 0
+        }
+      ],
+      "display": [
+        {
+          "team": "Beta",
+          "storedRank": 2,
+          "tableRank": 1
+        },
+        {
+          "team": "Gamma",
+          "storedRank": 3,
+          "tableRank": 2
+        }
+      ]
+    }
+  ]
+}

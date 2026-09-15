@@ -1,0 +1,75 @@
+{
+  "before": [
+    {
+      "name": "teams",
+      "count": 108,
+      "hash": "6ed56433f644e5d77e393a11268408c1"
+    },
+    {
+      "name": "team_members",
+      "count": 15,
+      "hash": "6efa6510440181a1d80cde990de5c5e8"
+    },
+    {
+      "name": "matches",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "line_games",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "ai_documents",
+      "count": 7,
+      "hash": "e7b44e5cefa31d45c8ddf5b378cdc3dc"
+    }
+  ],
+  "after": [
+    {
+      "name": "teams",
+      "count": 108,
+      "hash": "6ed56433f644e5d77e393a11268408c1"
+    },
+    {
+      "name": "team_members",
+      "count": 15,
+      "hash": "6efa6510440181a1d80cde990de5c5e8"
+    },
+    {
+      "name": "matches",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "line_games",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "ai_documents",
+      "count": 7,
+      "hash": "e7b44e5cefa31d45c8ddf5b378cdc3dc"
+    }
+  ],
+  "source": [
+    {
+      "chunkId": "35758e12-119d-45c6-87ad-15b722816a8d",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 2,
+      "ruleNumber": "3",
+      "heading": "PLAYER REQUIREMENTS",
+      "sectionLabel": "Rule 3",
+      "chunkOrdinal": 6,
+      "content": "3. PLAYER REQUIREMENTS\n3.1. All League players must have a signed/accepted waiver with LWR PC and have a valid\nLWR PC membership. To sign up, go to https://lwrpickleballclub.com/signup/.\n3.2. All DUPR League players must have a free DUPR ID which can be found at:\nhttps://www.dupr.com/.\n3.3. All DUPR League players must join our free DUPR club, which is diƯerent/separate from\nthe LWR PC membership: https://tinyurl.com/LWRPC-DUPRCLUB\n3.4. Players are assigned to a community based on their primary address at the start of the\nseason.\n3.5. Players may join teams from other communities; however, they are strongly encouraged\nto play for their local community’s team when their community has a team participating in\nthe same league and division with available roster space."
+    }
+  ],
+  "verifiedExportFiles": 1173,
+  "commit": "f0d6849a814798b79d7396a48a6b05f3d47425b8",
+  "deployment": "dpl_4jw8S8P8gmHgDj9jjpTsyeqeW993"
+}

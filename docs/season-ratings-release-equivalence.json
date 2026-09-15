@@ -1,0 +1,109 @@
+{
+  "baseline": {
+    "commit": "9109c716f232f10e9ca1fe612bc5203717accf78",
+    "tests": 1207,
+    "pass": 1197,
+    "fail": 10
+  },
+  "candidate": {
+    "commit": "1cf9fb25fc94288c92b035678d6fe8b4fabae000",
+    "tests": 1217,
+    "pass": 1207,
+    "fail": 10
+  },
+  "normalization": "CRLF to LF; remove elapsed test duration and stack-trace lines only. Assertion values, error codes, SQL bodies and identity metadata retained.",
+  "sameMaterialFailures": true,
+  "candidateOnlyFailures": 0,
+  "matrix": [
+    {
+      "test": "0725 formerly missing evidence is selected from current sources with all distinct rating requirements",
+      "location": "test at test\\lms0725FinalCorrection.test.mjs:49:1",
+      "baselineHash": "30ac7102646b1f4ab85735dcf8013e930590596dfc801c771a3aa1b8207a48a1",
+      "candidateHash": "30ac7102646b1f4ab85735dcf8013e930590596dfc801c771a3aa1b8207a48a1",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n  \n    assert.ok(timing.some(c=>c.content.includes('date\\ncommunicated')))\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: false,\n    expected: true,\n    operator: '==',",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n  \n    assert.ok(timing.some(c=>c.content.includes('date\\ncommunicated')))\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: false,\n    expected: true,\n    operator: '==',"
+    },
+    {
+      "test": "0725 policy operation: When is my Season DUPR established?",
+      "location": "test at test\\lms0725PolicyObservability.test.mjs:13:30",
+      "baselineHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "candidateHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',"
+    },
+    {
+      "test": "0725 policy operation: When is Season DUPR established?",
+      "location": "test at test\\lms0725PolicyObservability.test.mjs:13:30",
+      "baselineHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "candidateHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',"
+    },
+    {
+      "test": "0725 policy operation: When is my Season DUPR set?",
+      "location": "test at test\\lms0725PolicyObservability.test.mjs:13:30",
+      "baselineHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "candidateHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',"
+    },
+    {
+      "test": "0725 policy operation: When is my Season DUPR locked?",
+      "location": "test at test\\lms0725PolicyObservability.test.mjs:13:30",
+      "baselineHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "candidateHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',"
+    },
+    {
+      "test": "0725 policy operation: When does my Season DUPR lock?",
+      "location": "test at test\\lms0725PolicyObservability.test.mjs:13:30",
+      "baselineHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "candidateHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',"
+    },
+    {
+      "test": "0725 policy operation: When is my PrimeTime Season DUPR established?",
+      "location": "test at test\\lms0725PolicyObservability.test.mjs:13:30",
+      "baselineHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "candidateHash": "99f756881ad9ad714b6f32638ef476b65b163e2d6feb5fdf4a1d3a3e9911073b",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'season_rating_date'\n  - 'rating'\n  \n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'season_rating_date',"
+    },
+    {
+      "test": "0728 rollback and partial recovery retain metadata and business data",
+      "location": "test at test\\lms0728ImplicitPlayer.test.mjs:19:1",
+      "baselineHash": "8f4dc4eeaf46640d5679ba62c3d4af9eac6df838e7ab92eb788b4d3a8dde4a1c",
+      "candidateHash": "8f4dc4eeaf46640d5679ba62c3d4af9eac6df838e7ab92eb788b4d3a8dde4a1c",
+      "identicalMaterial": true,
+      "baselineFailure": "error: LMS-0728 function drift: view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)\n    length: 189,\n    severity: 'ERROR',\n    code: 'P0001',\n    detail: undefined,\n    hint: undefined,\n    position: undefined,\n    internalPosition: undefined,\n    internalQuery: undefined,",
+      "candidateFailure": "error: LMS-0728 function drift: view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)\n    length: 189,\n    severity: 'ERROR',\n    code: 'P0001',\n    detail: undefined,\n    hint: undefined,\n    position: undefined,\n    internalPosition: undefined,\n    internalQuery: undefined,"
+    },
+    {
+      "test": "0729 SQL identity, record, feedback and effective View-As",
+      "location": "test at test\\lms0729LiveRecord.test.mjs:19:1",
+      "baselineHash": "643f97557862faf1ef6e8b50d43f536c6c3b8231480945ab54a3ec764143aa59",
+      "candidateHash": "643f97557862faf1ef6e8b50d43f536c6c3b8231480945ab54a3ec764143aa59",
+      "identicalMaterial": true,
+      "baselineFailure": "error: LMS-0729 function drift public.ai_live_feedback(uuid,uuid,boolean,jsonb)\n    length: 187,\n    severity: 'ERROR',\n    code: 'P0001',\n    detail: undefined,\n    hint: undefined,\n    position: undefined,\n    internalPosition: undefined,\n    internalQuery: undefined,",
+      "candidateFailure": "error: LMS-0729 function drift public.ai_live_feedback(uuid,uuid,boolean,jsonb)\n    length: 187,\n    severity: 'ERROR',\n    code: 'P0001',\n    detail: undefined,\n    hint: undefined,\n    position: undefined,\n    internalPosition: undefined,\n    internalQuery: undefined,"
+    },
+    {
+      "test": "0724 review-only rollback restores prior function and privilege state without data changes",
+      "location": "test at test\\viewAsLockCorrection.test.mjs:65:1",
+      "baselineHash": "aa88a45027184edd415193f26420b6ef35077784a1e211895bd7a79a703652ce",
+      "candidateHash": "aa88a45027184edd415193f26420b6ef35077784a1e211895bd7a79a703652ce",
+      "identicalMaterial": true,
+      "baselineFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n  + actual - expected\n  ... Skipped lines\n  \n    [\n      {\n        proacl: [\n          'postgres=X/postgres',\n          'lms_view_as_executor=X/postgres'",
+      "candidateFailure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n  + actual - expected\n  ... Skipped lines\n  \n    [\n      {\n        proacl: [\n          'postgres=X/postgres',\n          'lms_view_as_executor=X/postgres'"
+    }
+  ]
+}

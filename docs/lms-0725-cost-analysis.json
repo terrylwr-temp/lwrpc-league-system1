@@ -1,0 +1,172 @@
+{
+  "local": {
+    "n": 595,
+    "input": 1318325,
+    "output": 66827,
+    "avgInput": 2215.672268907563,
+    "avgOutput": 112.31428571428572,
+    "uncachedUsd": 8.596435,
+    "avgUsd": 0.014447789915966385
+  },
+  "production": {
+    "n": 62,
+    "input": 140652,
+    "output": 7206,
+    "avgInput": 2268.5806451612902,
+    "avgOutput": 116.2258064516129,
+    "uncachedUsd": 0.91944,
+    "avgUsd": 0.014829677419354838
+  },
+  "latestFull": {
+    "n": 82,
+    "input": 178850,
+    "output": 9086,
+    "avgInput": 2181.0975609756097,
+    "avgOutput": 110.8048780487805,
+    "uncachedUsd": 1.16683,
+    "avgUsd": 0.014229634146341465
+  },
+  "localAttempts": 597,
+  "runs": [
+    {
+      "file": "lms-0725-age-reference-full-model-results.json",
+      "calls": 78
+    },
+    {
+      "file": "lms-0725-age-reference-full-Q90-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-authorized-model-results.json",
+      "calls": 42
+    },
+    {
+      "file": "lms-0725-final-failed-first-model-results-attempt1.json",
+      "calls": 12
+    },
+    {
+      "file": "lms-0725-final-failed-first-model-results.json",
+      "calls": 16
+    },
+    {
+      "file": "lms-0725-final-failed-first-Q29-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-final-failed-first-Q42-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-final-failed-first-Q56-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-final-full-model-results-attempt1.json",
+      "calls": 45
+    },
+    {
+      "file": "lms-0725-final-full-model-results.json",
+      "calls": 45
+    },
+    {
+      "file": "lms-0725-league-dates-current-dates-model-results.json",
+      "calls": 23
+    },
+    {
+      "file": "lms-0725-league-dates-current-failed-first-model-results.json",
+      "calls": 6
+    },
+    {
+      "file": "lms-0725-league-dates-current-full-model-attempt1.json",
+      "calls": 15
+    },
+    {
+      "file": "lms-0725-league-dates-current-full-model-attempt2.json",
+      "calls": 38
+    },
+    {
+      "file": "lms-0725-league-dates-current-full-model-results.json",
+      "calls": 68
+    },
+    {
+      "file": "lms-0725-league-dates-current-full-Q21-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-league-dates-current-full-Q81-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-league-dates-failed-first-model-results.json",
+      "calls": 2
+    },
+    {
+      "file": "lms-0725-league-dates-full-model-results.json",
+      "calls": 68
+    },
+    {
+      "file": "lms-0725-league-dates-network-failure.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-q55-family-before-duration.json",
+      "calls": 12
+    },
+    {
+      "file": "lms-0725-q55-family-model-results.json",
+      "calls": 12
+    },
+    {
+      "file": "lms-0725-q55-family-network-failure.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-q55-full-model-results.json",
+      "calls": 82
+    },
+    {
+      "file": "lms-0725-q55-full-Q29-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-q55-full-Q29-omission.json",
+      "calls": 23
+    },
+    {
+      "file": "lms-0725-q55-full-Q57-model-results.json",
+      "calls": 1
+    }
+  ],
+  "recordedPlayer0725Requests": 80,
+  "recordedStage3": 69,
+  "recordedLive0725": 12,
+  "mixIncludingTwoMissing": {
+    "generated": 64,
+    "requests": 82
+  },
+  "staticDoubleQuotedInstructionChars": 7438,
+  "avgQuestionEvidenceChars": 3284.4634146341464,
+  "avgExcerptChars": 743.219512195122,
+  "monthly": [
+    {
+      "questions": 100,
+      "allDocumentUsd": 1.48,
+      "observedTestMixUsd": 1.16
+    },
+    {
+      "questions": 500,
+      "allDocumentUsd": 7.41,
+      "observedTestMixUsd": 5.79
+    },
+    {
+      "questions": 1000,
+      "allDocumentUsd": 14.83,
+      "observedTestMixUsd": 11.57
+    },
+    {
+      "questions": 5000,
+      "allDocumentUsd": 74.15,
+      "observedTestMixUsd": 57.87
+    }
+  ]
+}

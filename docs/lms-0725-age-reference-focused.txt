@@ -1,0 +1,27 @@
+(node:13640) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 age Q90: What is the date for the primetime league for basing the age on (25.2067ms)
+✔ 0725 age Q91: What date is my age based on for PrimeTime? (2.2332ms)
+✔ 0725 age Q92: What is the PrimeTime age cutoff date? (1.1789ms)
+✔ 0725 age Q93: When do I have to turn 65 to play PrimeTime? (0.7969ms)
+✔ 0725 age Q94: Do I have to be 65 when the PrimeTime season starts? (1.1873ms)
+✔ 0725 age Q95: If I turn 65 later this year can I play PrimeTime? (1.1274ms)
+✔ 0725 age Q96: I turn 65 in December. Can I play PrimeTime? (1.3374ms)
+✔ 0725 age Q97: What date do you use to determine age for the 65+ league? (1.7864ms)
+✔ 0725 age Q98: When does PrimeTime start? (5.0463ms)
+✔ 0725 age Q99: What date do you use to determine age for PrimeTime? (1.2305ms)
+✔ 0725 four temporal meanings stay distinct (2.5157ms)
+✔ 0725 stored personal age, DOB and mixed rating/contact requests remain protected (3.053ms)
+✔ 0725 age reference scope does not transfer PrimeTime policy to other leagues (2.2438ms)
+✔ 0725 age cutoff policy comes only from source; no fixed date or year in selector (0.3456ms)
+✔ 0725 benchmark preserves all 89 earlier questions and appends the 10 requested age/event controls (15.1311ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 425.6618

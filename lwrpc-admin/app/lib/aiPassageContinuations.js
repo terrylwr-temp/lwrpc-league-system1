@@ -4,10 +4,12 @@ export function retainPassageReader(retrieval,db){if(typeof db?.from==='function
 function incomplete(text){return /\b(?:the|a|an|and|or|to|of|for|with|from|in|at|by|game|same|designated|will|shall|be|are|consist)$/i.test(String(text).trim());}
 export async function completeSelectedPassages(retrieval,selected){
  const db=readers.get(retrieval);readers.delete(retrieval);
- if(!db||!selected.some(c=>c.passageScopes&&incomplete(c.content)))return selected;
+ // Structured policy selection already includes the separate cross-chunk parts.
+ // Never rewrite their exact range bindings through legacy prose completion.
+ if(!db||!selected.some(c=>!c.excerptItems&&c.passageScopes&&incomplete(c.content)))return selected;
  const result=[];
  for(const c of selected){
-  if(!c.passageScopes||!incomplete(c.content)){result.push(c);continue;}
+  if(c.excerptItems||!c.passageScopes||!incomplete(c.content)){result.push(c);continue;}
   let continuation=null;
   try{
    const anchor=await db.from('ai_document_chunks').select('document_version_id,chunk_ordinal,rule_number,heading').eq('id',c.chunkId).eq('document_version_id',c.documentVersionId).eq('is_searchable',true).maybeSingle();
@@ -32,8 +34,8 @@ export function conflictingSelectedTargets(selected){
  const claims=[];
  for(const c of selected){
   if(c.sourceClassification!=='lwr_controlling')continue;
-  for(const p of c.selectedPassages||[c.content]){
-   const scope=c.passageScopes?.find(s=>s.league);
+  for(const item of c.excerptItems|| (c.selectedPassages||[c.content]).map(text=>({text,applicability:c.passageScopes?.find(s=>s.league)}))){
+   const p=item.text,scope=item.applicability;
    if(!scope)continue;
    for(const m of p.matchAll(/Picklebreaker[^.]{0,180}?(?:game\s+)?to\s+(\d+)\b/gi))claims.push({value:Number(m[1]),league:scope.league,division:scope.division||null,authority:c.documentAuthorityRank});
   }

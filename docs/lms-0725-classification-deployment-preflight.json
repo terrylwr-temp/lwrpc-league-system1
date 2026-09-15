@@ -1,0 +1,34 @@
+{
+  "status": "PREFLIGHT_BLOCKED_BEFORE_DEPLOYMENT",
+  "method": "Actual document-result adapter and player Exchange rendered with synthetic answer and saved official source metadata; no generation, production request, or private data.",
+  "controls": [
+    {
+      "question": "When is my Season DUPR established?",
+      "route": "DOCUMENT_POLICY",
+      "expectedBadge": "OFFICIAL RULES",
+      "actualBadge": null,
+      "officialSourceSection": true,
+      "officialRulesBadge": false,
+      "liveBadge": false,
+      "telemetrySourceFamily": "lwr",
+      "modelCalls": 0,
+      "personalReads": 0
+    },
+    {
+      "question": "Can my Season DUPR change during the season?",
+      "route": "DOCUMENT_POLICY",
+      "expectedBadge": "OFFICIAL RULES",
+      "actualBadge": null,
+      "officialSourceSection": true,
+      "officialRulesBadge": false,
+      "liveBadge": false,
+      "telemetrySourceFamily": "lwr",
+      "modelCalls": 0,
+      "personalReads": 0
+    }
+  ],
+  "correctionApplied": false,
+  "deploymentAttempted": false,
+  "sqlApplied": false,
+  "modelCalls": 0
+}

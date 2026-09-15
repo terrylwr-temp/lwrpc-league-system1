@@ -1,0 +1,383 @@
+{
+  "postgresVersion": "17.11",
+  "loopbackOnly": true,
+  "productionRecordsRead": 0,
+  "productionMutations": 0,
+  "modelCalls": 0,
+  "scope": "Production SELECT column types, table SELECT grants, RLS enablement and every SELECT policy reproduced for 17 tables. Synthetic rows only. No HTTP/PostgREST gateway probe. No write behavior claim; DML policies/triggers/constraints not cloned.",
+  "catalogSha256": "fcf1ffc2d614290fefc82ace27e82ff8840e99b31ee78b803a3b979776f62b9c",
+  "results": [
+    {
+      "role": "anon",
+      "table": "division_lines",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "divisions",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "leagues",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "line_games",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "locations",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "match_lines",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "match_lineups",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "matches",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "member_season_ratings",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "members",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "score_sheet_templates",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "seasons",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "team_byes",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "team_members",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "team_standings",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "teams",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "table": "user_roles",
+      "visibleRows": 0
+    },
+    {
+      "role": "anon",
+      "emailReadable": false,
+      "rfReadable": false,
+      "unrelatedRatingReadable": false,
+      "privateTeamReadable": false,
+      "unrelatedRosterReadable": false
+    },
+    {
+      "role": "player",
+      "table": "division_lines",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "divisions",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "leagues",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "line_games",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "locations",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "match_lines",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "match_lineups",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "matches",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "member_season_ratings",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "members",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "score_sheet_templates",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "seasons",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "team_byes",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "team_members",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "team_standings",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "teams",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "table": "user_roles",
+      "visibleRows": 1
+    },
+    {
+      "role": "player",
+      "emailReadable": true,
+      "rfReadable": true,
+      "unrelatedRatingReadable": true,
+      "privateTeamReadable": true,
+      "unrelatedRosterReadable": true
+    },
+    {
+      "role": "captain",
+      "table": "division_lines",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "divisions",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "leagues",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "line_games",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "locations",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "match_lines",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "match_lineups",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "matches",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "member_season_ratings",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "members",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "score_sheet_templates",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "seasons",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "team_byes",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "team_members",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "team_standings",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "teams",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "table": "user_roles",
+      "visibleRows": 1
+    },
+    {
+      "role": "captain",
+      "emailReadable": true,
+      "rfReadable": true,
+      "unrelatedRatingReadable": true,
+      "privateTeamReadable": true,
+      "unrelatedRosterReadable": true
+    },
+    {
+      "role": "club_pro",
+      "table": "division_lines",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "divisions",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "leagues",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "line_games",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "locations",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "match_lines",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "match_lineups",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "matches",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "member_season_ratings",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "members",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "score_sheet_templates",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "seasons",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "team_byes",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "team_members",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "team_standings",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "teams",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "table": "user_roles",
+      "visibleRows": 1
+    },
+    {
+      "role": "club_pro",
+      "emailReadable": true,
+      "rfReadable": true,
+      "unrelatedRatingReadable": true,
+      "privateTeamReadable": true,
+      "unrelatedRosterReadable": true
+    }
+  ]
+}

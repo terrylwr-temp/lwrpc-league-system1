@@ -1,0 +1,63 @@
+{
+  "postgres": "17.11",
+  "productionCompatibleNonSuperuser": true,
+  "loopbackOnly": true,
+  "modelCalls": 0,
+  "helper": {
+    "owner": "lms_view_as_reader",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "prosecdef": true
+  },
+  "grantsUnchanged": true,
+  "columnGrantsUnchanged": true,
+  "readerAndExecutorRolesUnchanged": true,
+  "membershipsUnchanged": true,
+  "rlsUnchanged": true,
+  "businessRowsUnchangedByMigration": true,
+  "cleanApply": true,
+  "replay": true,
+  "secondReplay": true,
+  "partialRecovery": true,
+  "rollback": true,
+  "unsafeDriftRejected": [
+    "definer",
+    "body",
+    "path",
+    "acl",
+    "owner",
+    "readerBypass",
+    "readerLogin",
+    "browserSchema"
+  ],
+  "identityWriterRaces": [
+    true,
+    true,
+    true
+  ],
+  "identityInvalidStates": true,
+  "identityDuplicatesDenied": true,
+  "multiRolePreserved": true,
+  "historicalScoped": true,
+  "provenanceMismatchDenied": true,
+  "inconsistentRecordDenied": true,
+  "namedStandingsOnly": true,
+  "feedbackRevalidated": true,
+  "feedbackIdempotent": true,
+  "realActorTeamBleedDenied": true,
+  "implicit": true,
+  "captain": true,
+  "coCaptain": true,
+  "clubPro": true,
+  "managerSelfNotAll": true,
+  "explicit": true,
+  "noRecord": true,
+  "forgedTeamDenied": true,
+  "multiTeam": true,
+  "invalidDenied": true,
+  "feedback": true,
+  "viewAsEffective": true,
+  "rankAbsent": true,
+  "browserDenied": true
+}

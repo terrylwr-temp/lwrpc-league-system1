@@ -1,0 +1,15 @@
+Fixture directory: C:\lwrpc-league-system\.local-validation\season-ratings-normal-actions\.local-validation\working-ratings-browser-1789127702070
+▲ Next.js 16.2.4 (webpack)
+- Local:         http://localhost:3390
+- Network:       http://192.168.4.63:3390
+✓ Ready in 2.2s
+
+○ Compiling /ratings ...
+ GET /ratings 200 in 8.0s (next.js: 7.7s, application-code: 266ms)
+ POST /api/ratings/workflow 200 in 1634ms (next.js: 1440ms, application-code: 194ms)
+ GET /ratings 200 in 138ms (next.js: 56ms, application-code: 82ms)
+ POST /api/ratings/workflow 200 in 54ms (next.js: 15ms, application-code: 39ms)
+ POST /api/ratings/workflow 200 in 36ms (next.js: 3ms, application-code: 34ms)
+ GET /ratings 200 in 176ms (next.js: 106ms, application-code: 70ms)
+ POST /api/ratings/workflow 200 in 171ms (next.js: 89ms, application-code: 82ms)
+ POST /api/ratings/workflow 200 in 25ms (next.js: 2ms, application-code: 23ms)

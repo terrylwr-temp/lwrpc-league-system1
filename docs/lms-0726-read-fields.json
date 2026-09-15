@@ -1,0 +1,528 @@
+{
+  "identity": {
+    "table": "members",
+    "columns": [
+      "id",
+      "first_name",
+      "last_name",
+      "full_name",
+      "is_active_member"
+    ]
+  },
+  "selfProfile": {
+    "table": "members",
+    "columns": [
+      "id",
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "club_location",
+      "dupr_id",
+      "renewal_date",
+      "is_active_member",
+      "self_rating",
+      "profile_image_urls",
+      "notification_preference"
+    ]
+  },
+  "rosterPerson": {
+    "table": "members",
+    "columns": [
+      "id",
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "dupr_id",
+      "self_rating",
+      "club_location",
+      "is_active_member",
+      "membership_status",
+      "renewal_date",
+      "location_id"
+    ]
+  },
+  "candidate": {
+    "table": "members",
+    "columns": [
+      "id",
+      "first_name",
+      "last_name"
+    ]
+  },
+  "candidateInternal": {
+    "table": "members",
+    "columns": [
+      "id",
+      "first_name",
+      "last_name",
+      "location_id",
+      "club_location",
+      "is_active_member",
+      "dupr_id",
+      "self_rating"
+    ]
+  },
+  "teamPublic": {
+    "table": "teams",
+    "columns": [
+      "id",
+      "name",
+      "abbreviation",
+      "division_id"
+    ]
+  },
+  "matchPublic": {
+    "table": "matches",
+    "columns": [
+      "id",
+      "division_id",
+      "home_team_id",
+      "away_team_id",
+      "location_id",
+      "scheduled_date",
+      "scheduled_time",
+      "week_number",
+      "status",
+      "home_score",
+      "away_score",
+      "winning_team_id",
+      "score_status",
+      "result_type"
+    ]
+  },
+  "personName": {
+    "table": "members",
+    "columns": [
+      "id",
+      "first_name",
+      "last_name",
+      "full_name"
+    ]
+  },
+  "adminMember": {
+    "table": "members",
+    "columns": [
+      "id",
+      "membershipworks_account_id",
+      "full_name",
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "club_location",
+      "self_rating",
+      "dupr_id",
+      "member_comment",
+      "waiver_status",
+      "profile_image_urls",
+      "membership_levels",
+      "membership_addons",
+      "labels",
+      "join_date",
+      "renewal_date",
+      "is_active",
+      "location_id",
+      "membershipworks_id",
+      "membership_status",
+      "membership_level",
+      "imported_at",
+      "last_membership_sync_at",
+      "is_active_member",
+      "notification_preference",
+      "notes",
+      "last_imported_at",
+      "created_at",
+      "updated_at"
+    ]
+  },
+  "roles": {
+    "table": "user_roles",
+    "columns": [
+      "member_id",
+      "role"
+    ]
+  },
+  "team": {
+    "table": "teams",
+    "columns": [
+      "id",
+      "division_id",
+      "name",
+      "captain_member_id",
+      "co_captain_member_id",
+      "co_captain_2_member_id",
+      "club_pro_member_id",
+      "is_active",
+      "home_location_id",
+      "team_number",
+      "notes",
+      "abbreviation"
+    ]
+  },
+  "membership": {
+    "table": "team_members",
+    "columns": [
+      "id",
+      "team_id",
+      "member_id",
+      "role",
+      "is_active"
+    ]
+  },
+  "rating": {
+    "table": "member_season_ratings",
+    "columns": [
+      "member_id",
+      "season_id",
+      "season_dupr_rating",
+      "season_primetime_rating",
+      "dupr_doubles_rating"
+    ]
+  },
+  "adminRating": {
+    "table": "member_season_ratings",
+    "columns": [
+      "id",
+      "member_id",
+      "season_id",
+      "season_dupr_rating",
+      "season_primetime_rating",
+      "dupr_doubles_rating",
+      "dupr_reliability_rating",
+      "notes",
+      "created_at",
+      "updated_at"
+    ]
+  },
+  "season": {
+    "table": "seasons",
+    "columns": [
+      "id",
+      "name",
+      "start_date",
+      "end_date",
+      "is_active",
+      "abbreviation"
+    ]
+  },
+  "league": {
+    "table": "leagues",
+    "columns": [
+      "id",
+      "season_id",
+      "name",
+      "description",
+      "is_active",
+      "rosters_locked",
+      "league_document_bucket",
+      "code_of_conduct_pdf_path",
+      "captains_guide_pdf_path",
+      "league_rules_pdf_path",
+      "score_sheet_pdf_path",
+      "league_waiver_pdf_path",
+      "match_setup_reminder_days_before",
+      "abbreviation",
+      "flex_league",
+      "only_home_community_players"
+    ]
+  },
+  "division": {
+    "table": "divisions",
+    "columns": [
+      "id",
+      "league_id",
+      "name",
+      "skill_level",
+      "sort_order",
+      "is_active",
+      "min_dupr",
+      "max_dupr",
+      "number_of_lines",
+      "default_game_format",
+      "games_per_line",
+      "points_to_win",
+      "win_by",
+      "third_game_format",
+      "picklebreaker_enabled",
+      "picklebreaker_points",
+      "line_notes",
+      "rating_type",
+      "standings_win_points",
+      "standings_tie_points",
+      "standings_loss_points",
+      "standings_tiebreak_1",
+      "standings_tiebreak_2",
+      "standings_tiebreak_3",
+      "picklebreaker_win_points",
+      "picklebreaker_loss_points",
+      "default_lines_config",
+      "team_dupr_max",
+      "playoff_team_count",
+      "score_sheet_template_id",
+      "primary_team_type",
+      "secondary_number_of_lines",
+      "secondary_team_type",
+      "flex_league"
+    ]
+  },
+  "divisionLine": {
+    "table": "division_lines",
+    "columns": [
+      "id",
+      "division_id",
+      "line_number",
+      "line_name",
+      "posted_to_dupr",
+      "game_format",
+      "games_per_line",
+      "points_to_win",
+      "win_by",
+      "picklebreaker_enabled",
+      "picklebreaker_points",
+      "line_type",
+      "sort_order",
+      "picklebreaker_win_points",
+      "picklebreaker_loss_points",
+      "team_win_points",
+      "uses_saved_match_lineups",
+      "standings_points_mode",
+      "score_type",
+      "score_required",
+      "picklebreaker_not_played_points",
+      "picklebreaker_not_played_award_rule",
+      "picklebreaker_play_rule"
+    ]
+  },
+  "location": {
+    "table": "locations",
+    "columns": [
+      "id",
+      "name",
+      "address",
+      "city",
+      "state",
+      "zip_code",
+      "number_of_courts",
+      "court_notes",
+      "club_pros",
+      "is_active",
+      "club_pro_member_id",
+      "club_pro_2_member_id"
+    ]
+  },
+  "match": {
+    "table": "matches",
+    "columns": [
+      "id",
+      "league_id",
+      "division_id",
+      "home_team_id",
+      "away_team_id",
+      "location_id",
+      "scheduled_date",
+      "scheduled_time",
+      "week_number",
+      "status",
+      "home_score",
+      "away_score",
+      "notes",
+      "published_at",
+      "is_published",
+      "schedule_setting_id",
+      "winning_team_id",
+      "score_status",
+      "score_entered_by_member_id",
+      "score_entered_at",
+      "score_verified_by_member_id",
+      "score_verified_at",
+      "score_disputed",
+      "score_dispute_notes",
+      "finalized_at",
+      "score_exported_at",
+      "result_type",
+      "result_notes"
+    ]
+  },
+  "matchLine": {
+    "table": "match_lines",
+    "columns": [
+      "id",
+      "match_id",
+      "division_line_id",
+      "line_number",
+      "home_player_1_id",
+      "home_player_2_id",
+      "away_player_1_id",
+      "away_player_2_id",
+      "line_status",
+      "home_wins",
+      "away_wins",
+      "posted_to_dupr",
+      "winning_team_id",
+      "verification_status",
+      "verified_by_member_id",
+      "verified_at",
+      "home_team_games_won",
+      "away_team_games_won",
+      "home_team_points",
+      "away_team_points",
+      "rating_type_at_play",
+      "home_player_1_rating_at_play",
+      "home_player_2_rating_at_play",
+      "away_player_1_rating_at_play",
+      "away_player_2_rating_at_play",
+      "home_team_rating_at_play",
+      "away_team_rating_at_play",
+      "ratings_snapshotted_at"
+    ]
+  },
+  "game": {
+    "table": "line_games",
+    "columns": [
+      "id",
+      "match_line_id",
+      "game_number",
+      "home_score",
+      "away_score",
+      "is_picklebreaker",
+      "game_status"
+    ]
+  },
+  "lineup": {
+    "table": "match_lineups",
+    "columns": [
+      "id",
+      "match_id",
+      "team_id",
+      "line_number",
+      "player_1_member_id",
+      "player_2_member_id"
+    ]
+  },
+  "bye": {
+    "table": "team_byes",
+    "columns": [
+      "id",
+      "league_id",
+      "division_id",
+      "team_id",
+      "week_number",
+      "bye_date"
+    ]
+  },
+  "standing": {
+    "table": "team_standings",
+    "columns": [
+      "id",
+      "league_id",
+      "division_id",
+      "team_id",
+      "matches_played",
+      "match_wins",
+      "match_losses",
+      "match_ties",
+      "line_wins",
+      "line_losses",
+      "line_ties",
+      "game_wins",
+      "game_losses",
+      "points_for",
+      "points_against",
+      "point_differential",
+      "standings_points",
+      "rank",
+      "home_wins",
+      "home_losses",
+      "away_wins",
+      "away_losses",
+      "current_streak",
+      "recent_form",
+      "finalized"
+    ]
+  },
+  "scoreTemplate": {
+    "table": "score_sheet_templates",
+    "columns": [
+      "id",
+      "name",
+      "description",
+      "sheet_title",
+      "template_html",
+      "rules_text",
+      "is_default",
+      "is_active"
+    ]
+  },
+  "scheduleSetting": {
+    "table": "league_schedule_settings",
+    "columns": [
+      "id",
+      "league_id",
+      "division_id",
+      "name",
+      "season_start_date",
+      "season_end_date",
+      "default_match_day",
+      "default_match_time",
+      "matches_per_team",
+      "allow_byes",
+      "schedule_status",
+      "notes",
+      "courts_needed_per_match",
+      "lines_playing",
+      "games_per_line",
+      "every_other_week",
+      "actual_schedule_weeks"
+    ]
+  },
+  "courtAvailability": {
+    "table": "location_court_availability",
+    "columns": [
+      "id",
+      "location_id",
+      "day_of_week",
+      "specific_date",
+      "start_time",
+      "end_time",
+      "courts_available",
+      "is_blackout",
+      "notes",
+      "courts_unavailable"
+    ]
+  },
+  "blackout": {
+    "table": "league_blackout_dates",
+    "columns": [
+      "id",
+      "league_id",
+      "division_id",
+      "blackout_date",
+      "reason"
+    ]
+  },
+  "importBatch": {
+    "table": "member_import_batches",
+    "columns": [
+      "id",
+      "file_name",
+      "total_rows",
+      "created_at",
+      "imported_by_member_id",
+      "inactive_members",
+      "source",
+      "new_members",
+      "updated_members",
+      "skipped_rows",
+      "notes"
+    ]
+  },
+  "setting": {
+    "table": "system_settings",
+    "columns": [
+      "setting_key",
+      "setting_value"
+    ]
+  }
+}

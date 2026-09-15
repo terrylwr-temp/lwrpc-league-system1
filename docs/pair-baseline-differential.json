@@ -1,0 +1,61 @@
+{
+  "baseline": {
+    "totals": [
+      "\u2139 tests 1296",
+      "\u2139 pass 1277",
+      "\u2139 fail 19",
+      "\u2139 duration_ms 224893.8145"
+    ],
+    "failures": [
+      "0717 final Rule 3.5 wins over high-ranked real procedural/host/server distractors; no sentence or rule-id hardcoding",
+      "0717 final general eligibility through player path: Can I join a team in another community?",
+      "0717 final general eligibility through player path: Can I play for another community if my community already has a team in my division?",
+      "0717 final general eligibility through player path: Can I play for another community if my community does not have a team in my division?",
+      "0717 final general eligibility through player path: Can I play for another community's team?",
+      "0717 final general eligibility through player path: Can I play for another community?",
+      "0717 final general eligibility through player path: Can I play on a team from a different community?",
+      "0717 final general eligibility through player path: Can players from different communities form a team?",
+      "0717 final general eligibility through player path: Do I have to play for the community where I live?",
+      "0717 final general eligibility through player path: What are the eligibility rules for joining another community's team?",
+      "0717 final real model transport preserves community condition and referee scope instructions",
+      "0725 formerly missing evidence is selected from current sources with all distinct rating requirements",
+      "0725 policy operation: When does my Season DUPR lock?",
+      "0725 policy operation: When is Season DUPR established?",
+      "0725 policy operation: When is my PrimeTime Season DUPR established?",
+      "0725 policy operation: When is my Season DUPR established?",
+      "0725 policy operation: When is my Season DUPR locked?",
+      "0725 policy operation: When is my Season DUPR set?",
+      "0729 SQL identity, record, feedback and effective View-As"
+    ]
+  },
+  "candidate": {
+    "totals": [
+      "\u2139 tests 1330",
+      "\u2139 pass 1311",
+      "\u2139 fail 19",
+      "\u2139 duration_ms 246846.5307"
+    ],
+    "failures": [
+      "0717 final Rule 3.5 wins over high-ranked real procedural/host/server distractors; no sentence or rule-id hardcoding",
+      "0717 final general eligibility through player path: Can I join a team in another community?",
+      "0717 final general eligibility through player path: Can I play for another community if my community already has a team in my division?",
+      "0717 final general eligibility through player path: Can I play for another community if my community does not have a team in my division?",
+      "0717 final general eligibility through player path: Can I play for another community's team?",
+      "0717 final general eligibility through player path: Can I play for another community?",
+      "0717 final general eligibility through player path: Can I play on a team from a different community?",
+      "0717 final general eligibility through player path: Can players from different communities form a team?",
+      "0717 final general eligibility through player path: Do I have to play for the community where I live?",
+      "0717 final general eligibility through player path: What are the eligibility rules for joining another community's team?",
+      "0717 final real model transport preserves community condition and referee scope instructions",
+      "0725 formerly missing evidence is selected from current sources with all distinct rating requirements",
+      "0725 policy operation: When does my Season DUPR lock?",
+      "0725 policy operation: When is Season DUPR established?",
+      "0725 policy operation: When is my PrimeTime Season DUPR established?",
+      "0725 policy operation: When is my Season DUPR established?",
+      "0725 policy operation: When is my Season DUPR locked?",
+      "0725 policy operation: When is my Season DUPR set?",
+      "0729 SQL identity, record, feedback and effective View-As"
+    ]
+  },
+  "candidateOnly": []
+}

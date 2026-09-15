@@ -1,0 +1,7 @@
+
+C:\lwrpc-league-system\lwrpc-admin\scripts\lms0725-authorized-model-validation.mjs
+  7:8  warning  'selectAnswerEvidence' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  8:8  warning  'selectPolicyEvidence' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

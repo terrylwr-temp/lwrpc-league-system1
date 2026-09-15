@@ -1,0 +1,86 @@
+{
+  "commit": "7c0e5c7c1fff3803f6b3c2593175dd5ef11c9037",
+  "deployment": "dpl_8YTFfmCy1VF4thuJoRMd2X9R49T1",
+  "url": "https://lwrpc-admin-pu7j1yigf-terry-lwrpc.vercel.app",
+  "productionDomain": "https://league.lwrpickleballclub.com",
+  "rollback": "dpl_7TPb3ZXyPMpPrgMy35CEpDH4cvSd",
+  "before": [
+    {
+      "verification": {
+        "auth": "680ee7fe4140554b81a4acccf32aeecc",
+        "roles": "e59cd514e095cd38f8ae1bcc74515702",
+        "teams": "745cd4d3c873ce77d6da32317c035a9a",
+        "ratings": "ec36e89e097654e553e2f63e51b27a6b",
+        "rosters": "d751713988987e9331980363e24189ce",
+        "allMembers": "eedcc2f2115288ea1e0f78099f76dd52",
+        "importRows": "64107a3a2ebc291d98dbacbf72de4d84",
+        "importBatches": "72992ca2647299bb98f0adde7c607f20",
+        "memberNonDupr": {
+          "43e1e363-82f1-47d7-a869-befed4c967b8": "8b39c965f43d67d5f2de378cf16e5fa4",
+          "a6cc5885-f6da-41f2-8bdc-88596b176d96": "809277dc0591c633192405179271f80b"
+        },
+        "tournamentContacts": "91091a3e02b83df5d9b972819eb9b9f9",
+        "otherDuplicateMembers": "ca71e27c24ff6090977d88995c544413"
+      }
+    }
+  ],
+  "after": [
+    {
+      "verification": {
+        "auth": "680ee7fe4140554b81a4acccf32aeecc",
+        "roles": "e59cd514e095cd38f8ae1bcc74515702",
+        "teams": "87c78f1e593e95fe06110f06726850dc",
+        "ratings": "ec36e89e097654e553e2f63e51b27a6b",
+        "rosters": "d751713988987e9331980363e24189ce",
+        "allMembers": "eedcc2f2115288ea1e0f78099f76dd52",
+        "importRows": "64107a3a2ebc291d98dbacbf72de4d84",
+        "importBatches": "72992ca2647299bb98f0adde7c607f20",
+        "memberNonDupr": {
+          "43e1e363-82f1-47d7-a869-befed4c967b8": "8b39c965f43d67d5f2de378cf16e5fa4",
+          "a6cc5885-f6da-41f2-8bdc-88596b176d96": "809277dc0591c633192405179271f80b"
+        },
+        "tournamentContacts": "91091a3e02b83df5d9b972819eb9b9f9",
+        "otherDuplicateMembers": "ca71e27c24ff6090977d88995c544413"
+      }
+    }
+  ],
+  "beforePreviewHistory": [
+    {
+      "verification": {
+        "ratings_workflow_private.runs": "6b616034a9a9bfa9851e7f14d1e70878",
+        "ratings_source_private.batches": "3b5aff0e1e40d4599f292375761d7aff",
+        "ratings_source_private.sources": "4bb1d1d6e9faae6183f1b84fa263486f",
+        "ratings_workflow_private.input_state": "1131d7cdb52cd842768d7b80f019d323",
+        "ratings_initialization_private.batches": "d751713988987e9331980363e24189ce",
+        "ratings_initialization_private.provenance": "d751713988987e9331980363e24189ce"
+      }
+    }
+  ],
+  "afterPreviewHistory": [
+    {
+      "verification": {
+        "ratings_workflow_private.runs": "6b616034a9a9bfa9851e7f14d1e70878",
+        "ratings_source_private.batches": "3b5aff0e1e40d4599f292375761d7aff",
+        "ratings_source_private.sources": "4bb1d1d6e9faae6183f1b84fa263486f",
+        "ratings_workflow_private.input_state": "1131d7cdb52cd842768d7b80f019d323",
+        "ratings_initialization_private.batches": "d751713988987e9331980363e24189ce",
+        "ratings_initialization_private.provenance": "d751713988987e9331980363e24189ce"
+      }
+    }
+  ],
+  "preview": {
+    "ambiguousRows": 11,
+    "example": "Barbara Ritter QP7W65: REVIEW Ambiguous DUPR identity; no proposed rating fields",
+    "terry": "READY TO IMPORT 4.0 / 100 / 4.3",
+    "importCommitted": false,
+    "cleanRun": false
+  },
+  "concurrentTeamEdit": {
+    "id": "b6792f17-c1de-4bc2-9e90-b7c352e189ac",
+    "name": "Dill With It (Windward)",
+    "updatedAt": "2026-09-11T16:29:53.567Z",
+    "ownerConfirmation": "Yes, intentional edit"
+  },
+  "status": "PRODUCTION ACCEPTED",
+  "productionBusinessDataMutationsByThisTask": 0
+}

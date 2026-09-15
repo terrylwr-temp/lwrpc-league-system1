@@ -1,0 +1,10 @@
+{
+  "purpose": "Permanent acceptance expectations implemented with the approved correction; append to Q01-Q99. Q51/Q52/Q53/Q55 retain the other four requested contrasts.",
+  "cases": [
+    {"id":"Q100","question":"How is my Season DUPR determined?","expectedRoute":"DOCUMENT","expectedKind":"answer","personalDataReads":0},
+    {"id":"Q101","question":"When is Season DUPR locked?","expectedRoute":"DOCUMENT","expectedKind":"answer","personalDataReads":0},
+    {"id":"Q102","question":"Can my Season DUPR change during the season?","expectedRoute":"DOCUMENT","expectedKind":"answer","personalDataReads":0},
+    {"id":"Q103","question":"When is my PrimeTime Season DUPR established?","expectedRoute":"DOCUMENT","expectedKind":"answer","personalDataReads":0}
+  ],
+  "telemetryControls": ["Q23 four-source metadata accepted","Q36 three-source metadata accepted","identical replay retains one outcome","payload construction failure classification","RPC failure classification","deadline classification","successful answer survives persistence failure","exact source ranges remain separate","View-As diagnostic isolation","no personal values or raw errors in operational logs"]
+}

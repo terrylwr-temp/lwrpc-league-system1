@@ -48,3 +48,11 @@ npm run build
 ```
 
 The app currently builds successfully, but lint has warnings that should be reduced over time.
+
+## Permanent live-production protection
+
+Read and follow docs/live-lms-production-protection.md for LMS-0726 and every future release. Normal Tier 1 league workflows and business data take priority over new features. Test normal LMS first; preserve exact accepted behavior, require explicit authorization for business-data changes, and retain tested application/database recovery paths. Never create production test rows or mutate live scores, schedules or rosters for acceptance without explicit authorization. Keep unrelated security hardening in a separately reviewed release.
+
+## FAST FIX lane
+
+Read and follow `docs/lms-fast-fix-workflow.md` for small, localized application defects. The owner authorizes direct application deployment and targeted production replay after all FAST FIX gates pass, without separate design/implementation approval. Stop for review at any listed escalation condition; production business-data mutation is never included.

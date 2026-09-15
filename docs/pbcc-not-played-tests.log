@@ -1,0 +1,21 @@
+(node:12760) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/roundRobinSchedule.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ not played stores null scores even when stale numeric inputs are sent (139.3199ms)
+✔ reopen retains blank scheduled state and ordinary scores still complete (64.352ms)
+✔ DUPR export lock denies not played and reopening before any writes (72.0336ms)
+✔ failed result write does not rebuild results or return success (31.7051ms)
+✔ round completion accepts not played but blocks unmarked blank games (66.188ms)
+✔ mark cancellation and failure preserve local input; success clears it (145.0681ms)
+✔ not played contributes no games, wins, losses or points (11.615ms)
+✔ DUPR export omits not played games and retains scored games (42.6516ms)
+✔ court displays persisted not played with blank disabled inputs and reopening control (74.4ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1103.1626

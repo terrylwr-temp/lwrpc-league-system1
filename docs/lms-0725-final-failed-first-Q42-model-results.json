@@ -1,0 +1,269 @@
+{
+  "recordedAt": "2026-09-08T15:31:55.093Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q42",
+      "question": "Do regular PrimeTime games use Rally Scoring?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+          "pageNumber": 4,
+          "ruleNumber": "5",
+          "excerptItems": [
+            {
+              "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 896,
+              "end": 1067,
+              "pageNumber": 4,
+              "ruleNumber": "5.3",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 171,
+              "sha256": "61ecccd46ccbc50a3f74d4c29809fc7c8c8d9a978771fd48309e2dbc4ad20bca"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+          "pageNumber": 5,
+          "ruleNumber": "5",
+          "excerptItems": [
+            {
+              "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 124,
+              "pageNumber": 5,
+              "ruleNumber": "5",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 124,
+              "sha256": "4b27973bca7fed12212426c00d19c84c72504465cec461db0256cae32e9b591d"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "4193818c-5dcb-4ee6-9f03-249f18d5d38c",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.6",
+          "excerptItems": [
+            {
+              "chunkId": "4193818c-5dcb-4ee6-9f03-249f18d5d38c",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 162,
+              "pageNumber": 12,
+              "ruleNumber": "6.3.6",
+              "applicability": {
+                "role": "express_format",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "3da3f281-eb8d-4bd2-8904-700a122e3462",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 162,
+              "sha256": "ac239de0013242c98c03f1b1fba572632c6964e6535f1165c7773acc259f1e05"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "413ec35d-6bf2-4f72-a753-f20b2246abb3",
+          "pageNumber": 13,
+          "ruleNumber": "6.3.6",
+          "excerptItems": [
+            {
+              "chunkId": "413ec35d-6bf2-4f72-a753-f20b2246abb3",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 319,
+              "pageNumber": 13,
+              "ruleNumber": "6.3.6",
+              "applicability": {
+                "role": "express_format",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "3da3f281-eb8d-4bd2-8904-700a122e3462",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 319,
+              "sha256": "9b930b177a81a6a76f871e0b614e77def4bf53f462d731c87a2e9951b3fba974"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 4392,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "No. Regular PrimeTime games use the governing default scoring method: Standard Scoring, unless a particular game or match format expressly requires Rally Scoring.\n\nThe PrimeTime Rally Scoring exception is limited to the Picklebreaker™ only: when the PrimeTime match is tied 2–2 after all preceding rounds, the Picklebreaker™ is one game to 15, win by 2, using Rally Scoring.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2967,
+        "sourceResolutionMs": 5,
+        "totalMs": 2992,
+        "inputTokens": 2465,
+        "outputTokens": 150,
+        "totalTokens": 2615,
+        "estimatedGenerationCostUsd": 0.016825
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.3 — Point Scoring Methods — Page 4",
+          "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+          "pageNumber": 4,
+          "ruleNumber": "5.3",
+          "excerptItems": [
+            {
+              "chunkId": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 896,
+              "end": 1067,
+              "pageNumber": 4,
+              "ruleNumber": "5.3",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5 — Page 5",
+          "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+          "pageNumber": 5,
+          "ruleNumber": "5",
+          "excerptItems": [
+            {
+              "chunkId": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 124,
+              "pageNumber": 5,
+              "ruleNumber": "5",
+              "applicability": {
+                "role": "default"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.6 — Page 12",
+          "chunkId": "4193818c-5dcb-4ee6-9f03-249f18d5d38c",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.6",
+          "excerptItems": [
+            {
+              "chunkId": "4193818c-5dcb-4ee6-9f03-249f18d5d38c",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 162,
+              "pageNumber": 12,
+              "ruleNumber": "6.3.6",
+              "applicability": {
+                "role": "express_format",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "3da3f281-eb8d-4bd2-8904-700a122e3462",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.6 — Page 13",
+          "chunkId": "413ec35d-6bf2-4f72-a753-f20b2246abb3",
+          "pageNumber": 13,
+          "ruleNumber": "6.3.6",
+          "excerptItems": [
+            {
+              "chunkId": "413ec35d-6bf2-4f72-a753-f20b2246abb3",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 319,
+              "pageNumber": 13,
+              "ruleNumber": "6.3.6",
+              "applicability": {
+                "role": "express_format",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "3da3f281-eb8d-4bd2-8904-700a122e3462",
+                  "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+                  "start": 0,
+                  "end": 26,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

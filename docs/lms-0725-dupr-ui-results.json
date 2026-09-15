@@ -1,0 +1,80 @@
+[
+  {
+    "mode": "normal",
+    "width": 1440,
+    "limitation": true,
+    "combinedChoices": true,
+    "keyboardSelection": true,
+    "resolvedQuestion": true,
+    "missingData": true,
+    "newQuestionReset": true,
+    "noOverflow": true,
+    "effectiveContextOnly": false,
+    "errors": []
+  },
+  {
+    "mode": "normal",
+    "width": 390,
+    "limitation": true,
+    "combinedChoices": true,
+    "keyboardSelection": true,
+    "resolvedQuestion": true,
+    "missingData": true,
+    "newQuestionReset": true,
+    "noOverflow": true,
+    "effectiveContextOnly": false,
+    "errors": []
+  },
+  {
+    "mode": "normal",
+    "width": 320,
+    "limitation": true,
+    "combinedChoices": true,
+    "keyboardSelection": true,
+    "resolvedQuestion": true,
+    "missingData": true,
+    "newQuestionReset": true,
+    "noOverflow": true,
+    "effectiveContextOnly": false,
+    "errors": []
+  },
+  {
+    "mode": "view-as",
+    "width": 1440,
+    "limitation": true,
+    "combinedChoices": true,
+    "keyboardSelection": true,
+    "resolvedQuestion": true,
+    "missingData": true,
+    "newQuestionReset": true,
+    "noOverflow": true,
+    "effectiveContextOnly": true,
+    "errors": []
+  },
+  {
+    "mode": "view-as",
+    "width": 390,
+    "limitation": true,
+    "combinedChoices": true,
+    "keyboardSelection": true,
+    "resolvedQuestion": true,
+    "missingData": true,
+    "newQuestionReset": true,
+    "noOverflow": true,
+    "effectiveContextOnly": true,
+    "errors": []
+  },
+  {
+    "mode": "view-as",
+    "width": 320,
+    "limitation": true,
+    "combinedChoices": true,
+    "keyboardSelection": true,
+    "resolvedQuestion": true,
+    "missingData": true,
+    "newQuestionReset": true,
+    "noOverflow": true,
+    "effectiveContextOnly": true,
+    "errors": []
+  }
+]

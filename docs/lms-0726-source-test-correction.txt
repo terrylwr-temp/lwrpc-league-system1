@@ -1,0 +1,56 @@
+(node:16236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Document-only What are the requirements for DUPR5? (13.5823ms)
+✔ Document-only What DUPR range is allowed in DUPR5? (4.206ms)
+✔ Document-only How does NR work for DUPR5? (3.8224ms)
+✔ Hybrid Can I play on a DUPR5 team? (2.6056ms)
+✔ Hybrid Am I eligible for DUPR5? (2.6697ms)
+✔ Existing document policy When is my Season DUPR established? (3.2606ms)
+✔ Existing document policy Can my Season DUPR change during the season? (1.4912ms)
+✔ Existing document policy How does NR eligibility work? (1.8532ms)
+✔ Existing document policy What does the Reliability Factor rule say? (1.4923ms)
+✔ Existing Live SELF_RATING remains live-only (0.6881ms)
+✔ Authorized missing RF is consulted and hybrid but UNKNOWN (2.9817ms)
+✔ No successful personal inputs: denied (0.4776ms)
+✔ No successful personal inputs: not_found (1.2571ms)
+✔ No successful personal inputs: rate_limited (0.3464ms)
+✔ No successful personal inputs: unsupported (0.3344ms)
+✔ No successful personal inputs: ambiguous (0.5976ms)
+✔ No successful personal inputs: no_season (2.3489ms)
+✔ Planned personal access not performed Can I play PrimeTime 9? (2.6466ms)
+✔ Planned personal access not performed Can I play DUPR7? (0.2853ms)
+✔ Planned personal access not performed Can I play SDUPR5? (0.093ms)
+✔ Failed source validation cannot claim successful personal comparison (0.4184ms)
+✔ View-As uses identical trusted source classifications with no role inference (10.5933ms)
+✔ Source metadata contains no private values or member identifiers (2.9113ms)
+✔ Privacy history is independent of document-only badge and stale result.live (2.9829ms)
+✔ Normal and View-As UI use shared presentation and avoid hardcoded eligibility LIVE banner (1.4022ms)
+✔ Actual player Exchange markup renders official/hybrid/live badges and timestamp truthfully (30.7457ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When is my Season DUPR established? (3.2599ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When is my Season DUPR locked? (1.2181ms)
+✔ Actual document adapter, serialization, render and telemetry parity: Can my Season DUPR change during the season? (1.3284ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When can I start entering my roster? (1.0519ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When does the Women's Weekday DUPR League start? (1.522ms)
+✔ Actual document adapter, serialization, render and telemetry parity: What date is age based on for PrimeTime? (1.2431ms)
+✔ Actual document adapter, serialization, render and telemetry parity: Does the Weekday DUPR League use Rally Scoring? (1.3729ms)
+✔ Actual document adapter, serialization, render and telemetry parity: How does Rally Scoring work? (1.0722ms)
+✔ Trusted document processing family league_rules (0.4192ms)
+✔ Trusted document processing family usap_rulebook (0.3353ms)
+✔ Trusted document processing family important_dates (0.2493ms)
+✔ Trusted document processing family approved_answer (0.252ms)
+✔ Mixed official document families retain telemetry distinction and document badge (0.2849ms)
+✔ Non-success document processing has no successful source badge: insufficient_evidence (0.1693ms)
+✔ Non-success document processing has no successful source badge: conflict (0.1601ms)
+✔ Manager document response propagates identical trusted provenance (1.1964ms)
+✔ Live roster stays Live even with arbitrary prose or source citations (0.1028ms)
+✔ Actual manager renderer handles policy eligibility, hybrid and Live without legacy document fields (27.9785ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 44
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 729.1696

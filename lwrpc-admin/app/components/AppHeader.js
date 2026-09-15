@@ -1,13 +1,14 @@
 "use client";
+import {displaySystemSettings} from "../lib/viewAsPageState.js";
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { supabase } from "../lib/auth";
+import { supabase, getCurrentMemberRows } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
-import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
+import { highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 import { saveProfilePhoto } from "../lib/profilePhotos";
 import { APP_VERSION } from "../lib/version";
 import { isNavigationPathActive } from "../lib/navigationActiveState";
@@ -118,18 +119,17 @@ export default function AppHeader({
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) return;
-      const { data: memberRows } = await findMembersByEmail(supabase, user.email, "id, first_name, last_name, email, phone, club_location, dupr_id, renewal_date, is_active_member, profile_image_urls, user_roles(role)");
+      const { data: memberRows, user } = await getCurrentMemberRows( "id, first_name, last_name, email, phone, club_location, dupr_id, renewal_date, is_active_member, profile_image_urls, user_roles(role)");
       const { activeMembers, duplicateCount, hasDuplicateMemberships, selectedMember } = memberEmailResolution(memberRows);
-      const selected = selectedMember || { email: user.email, profile_image_urls: [] };
+      if (!memberRows && !user?.email) return;
+      const selected = selectedMember || { email: user?.email, profile_image_urls: [] };
       setMember(selected);
       setRole(highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [selected]));
       setMemberEmailIssue(hasDuplicateMemberships ? { count: duplicateCount, selectedName: memberDisplayName(selected) } : null);
     }
 
     async function loadSettings() {
-      const response = await fetch("/api/system-settings");
+      const response = await displaySystemSettings();
       const result = await response.json().catch(() => ({}));
       if (result.settings) {
         const nextSettings = mergeSystemSettings(result.settings);

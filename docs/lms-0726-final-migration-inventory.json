@@ -1,0 +1,79 @@
+{
+  "file": "lwrpc-admin\\supabase\\migrations\\20260909014356_lms0726_view_as_real_ui_reads.sql",
+  "sha256": "690f3c2777f760b84fee2b756ef64060c844924ded304d7ae22344e015d28125",
+  "functions": [
+    [
+      "lms_read_private.lock_viewer",
+      "p_proof jsonb,p_contract text,p_args jsonb"
+    ],
+    [
+      "lms_read_private.competition",
+      "p_viewer jsonb,p_contract text,p_args jsonb"
+    ],
+    [
+      "lms_read_private.people",
+      "p_viewer jsonb,p_contract text,p_args jsonb"
+    ],
+    [
+      "view_as_private.page_read",
+      "p_proof jsonb,p_contract text,p_args jsonb"
+    ],
+    [
+      "public.lms_view_as",
+      "p_op text,p_input jsonb"
+    ]
+  ],
+  "aclOwnershipSchemaPolicies": [
+    "create schema if not exists lms_read_private;",
+    "revoke all on schema lms_read_private from public,anon,authenticated,service_role;",
+    "grant usage on schema lms_read_private,view_as_private,public to lms_view_as_reader;",
+    "grant select(abbreviation,end_date,id,is_active,name,start_date) on public.seasons to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.seasons for select to lms_view_as_reader using(true);",
+    "grant select(abbreviation,captains_guide_pdf_path,code_of_conduct_pdf_path,description,flex_league,id,is_active,league_document_bucket,league_rules_pdf_path,league_waiver_pdf_path,match_setup_reminder_days_before,name,only_home_community_players,rosters_locked,score_sheet_pdf_path,season_id) on public.leagues to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.leagues for select to lms_view_as_reader using(true);",
+    "grant select(default_game_format,default_lines_config,flex_league,games_per_line,id,is_active,league_id,line_notes,max_dupr,min_dupr,name,number_of_lines,picklebreaker_enabled,picklebreaker_loss_points,picklebreaker_points,picklebreaker_win_points,playoff_team_count,points_to_win,primary_team_type,rating_type,score_sheet_template_id,secondary_number_of_lines,secondary_team_type,skill_level,sort_order,standings_loss_points,standings_tie_points,standings_tiebreak_1,standings_tiebreak_2,standings_tiebreak_3,standings_win_points,team_dupr_max,third_game_format,win_by) on public.divisions to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.divisions for select to lms_view_as_reader using(true);",
+    "grant select(division_id,game_format,games_per_line,id,line_name,line_number,line_type,picklebreaker_enabled,picklebreaker_loss_points,picklebreaker_not_played_award_rule,picklebreaker_not_played_points,picklebreaker_play_rule,picklebreaker_points,picklebreaker_win_points,points_to_win,posted_to_dupr,score_required,score_type,sort_order,standings_points_mode,team_win_points,uses_saved_match_lineups,win_by) on public.division_lines to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.division_lines for select to lms_view_as_reader using(true);",
+    "grant select(address,city,club_pro_2_member_id,club_pro_member_id,club_pros,court_notes,id,is_active,name,number_of_courts,state,zip_code) on public.locations to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.locations for select to lms_view_as_reader using(true);",
+    "grant select(description,id,is_active,is_default,name,rules_text,sheet_title,template_html) on public.score_sheet_templates to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.score_sheet_templates for select to lms_view_as_reader using(true);",
+    "grant select(abbreviation,captain_member_id,club_pro_member_id,co_captain_2_member_id,co_captain_member_id,division_id,home_location_id,id,is_active,name,notes,team_number) on public.teams to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.teams for select to lms_view_as_reader using(true);",
+    "grant select(away_score,away_team_id,division_id,finalized_at,home_score,home_team_id,id,is_published,league_id,location_id,published_at,result_notes,result_type,schedule_setting_id,scheduled_date,scheduled_time,score_disputed,score_entered_at,score_exported_at,score_status,score_verified_at,status,week_number,winning_team_id) on public.matches to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.matches for select to lms_view_as_reader using(true);",
+    "grant select(away_player_1_id,away_player_1_rating_at_play,away_player_2_id,away_player_2_rating_at_play,away_team_games_won,away_team_points,away_team_rating_at_play,away_wins,division_line_id,home_player_1_id,home_player_1_rating_at_play,home_player_2_id,home_player_2_rating_at_play,home_team_games_won,home_team_points,home_team_rating_at_play,home_wins,id,line_number,line_status,match_id,posted_to_dupr,rating_type_at_play,ratings_snapshotted_at,verification_status,verified_at,verified_by_member_id,winning_team_id) on public.match_lines to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.match_lines for select to lms_view_as_reader using(true);",
+    "grant select(away_score,game_number,game_status,home_score,id,is_picklebreaker,match_line_id) on public.line_games to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.line_games for select to lms_view_as_reader using(true);",
+    "grant select(id,line_number,match_id,player_1_member_id,player_2_member_id,team_id) on public.match_lineups to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.match_lineups for select to lms_view_as_reader using(true);",
+    "grant select(bye_date,division_id,id,league_id,team_id,week_number) on public.team_byes to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.team_byes for select to lms_view_as_reader using(true);",
+    "grant select(away_losses,away_wins,current_streak,division_id,finalized,game_losses,game_wins,home_losses,home_wins,id,league_id,line_losses,line_ties,line_wins,match_losses,match_ties,match_wins,matches_played,point_differential,points_against,points_for,rank,recent_form,standings_points,team_id) on public.team_standings to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.team_standings for select to lms_view_as_reader using(true);",
+    "grant select(id,is_active,member_id,role,team_id) on public.team_members to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.team_members for select to lms_view_as_reader using(true);",
+    "grant select(club_location,dupr_id,email,first_name,full_name,id,is_active_member,last_name,location_id,membership_status,notification_preference,phone,profile_image_urls,renewal_date,self_rating) on public.members to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.members for select to lms_view_as_reader using(true);",
+    "grant select(dupr_doubles_rating,member_id,season_dupr_rating,season_id,season_primetime_rating) on public.member_season_ratings to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.member_season_ratings for select to lms_view_as_reader using(true);",
+    "grant select(member_id,role) on public.user_roles to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.user_roles for select to lms_view_as_reader using(true);",
+    "grant select(setting_key,setting_value) on public.system_settings to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.system_settings for select to lms_view_as_reader using(true);",
+    "grant select(body,template_key) on public.notification_templates to lms_view_as_reader;",
+    "create policy lms0726_internal_page_read on public.notification_templates for select to lms_view_as_reader using(true);",
+    "revoke all on function lms_read_private.lock_viewer(jsonb,text,jsonb) from public,anon,authenticated,service_role,lms_view_as_executor;",
+    "revoke all on function lms_read_private.competition(jsonb,text,jsonb) from public,anon,authenticated,service_role,lms_view_as_executor;",
+    "alter function lms_read_private.competition(jsonb,text,jsonb) owner to lms_view_as_reader;",
+    "revoke all on function lms_read_private.people(jsonb,text,jsonb) from public,anon,authenticated,service_role,lms_view_as_executor;",
+    "alter function lms_read_private.people(jsonb,text,jsonb) owner to lms_view_as_reader;",
+    "revoke all on function view_as_private.page_read(jsonb,text,jsonb) from public,anon,authenticated,service_role,lms_view_as_executor;",
+    "alter function view_as_private.page_read(jsonb,text,jsonb) owner to lms_view_as_reader;",
+    "grant execute on function lms_read_private.lock_viewer(jsonb,text,jsonb) to lms_view_as_reader;",
+    "grant execute on function view_as_private.page_read(jsonb,text,jsonb) to lms_view_as_executor;"
+  ],
+  "scope": "Four new private read functions plus replacement of accepted dispatcher; exact definitions in hashed SQL. No production application."
+}

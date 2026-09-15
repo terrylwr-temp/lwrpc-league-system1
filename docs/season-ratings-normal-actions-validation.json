@@ -1,0 +1,62 @@
+{
+  "base": "9109c716f232f10e9ca1fe612bc5203717accf78",
+  "focused": {
+    "pass": 30,
+    "fail": 0
+  },
+  "full": {
+    "tests": 1217,
+    "pass": 1207,
+    "fail": 10
+  },
+  "baseline": {
+    "tests": 41,
+    "pass": 31,
+    "fail": 10
+  },
+  "sameFailuresAsBaseline": true,
+  "failures": [
+    "✖ 0724 review-only rollback restores prior function and privilege state without data changes",
+    "✖ 0725 formerly missing evidence is selected from current sources with all distinct rating requirements",
+    "✖ 0725 policy operation: When does my Season DUPR lock?",
+    "✖ 0725 policy operation: When is Season DUPR established?",
+    "✖ 0725 policy operation: When is my PrimeTime Season DUPR established?",
+    "✖ 0725 policy operation: When is my Season DUPR established?",
+    "✖ 0725 policy operation: When is my Season DUPR locked?",
+    "✖ 0725 policy operation: When is my Season DUPR set?",
+    "✖ 0728 rollback and partial recovery retain metadata and business data",
+    "✖ 0729 SQL identity, record, feedback and effective View-As"
+  ],
+  "build": "pass",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 6
+  },
+  "types": "pass",
+  "pdf": "pass",
+  "diffCheck": "pass",
+  "sqlChanged": false,
+  "deployed": false,
+  "productionWritesIssued": 0,
+  "browser": {
+    "commits": 0,
+    "cleanPreviews": [
+      29,
+      29
+    ],
+    "audit": [],
+    "sourceRows": 2,
+    "seasonUnchanged": true,
+    "sourceUnchanged": true
+  },
+  "runtime": [
+    {
+      "path": "app/components/SeasonRatingsWorkflow.js",
+      "sha256": "9ed9936daf0040c314bd325e4d7b0043e9f3e7bdfbf8d8786c6b678b9f1da5aa"
+    },
+    {
+      "path": "app/lib/seasonRatingsWorkflowServer.js",
+      "sha256": "45babf608cec733ee938fd60fa793f369f5a908be67d4a417d58358f8b403b3d"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "file": "test/fixtures/lms0726-member-directory.sql",
+    "sha256": "ae4ef47e292fa96ff32de5b402f1f1bb5de2786583287ea6fc45c9ea020a6301",
+    "scope": "fixture/test infrastructure only"
+  },
+  {
+    "file": "test/helpers/fixtureRpcManifest.mjs",
+    "sha256": "6a036af1c4e401b432a0eec2c0fbe28987bd6bfed26fb22c5b4b3e03880dd343",
+    "scope": "fixture/test infrastructure only"
+  },
+  {
+    "file": "test/lms0726MemberDirectoryFixture.test.mjs",
+    "sha256": "fde7a6949b30f8906b79b00f632d5d963e8699d291bea7081ba6c27a0a414a1b",
+    "scope": "fixture/test infrastructure only"
+  },
+  {
+    "file": "scripts/lms0726-safety-rehearsal.mjs",
+    "sha256": "1b5bfd2789c22a005d525dcaa3699f3d10668194d41582b83cf1a3babd88ed40",
+    "scope": "fixture/test infrastructure only"
+  },
+  {
+    "file": "scripts/lms0726-member-api-check.mjs",
+    "sha256": "287eb9c6cc852937618929b9116d15f5097180bca838b2d2c577ac1c0a1ba964",
+    "scope": "fixture/test infrastructure only"
+  },
+  {
+    "file": "scripts/lms0726-member-rollback-postgres.mjs",
+    "sha256": "a19dd34f7f9ce7f09e50b43c65ab6b9389aedb8028f8d1720d7e2bb66e731eaa",
+    "scope": "fixture/test infrastructure only"
+  }
+]

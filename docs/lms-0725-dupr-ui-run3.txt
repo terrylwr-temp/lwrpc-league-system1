@@ -1,0 +1,29 @@
+(node:32288) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+RESULT normal 1440 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT normal 1440 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+RESULT normal 1440 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT normal 1440 {"kind":"answer","answer":"You don't currently have a PrimeTime Season DUPR recorded for 2026 Fall Season."}
+RESULT normal 390 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT normal 390 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+RESULT normal 390 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT normal 390 {"kind":"answer","answer":"You don't currently have a PrimeTime Season DUPR recorded for 2026 Fall Season."}
+RESULT normal 320 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT normal 320 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+RESULT normal 320 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT normal 320 {"kind":"answer","answer":"You don't currently have a PrimeTime Season DUPR recorded for 2026 Fall Season."}
+RESULT view-as 1440 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT view-as 1440 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+RESULT view-as 1440 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT view-as 1440 {"kind":"answer","answer":"You don't currently have a PrimeTime Season DUPR recorded for 2026 Fall Season."}
+RESULT view-as 390 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT view-as 390 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+RESULT view-as 390 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT view-as 390 {"kind":"answer","answer":"You don't currently have a PrimeTime Season DUPR recorded for 2026 Fall Season."}
+RESULT view-as 320 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT view-as 320 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+RESULT view-as 320 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+RESULT view-as 320 {"kind":"answer","answer":"You don't currently have a PrimeTime Season DUPR recorded for 2026 Fall Season."}
+[{"mode":"normal","width":1440,"limitation":true,"combinedChoices":true,"keyboardSelection":true,"resolvedQuestion":true,"missingData":true,"newQuestionReset":true,"noOverflow":true,"effectiveContextOnly":false,"errors":[]},{"mode":"normal","width":390,"limitation":true,"combinedChoices":true,"keyboardSelection":true,"resolvedQuestion":true,"missingData":true,"newQuestionReset":true,"noOverflow":true,"effectiveContextOnly":false,"errors":[]},{"mode":"normal","width":320,"limitation":true,"combinedChoices":true,"keyboardSelection":true,"resolvedQuestion":true,"missingData":true,"newQuestionReset":true,"noOverflow":true,"effectiveContextOnly":false,"errors":[]},{"mode":"view-as","width":1440,"limitation":true,"combinedChoices":true,"keyboardSelection":true,"resolvedQuestion":true,"missingData":true,"newQuestionReset":true,"noOverflow":true,"effectiveContextOnly":true,"errors":[]},{"mode":"view-as","width":390,"limitation":true,"combinedChoices":true,"keyboardSelection":true,"resolvedQuestion":true,"missingData":true,"newQuestionReset":true,"noOverflow":true,"effectiveContextOnly":true,"errors":[]},{"mode":"view-as","width":320,"limitation":true,"combinedChoices":true,"keyboardSelection":true,"resolvedQuestion":true,"missingData":true,"newQuestionReset":true,"noOverflow":true,"effectiveContextOnly":true,"errors":[]}]

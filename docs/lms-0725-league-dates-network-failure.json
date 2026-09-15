@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-09-08T16:10:27.173Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q64",
+      "question": "when does the women weekday dupr league start",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 54,
+              "sha256": "66b59cb33ee1f1a583c78cfed446b9176598512fad76060f34abe1cdb3e60e8a"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1298,
+      "configuredModel": "gpt-5.5",
+      "status": "failed",
+      "error": {
+        "name": "OfficialAnswerModelError",
+        "category": "api_request_failure",
+        "message": "The answer model request could not be completed."
+      }
+    }
+  ],
+  "stoppedOn": "Q64"
+}

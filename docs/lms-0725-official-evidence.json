@@ -1,0 +1,1263 @@
+{
+  "checkedAt": "2026-09-08T11:29:09.577Z",
+  "method": "Read-only REST GET; no SQL/RPC, no retrieval/model execution. Keyword-filtered active searchable source passages, not Stage 3 rankings.",
+  "documents": [
+    {
+      "id": "1c9bcadf-79b9-4493-b426-3c3e3528766e",
+      "title": "LWR Pickleball Club Code of Conduct",
+      "document_type": "other",
+      "authority_rank": 2,
+      "active_version_id": "1ea2ccf1-598e-4d0c-b0a4-b20f833805f0"
+    },
+    {
+      "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "title": "LWRPC-Players Guide to the LMS",
+      "document_type": "player_guide",
+      "authority_rank": 4,
+      "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+    },
+    {
+      "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+      "title": "LWR Pickleball Club DUPR Captains Guide",
+      "document_type": "captain_guide",
+      "authority_rank": 3,
+      "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+    },
+    {
+      "id": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+      "title": "2026 Fall League Important Dates",
+      "document_type": "league_supplement",
+      "authority_rank": 2,
+      "active_version_id": "f811e60f-9af8-444f-b009-9594a530acd6"
+    },
+    {
+      "id": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "title": "2026 USA Pickleball Official Rulebook",
+      "document_type": "usap_rulebook",
+      "authority_rank": 2,
+      "active_version_id": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+    },
+    {
+      "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "title": "LWR Pickleball Club DUPR League Rules",
+      "document_type": "league_rules",
+      "authority_rank": 1,
+      "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+    },
+    {
+      "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+      "title": "LWRPC-Captains Guide to the LMS",
+      "document_type": "captain_guide",
+      "authority_rank": 3,
+      "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+    }
+  ],
+  "evidence": [
+    {
+      "document": {
+        "id": "1c9bcadf-79b9-4493-b426-3c3e3528766e",
+        "title": "LWR Pickleball Club Code of Conduct",
+        "document_type": "other",
+        "authority_rank": 2,
+        "active_version_id": "1ea2ccf1-598e-4d0c-b0a4-b20f833805f0"
+      },
+      "id": "97d610c5-d262-4982-9b06-305e50e1c4c7",
+      "document_version_id": "1ea2ccf1-598e-4d0c-b0a4-b20f833805f0",
+      "chunk_ordinal": 5,
+      "page_number": 2,
+      "rule_number": "3",
+      "heading": null,
+      "section_label": "Rule 3",
+      "content": "• Finality of Decisions: The President / League Commissioner / League Manager\nholds final authority on all league disputes, roster eligibility, and rule interpretations.\n• Retroactive Adjustments: Roster changes or score corrections are only permitted\nat the discretion of the Commissioner and/or League Manager and must be\nsupported by valid LWR PC data via signed score sheets or other comparable hard\ndocumentation.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+        "title": "LWRPC-Players Guide to the LMS",
+        "document_type": "player_guide",
+        "authority_rank": 4,
+        "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+      },
+      "id": "5137e85a-ab55-4734-ad94-309e922f9e85",
+      "document_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "chunk_ordinal": 7,
+      "page_number": 6,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Player Dashboard Overview\nThe dashboard gives you quick access to your teams, upcoming matches, completed\nmatches, team standings, and your play history. If you are a member of multiple teams,\nselect the correct team under My Team in the sidebar to update the view.\nDashboard Highlights:\n• Top Navigation: At the very top right of the Player Dashboard, you can access the\nPlayer User Guide, email the league, or click the button next to your name to update\nyour profile, change your password, adjust appearance settings, or view your club\nmembership.\n• Sidebar Options: Use the sidebar menu to switch between teams if you belong to\nmore than one, view your personal Play History, and check the Division Schedule\nor Standings. Select League Documents to view all available files for your league.\n• Team Information: The main dashboard gives you immediate access to your next\nmatch, including buttons for match details and posted lineups. You can monitor your\nteam's rank, record, and your personal Season DUPR rating, as well as review\nupcoming schedules and recent results.\n• In the My Team section, click on any captain to send them an email, or select View\nTeam to see the complete player roster with DUPR ratings and individual records.\nPlayer Dashboard Main Screen (Desktop view)",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+        "title": "LWRPC-Players Guide to the LMS",
+        "document_type": "player_guide",
+        "authority_rank": 4,
+        "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+      },
+      "id": "cbb9ff22-5b51-4391-a81d-fc4c08dba6c4",
+      "document_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "chunk_ordinal": 9,
+      "page_number": 8,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Viewing My Teams Information\nIf you are on multiple teams, you can easily switch between them. Go to the sidebar, select\nMy Team, and choose the team you want to see.\nThe team page displays:\n• Next Match: Shows at the top with quick links to Match Details and Match Lineup\n(if available).\n• Team Performance: Displays your team's current record, rank and your personal\nseason DUPR rating.\n• Schedules & Results: Lists of upcoming matches and recent match results.\n• Team Roster: Shows your full roster. Tap or click any captain's card to email them\ndirectly.\n• League Documents: Access all current league files via the sidebar option.\nFor more details, see the sections below on Team Roster, Division Standings, and Team\nMatches.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+        "title": "LWRPC-Players Guide to the LMS",
+        "document_type": "player_guide",
+        "authority_rank": 4,
+        "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+      },
+      "id": "bddfae38-0a1b-47da-b1a4-d66e26bfb479",
+      "document_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "chunk_ordinal": 10,
+      "page_number": 9,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Viewing Your Play History\nMy Play History lets a player review their recorded league match results and performance\nacross the league.\nUse the Play History Scope list to choose which results to view:\n• All Seasons/All Teams\n• A specific season, league, division, or team\nThe page updates immediately to show only results within the selected scope.\nAt the top, summary cards show:\n• Games Played — the number of recorded match-line results in the selected scope.\n• Wins — recorded individual line wins.\n• Losses — recorded individual line losses.\n• Other Category - Tracks non-counting personal games, such as forfeits and\nPicklebreaker matches. Scores Pending — matches whose scores have not yet been\nentered and posted.\nBelow the summary, each match shows the match date, teams, home/away status, season,\nleague, division, lines played, and available game scores. A match that still needs scoring is\nclearly labeled Scores Not Entered rather than being shown as an unclear “Other” result.\nSelect More Player Details in the header to open a separate, scrollable details window. It\nprovides five additional groups of scope-specific information:\n• Matches: wins, losses, and match win percentage.\n• Games: individual game wins, losses, and game win percentage.\n• Points: points earned, points against, and point differential percentage.\n• Ratings: average recorded partner and opponent ratings, plus adjusted and overall\nperformance estimates.\n• Last 5 Matchups: the player’s five most recent results, marked with W or L.\nThe details window is designed for mobile as well as desktop and can be closed without\nchanging the selected History Scope.\n• Mobile Shortcut: Tap the Play History icon in the bottom navigation bar.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+        "title": "LWRPC-Players Guide to the LMS",
+        "document_type": "player_guide",
+        "authority_rank": 4,
+        "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+      },
+      "id": "88ac4f0d-ef1c-4ef2-b0e3-a646fdbcff04",
+      "document_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "chunk_ordinal": 13,
+      "page_number": 11,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Viewing Your Team Roster\nSelect View Team from the \"My Team\" block to see your complete roster.\nThis section displays:\n• Full list of current team members\n• Individual player ratings and season records\n• Player contact information\nViewing Division Standings\nThe Division Standings section shows rankings, records, and point differentials for your\nselected team. You can also view other teams in your division by using the drop-down menu\nin the header.\nTo access the standings:\n• Sidebar: Click Division Standings.\n• Dashboard: Click the Division Rank block located right under your next scheduled\nmatch.\n• Mobile Shortcut: Tap the Standings icon in the bottom navigation bar.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+        "title": "LWRPC-Players Guide to the LMS",
+        "document_type": "player_guide",
+        "authority_rank": 4,
+        "active_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de"
+      },
+      "id": "7d12396b-f172-4180-af01-56a80fbf52ce",
+      "document_version_id": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "chunk_ordinal": 15,
+      "page_number": 13,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Viewing Upcoming Matches\nYour next upcoming match is featured right at the top of your Player Dashboard for quick\naccess. Below, in the Upcoming Schedule block, you can view the rest of your team’s\nscheduled games—click View All if you need to expand the list to see additional matches.\nClick on a match row to view more information about an upcoming match. This popup\nwindow includes a button that opens a map of the playing location.\nAdditionally, each team block on this screen features direct buttons for viewing the\nrespective team rosters.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+      },
+      "id": "40ebde69-5c83-43a5-a6cf-814ea5252dcb",
+      "document_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "chunk_ordinal": 2,
+      "page_number": 1,
+      "rule_number": null,
+      "heading": "DUPR LEAGUE RULES",
+      "section_label": "DUPR LEAGUE RULES",
+      "content": "DUPR LEAGUE RULES\n• The DUPR League Mission and League Rules contain the official policies and requirements for\nteam creation, player eligibility, roster requirements, and specific rules for each of our leagues.\nYou can access the most current version of this document at any time by logging into the LMS and\nselecting League Documents → League Rules from the sidebar menu. The direct link to the current\nleague rules is DUPR League Rules (https://tinyurl.com/LWRPC-DUPRRules).",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+      },
+      "id": "86eab947-3191-4577-9232-bad11214c503",
+      "document_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "chunk_ordinal": 3,
+      "page_number": 1,
+      "rule_number": null,
+      "heading": "LEAGUE MANAGEMENT SYSTEM (LMS) - (CAPTAINS USER GUIDE)",
+      "section_label": "LEAGUE MANAGEMENT SYSTEM (LMS) - (CAPTAINS USER GUIDE)",
+      "content": "LEAGUE MANAGEMENT SYSTEM (LMS) - (CAPTAINS USER GUIDE)\n• Captains User Guide: Everything you need to run your team in the LMS—from roster management\nand match setup to score entry and standings tracking. For step-by-step technical instructions on\nusing the LMS, log in and click the Captains User Guide (question mark icon) in the top header.\n• Getting Started: “League Management System (LMS) – Login Instructions” (Page 6) – Provides\nstep-by-step instructions specifically for logging into the League Management System for the first\ntime.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+      },
+      "id": "6199f5a5-c9a3-4706-bc06-d17faaf4a72e",
+      "document_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "chunk_ordinal": 5,
+      "page_number": 3,
+      "rule_number": null,
+      "heading": "CAPTAIN/CO-CAPTAIN REQUIREMENTS",
+      "section_label": "CAPTAIN/CO-CAPTAIN REQUIREMENTS",
+      "content": "CAPTAIN/CO-CAPTAIN REQUIREMENTS\nEach League team must have a designated Captain. A Captain may also serve as Co-Captain on\nanother team and may captain a team in the opposite gender category. However, a person may not\ncaptain more than one team within the same gender category. There can be up to two Co-Captains.\nCommunity Team Captains and Co-Captains have “Captain” access to the League Management\nSystem (LMS) at league.lwrpickleballclub.com to manage teams, rosters, schedules, scores, and\noverall league information. (For general club details, visit the main website at lwrpickleballclub.com).\nCaptains are responsible for their team roster, each match date setup including reserving all home\ncourts, recording/validating scores and general team management. Club League Management is\navailable at any time for help with any questions or concerns. See last page for contact information.\nTeam Home Court Expectations: All teams registering for league play are expected to host their share\nof scheduled home matches by providing adequate court availability, resulting in a balanced home-\nand-away schedule whenever possible. If a team cannot reserve enough courts for all its assigned\nhome match dates, additional matches may be scheduled as away games. Teams that are unable to\nprovide any courts due to limitations within their community or facility will play all their scheduled\nmatches as away games.\nAll league players also have access to the LMS through their personal Player Dashboard, where they\ncan view their assigned teams, upcoming and completed matches, team rosters, and standings. It also\nfeatures a full personal play history and quick-click shortcuts to email team captains. Captains can\nalso switch to the Player Dashboard to see their personal league information.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+      },
+      "id": "1b88b1d6-cabd-4aab-ba26-cb0b34aeb1fa",
+      "document_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "chunk_ordinal": 8,
+      "page_number": 5,
+      "rule_number": null,
+      "heading": "HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM)",
+      "section_label": "HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM)",
+      "content": "• Complete all required questions to set up your team. Most of the information you enter, such as\nyour Team Name, Captain, and other team details, can be changed later. This initial information\nwill be used to create and activate your team and associate it with the appropriate community and\nrelated league information.\n• Once you have completed the registration form, click Register My Team! You will then be prompted\nto enter your payment information or, if available, select your current payment method already on\nfile.\n• After completing your registration, you will receive a confirmation email with your team registration\ndetails, important next steps, and upcoming dates and deadlines.\n• League Management will then activate your team and assign you and/or the individuals designated\nduring registration as the Captain and Co-Captain(s). Once this is completed, your initial team\nregistration and setup will be complete.\n• League Management will notify you when team rosters for your league have been unlocked and are\navailable for you to begin adding and managing your players.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+      },
+      "id": "c524d6d2-34d8-41ed-8fd6-40cf4c5e0e09",
+      "document_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "chunk_ordinal": 10,
+      "page_number": 7,
+      "rule_number": null,
+      "heading": "CREATE/UPDATE TEAM ROSTER",
+      "section_label": "CREATE/UPDATE TEAM ROSTER",
+      "content": "CREATE/UPDATE TEAM ROSTER\no Enter or update your player team roster prior to the commencement of each season. Use the\nManage Roster option to add or remove players.\n All players must be active Lakewood Ranch Pickleball Club members before playing. To\njoin, they can visit: https://lwrpickleballclub.com/signup.\n All DUPR League players must have a free DUPR ID which can be created at\nhttps://www.dupr.com.\n All players must join the Lakewood Ranch Pickleball Club DUPR club (free and\nseparate from the LWR PC membership) so we can accurately sync player ratings.\nCaptains should share this link with all players: https://tinyurl.com/LWRPC-DUPRCLUB.\no Roster Requirements & Substitutes: Teams must roster enough players and substitutes (who\nare not already on another team) to field a full lineup weekly. For example, if your match\nrequires 6 players, an 8–10 player roster is recommended. Additional substitutes may be drawn\nfrom other teams in the same community, provided they meet the DUPR division rating\nrequirements. For complete details, see the Player Requirements and DUPR Rating/Divisions\nsections in the DUPR League Mission and Rules.\no Captain Roster Control: Captains are responsible for building their own rosters and may add\nor delete players throughout the season as needed provided the player is a current, valid\nmember of the LWR PC, has a DUPR ID and is eligible for that division.\no Player DUPR Ratings: Season DUPR ratings are updated in the LMS before the season starts\nand remain visible to captains all season. For players added midseason, their rating is based on\nthe date the league's season ratings were originally recorded.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+      },
+      "id": "b49c3579-012f-4b78-8c4d-b5940baef598",
+      "document_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "chunk_ordinal": 12,
+      "page_number": 8,
+      "rule_number": null,
+      "heading": "CAPTAINS NORMAL WEEKLY PROCESS",
+      "section_label": "CAPTAINS NORMAL WEEKLY PROCESS",
+      "content": " Validation: Once the home team enters scores, the opposing captain(s) receives an\nemail to validate or dispute the entry.\n Alternate Entry: By mutual agreement before the match, the visiting team may enter\nscores first, leaving the home team to validate them.\no Detailed Instructions: See the Captains User Guide (accessible via the ? button in the top\nright of any LMS screen) for details regarding using rosters, scoring and the general use of the",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "title": "LWR Pickleball Club DUPR Captains Guide",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d"
+      },
+      "id": "68591ceb-77db-464b-b590-412a886dd372",
+      "document_version_id": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "chunk_ordinal": 18,
+      "page_number": 10,
+      "rule_number": null,
+      "heading": "LEAGUE FEES AND WAIVER",
+      "section_label": "LEAGUE FEES AND WAIVER",
+      "content": "LEAGUE FEES AND WAIVER\no The registration fee is per team, per division, per season, as announced before the season\nbegins. No refunds will be issued starting one week before the season starts, unless a division\nis canceled due to having fewer than the four-team minimum or other league-initiated\ncancelations.\no The League shall provide:\n Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoƯ\nmatches.\n DUPR Uploads: All match results logged to DUPR for rating updates (excluding mixed\nand individual Picklebreaker™ games and some tournament games).\n Administration: All scheduling, website management, and administrative support.\n Championship Prize: Free entry into the following season for the Gold Medal/1st place\nteam in each division based on Championship Day/PlayoƯ results.\no Waiver: As an LWR PC member, you acknowledge the risks of participation and release\nLWR PC, match sites, communities/clubs, and all officers/volunteers from any claims,\nliability, and costs. See the full detailed Waiver here: https://tinyurl.com/LWRPC-ClubWaiver",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "title": "2026 Fall League Important Dates",
+        "document_type": "league_supplement",
+        "authority_rank": 2,
+        "active_version_id": "f811e60f-9af8-444f-b009-9594a530acd6"
+      },
+      "id": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+      "document_version_id": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "chunk_ordinal": 2,
+      "page_number": 1,
+      "rule_number": null,
+      "heading": "Weekday DUPR League Key Dates",
+      "section_label": "Weekday DUPR League Key Dates",
+      "content": "Weekday DUPR League Key Dates\n• Sept. 7, Monday – Open Registration\n• Sept. 27, Sunday – Season DUPR ratings recorded\n• Sept. 28, Monday - Can start updating rosters\n• Oct. 4, Sunday – Last day to register (4 weeks)\n• Oct. 7, Wednesday – Schedules completed and sent\n• Oct. 14 (Women)/15(Men) – Weekday DUPR Season Starts\n• Nov. 25/26 Break Week\n• Dec. 2/3 - End of Regular Season\n• Dec. 9/10 - Championship Days (All 3 lines at the Premier Sports Center - hopefully will\nbe completed!)\nNote: No games the week of Nov. 22 (Thanksgiving Break)",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "title": "2026 Fall League Important Dates",
+        "document_type": "league_supplement",
+        "authority_rank": 2,
+        "active_version_id": "f811e60f-9af8-444f-b009-9594a530acd6"
+      },
+      "id": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+      "document_version_id": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "chunk_ordinal": 3,
+      "page_number": 1,
+      "rule_number": null,
+      "heading": "Saturday DUPR League Key Dates",
+      "section_label": "Saturday DUPR League Key Dates",
+      "content": "Saturday DUPR League Key Dates\n• Sept. 7, Monday – Open Registration\n• Sept. 27, Sunday – Season DUPR ratings recorded\n• Sept. 28, Monday - Can start updating rosters\n• Oct. 4, Sunday – Last day to register\n• Oct. 7, Wednesday – Schedules completed and sent\n• Oct. 17 - Saturday DUPR7 Season Starts\n• Oct. 24 - Saturday DUPR6 / DUPR8 Season Starts\n• Nov. 25 / 26 Break Week\n• Dec. 5 / 12 - Last games of 1st half / break\n• Jan. 9 / 16 - Start of 2nd half\n• Feb. 20 / 27 - End of Regular Season\n• Mar. 6 / 13 - Championship Days (PlayoƯs with top 4 teams)\n• Jamboree - Mar. 20 / 27\nNote:\nNo games the week of Nov. 22 for Thanksgiving Break\nNo games after Dec. 13 – Jan. 8 for Christmas Break",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "title": "2026 Fall League Important Dates",
+        "document_type": "league_supplement",
+        "authority_rank": 2,
+        "active_version_id": "f811e60f-9af8-444f-b009-9594a530acd6"
+      },
+      "id": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+      "document_version_id": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "chunk_ordinal": 4,
+      "page_number": 2,
+      "rule_number": null,
+      "heading": "PrimeTime DUPR League Key Dates",
+      "section_label": "PrimeTime DUPR League Key Dates",
+      "content": "PrimeTime DUPR League Key Dates\n• Sept. 7, Monday – Open Registration\n• Sept. 27, Sunday – Season DUPR ratings recorded\n• Sept. 28, Monday - Can start updating rosters\n• Oct. 4, Sunday – Last day to register (4 weeks)\n• Oct. 7, Wednesday – Schedules completed and sent\n• Oct. 16 - PrimeTime League Starts\n• Nov. 25/26 Break Week\n• Dec. 4 - PrimeTime League Regular Season Ends\n• Dec. 11 - PrimeTime League Championship Day\nNote: No games the week of Nov. 22 (Thanksgiving Break)",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "1b82f518-665d-4bf7-b61f-5b4e34bb57ab",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 4,
+      "page_number": 2,
+      "rule_number": "1",
+      "heading": "CLUB LEAGUE FORMAT",
+      "section_label": "Rule 1",
+      "content": "1. CLUB LEAGUE FORMAT\n1.1. Club main website: https://lwrpickleballclub.com\n1.2. League Management System (LMS) website: https://league.lwrpickleballclub.com\n1.3. There are three seasons: Fall, Winter, and Spring.\n1.4. Each season consists of a multi-week regular play followed by championships/playoƯs.\n1.5. League teams are divided by Divisions based on DUPR ratings.\n1.6. The Leagues consist of:\n1.6.1. Weekday DUPR League – Gender doubles scheduled play during the week\n1.6.2. Saturday League - Gender Doubles/Mixed play using the Picklebreaker™ format\n(every other Saturday)\n1.6.3. PrimeTime League – Gender doubles, aged 65+ scheduled play on Fridays",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "12bd9837-b95f-489c-a4d7-675c7b59f516",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 6,
+      "page_number": 2,
+      "rule_number": "3",
+      "heading": "PLAYER REQUIREMENTS",
+      "section_label": "Rule 3",
+      "content": "3. PLAYER REQUIREMENTS\n3.1. All League players must have a signed/accepted waiver with LWR PC and have a valid\nLWR PC membership. To sign up, go to https://lwrpickleballclub.com/signup/.\n3.2. All DUPR League players must have a free DUPR ID which can be found at:\nhttps://www.dupr.com/.\n3.3. All DUPR League players must join our free DUPR club, which is diƯerent/separate from\nthe LWR PC membership: https://tinyurl.com/LWRPC-DUPRCLUB\n3.4. Players are assigned to a community based on their primary address at the start of the\nseason.\n3.5. Players may form teams with members from other communities; however, they are not\npermitted to play for another community’s team if their own community already has a\nteam in their division and has roster availability for additional players.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 12,
+      "page_number": 4,
+      "rule_number": "4.5.2",
+      "heading": null,
+      "section_label": "Rule 4.5.2",
+      "content": "4.5.2. If a player is rostered on teams in multiple divisions, the highest adjusted Season\nDUPR Rating assigned to that player will be used consistently across all divisions in\nwhich they appear.\n4.6. Team DUPR Rating Requirements: A team's DUPR Rating is calculated by adding the\nSeason DUPR Ratings of both players. Each division has established minimum and\nmaximum individual player ratings, as well as a maximum combined Team DUPR\nRating. These limits are strictly enforced.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "7a09f29b-f9ea-4bb0-99bb-08183b02f94f",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 16,
+      "page_number": 4,
+      "rule_number": "5",
+      "heading": "TEAM/GAME RULES",
+      "section_label": "Rule 5",
+      "content": "5. TEAM/GAME RULES\n5.1. Team Home Court Expectations: All teams registering for league play are expected to\nhost their share of scheduled home matches by providing adequate court availability,\nresulting in a balanced home-and-away schedule whenever possible. If a team cannot\nreserve enough courts for all its assigned home match dates, additional matches may be\nscheduled as away games. Teams that are unable to provide any courts due to limitations\nwithin their community or facility will play all their scheduled matches as away games.\n5.2. Governing Rules & Equipment Standards: All matches are governed by USA Pickleball\nRules (https://usapickleball.org/) and equipment standards including USA Pickleball\napproved equipment. In the event of a conflict, specific Lakewood Ranch Pickleball Club\n(LWR PC) rules shall take precedence over the corresponding USA Pickleball rules and\nregulations.\n5.3. Point Scoring Methods: Unless otherwise specifically stated, all games shall use\nStandard Scoring as defined by the current USA Pickleball (USAP) Rules. Rally Scoring",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "80d9c2f5-8b5d-4009-b00c-04e116f84b5f",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 17,
+      "page_number": 5,
+      "rule_number": "5",
+      "heading": "TEAM/GAME RULES",
+      "section_label": "Rule 5",
+      "content": "shall be used only when a particular game or match format expressly identifies Rally\nScoring as the required scoring method.\n5.4. Unauthorized Equipment Penalty: Games played with unauthorized paddles or\nequipment will be forfeited, not recorded, and not posted to DUPR if discovered by\nplayers/captains during or after play.\n5.5. Match Setup and Roster Exchange: Home and visiting Captains must submit their\nupcoming match rosters through the League Management System (LMS) using the Match\nSetup button no later than three (3) days prior to the scheduled match. It is strongly\nrecommended that the Home Team submit its lineup first. Automated reminder emails\nwill be sent to all Captains. Any lineup or roster changes made after the initial submission\nmust be entered through Match Setup, which will automatically notify the opposing\nCaptain(s) of the change. Teams that have not completed Match Setup will not be able to\nprint a completed Match Score Sheet. Repeated failure to complete Match Setup within\nthe required timeframe may result in forfeiture of the current or future matches, at the\ndiscretion of League Management.\n5.6. Roster Requirements & Retroactive Additions: All active players must appear on the\nteam’s roster in the LMS prior to match play. Retroactive additions are permitted without\npenalty only if the player is a valid LWR PC member with an eligible DUPR account and\nrating. Failure to meet these requirements will result in a match forfeit, and the match will\nnot be posted to DUPR.\n5.7. DUPR Submission & Eligibility: All qualifying games will be automatically entered into\nthe DUPR rating system. Games that are forfeited, incomplete, or deemed ineligible will\nnot be recorded in DUPR (unless otherwise specified by a rule). Individuals/Players are",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "81720ed2-7f88-4198-aeab-0f19998ccddd",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 19,
+      "page_number": 6,
+      "rule_number": "5",
+      "heading": "TEAM/GAME RULES",
+      "section_label": "Rule 5",
+      "content": "Sunday at midnight with the rescheduled date and time. Failure to do so may result in\nforfeiture of the games.\n5.13. Makeup Game Deadline: All makeup games must be played at least one week before the\nplayoƯs/championship date.\n5.14. Weather Interruptions & Mid-Match Stoppages: If weather or other factors interrupt\nplay after a match has started, the following rules apply based on progress:\n5.14.1. Less than half of the games completed: Remaining games should be\nrescheduled. Only fully completed games will count toward final scores;\nunfinished or unplayed games will not be recorded.\n5.14.2. At least half of the games are completed: Completed results will stand. Any\nremaining unplayed games may be either rescheduled or canceled as agreed upon\nby both Captains (rescheduling is the preferred option).\n5.14.3. Roster Continuity: When a game is rescheduled, the players originally assigned to\nit must participate and maintain their original positions/line assignments.\n5.15. End of Season PlayoƯs/Championship Day (All Leagues)\n5.15.1. Teams starting the season with fewer scheduled games than others in their\nDivision/Pool will receive compensatory points at the end of the season. These\npoints will be calculated based on the team’s average points earned per match\ndate, rounded to the nearest whole number (0.5 and above rounds up; 0.4 and\nbelow rounds down).\n5.15.2. PlayoƯs feature the top 4 teams per Division based on the LMS points; ties are\nsettled by Line/Game Win %, then point diƯerential, and finally a coin flip. For\ndivisions with 2 pools, the top 2 teams from each pool advance to playoƯs.\n5.15.3. PlayoƯs will take place the week following the last regular season games, with all\ngames played at one location.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "f17bbdff-6a32-4861-b506-93694731d706",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 23,
+      "page_number": 7,
+      "rule_number": "6.1.1",
+      "heading": "Scheduling",
+      "section_label": "Rule 6.1.1",
+      "content": "6.1.1. Scheduling: Games are typically scheduled for Wednesdays at noon for women\nand Thursdays at noon for men. DUPR 9: See 6.1.9 below.\n6.1.2. Roster & Courts: 6 Players / 3 Lines. Requires 3 courts.\n6.1.3. Match Format: Round robin; one game to 15, win by 1. Each team receives two\none-minute timeouts. Teams switch ends when the first team reaches 8 points,\nand visitors choose serve, receive, side, or defer in games 1 and 3.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "44f7efe3-975e-4eb9-a2b8-6e5851e2bf49",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 27,
+      "page_number": 8,
+      "rule_number": "6.1.9.1",
+      "heading": null,
+      "section_label": "Rule 6.1.9.1",
+      "content": "6.1.9.1. This division will only have 2 lines (4 players) and require 2 courts.\n6.1.9.2. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus,\npotential Picklebreaker™ to 15. Teams will switch ends before Game 2. If a\nthird game is required, teams will switch ends during Game 3 when the first\nteam reaches six (6) points. Visitors choose serve, receive, side, or defer in\ngame 1 and 3. Each team receives one one-minute timeout/game.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "95a114bb-8a30-4598-9858-790d295a1de4",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 28,
+      "page_number": 8,
+      "rule_number": "6.1.9.3",
+      "heading": "Scoring",
+      "section_label": "Rule 6.1.9.3",
+      "content": "6.1.9.3. Scoring: Each win earns 1 point (5 total possible match points per date). If\nit’s a tie (2-2) after round robin, there would be a single game to 15 by 2 using\nthe Picklebreaker™ format with the winning team collecting 1 additional point.\nIf there isn’t a tie, the leading team collects a 1-point bonus.\n6.1.9.4. Player Cap: Each player plays 4 games with a possible 6+ games.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "77cebfac-54ac-4199-8d6a-233c439a0a69",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 30,
+      "page_number": 8,
+      "rule_number": "6.1.9.7",
+      "heading": null,
+      "section_label": "Rule 6.1.9.7",
+      "content": "6.1.9.7. The Picklebreaker™ shall be played only when the match is tied 2–2\nfollowing completion of all preceding rounds. The Picklebreaker™ features the\ndesignated doubles teams that participated in the preceding rounds, rotating\nin accordance with the Picklebreaker™ Rotation Rules. The Picklebreaker™\nshall consist of one game to 15 points, win by two (2), using Rally Scoring.\nNote: Picklebreaker matches will not be recorded in DUPR and do not reflect\non individual’s W/L record.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "7a0cb14f-4896-487e-8ba7-cef2f6a60109",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 31,
+      "page_number": 9,
+      "rule_number": "6.2",
+      "heading": null,
+      "section_label": "Rule 6.2",
+      "content": "6.2. Saturday DUPR League\nThe Saturday DUPR League is designed for players who prefer weekend competition or are\nunable to participate during the week. This coed league features community-based teams\nmade up of both men and women, competing every other Saturday in a unique format that\nincludes men's doubles, women's doubles, mixed doubles and the exciting mixed doubles\nPicklebreaker to determine tied matches. Teams are grouped into divisions based on\ncombined DUPR ratings, creating competitive and enjoyable matches while fostering\ncamaraderie and community spirit throughout the Lakewood Ranch area.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "4f4ce736-0b8c-412b-ae60-5f1a399a27bb",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 33,
+      "page_number": 9,
+      "rule_number": "6.2.1",
+      "heading": "Scheduling",
+      "section_label": "Rule 6.2.1",
+      "content": "6.2.1. Scheduling: Games are typically scheduled for every other Saturday at noon.\n6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s\ndoubles teams and 3 women’s doubles teams. Mixed teams may be formed from\nthe gender doubles players or can be from additional players who participate only in\nthe mixed round. Requires 4 courts.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "49b68f73-d7a5-435c-9c50-b98a59180774",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 34,
+      "page_number": 9,
+      "rule_number": "6.2.3",
+      "heading": "Match Day Format",
+      "section_label": "Rule 6.2.3",
+      "content": "6.2.3. Match Day Format: (See table below)\n6.2.3.1. All Games: Games to 15 using Rally Scoring* (win by 1). 1 point per win. Two\none-minute timeouts per team/game but no timeouts in Picklebreaker. Teams\nswitch ends when the first team reaches 8 points. Visitors choose serve,\nreceive, side, or defer in games 1 and 3 and all mixed games.\n6.2.3.2. Men's Round Robin: 3 Men’s teams play Round Robin (from low to high,\nTeams 1 to 3). Each player will play 3 games. 9 points possible.\n6.2.3.3. Women's Round Robin: 3 Women’s teams play Round Robin (from low to\nhigh, Teams 4 to 6). Each player will play 3 games. 9 points possible.\n6.2.3.4. Mixed Round: Create 6 Mixed teams (from low to high, Teams 7 to 12). Each\nplayer will play 1 mixed game. 6 points possible.\n6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams that played in the Mixed rounds. This will",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "66a8e74d-bfa1-4ba3-a8e0-9f3824a315db",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 35,
+      "page_number": 10,
+      "rule_number": "6.2.3",
+      "heading": "Match Day Format",
+      "section_label": "Rule 6.2.3",
+      "content": "be one game to 25 win by 2 using Rally Scoring. The winning team collects 3\nadditional points. (If there isn’t a tie, the leading team collects a 3-point\nbonus.) Note: Picklebreaker matches will not be recorded in DUPR and do not\nreflect on individual’s W/L record.\nTeams are numbered 1–3 for Men’s Doubles, 4–6 for Women’s Doubles, and 7–12 for Mixed\nDoubles. These team numbers correspond directly to the Match Score Sheet printed from the system.\nWe highly recommend assigning higher team numbers to teams with higher combined skill levels and\nratings (for instance, Team 6 should have a higher combined DUPR rating than Team 4 in Women’s or\nTeam 12 should be a higher team rating than Team 7 in Mixed Doubles).",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "2c1c337c-c480-45da-86bc-6f0be9a3efbc",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 36,
+      "page_number": 10,
+      "rule_number": null,
+      "heading": "Saturday DUPR League Match Day Format",
+      "section_label": "Saturday DUPR League Match Day Format",
+      "content": "Saturday DUPR League Match Day Format\nThe schedule uses two courts for men’s teams and two courts for women’s teams. After the first four\ngender-doubles rounds, Men’s Team 3 and Women’s Team 6 play while Mixed Teams 7 and 8 begin.\nRound 6 includes the remaining mixed teams. If the match is tied 12-12 after all gender and mixed\ndoubles, the Picklebreaker is played on two courts using the same mixed teams in the captains’\ndesignated order.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "a39086d6-2e96-4ad7-bc2b-99b3534f36fa",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 37,
+      "page_number": 10,
+      "rule_number": "6.2.4",
+      "heading": "Scoring",
+      "section_label": "Rule 6.2.4",
+      "content": "6.2.4. Scoring: A maximum of 27 total possible match points per date. This includes 24\npossible points awarded during standard play, plus a 3-point bonus. If the match\nends in a tie after the mixed doubles division (12-12), a Picklebreaker will be played\nto determine the winner of the 3 bonus points. If there is no tie, the leading team\nautomatically receives the 3-point bonus.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "ed410470-36d2-4201-8208-11fcfe93ab2f",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 38,
+      "page_number": 10,
+      "rule_number": "6.2.5",
+      "heading": "Player Cap",
+      "section_label": "Rule 6.2.5",
+      "content": "6.2.5. Player Cap: Every player plays 3 gender double games to 15 and will then play 1\nmixed game to 15. Optional lineups may include players who compete only in\ngender doubles or only in mixed doubles. Depending on the outcome, the 6 mixed\nteams will then play the Picklebreaker sequence playing up to 4+ points per team.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "4162d7ed-ed48-4967-9cc7-969b9a3304d8",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 40,
+      "page_number": 10,
+      "rule_number": "6",
+      "heading": null,
+      "section_label": "Rule 6",
+      "content": "6 vs Team 6\nMixed: Team 7 vs\nTeam 7\nMixed: Team 8 vs\nTeam 8\nRound 6 Mixed: Team 9 vs\nTeam 9\nMixed: Team 10\nvs Team 10\nMixed: Team 11\nvs Team 11\nMixed: Team 12 vs\nTeam 12\nRound 7 Picklebreaker:\nMixed Teams\nPicklebreaker:\nWarmup Court",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "3da3f281-eb8d-4bd2-8904-700a122e3462",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 42,
+      "page_number": 12,
+      "rule_number": "6.3",
+      "heading": null,
+      "section_label": "Rule 6.3",
+      "content": "6.3. PrimeTime DUPR League\nThe PrimeTime DUPR League is exclusively for players age 65 and older who want\ncompetitive play against others in the same age group. Using DUPR's 65+ age-based rating\nsystem, the league provides a more level playing field by matching players of similar age and\nability. Separate men's and women's divisions compete weekly with two doubles teams\nrepresenting each squad, and any tied team match is decided by the exciting Picklebreaker\nformat. PrimeTime emphasizes spirited competition, sportsmanship, and the opportunity\nfor experienced players to continue enjoying high-quality league play in a community-\nfocused environment.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "ccf0d0be-3bc0-482e-802d-e6824dac244e",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 44,
+      "page_number": 12,
+      "rule_number": "6.3.1",
+      "heading": "Scheduling",
+      "section_label": "Rule 6.3.1",
+      "content": "6.3.1. Scheduling: Women’s and men’s games are typically scheduled for Fridays at\nnoon.\n6.3.2. Roster & Courts: 4 players / 2 lines. Requires 2 courts. Player age is determined as\nof 12/31 of the season’s starting year. Players must be 65 or older and will use the\nDUPR Age-Based Rating. Players who are not 65 at the start of the season will be\nrated NR since they will not yet have an official 65+ age-based rating.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "1b949abe-51d8-4f35-80fb-f1481722d1c6",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 45,
+      "page_number": 12,
+      "rule_number": "6.3.3",
+      "heading": "Match Format",
+      "section_label": "Rule 6.3.3",
+      "content": "6.3.3. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus, potential\nPicklebreaker to 15 (win by 2 using Rally Scoring). Teams will switch ends for game",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "8e7118a4-633b-4483-9c6b-b1725680a09d",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 47,
+      "page_number": 12,
+      "rule_number": "3",
+      "heading": null,
+      "section_label": "Rule 3",
+      "content": "3. Two one-minute timeouts per team/game but no timeouts in Picklebreaker\ngame.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "45dea5ab-17dd-4764-a92a-f558cca82104",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 48,
+      "page_number": 12,
+      "rule_number": "6.3.4",
+      "heading": "Scoring",
+      "section_label": "Rule 6.3.4",
+      "content": "6.3.4. Scoring: Each standard round win earns 1 point, with a maximum of 5 total\npossible match points per date. If the regular round-robin ends in a tie (2-2), a\nPicklebreaker will be played, awarding 1 extra bonus point to the winner. If there is\nno tie, the outright winning team receives the 1-point bonus.\n6.3.5. Player Cap: Each player plays 4 games with a possible 6+ games.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "4193818c-5dcb-4ee6-9f03-249f18d5d38c",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 49,
+      "page_number": 12,
+      "rule_number": "6.3.6",
+      "heading": null,
+      "section_label": "Rule 6.3.6",
+      "content": "6.3.6. The Picklebreaker™ shall be played only when the match is tied 2–2 following\ncompletion of all preceding rounds. The Picklebreaker™ features the designated",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "413ec35d-6bf2-4f72-a753-f20b2246abb3",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 50,
+      "page_number": 13,
+      "rule_number": "6.3.6",
+      "heading": null,
+      "section_label": "Rule 6.3.6",
+      "content": "doubles teams that participated in the preceding rounds, rotating in accordance\nwith the Picklebreaker™ Rotation Rules. The Picklebreaker™ shall consist of one\ngame to 15 points, win by two (2), using Rally Scoring.\nNote: Picklebreaker matches will not be recorded in DUPR and do not reflect on\nindividual’s W/L record.\n6.3.7. Forfeits: In the event of a forfeit (unable to reschedule and not weather related),\nthe match score is officially recorded as 3-0 in favor of the non-forfeiting team.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "080f6f02-5c3e-43fa-a008-cf7d2f76df08",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 53,
+      "page_number": 13,
+      "rule_number": null,
+      "heading": "Saturday League PrimeTime League",
+      "section_label": "Saturday League PrimeTime League",
+      "content": "Saturday League PrimeTime League\nPlayers/Team 6 4 12 (6 Men / 6 Women) 4\nCourts Required 3 2 4 2\nGames/Player 3 4 + 2(E) + 1(PB) 3(G) + 1(MD) + 1(PB) 4 + 2(E) + 1(PB)\nGames 15 by 1 2 out of 3 to 11 by 2 15 by 1 (Rally) 2 out of 3 to 11 by 2\nPicklebreaker\n(tiebreaker) N/A 15 by 2 (Rally) 25 by 2 (Rally) 15 by 2 (Rally)\nTotal Points 9 5 27 5\nForfeits 7-0 3-0 21-0 3-0\nWeather Forfeits 4-4 2-2 13-13 2-2\nG=Gender Doubles, MD=Mixed Doubles, E=Extra possible games if 3rd played in a best of 3,\nPB=Picklebreaker",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 62,
+      "page_number": 15,
+      "rule_number": null,
+      "heading": "DUPR LEAGUE MANAGERS",
+      "section_label": "DUPR LEAGUE MANAGERS",
+      "content": "Rally Scoring Rules\nWe follow standard USA Pickleball rally scoring option rules (Section 14.A) with the\nfollowing clarifications/modifications:\n• Service Positioning: After a side out, the first serve is determined by the team's\nscore: the player on the right (baseline facing the net) serves if the score is even, and\nthe player on the left serves if the score is odd.\n• Switching Sides: Players only switch sides after winning a point on their own serve.\nThe same player continues serving from the new side.\n• Side Outs & Scoring: If the serving team loses a rally, a side out occurs; the\nopposing team earns a point and takes over the serve.\n• Game Points: A team can win a point regardless of whether they are serving or\nreceiving except for the winning point (see next item).\n• Scoring Freeze and Match Point: To keep the game competitive through the final\npoint, a scoring freeze shall take eƯect whenever a team reaches one point below\nthe game-winning score. Once a team reaches the freeze point, it may score the\ngame-winning point only while serving. For example, in a game played to 25 points,\na team’s score shall initially freeze at 24. The scoring freeze applies only to the team\nthat has reached the freeze point; the opposing team may continue to score using\nnormal Rally Scoring until it also reaches the applicable freeze point. A team must\nbe serving to score the game-winning point.\n• Win-by-Two (2) Games: When the game is played using a win-by-two (2) format\nand the score becomes tied at or beyond the initial freeze point, neither team can\nwin by scoring the next point. Therefore, both teams’ scores shall become\nunfrozen, and normal Rally Scoring shall resume. Thereafter, a team’s score shall\nfreeze again whenever it reaches a score at which its next point would win the",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "9e4a1262-0ecd-4a18-9372-d5b04dd1d3ca",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 64,
+      "page_number": 16,
+      "rule_number": null,
+      "heading": "DUPR LEAGUE MANAGERS",
+      "section_label": "DUPR LEAGUE MANAGERS",
+      "content": "Picklebreaker™ Rules and Setup",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "a85c2cee-c50d-4d8b-9c2a-87bf02c58591",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 65,
+      "page_number": 16,
+      "rule_number": null,
+      "heading": "PICKLEBREAKER™ GAME OVERVIEW",
+      "section_label": "PICKLEBREAKER™ GAME OVERVIEW",
+      "content": "PICKLEBREAKER™ GAME OVERVIEW\nThe Picklebreaker™ is our league’s tiebreaker format, similar to Major League Pickleball’s (MLP)\nDreambreaker. It is used when a match is tied after the day’s regular games. Unlike the MLP\nversion, our Picklebreaker uses doubles rather than singles.\nHere is how it works:\nThe Format: The Picklebreaker™ is a doubles game played to either 15 or 25 points, depending\non the league. It always uses Rally Scoring, where every rally/serve earns a point regardless of\nwhich team served. Refer to the league-specific rules for Rally Scoring, total points, and win-by\nrequirements.\nThe Rotations: Each team’s designated doubles pairs shall enter the game in the order\nestablished by their captain prior to the start of play. Both doubles pairs currently on the\ncourt shall remain in play until the combined game score reaches the next rotation\nthreshold, at which time both pairs shall rotate out and the next designated doubles pair from\neach team shall enter.\nFor games played to 15 points, two (2) designated doubles pairs from each team shall\nparticipate in the rotation, with substitutions occurring after every four (4) combined points\nscored.\nFor games played to 25 points, six (6) designated doubles pairs from each team shall\nparticipate in the rotation, with substitutions occurring after every four (4) combined points\nscored.\nEach newly substituted doubles pair shall resume play at the existing score and remain on the\ncourt until the next applicable four (4) combined-point rotation threshold is reached.\nIf the game continues beyond the initial rotation of all designated doubles pairs, the\nrotation shall return to the doubles pairs that began the game and continue in the same",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "0f51b03f-5ae0-4c8a-a866-bbde1da06788",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 66,
+      "page_number": 16,
+      "rule_number": null,
+      "heading": "PICKLEBREAKER™ GAME OVERVIEW",
+      "section_label": "PICKLEBREAKER™ GAME OVERVIEW",
+      "content": "established order. The rotation process shall continue, as necessary, until the game is\ncompleted and a winner is determined in accordance with the applicable scoring rules.\nThe Lineups: Captains determine the lineup order, making strategy an important part of the\ngame. They must decide whether to start with their strongest team or save that team for the\nfinish. The changing matchups shift the game’s momentum, while teammates cheering adds\nenergy and excitement that can help push a team toward victory.\nWith short doubles sequences and teams ready to rotate in quickly, the Picklebreaker creates a\ntense, exciting finish to a full day of pickleball.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "404336ee-58ee-4807-bf84-77d466fcdeb3",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 68,
+      "page_number": 17,
+      "rule_number": "1.2",
+      "heading": null,
+      "section_label": "Rule 1.2",
+      "content": "1.2. To determine the team that decides the serve, receive, side or defer options, use the 1 / 2\nmethod or other mutually agreed option.\n1.3. No time outs are allowed except for medical or equipment issues.\n1.4. Optional End Change: Prior to the start of the Picklebreaker, both teams may mutually\nagree to switch ends when the first team reaches six (8) points (15-point game) or thirteen\n(13) points (25-point game). If both teams do not agree before play begins, no end change\nshall occur during the entire game.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "aa9524ba-e6a1-41db-aa1d-67cf2a06b3b8",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 69,
+      "page_number": 17,
+      "rule_number": "1.5",
+      "heading": null,
+      "section_label": "Rule 1.5",
+      "content": "1.5. The next teams in play order should warm up and be ready near the Picklebreaker court.\nThey should track the game score to ensure a smooth switch.\n1.6. Teams have 20 seconds to complete the team switch. Time starts when the exiting team\nhas the ball to give to the incoming team.\n1.7. The outgoing team must communicate the complete score and serve side before exiting.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "19c51d93-6b57-4a1f-8d84-ca03e895b2a0",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 71,
+      "page_number": 17,
+      "rule_number": "2",
+      "heading": "SCORING & RECORDING",
+      "section_label": "Rule 2",
+      "content": "2. SCORING & RECORDING\n2.1. Picklebreaker games are not posted to DUPR because of their format; bonus points are\nautomatically added to the winning team’s total. When entering game results, simply enter\nthe ending scores. This will not aƯect any individual players’ win/loss records.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "title": "LWRPC-Captains Guide to the LMS",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+      },
+      "id": "6cab8beb-ccf1-4c30-b8ba-a032f3e582d6",
+      "document_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "chunk_ordinal": 5,
+      "page_number": 3,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Quick Start Guide\nAs a Captain, use the League Management System to view schedules, manage rosters, see\ndivision standings, check match details, and find other Captains' contact info. From the\nupcoming match details screens, you can set your lineup, print score sheets, and enter or\nvalidate match scores. If you manage multiple teams, a tab for each team will appear in your\nMy Teams section.\nMobile Device Usage\nThe system is fully optimized for desktop computers, tablets, and mobile devices. Please\nnote that most of the screenshots and instructions in this guide are based on the desktop\nversion. Layouts, menus, and navigation will automatically adapt to your screen size, so\ndisplay and functionality may differ slightly when using a mobile device.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "title": "LWRPC-Captains Guide to the LMS",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+      },
+      "id": "07463ae2-a809-4a86-b77e-4fa022176b07",
+      "document_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "chunk_ordinal": 8,
+      "page_number": 6,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Captain Dashboard Overview\nUse the dashboard to overall manage your team(s), keep on top of all upcoming and prior\nmatches, manage rosters, view standings, and handle score tasks. If you captain multiple\nteams, select the correct team under My Team in the sidebar to update the view.\nDashboard Highlights:\n• Top Navigation: At the very top right of the Captain Dashboard, you can access the\nCaptain User Guide, email the league, or click the button next to your name to\nupdate your profile, change your password, adjust appearance settings, or view your\nclub membership.\n• Sidebar Options: Click League Documents to view all available files for your\nleague.\n• Quick Links/Captain Toolbar: Access your team list, manage your team and see\nyour division schedules and division captain contacts.\n• Team Information: Your main dashboard gives you quick access to your next\nmatch—complete with quick-action buttons for match setup. You can also monitor\nyour team's current rank, record, and any pending score entry or validations,\nalongside quick-view sections for division standings, upcoming schedules, and\nrecent match results.\nMain Captain Dashboard Screen (Desktop View)",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "title": "LWRPC-Captains Guide to the LMS",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+      },
+      "id": "61269c81-f09f-44af-adbd-3da3065e22a7",
+      "document_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "chunk_ordinal": 10,
+      "page_number": 8,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Managing Team Rosters\nTo update your team roster, go to the Captain Tools section on your Captain Dashboard\nand click Manage Roster to add, change, or remove players.\n• Changing Captains or Co-Captains: On the Team Roster Management screen, click\nChange Captain/Co-Captain next to your team name. This opens an email draft to\nsubmit your request directly to League Management.\nTeam Roster Management Window",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "title": "LWRPC-Captains Guide to the LMS",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+      },
+      "id": "aaedf4ae-3936-4d8c-ae6c-23435bd27105",
+      "document_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "chunk_ordinal": 11,
+      "page_number": 9,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Player Eligibility & DUPR Ratings\nClick the Add Player button to add a player to your roster.\n• Selection: A pop-up window will appear with your home community preselected.\nUse the drop-down menu to view available players, along with their eligibility status\nand DUPR ratings.\n• Missing DUPR Info: If a player is missing a DUPR ID or Season Rating, select the\nplayer and click Add Player to Team. League Management will automatically be\nnotified to review the issue and update you on their status.\n• Ineligible Players: If a player is marked \"Not Eligible,\" attempting to add them will\ndisplay an on-screen message explaining the specific reason why.\nAdd Player Pop-up Window",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "title": "LWRPC-Captains Guide to the LMS",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+      },
+      "id": "5b432210-b886-44b6-a6e4-5b2312b07dee",
+      "document_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "chunk_ordinal": 13,
+      "page_number": 11,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Match Setup Process\nCaptains must assign player pairings and save their lineups before the match date. To\nensure fair play, the system automatically checks entries against division ranges, team\ntotals, and Season DUPR ratings, displaying an on-screen warning if a combination is\nineligible. It is highly recommended that the Home Team enter their lineup first. Lineups\ncan be changed prior to match day with all changes automatically emailed to opposing\ncaptains.\n• In Match Setup, roster choices are filtered against the division’s configured rating\ntype: Season DUPR, or Age-based/PrimeTime (season_primetime_rating). Players\nwith no valid rating or outside the division minimum/maximum cannot be selected.\nIt also checks the two-player combined rating cap.\n• Before saving, it refreshes the season ratings and validates again. The save API\nrepeats that validation server-side, including roster membership, individual rating\nrange, duplicates, and team-rating maximum.\nThe rating source is selected by the division’s rating_type: standard divisions use Season\nDUPR; PrimeTime/Age-based divisions use the Season PrimeTime rating.\nThe Match Setup button will show as red if your setup is incomplete, and blue once it is\ncompleted. When both teams have completed their setup, the Match Score Sheet button\nwill turn green, allowing you to print a complete match score sheet.\nSaving a lineup (press the Save Match Setup button) automatically notifies the opposing\ncaptain of the update. From this screen, you can also use the Email Players button to notify\nall selected players or the entire team.\nFor any questions regarding player ratings or eligibility, contact\ninfo@lwrpickleballclub.com.\nMatch Setup Window",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "title": "LWRPC-Captains Guide to the LMS",
+        "document_type": "captain_guide",
+        "authority_rank": 3,
+        "active_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+      },
+      "id": "ff3be91d-87e9-4e15-a8b4-4d0dffde98e0",
+      "document_version_id": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "chunk_ordinal": 17,
+      "page_number": 15,
+      "rule_number": null,
+      "heading": null,
+      "section_label": null,
+      "content": "Completed Match Results\nThe lower part of the Captain Dashboard features a Recent Results section showing all\nrecently completed matches for the selected team, including finalized scores and results.\nYou can click on any match row to view the Match Score Details.\nCompleted Recent Match Results\nMatch Score Details\nDetailed score views display all players/ratings, game results and player pairings for the\nselected match. The top part of the window shows the current ranks and records along with\nthe current team rosters.\nMatch Score Details Screen",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 11,
+      "page_number": 4,
+      "rule_number": "4.5.1",
+      "heading": null,
+      "section_label": "Rule 4.5.1",
+      "content": "4.5.1. For team aggregate rating calculations, an NR player will initially be assigned a\nSeason DUPR Rating equal to the maximum individual DUPR rating allowed for\nthat division, minus 0.5. For example, in a division, where the maximum individual\nrating is 3.8, an NR player would be assigned an initial Season DUPR Rating of 3.3\n(3.8 − 0.5) for team aggregate calculations.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "cc589163-68b9-4f3d-9f21-94ac099a967f",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 13,
+      "page_number": 4,
+      "rule_number": "4.6.1",
+      "heading": null,
+      "section_label": "Rule 4.6.1",
+      "content": "4.6.1. Every lineup fielded for a match must comply with both the individual player rating\nrequirements and the maximum combined Team DUPR Rating for that division.\nTeams that fail to meet these requirements will automatically forfeit the aƯected\ngames.\n4.6.2. Games forfeited due to an invalid lineup will not be submitted to DUPR. The\nLeague Management System will automatically record the forfeits and update team\nrecords and league standings accordingly.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "131329a2-6116-4a95-a0ad-45129d87abcf",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 14,
+      "page_number": 4,
+      "rule_number": "4.7",
+      "heading": null,
+      "section_label": "Rule 4.7",
+      "content": "4.7. A player whose individual rating exceeds the Division maximum at the beginning of the\nseason is strictly prohibited from participating in that Division. If a Player rises above the\nmaximum during the season, they may complete that season in that Division.\n4.8. A player whose individual rating is below the Division minimum at the beginning of the\nseason is strictly prohibited from participating in that Division. If a Player goes below the\nminimum during the season, they may complete that season in that Division.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "00414305-7da7-4721-959d-5c5555eba109",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 15,
+      "page_number": 4,
+      "rule_number": "4.9",
+      "heading": null,
+      "section_label": "Rule 4.9",
+      "content": "4.9. Players can compete in any Division higher than their DUPR rating provided they are also\nabove the minimum rating requirements for that Division.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "09f36807-0451-4500-bace-d25901bfd6e1",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 21,
+      "page_number": 7,
+      "rule_number": "6",
+      "heading": "LEAGUES",
+      "section_label": "Rule 6",
+      "content": "6. LEAGUES\n6.1. Weekday DUPR League\nThe Weekday DUPR League is designed for players who have the flexibility to play during\nthe week and want a structured, team-based competitive experience. Men's and women's\ndivisions compete separately, with matches typically held at noon during the week. Teams\nrepresent their home communities and travel throughout the Lakewood Ranch area to\ncompete against other community teams in a round-robin match format. Divisions are\norganized using DUPR team rating ranges to promote balanced competition while providing\nplayers with regular opportunities to improve their skills, build friendships, and enjoy the\nexcitement of representing their community.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "ec98efe1-63e9-4577-978d-b984c348dd56",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 22,
+      "page_number": 7,
+      "rule_number": null,
+      "heading": "Weekday DUPR League Divisions",
+      "section_label": "Weekday DUPR League Divisions",
+      "content": "Weekday DUPR League Divisions\nDivision Name\n(Men and Women)\nIndividual\nRating Range\nMax Team\nAggregate\nDUPR 5 2.0 to 2.899 5.1\nDUPR 6 2.3 to 3.399 6.1\nDUPR 7 2.8 to 3.899 7.1\nDUPR 8 3.3 to 4.399 8.1\nDUPR 9 3.8 to 4.899 9.1",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "57f6aab3-b1dc-4544-b0a3-1d5dc9d3a207",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 24,
+      "page_number": 7,
+      "rule_number": "6.1.4",
+      "heading": "Scoring",
+      "section_label": "Rule 6.1.4",
+      "content": "6.1.4. Scoring: Each win earns 1 point with 9 total possible match points per date.\n6.1.5. Player Cap: Each player plays exactly 3 games to 15.\n6.1.6. Teams may use two doubles teams if they inform their opponents in advance. If a\nteam lacks a third doubles team, they must forfeit those 3 games and points. In this\ncase, the community team with three teams will play against the other two.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "8c8867fe-24c7-436a-abdb-da30c02830d4",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 25,
+      "page_number": 7,
+      "rule_number": "6.1.7",
+      "heading": "Forfeits",
+      "section_label": "Rule 6.1.7",
+      "content": "6.1.7. Forfeits: In the event of a forfeit (unable to reschedule and not weather related),\nthe match score is officially recorded as 7-0 in favor of the non-forfeiting team.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "1dfe3d62-af28-4c5d-9b07-1e444511e643",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 26,
+      "page_number": 8,
+      "rule_number": "6.1.8",
+      "heading": "Weather Issues",
+      "section_label": "Rule 6.1.8",
+      "content": "6.1.8. Weather Issues: If games are aƯected by weather-related issues and both teams\nare unable to reschedule them within the permitted league timeframe, the\nmatches will officially be scored as a “weather related” resulting in a 4-4 tie.\n6.1.9. Men’s/Women’s 9.1 Division: These divisions will initially be scheduled as a “flex\nleague” with matches initially scheduled for Fridays at noon but the Captains can\nmodify the match day/time (within 7 days).",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "511ba955-5ae5-43fb-af7f-1869b77cb754",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 29,
+      "page_number": 8,
+      "rule_number": "6.1.9.5",
+      "heading": "Forfeits",
+      "section_label": "Rule 6.1.9.5",
+      "content": "6.1.9.5. Forfeits: In the event of a forfeit (unable to reschedule and not weather\nrelated), the match score is officially recorded as 3-0 in favor of the non-\nforfeiting team.\n6.1.9.6. Weather Issues: If games are aƯected by weather-related issues and both\nteams are unable to reschedule them within the permitted league timeframe,\nthe matches will officially be scored as a “weather related” resulting in a 2-2\ntie.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "01ec7ea7-579d-4464-8e02-13d86e72aa83",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 41,
+      "page_number": 11,
+      "rule_number": "6.2.7",
+      "heading": "Weather Issues",
+      "section_label": "Rule 6.2.7",
+      "content": "6.2.7. Weather Issues: If games are aƯected by weather-related issues and both teams\nare unable to reschedule them within the permitted league timeframe, the\nmatches will officially be scored as a “weather related” resulting in a 13-13 tie.\n6.2.8. Snacks/Drinks: Optional; the Home Team may provide them if desired.\n6.2.9. Jamboree: held at the end of the season.",
+      "is_searchable": true
+    },
+    {
+      "document": {
+        "id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "title": "LWR Pickleball Club DUPR League Rules",
+        "document_type": "league_rules",
+        "authority_rank": 1,
+        "active_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656"
+      },
+      "id": "e0d311b0-18b3-46b1-8f23-008dbe41e569",
+      "document_version_id": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+      "chunk_ordinal": 63,
+      "page_number": 15,
+      "rule_number": null,
+      "heading": "DUPR LEAGUE MANAGERS",
+      "section_label": "DUPR LEAGUE MANAGERS",
+      "content": "game by two (2) points. If the score becomes tied again, both teams shall again\nbecome unfrozen. This freeze-and-unfreeze process shall continue as necessary\nuntil one team wins the game by two (2) points. The game-winning point must\nalways be scored while serving.",
+      "is_searchable": true
+    }
+  ]
+}

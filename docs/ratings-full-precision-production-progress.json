@@ -1,0 +1,1538 @@
+{
+  "status": "PRODUCTION_ACCEPTED_REPAIR_COMPLETE",
+  "migrationFile": "20260911232820_ratings_full_precision_and_guarded_repair.sql",
+  "migrationVersion": "20260912001226",
+  "sha256": "c3b4cfb6b433087c6b419898ffacfca282c4f0da2f7ed41b77f81394b7c4e811",
+  "commit": "6397e53ac0632e717913c2dc7736f9aed79ee15b",
+  "deployment": "dpl_5GBYhis9FKxzmjMu5gBrqDxVdwLf",
+  "url": "https://lwrpc-admin-ilbquelk5-terry-lwrpc.vercel.app",
+  "previousDeployment": "dpl_8YTFfmCy1VF4thuJoRMd2X9R49T1",
+  "affected": 625,
+  "repairable": 623,
+  "conflicts": [
+    "Barry Wolf",
+    "Chris Oleson"
+  ],
+  "manualConflicts": 0,
+  "repairExecuted": true,
+  "preMigrationHashes": [
+    {
+      "name": "public.members",
+      "n": 1986,
+      "hash": "389cf3ba4df5bde4ebf1ee4205bb8570"
+    },
+    {
+      "name": "public.user_roles",
+      "n": 190,
+      "hash": "81a931144fe6f2e1f505ec8240679e70"
+    },
+    {
+      "name": "public.teams",
+      "n": 107,
+      "hash": "92de4fcc072583eda4ac0b4c4950c441"
+    },
+    {
+      "name": "public.team_members",
+      "n": 15,
+      "hash": "6efa6510440181a1d80cde990de5c5e8"
+    },
+    {
+      "name": "public.matches",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.match_lineups",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.match_lines",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.line_games",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.team_standings",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.league_schedule_settings",
+      "n": 9,
+      "hash": "f353cfede9d8696c69d69ac94ba7c643"
+    },
+    {
+      "name": "public.member_season_ratings",
+      "n": 1681,
+      "hash": "4a171ece61019d1dd9544b53524ba093"
+    },
+    {
+      "name": "ratings_source_private.batches",
+      "n": 4,
+      "hash": "11563f0bff020bb8e5892554cd7e9f50"
+    },
+    {
+      "name": "ratings_source_private.sources",
+      "n": 671,
+      "hash": "b5618c1a7e481554e3e811c97b33520a"
+    },
+    {
+      "name": "ratings_workflow_private.input_state",
+      "n": 671,
+      "hash": "f85d32be0c505b62cbaa184c19b0f2c5"
+    },
+    {
+      "name": "ratings_workflow_private.runs",
+      "n": 8,
+      "hash": "717a93012b38a9158c263e6fe4a84534"
+    }
+  ],
+  "postMigrationHashes": [
+    {
+      "name": "public.members",
+      "n": 1986,
+      "hash": "389cf3ba4df5bde4ebf1ee4205bb8570"
+    },
+    {
+      "name": "public.user_roles",
+      "n": 190,
+      "hash": "81a931144fe6f2e1f505ec8240679e70"
+    },
+    {
+      "name": "public.teams",
+      "n": 107,
+      "hash": "92de4fcc072583eda4ac0b4c4950c441"
+    },
+    {
+      "name": "public.team_members",
+      "n": 15,
+      "hash": "6efa6510440181a1d80cde990de5c5e8"
+    },
+    {
+      "name": "public.matches",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.match_lineups",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.match_lines",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.line_games",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.team_standings",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.league_schedule_settings",
+      "n": 9,
+      "hash": "f353cfede9d8696c69d69ac94ba7c643"
+    },
+    {
+      "name": "public.member_season_ratings",
+      "n": 1681,
+      "hash": "4a171ece61019d1dd9544b53524ba093"
+    },
+    {
+      "name": "ratings_source_private.batches",
+      "n": 4,
+      "hash": "11563f0bff020bb8e5892554cd7e9f50"
+    },
+    {
+      "name": "ratings_source_private.sources",
+      "n": 671,
+      "hash": "b5618c1a7e481554e3e811c97b33520a"
+    },
+    {
+      "name": "ratings_workflow_private.input_state",
+      "n": 671,
+      "hash": "f85d32be0c505b62cbaa184c19b0f2c5"
+    },
+    {
+      "name": "ratings_workflow_private.runs",
+      "n": 8,
+      "hash": "717a93012b38a9158c263e6fe4a84534"
+    }
+  ],
+  "preCatalog": [
+    {
+      "schema": "public",
+      "relname": "ai_answer_feedback_events",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_approved_answer_events",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=r/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_approved_answer_revisions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=r/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_approved_answers",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=r/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_document_chunks",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_document_versions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_documents",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_manager_review_cases",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_manager_review_events",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=ar/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_question_fingerprint_routes",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_question_groups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_request_outcomes",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=ar/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_review_occurrences",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "app_notification_subscriptions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "division_lines",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "divisions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "league_blackout_dates",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "league_schedule_settings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "leagues",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "line_games",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "location_court_availability",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "locations",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "match_lines",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "match_lineups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "matches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "member_import_batches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "member_import_rows",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "member_season_ratings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "members",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "notification_template_history",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "notification_templates",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "password_reset_rate_limits",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_activity_log",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_courts",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_groups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_matches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_player_group_members",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_player_groups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_player_session_results",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_players",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_session_players",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_sessions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "score_sheet_templates",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "seasons",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "system_settings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "team_byes",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "team_members",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "team_standings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "teams",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_activity_log",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_courts",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_divisions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_matches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_team_contacts",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_teams",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournaments",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "user_roles",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_source_private",
+      "relname": "batches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_source_private",
+      "relname": "sources",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_workflow_private",
+      "relname": "input_state",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_workflow_private",
+      "relname": "runs",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    }
+  ],
+  "postCatalog": [
+    {
+      "schema": "public",
+      "relname": "ai_answer_feedback_events",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_approved_answer_events",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=r/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_approved_answer_revisions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=r/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_approved_answers",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=r/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_document_chunks",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_document_versions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_documents",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_manager_review_cases",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_manager_review_events",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=ar/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_question_fingerprint_routes",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_question_groups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_request_outcomes",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=ar/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "ai_review_occurrences",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arw/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "app_notification_subscriptions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "division_lines",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "divisions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "league_blackout_dates",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "league_schedule_settings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "leagues",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "line_games",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "location_court_availability",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "locations",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "match_lines",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "match_lineups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "matches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "member_import_batches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "member_import_rows",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "member_season_ratings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "members",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "notification_template_history",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "notification_templates",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "password_reset_rate_limits",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_activity_log",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_courts",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_groups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_matches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_player_group_members",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_player_groups",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_player_session_results",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_players",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_session_players",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "round_robin_sessions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "score_sheet_templates",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "seasons",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "system_settings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "team_byes",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "team_members",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "team_standings",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "teams",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_activity_log",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_courts",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_divisions",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_matches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_team_contacts",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournament_teams",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "tournaments",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "public",
+      "relname": "user_roles",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_source_private",
+      "relname": "batches",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_source_private",
+      "relname": "sources",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_workflow_private",
+      "relname": "input_state",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    },
+    {
+      "schema": "ratings_workflow_private",
+      "relname": "runs",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "relacl": "{postgres=arwdDxtm/postgres}"
+    }
+  ],
+  "beforeFunctions": [
+    {
+      "signature": "ratings_source_private.authorize(uuid)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "f316e51f5cc95d5ec51be249d6afc5fa"
+    },
+    {
+      "signature": "ratings_source_private.commit_import(uuid,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "lock_timeout=1s",
+        "statement_timeout=5s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "9545ca338772e033ff0bab7fa1fe75f2"
+    },
+    {
+      "signature": "ratings_source_private.snapshot(uuid,uuid,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=5s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "328a2a1476e86beacabf96351d9fd040"
+    },
+    {
+      "signature": "ratings_workflow_private.clean_plan(uuid,uuid,numeric)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "10f52a8ed1c90001459c444bc8d92832"
+    },
+    {
+      "signature": "ratings_workflow_private.clean_regular_plan(uuid,uuid,numeric)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=8s"
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "aaa5143b35c73d23fdd6b570fe358a02"
+    },
+    {
+      "signature": "ratings_workflow_private.commit_run(uuid,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "lock_timeout=1s",
+        "statement_timeout=8s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "9575513e83ab1faa89892d9adf8e74e5"
+    },
+    {
+      "signature": "ratings_workflow_private.context(uuid,uuid)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "5d3809f692105656b30aebdc219f5201"
+    },
+    {
+      "signature": "ratings_workflow_private.plan(uuid,uuid,text,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=8s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "6de5b0eda21c8b408dceacd57384cc51"
+    },
+    {
+      "signature": "ratings_workflow_private.policy()",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "37287c17f918d95b5db0d3769d76cc82"
+    },
+    {
+      "signature": "ratings_workflow_private.primetime_proposal(jsonb,jsonb)",
+      "owner": "postgres",
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "1bdd522a78c38b5c9bfe2147a970188a"
+    },
+    {
+      "signature": "ratings_workflow_private.valid_source(jsonb)",
+      "owner": "postgres",
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "d15a216b34ca2913fb6a2735b7715c1e"
+    }
+  ],
+  "afterFunctions": [
+    {
+      "signature": "ratings_source_private.authorize(uuid)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "f316e51f5cc95d5ec51be249d6afc5fa"
+    },
+    {
+      "signature": "ratings_source_private.commit_import(uuid,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "lock_timeout=1s",
+        "statement_timeout=5s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "9545ca338772e033ff0bab7fa1fe75f2"
+    },
+    {
+      "signature": "ratings_source_private.snapshot(uuid,uuid,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=5s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "328a2a1476e86beacabf96351d9fd040"
+    },
+    {
+      "signature": "ratings_workflow_private.clean_plan(uuid,uuid,numeric)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "10f52a8ed1c90001459c444bc8d92832"
+    },
+    {
+      "signature": "ratings_workflow_private.clean_regular_plan(uuid,uuid,numeric)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=8s"
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "aaa5143b35c73d23fdd6b570fe358a02"
+    },
+    {
+      "signature": "ratings_workflow_private.commit_run(uuid,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "lock_timeout=1s",
+        "statement_timeout=8s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "9575513e83ab1faa89892d9adf8e74e5"
+    },
+    {
+      "signature": "ratings_workflow_private.context(uuid,uuid)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "5d3809f692105656b30aebdc219f5201"
+    },
+    {
+      "signature": "ratings_workflow_private.plan(uuid,uuid,text,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=8s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "68da37cdc191babae5ce0c7cf2ddcb34"
+    },
+    {
+      "signature": "ratings_workflow_private.policy()",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "37287c17f918d95b5db0d3769d76cc82"
+    },
+    {
+      "signature": "ratings_workflow_private.precision_candidate(uuid,uuid)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "6f4e268defbc356d72fe77c9f9203568"
+    },
+    {
+      "signature": "ratings_workflow_private.precision_repair_preview(uuid,uuid)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "2d9ef67414faf5d1a4279d799aaf31d3"
+    },
+    {
+      "signature": "ratings_workflow_private.primetime_proposal(jsonb,jsonb)",
+      "owner": "postgres",
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "1bdd522a78c38b5c9bfe2147a970188a"
+    },
+    {
+      "signature": "ratings_workflow_private.repair_precision(uuid,jsonb)",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=30s",
+        "lock_timeout=5s"
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_hash": "f53aa527753b981ceb87a2fd8da06f2a"
+    },
+    {
+      "signature": "ratings_workflow_private.valid_source(jsonb)",
+      "owner": "postgres",
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "definition_hash": "d15a216b34ca2913fb6a2735b7715c1e"
+    }
+  ],
+  "security": [
+    {
+      "proname": "precision_candidate",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "anon": false,
+      "authenticated": false,
+      "service": false
+    },
+    {
+      "proname": "precision_repair_preview",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "anon": false,
+      "authenticated": false,
+      "service": true
+    },
+    {
+      "proname": "repair_precision",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\"",
+        "statement_timeout=30s",
+        "lock_timeout=5s"
+      ],
+      "anon": false,
+      "authenticated": false,
+      "service": true
+    }
+  ],
+  "repairRunId": "251adf4f-3be7-4918-83e7-0789c756d3af",
+  "repairResult": {
+    "id": "251adf4f-3be7-4918-83e7-0789c756d3af",
+    "operation": "precision-repair",
+    "result": {
+      "fields": 1172,
+      "status": "success",
+      "members": 623,
+      "completedAt": "2026-09-12T00:35:01.499603+00:00"
+    },
+    "review": {
+      "affected": 625,
+      "excluded": [
+        {
+          "name": "Barry Wolf",
+          "reasons": [
+            "doubles: latest source differs from selected source"
+          ],
+          "memberId": "4bac0dc8-5d6c-4f6f-8b19-405876d4d85e"
+        },
+        {
+          "name": "Chris Oleson",
+          "reasons": [
+            "doubles: latest source differs from selected source",
+            "age: latest source differs from selected source"
+          ],
+          "memberId": "f9b4513a-80ad-4cb4-8cd6-1077095e5711"
+        }
+      ],
+      "excludedCount": 2,
+      "approvedCommit": "6397e53ac0632e717913c2dc7736f9aed79ee15b",
+      "manifestFingerprint": "2db96f86fead27a31aaebb30ea4efd58",
+      "manualEditConflicts": 0
+    },
+    "before_count": 623,
+    "after_count": 623,
+    "doubles_fields": 618,
+    "age_fields": 554,
+    "repair_batches": 1,
+    "actual_after_mismatch": 0
+  },
+  "postRepairHashes": [
+    {
+      "name": "public.members",
+      "n": 1986,
+      "hash": "389cf3ba4df5bde4ebf1ee4205bb8570"
+    },
+    {
+      "name": "public.user_roles",
+      "n": 190,
+      "hash": "81a931144fe6f2e1f505ec8240679e70"
+    },
+    {
+      "name": "public.teams",
+      "n": 107,
+      "hash": "92de4fcc072583eda4ac0b4c4950c441"
+    },
+    {
+      "name": "public.team_members",
+      "n": 15,
+      "hash": "6efa6510440181a1d80cde990de5c5e8"
+    },
+    {
+      "name": "public.matches",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.match_lineups",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.match_lines",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.line_games",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.team_standings",
+      "n": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "public.league_schedule_settings",
+      "n": 9,
+      "hash": "f353cfede9d8696c69d69ac94ba7c643"
+    },
+    {
+      "name": "public.member_season_ratings",
+      "n": 1681,
+      "hash": "c80175f59708319feaf4c1ee9cfb5de0"
+    },
+    {
+      "name": "ratings_source_private.batches",
+      "n": 4,
+      "hash": "11563f0bff020bb8e5892554cd7e9f50"
+    },
+    {
+      "name": "ratings_source_private.sources",
+      "n": 671,
+      "hash": "b5618c1a7e481554e3e811c97b33520a"
+    },
+    {
+      "name": "ratings_workflow_private.input_state",
+      "n": 671,
+      "hash": "90952eb10fb892911758f71d9351fa15"
+    },
+    {
+      "name": "ratings_workflow_private.runs",
+      "n": 9,
+      "hash": "7d9e1b3e3dc3f1d1055520e363a4d107"
+    }
+  ],
+  "protectedRatings": [
+    {
+      "rows": 1681,
+      "protected_rating_hash": "1b2898c6468a0e1a105f35a53a9fb792"
+    }
+  ],
+  "cleanComparison": {
+    "rows": 1986,
+    "changedRows": 0,
+    "regularChanges": 0,
+    "primeTimeChanges": 0,
+    "cutoff": 29
+  },
+  "terryAndExclusions": [
+    {
+      "member_id": "43e1e363-82f1-47d7-a869-befed4c967b8",
+      "dupr_doubles_rating": "4.077",
+      "dupr_reliability_rating": "100.000",
+      "dupr_age_based_rating": "4.311",
+      "season_dupr_rating": "4.00",
+      "season_primetime_rating": "4.30"
+    },
+    {
+      "member_id": "4bac0dc8-5d6c-4f6f-8b19-405876d4d85e",
+      "dupr_doubles_rating": "4.1",
+      "dupr_reliability_rating": "100.000",
+      "dupr_age_based_rating": "4.7",
+      "season_dupr_rating": "4.10",
+      "season_primetime_rating": "4.70"
+    },
+    {
+      "member_id": "f9b4513a-80ad-4cb4-8cd6-1077095e5711",
+      "dupr_doubles_rating": "3.7",
+      "dupr_reliability_rating": "90.000",
+      "dupr_age_based_rating": "4.0",
+      "season_dupr_rating": "3.70",
+      "season_primetime_rating": "4.00"
+    }
+  ],
+  "remaining": [
+    {
+      "remaining_affected": 2,
+      "remaining_repairable": 0,
+      "remaining": [
+        {
+          "name": "Barry Wolf",
+          "status": "REVIEW",
+          "reasons": [
+            "doubles: latest source differs from selected source"
+          ]
+        },
+        {
+          "name": "Chris Oleson",
+          "status": "REVIEW",
+          "reasons": [
+            "doubles: latest source differs from selected source",
+            "age: latest source differs from selected source"
+          ]
+        }
+      ]
+    }
+  ],
+  "auditIntegrity": [
+    {
+      "provenance_after_mismatch": 0,
+      "source_mismatch": 0,
+      "failed_repair_runs": 0
+    }
+  ],
+  "existingAuditUnchanged": true,
+  "smoke": {
+    "commissioner": "PASS",
+    "seasonRatings": "PASS",
+    "captain": "PASS - Commissioner navigation, no active captain team",
+    "player": "PASS - team and final Season DUPR 4.0 rendered",
+    "askLwr": "PASS - panel/input/guides rendered; no question submitted",
+    "viewAs": "PASS - explicitly authorized Terry Captain read-only dashboard rendered; session ended",
+    "uploadPreview": "PASS - full CSV, Terry 4.077/100/4.311; existing inputs preserved; no Import"
+  },
+  "rollbackPerformed": false,
+  "normalUploadSafe": true,
+  "importExecuted": false,
+  "cleanExecuted": false
+}

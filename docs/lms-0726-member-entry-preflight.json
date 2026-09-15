@@ -1,0 +1,50 @@
+[
+  {
+    "actor": 8,
+    "target": 2,
+    "status": 200,
+    "allowed": true
+  },
+  {
+    "actor": 8,
+    "target": 9,
+    "status": 403,
+    "allowed": false
+  },
+  {
+    "actor": 7,
+    "target": 2,
+    "status": 200,
+    "allowed": true
+  },
+  {
+    "actor": 7,
+    "target": 9,
+    "status": 403,
+    "allowed": false
+  },
+  {
+    "actor": 2,
+    "target": 2,
+    "status": 403,
+    "allowed": false
+  },
+  {
+    "actor": 2,
+    "target": 9,
+    "status": 403,
+    "allowed": false
+  },
+  {
+    "actor": 1,
+    "target": 2,
+    "status": 403,
+    "allowed": false
+  },
+  {
+    "actor": 1,
+    "target": 9,
+    "status": 403,
+    "allowed": false
+  }
+]

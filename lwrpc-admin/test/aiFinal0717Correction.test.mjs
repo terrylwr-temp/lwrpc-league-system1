@@ -20,9 +20,9 @@ async function execute(kind,question,receipt){return runPlayerOfficialAnswer({bo
  const s=selectAnswerEvidence(r);return {answer:'Local answer fixture',evidenceSufficient:s.length>0,selectedEvidence:s,sources:sources(s)};
 }});}
 
-test('0717 final recording dates use original heading plus one original bullet, without calendar siblings',()=>{
+test('0717 final recording dates use one exact original bullet with separate source heading metadata, without calendar siblings',()=>{
  const r=retrieval('timing',first),s=selectAnswerEvidence(r);assert.equal(s.length,3);
- for(const c of s){assert.match(c.content,/League Key Dates\n• Sept\. 27, Sunday – Season DUPR ratings recorded$/);assert.doesNotMatch(c.content,/Sept\. 28|Registration|Schedules|Championship|4\.2\./);assert.equal(c.selectedPassages.length,1);}
+ for(const c of s){assert.match(c.content,/^• Sept\. 27, Sunday – Season DUPR ratings recorded$/);assert.doesNotMatch(c.content,/Sept\. 28|Registration|Schedules|Championship|4\.2\./);assert.equal(c.selectedPassages.length,1);}
  // The date is source data, not a hardcoded answer or selected date.
  for(const c of r.suppliedEvidence)c.content=c.content.replace('Sept. 27, Sunday','Oct. 3, Saturday');
  for(const c of selectAnswerEvidence(r))assert.match(c.content,/Oct\. 3, Saturday/);
@@ -33,7 +33,7 @@ for(const league of ['Weekday','Saturday','PrimeTime'])test(`0717 final signed S
  const raw=`When are they recorded for the ${league.toLowerCase()} league?`;
  const two=await execute('timing',raw,one.result.conversationReceipt);assert.equal(two.result.kind,'answer');assert.equal(two.conversationResolution.classification,'follow_up');
  assert.equal(two.conversationResolution.effectiveQuestion,`When are Season DUPR ratings recorded for the ${league} League?`);
- assert.equal(two.answer.selectedEvidence.length,1);assert.match(text(two.answer.selectedEvidence),new RegExp(`^${league} DUPR League Key Dates`));
+ assert.equal(two.answer.selectedEvidence.length,1);assert.match(two.answer.selectedEvidence[0].heading,new RegExp(`^${league} DUPR League Key Dates`));
  const o=qualityOutcome({id:randomUUID(),origin:'player_interface',started:now,completed:now+1,execution:two});assert.equal(o.final_kind,'answer');assert.equal(qualityException(o,two).p_occurrence,null);
 });
 test('0717 final plural timing continuation cannot inherit ambiguous, absent, invalid, expired or clarification context',async()=>{

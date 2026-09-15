@@ -1,0 +1,158 @@
+- generic
+  - complementary "View As User status"
+    - strong
+      - StaticText "VIEWING AS: Synthetic Person2 · READ-ONLY"
+    - paragraph
+      - StaticText "captain · Signed in as Synthetic Person7 (league manager)"
+    - button "Exit View As User" [ref=e1]
+  - alert
+  - main
+    - complementary "Captain dashboard navigation; hover to expand when collapsed"
+      - link "Lakewood Ranch Pickleball Club Lakewood Ranch Pickleball Club" [ref=e2]
+        - image "Lakewood Ranch Pickleball Club"
+        - strong
+          - StaticText "Lakewood Ranch Pickleball Club"
+      - navigation "Captain dashboard navigation" [ref=e3]
+        - button "Dashboard Captain ›" [expanded=false, ref=e5]
+          - StaticText "Dashboard"
+          - StaticText "Captain"
+          - StaticText "›"
+        - button "My Team" [ref=e6]
+          - StaticText "My Team"
+        - button "Captain Tools" [ref=e7]
+          - StaticText "Captain Tools"
+        - button "League Documents Synthetic League ›" [expanded=false, ref=e8]
+          - StaticText "League Documents"
+          - StaticText "Synthetic League"
+          - StaticText "›"
+      - StaticText "SELECTED SEASON"
+      - strong
+        - StaticText "Synthetic Current"
+      - StaticText "Synthetic League"
+      - paragraph
+        - StaticText "© 2026 Lakewood Ranch Pickleball Club"
+    - generic
+      - sectionheader
+        - StaticText "CAPTAIN DASHBOARD"
+        - heading "Welcome Synthetic" [level=1, ref=e9]
+          - StaticText "Welcome Synthetic"
+        - button "Ask LWR Pickleball Club AI" [ref=e10]
+        - link "Email League Management" [ref=e11]
+        - strong
+          - StaticText "Synthetic Person2"
+        - StaticText "Captain"
+        - button "SP" [ref=e12]
+          - StaticText "SP"
+      - generic
+        - StaticText "NEXT MATCH"
+        - StaticText "HOME MATCH"
+        - StaticText "Fri, Sep 11 - 12:00 PM"
+        - heading "Synthetic Team vs Other Team" [level=2, ref=e26]
+          - StaticText "Synthetic Team "
+          - emphasis
+            - StaticText "vs"
+          - StaticText " Other Team"
+        - StaticText "Synthetic Courts"
+        - button "Match Details" [ref=e27]
+        - button "Email Opposing Captains" [disabled, ref=e28]
+        - button "Match Score Sheet" [ref=e29]
+        - button "Enter Match Scores" [disabled, ref=e30]
+        - generic
+          - generic
+            - StaticText "MATCH SETUP"
+            - strong
+              - StaticText "Team lineups & readiness"
+          - StaticText "Home"
+          - StaticText " - "
+          - StaticText "Synthetic Team"
+          - strong
+            - StaticText "Setup Complete"
+          - StaticText "Away"
+          - StaticText " - "
+          - StaticText "Other Team"
+          - strong
+            - StaticText "Setup Complete"
+          - button "Match Setup" [ref=e31]
+      - region "Captain team statistics" [ref=e4]
+        - article
+          - StaticText "TEAM RECORD"
+          - strong
+            - StaticText "3-0"
+          - generic
+            - StaticText "12 Team Points"
+        - button "Open Division Standings" [ref=e13]
+          - StaticText "DIVISION RANK"
+          - strong
+            - StaticText "#1 OF 2"
+          - generic
+            - StaticText "Synthetic League | Synthetic Division"
+        - button "Open pending match score entry and validation actions" [disabled, ref=e14]
+          - StaticText "PENDING MATCH SCORE ENTRY/VALIDATIONS"
+          - strong
+            - StaticText "0"
+          - StaticText "Nothing awaiting action"
+      - generic
+        - StaticText "CAPTAIN TOOLS"
+        - heading "Synthetic Team" [level=3, ref=e15]
+        - button "View Team 6 rostered players" [ref=e16]
+          - strong
+            - StaticText "View Team"
+          - generic
+            - StaticText "6 rostered players"
+        - button "Manage Roster Players and leadership" [ref=e17]
+          - strong
+            - StaticText "Manage Roster"
+          - StaticText "Players and leadership"
+        - button "Division Schedules View all division team schedules" [ref=e18]
+          - strong
+            - StaticText "Division Schedules"
+          - StaticText "View all division team schedules"
+        - button "Division Captains Captain contact list" [ref=e19]
+          - strong
+            - StaticText "Division Captains"
+          - StaticText "Captain contact list"
+      - generic
+        - StaticText "ACTION NEEDED"
+        - heading "Pending Match Score Entry/Validations" [level=3, ref=e20]
+        - paragraph
+          - StaticText "No matches currently need score entry or validation."
+      - generic
+        - StaticText "PLAN FOR UPCOMING MATCHES"
+        - heading "Upcoming matches & byes" [level=3, ref=e21]
+        - paragraph
+          - StaticText "Click Match for Match Tools"
+        - StaticText "MATCHES"
+        - strong
+          - StaticText "1"
+        - button "Open Match Tools for Synthetic Team versus Other Team" [ref=e22]
+          - time
+            - StaticText "11"
+            - StaticText "SEP"
+          - strong
+            - StaticText "Synthetic Team vs Other Team"
+          - StaticText "Fri, Sep 11"
+          - StaticText " - "
+          - StaticText "12:00 PM"
+          - StaticText "Home"
+      - generic
+        - StaticText "DIVISION SNAPSHOT"
+        - heading "Standings" [level=3, ref=e23]
+        - button "Full view" [ref=e24]
+        - strong
+          - StaticText "#1 Synthetic Team"
+        - StaticText "12"
+        - strong
+          - StaticText "#2 Other Team"
+        - StaticText "4"
+      - generic
+        - StaticText "COMPLETED"
+        - heading "Recent results" [level=3, ref=e25]
+        - paragraph
+          - StaticText "Click Match for Score Details"
+        - StaticText "TOTAL TEAM POINTS"
+        - strong
+          - StaticText "12"
+        - paragraph
+          - StaticText "No completed matches are available."
+      - paragraph
+        - StaticText "LIVE CAPTAIN DASHBOARD - CURRENT DATA, PERMISSIONS, AND OPERATIONAL TOOLS"

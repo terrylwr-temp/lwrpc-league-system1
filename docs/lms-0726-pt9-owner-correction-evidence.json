@@ -1,0 +1,72 @@
+{
+  "rules": [
+    {
+      "page": 12,
+      "title": "LWR Pickleball Club DUPR League Rules",
+      "content": "PrimeTime DUPR League Divisions\nDivision Name\n(Men and Women)\nIndividual Rating\nRange\nMax Team\nAggregate\nPrimeTime 7 (PT 7) 2.7 to 3.899 7.1\nPrimeTime 9 (PT 9) 3.4 to 4.899 9.1\nPrimeTime 8 (Future) 3.3 to 4.399 8.1\nPrimeTime 9 (Future) 3.8 to 4.899 9.1",
+      "ordinal": 43,
+      "version_label": "v20260908162017-f0aad5ad"
+    }
+  ],
+  "observed_at": "2026-09-08T20:03:03.917899-04:00",
+  "configuration": [
+    {
+      "league": "PrimeTime DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MPT 9",
+      "max_dupr": 4.8,
+      "min_dupr": 3.4,
+      "league_id": "01dc00dd-f3fa-4e57-9d9f-b1a7ae91d046",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "division_id": "c2cf8705-f8a8-44c3-aa4f-500d23f36de2",
+      "rating_type": "primetime",
+      "team_dupr_max": 9.1
+    },
+    {
+      "league": "PrimeTime DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WPT 9",
+      "max_dupr": 4.8,
+      "min_dupr": 3.4,
+      "league_id": "01dc00dd-f3fa-4e57-9d9f-b1a7ae91d046",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "division_id": "f8e93f13-968d-4c77-958e-8bc88c019e4c",
+      "rating_type": "primetime",
+      "team_dupr_max": 9.1
+    }
+  ],
+  "scope": "Read-only owner correction verification; no data changed",
+  "schema": {
+    "min_dupr": "numeric(3,2)",
+    "max_dupr": "numeric(3,2)"
+  },
+  "editor": "app/divisions/page.js ratingNumber rounds to 2 decimal places",
+  "controls": [
+    {
+      "division": "MPT 9",
+      "exactRangeMatch": false,
+      "oneDecimalDomainMatch": true
+    },
+    {
+      "division": "WPT 9",
+      "exactRangeMatch": false,
+      "oneDecimalDomainMatch": true
+    }
+  ],
+  "regressionFixtures": [
+    {
+      "name": "Prior incorrect range rejected",
+      "pass": true
+    },
+    {
+      "name": "Changed minimum rejected in normalized domain",
+      "pass": true
+    },
+    {
+      "name": "Changed maximum rejected in normalized domain",
+      "pass": true
+    }
+  ],
+  "limitation": "Normalized configuration correspondence verified and approved. This does not certify every member rating or complete admission eligibility. Fixtures validate comparison semantics, not an implemented production guard.",
+  "ownerDecision": "Keep normalized 4.8 for Season DUPR; no precision change; prior PT9 discrepancy closed"
+}

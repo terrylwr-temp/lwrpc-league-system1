@@ -1,0 +1,68 @@
+{
+  "release": "LMS-0733",
+  "version": "0.1.555",
+  "branch": "codex/lms0733-source-review",
+  "commit": "c6ee7f067ba3965d7eb2a0d1b92f44389697dcc0",
+  "tree": "7bb0e875cb4d3e51b20254fcf18d9389a7b7fdea",
+  "parent": "a9a515da7287f50408fcd98b6779f3d7ad6806bb",
+  "clean": true,
+  "productionChanged": false,
+  "files": [
+    {
+      "path": "docs/lms-0733-season-initialization-diagnosis.md",
+      "sha256": "6e213979eb055b687e61f412067ad81f85abf2e049c29f1fd98175df37cb5e5e"
+    },
+    {
+      "path": "docs/lms-0733-source-review-local-review.md",
+      "sha256": "4b2897b71d8fa2946f6c2d79ee142a31edc7a321c774e034c66ce0a7c8a4cc99"
+    },
+    {
+      "path": "docs/project-roadmap.md",
+      "sha256": "06f0f37343b3be4323354de50dfc71afd73af80cc21c6db3b3c713af2d2266ce"
+    },
+    {
+      "path": "lwrpc-admin/app/components/RatingsImportPreview.js",
+      "sha256": "fee60c894671fa3d1fad50d3458173cff261664b569be4f42e41595b2e6a22b3"
+    },
+    {
+      "path": "lwrpc-admin/app/components/SourceRatingsReview.js",
+      "sha256": "66cfec65f5443fccc32102867d12331d65f80c486a390e9ec1544e15db99266e"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/seasonRatingsImport.js",
+      "sha256": "32f32663bddfaa8e4851d39e631197f4933d3047ce2c2c1c21bc8dfb4f64fe9b"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/seasonRatingsImportServer.js",
+      "sha256": "a321e84674cc8de0f18a3d03d595faa2a8ff4909f5be57423a885f2e89394b9c"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/seasonRatingsReview.js",
+      "sha256": "65659c8339099034406867b8be0f3d71d89fd3c5994bef41e00fe362e2b19167"
+    },
+    {
+      "path": "lwrpc-admin/app/ratings/page.js",
+      "sha256": "8da49bd1f2b66df9bac60c4d4be303704ae75361185371e23ef83dfcd987ecdd"
+    },
+    {
+      "path": "lwrpc-admin/scripts/source-review-browser-fixture.mjs",
+      "sha256": "4d4d6260759b4a52037f1690dbed5bf2f961be19b43dbf998d73d7ac652ad8e2"
+    },
+    {
+      "path": "lwrpc-admin/supabase/migrations/20260910171732_season_ratings_source_review_metadata.sql",
+      "sha256": "0e3bf3665b83032bb8b538b11e916b55548dada642f5cdef1097f165ee023098"
+    },
+    {
+      "path": "lwrpc-admin/supabase/rollback/season_ratings_source_review_metadata.sql",
+      "sha256": "94577b5e3b89225c904f6a865d63bf39e82e932730e3240d133d5cd211b88653"
+    },
+    {
+      "path": "lwrpc-admin/test/helpers/sourceReviewFixture.mjs",
+      "sha256": "c77f51a879ebb50012689f074f3d8f795e9c538acfc8a44a0114e70b3070ae6f"
+    },
+    {
+      "path": "lwrpc-admin/test/sourceRatingsReview.test.mjs",
+      "sha256": "b360b08266de614e0be51fc7379dfcce586bd066e59f69f875b0408c848d740b"
+    }
+  ]
+}

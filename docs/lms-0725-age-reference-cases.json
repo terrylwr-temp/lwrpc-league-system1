@@ -1,0 +1,74 @@
+{
+  "cases": [
+    {
+      "id": "Q90",
+      "question": "What is the date for the primetime league for basing the age on",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q91",
+      "question": "What date is my age based on for PrimeTime?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q92",
+      "question": "What is the PrimeTime age cutoff date?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q93",
+      "question": "When do I have to turn 65 to play PrimeTime?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q94",
+      "question": "Do I have to be 65 when the PrimeTime season starts?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q95",
+      "question": "If I turn 65 later this year can I play PrimeTime?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q96",
+      "question": "I turn 65 in December. Can I play PrimeTime?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q97",
+      "question": "What date do you use to determine age for the 65+ league?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    },
+    {
+      "id": "Q98",
+      "question": "When does PrimeTime start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "league_date"
+    },
+    {
+      "id": "Q99",
+      "question": "What date do you use to determine age for PrimeTime?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedIntent": "age_eligibility"
+    }
+  ]
+}

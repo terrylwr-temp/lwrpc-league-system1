@@ -74,6 +74,7 @@ export async function approvedDetail(db,id){
   db.from('ai_approved_answer_events').select('id,action,created_at,reason,revision_id,before_state,after_state').eq('answer_id',revision.answer_id).order('created_at',{ascending:false}).limit(100),
  ]);
  const item=checked(a);const linkedCase=item.source_review_case_id?checked(await db.from('ai_manager_review_cases').select('group_id,status').eq('id',item.source_review_case_id).maybeSingle()):null;
+ if(linkedCase){const group=checked(await db.from('ai_question_groups').select('canonical_question').eq('id',linkedCase.group_id).maybeSingle());linkedCase.question=group?.canonical_question||revision.canonical_question;}
  return {revision,related:revision.related_chunk_id?await approvedBoundSource(db,revision):null,activatedBy,item,linkedCase,history:checked(rs),events:checked(es).map(e=>({...e,before_state:auditPublicState(e.before_state),after_state:auditPublicState(e.after_state)}))};
 }
 export async function approvedPreflight(db,id,user){

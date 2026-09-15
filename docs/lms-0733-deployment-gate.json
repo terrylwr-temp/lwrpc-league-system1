@@ -1,0 +1,138 @@
+{
+  "deployment": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"deployment\": {\n    \"id\": \"dpl_3bUs78Vz63nxpVwguqPcHn35WziL\",\n    \"name\": \"lwrpc-admin\",\n    \"url\": \"lwrpc-admin-fsqs2gh9x-terry-lwrpc.vercel.app\",\n    \"type\": \"LAMBDAS\",\n    \"state\": \"READY\",\n    \"createdAt\": 1789051786676,\n    \"creator\": {\n      \"uid\": \"JUuQDjLgrTx95yrq0IbiBdU6\",\n      \"username\": \"terrylwr-temp\"\n    },\n    \"project\": {\n      \"id\": \"prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3\",\n      \"name\": \"lwrpc-admin\",\n      \"framework\": \"nextjs\"\n    },\n    \"meta\": {\n      \"gitCommitAuthorName\": \"terrylwrpickleballclub\",\n      \"gitCommitAuthorEmail\": \"terry.adelman@gmail.com\",\n      \"gitCommitMessage\": \"LMS-0724 isolated read-only View As User\",\n      \"gitCommitRef\": \"main\",\n      \"gitCommitSha\": \"e24d27f64953a6128383bb6393bcb383ba67f5dc\",\n      \"gitDirty\": \"1\",\n      \"reviewedCommit\": \"e24d27f64953a6128383bb6393bcb383ba67f5dc\",\n      \"lmsRelease\": \"LMS-0733\",\n      \"sourceTree\": \"1d1198e97af7cb5cb3b3fc1a0f6350d13fcec7a5\",\n      \"actor\": \"codex\",\n      \"lambdaRuntimeStats\": \"{\\\"nodejs\\\":3}\",\n      \"bundler\": \"turbopack\"\n    },\n    \"alias\": [\n      \"lwrpc-admin.vercel.app\",\n      \"league.lwrpickleballclub.com\",\n      \"view-as.lwrpickleballclub.com\",\n      \"lwrpc-admin-terry-lwrpc.vercel.app\"\n    ],\n    \"target\": \"production\",\n    \"regions\": [\n      \"iad1\"\n    ],\n    \"buildingAt\": 1789051787698,\n    \"ready\": 1789051836374,\n    \"readyState\": \"READY\",\n    \"source\": \"cli\",\n    \"aliasError\": null\n  }\n}"
+      }
+    ],
+    "isError": false
+  },
+  "business": [
+    {
+      "captured_at": "2026-09-10 14:52:07.82601+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "dd28041d5831bde799870753445056c9"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+        },
+        {
+          "name": "locations",
+          "rows": 137,
+          "fingerprint": "ad8768b59dc159e7a5cb779f49657635"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1012,
+          "fingerprint": "45213079f14e8e6374c4cb7876d0e6e7"
+        },
+        {
+          "name": "members",
+          "rows": 1974,
+          "fingerprint": "90562f698338f1eaec040f5c13b25c62"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 105,
+          "fingerprint": "83ec67dc7e6ca9664b35a4cf09790a1b"
+        },
+        {
+          "name": "user_roles",
+          "rows": 183,
+          "fingerprint": "2dd120cf3ac7ed71b296b4610802e87c"
+        }
+      ]
+    }
+  ],
+  "activeRules": [
+    {
+      "document_id": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "title": "LWR Pickleball Club DUPR League Rules",
+      "status": "active",
+      "active_version_id": "6ae10e5f-fdde-41be-a941-d1b7ed360d1a",
+      "processing_status": "ready",
+      "chunk_id": "8834ecc0-0c39-405f-bed9-0b9b6d3d25d0",
+      "rule_number": "4",
+      "page_number": 3,
+      "is_searchable": true,
+      "has_embedding": true,
+      "content": "4. DUPR RATINGS/DIVISIONS\n4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.\n4.1.1. A player with a DUPR Reliability Factor of 29 or below will be classified as “Not\nRated” (NR) for League purposes and will be subject to the provisions of Rule 4.5.\nThis classification recognizes that a player’s current DUPR rating may not yet\nprovide a suƯiciently reliable indication of skill level, particularly for newer or less-\nestablished players or those who have not recently recorded matches in DUPR.\nPlayers classified as “NR” may be placed on a team in the division that most\nappropriately reflects their current skill level while they record additional matches\nand establish a more reliable DUPR rating. These players are strongly encouraged\nto consult with a local Certified DUPR Coach, pickleball professional, or\nknowledgeable team captain for guidance regarding appropriate division\nplacement.\n4.2. All DUPR ratings will be truncated to the nearest tenth to establish a player's “Season's\nDUPR Rating”. For example, a rating of 3.496 will be truncated to 3.4, as will a rating of\n3.401.\n4.3. Some of our Leagues use the “Age-based” DUPR sub-rating but will still follow all DUPR\nRating/Division Rules. If a player hasn’t established their 65+ Age-based rating as of the\nstart of a season, their 50+ Age-based rating will be used.\n4.4. Any player or team that is found to be cheating, tanking, game-fixing or any kind of data\nmanipulation, including intentionally creating multiple DUPR accounts, will be banned\nfrom the League for one calendar year.\n4.5. Players with a DUPR Rating of \"NR\" (Not Rated): Players with a DUPR rating of NR (Not"
+    }
+  ],
+  "substitute": [
+    {
+      "id": "bdccf8d7-340f-48bb-a50e-6531943f3282",
+      "title": "Substitute Player Eligibility",
+      "status": "active",
+      "approved_answer": "Yes. Substitute players must meet all applicable player eligibility requirements for the division in which they are playing, including the applicable Season DUPR rating requirements. A player’s status as a substitute does not waive or modify any division eligibility requirements. If the substitute is classified as Not Rated (NR), all applicable NR eligibility rules also apply.",
+      "activated_at": "2026-09-10 11:32:59.680775+00",
+      "content_hash": "3e8bd62ed5dabe458f582f35592f2e17891358bc2240b0bec2e061ceda7e277a"
+    }
+  ]
+}

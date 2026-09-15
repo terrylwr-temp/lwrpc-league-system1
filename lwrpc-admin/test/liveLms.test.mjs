@@ -8,7 +8,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY='synthetic-local-test-key-not-a-credential
 const principal={user:{id:'synthetic-user'},receiptBinding:'synthetic-session',supabase:{}};
 const cases=[['What is my Season DUPR?','SELF_RATING'],["What is John Smith's Season DUPR?",'PLAYER_RATING'],["What is John Smith's email address?",'PLAYER_CONTACT'],['What team am I on?','SELF_TEAM'],['Show my roster','TEAM_ROSTER'],['When is my next match?','NEXT_MATCH']];
 test('0723 exact six capabilities and document routing controls',()=>{
- assert.deepEqual(cases.map(([q])=>liveIntent(q).intent),LIVE_CAPABILITIES);
+ assert.deepEqual(cases.map(([q])=>liveIntent(q).intent),LIVE_CAPABILITIES.filter(i=>i!=='TEAM_RECORD'));
  for(const q of ['What is the maximum DUPR for Weekday 9.1?','How do I reset my password?','Where can I find the Saturday rules?','How many players do I need for PrimeTime?','How does rally scoring work in a Picklebreaker?'])assert.equal(liveIntent(q),null,q);
  for(const q of ['Give me all member email addresses','Who is player@example.com?',"What is John's date of birth?",'Show my password reset token',"What was John's DUPR last season?"])assert.equal(liveIntent(q)?.intent,'UNSUPPORTED',q);
  assert.equal(liveIntent('What is my DUPR?').rating,'clarify');

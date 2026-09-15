@@ -1,0 +1,5116 @@
+{
+  "columns": [
+    {
+      "type": "uuid",
+      "table": "ai_answer_feedback_events",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_answer_feedback_events",
+      "column": "answer_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_answer_feedback_events",
+      "column": "auth_user_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_answer_feedback_events",
+      "column": "member_id"
+    },
+    {
+      "type": "bool",
+      "table": "ai_answer_feedback_events",
+      "column": "helpful"
+    },
+    {
+      "type": "text",
+      "table": "ai_answer_feedback_events",
+      "column": "original_question"
+    },
+    {
+      "type": "text",
+      "table": "ai_answer_feedback_events",
+      "column": "effective_question"
+    },
+    {
+      "type": "text",
+      "table": "ai_answer_feedback_events",
+      "column": "generated_answer"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_answer_feedback_events",
+      "column": "source_snapshot"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_answer_feedback_events",
+      "column": "selection_snapshot"
+    },
+    {
+      "type": "text",
+      "table": "ai_answer_feedback_events",
+      "column": "assistant_version"
+    },
+    {
+      "type": "text",
+      "table": "ai_answer_feedback_events",
+      "column": "model"
+    },
+    {
+      "type": "text",
+      "table": "ai_answer_feedback_events",
+      "column": "comment"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_answer_feedback_events",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_events",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_events",
+      "column": "answer_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_events",
+      "column": "revision_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_events",
+      "column": "operation_id"
+    },
+    {
+      "type": "int2",
+      "table": "ai_approved_answer_events",
+      "column": "event_ordinal"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_events",
+      "column": "request_hash"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_events",
+      "column": "action"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_events",
+      "column": "actor_user_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answer_events",
+      "column": "created_at"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_approved_answer_events",
+      "column": "before_state"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_approved_answer_events",
+      "column": "after_state"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_events",
+      "column": "reason"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "answer_id"
+    },
+    {
+      "type": "int4",
+      "table": "ai_approved_answer_revisions",
+      "column": "revision_number"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "status"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "title"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "topic_key"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "canonical_question"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "approved_answer"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "league_scope"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "temporal_scope"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "season_id"
+    },
+    {
+      "type": "date",
+      "table": "ai_approved_answer_revisions",
+      "column": "effective_on"
+    },
+    {
+      "type": "date",
+      "table": "ai_approved_answer_revisions",
+      "column": "expires_on"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "related_chunk_id"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "related_rule_identity"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_approved_answer_revisions",
+      "column": "public_links"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "content_hash"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "authority_manifest_hash"
+    },
+    {
+      "type": "vector",
+      "table": "ai_approved_answer_revisions",
+      "column": "embedding"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "embedding_model"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answer_revisions",
+      "column": "embedding_created_at"
+    },
+    {
+      "type": "tsvector",
+      "table": "ai_approved_answer_revisions",
+      "column": "search_vector"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answer_revisions",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answer_revisions",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "created_by_user_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "updated_by_user_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answer_revisions",
+      "column": "activated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "activated_by_user_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answer_revisions",
+      "column": "retired_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "retired_by_user_id"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "retirement_reason"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answer_revisions",
+      "column": "replaced_by_revision_id"
+    },
+    {
+      "type": "int8",
+      "table": "ai_approved_answer_revisions",
+      "column": "row_version"
+    },
+    {
+      "type": "text",
+      "table": "ai_approved_answer_revisions",
+      "column": "related_passage"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answers",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answers",
+      "column": "source_review_case_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answers",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_approved_answers",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answers",
+      "column": "created_by_user_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_approved_answers",
+      "column": "updated_by_user_id"
+    },
+    {
+      "type": "int8",
+      "table": "ai_approved_answers",
+      "column": "row_version"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_document_chunks",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_document_chunks",
+      "column": "document_version_id"
+    },
+    {
+      "type": "int4",
+      "table": "ai_document_chunks",
+      "column": "chunk_ordinal"
+    },
+    {
+      "type": "int4",
+      "table": "ai_document_chunks",
+      "column": "page_number"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_chunks",
+      "column": "section_label"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_chunks",
+      "column": "rule_number"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_chunks",
+      "column": "heading"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_chunks",
+      "column": "content"
+    },
+    {
+      "type": "tsvector",
+      "table": "ai_document_chunks",
+      "column": "search_vector"
+    },
+    {
+      "type": "vector",
+      "table": "ai_document_chunks",
+      "column": "embedding"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_chunks",
+      "column": "embedding_model"
+    },
+    {
+      "type": "bool",
+      "table": "ai_document_chunks",
+      "column": "is_searchable"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_document_chunks",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_document_chunks",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_document_versions",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_document_versions",
+      "column": "document_id"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "version_label"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "source_kind"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "storage_bucket"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "storage_path"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "original_filename"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "checksum_sha256"
+    },
+    {
+      "type": "int8",
+      "table": "ai_document_versions",
+      "column": "file_size_bytes"
+    },
+    {
+      "type": "int4",
+      "table": "ai_document_versions",
+      "column": "page_count"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "processing_status"
+    },
+    {
+      "type": "text",
+      "table": "ai_document_versions",
+      "column": "processing_error"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_document_versions",
+      "column": "processing_warnings"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_document_versions",
+      "column": "processed_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_document_versions",
+      "column": "processed_by_member_id"
+    },
+    {
+      "type": "int4",
+      "table": "ai_document_versions",
+      "column": "chunk_count"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_document_versions",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_document_versions",
+      "column": "updated_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_document_versions",
+      "column": "activated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_document_versions",
+      "column": "activated_by_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_documents",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "ai_documents",
+      "column": "title"
+    },
+    {
+      "type": "text",
+      "table": "ai_documents",
+      "column": "description"
+    },
+    {
+      "type": "text",
+      "table": "ai_documents",
+      "column": "document_type"
+    },
+    {
+      "type": "int2",
+      "table": "ai_documents",
+      "column": "authority_rank"
+    },
+    {
+      "type": "text",
+      "table": "ai_documents",
+      "column": "status"
+    },
+    {
+      "type": "text",
+      "table": "ai_documents",
+      "column": "scope_kind"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_documents",
+      "column": "league_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_documents",
+      "column": "division_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_documents",
+      "column": "season_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_documents",
+      "column": "active_version_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_documents",
+      "column": "created_by_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_documents",
+      "column": "updated_by_member_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_documents",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_documents",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_cases",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_cases",
+      "column": "group_id"
+    },
+    {
+      "type": "text",
+      "table": "ai_manager_review_cases",
+      "column": "status"
+    },
+    {
+      "type": "text",
+      "table": "ai_manager_review_cases",
+      "column": "action_category"
+    },
+    {
+      "type": "text",
+      "table": "ai_manager_review_cases",
+      "column": "priority"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_cases",
+      "column": "assigned_to"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_manager_review_cases",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_cases",
+      "column": "created_by"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_manager_review_cases",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_cases",
+      "column": "reviewed_by"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_manager_review_cases",
+      "column": "reviewed_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_manager_review_cases",
+      "column": "reviewed_through_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_manager_review_cases",
+      "column": "resolved_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_manager_review_cases",
+      "column": "closed_at"
+    },
+    {
+      "type": "text",
+      "table": "ai_manager_review_cases",
+      "column": "resolution_summary"
+    },
+    {
+      "type": "int4",
+      "table": "ai_manager_review_cases",
+      "column": "revision"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_events",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_events",
+      "column": "operation_id"
+    },
+    {
+      "type": "int2",
+      "table": "ai_manager_review_events",
+      "column": "event_ordinal"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_events",
+      "column": "group_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_events",
+      "column": "case_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_events",
+      "column": "occurrence_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_manager_review_events",
+      "column": "actor_user_id"
+    },
+    {
+      "type": "text",
+      "table": "ai_manager_review_events",
+      "column": "actor_kind"
+    },
+    {
+      "type": "text",
+      "table": "ai_manager_review_events",
+      "column": "action"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_manager_review_events",
+      "column": "before_state"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_manager_review_events",
+      "column": "after_state"
+    },
+    {
+      "type": "text",
+      "table": "ai_manager_review_events",
+      "column": "note"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_manager_review_events",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_question_fingerprint_routes",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_fingerprint_routes",
+      "column": "origin"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_fingerprint_routes",
+      "column": "family"
+    },
+    {
+      "type": "int2",
+      "table": "ai_question_fingerprint_routes",
+      "column": "normalizer_version"
+    },
+    {
+      "type": "int2",
+      "table": "ai_question_fingerprint_routes",
+      "column": "key_version"
+    },
+    {
+      "type": "bytea",
+      "table": "ai_question_fingerprint_routes",
+      "column": "fingerprint"
+    },
+    {
+      "type": "int4",
+      "table": "ai_question_fingerprint_routes",
+      "column": "collision_slot"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_fingerprint_routes",
+      "column": "normalized_question"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_question_fingerprint_routes",
+      "column": "group_id"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_fingerprint_routes",
+      "column": "assignment_kind"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_question_fingerprint_routes",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_question_fingerprint_routes",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_question_groups",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_groups",
+      "column": "origin"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_groups",
+      "column": "family"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_groups",
+      "column": "title"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_groups",
+      "column": "canonical_question"
+    },
+    {
+      "type": "text",
+      "table": "ai_question_groups",
+      "column": "topic"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_question_groups",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_question_groups",
+      "column": "first_seen_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_question_groups",
+      "column": "last_seen_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_question_groups",
+      "column": "merged_into_group_id"
+    },
+    {
+      "type": "int4",
+      "table": "ai_question_groups",
+      "column": "revision"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_question_groups",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_request_outcomes",
+      "column": "id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_request_outcomes",
+      "column": "request_started_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_request_outcomes",
+      "column": "completed_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_request_outcomes",
+      "column": "recorded_at"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "origin"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "final_kind"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "reason_code"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "assistant_version"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "model"
+    },
+    {
+      "type": "bool",
+      "table": "ai_request_outcomes",
+      "column": "feedback_eligible"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "source_family"
+    },
+    {
+      "type": "int2",
+      "table": "ai_request_outcomes",
+      "column": "selected_evidence_count"
+    },
+    {
+      "type": "bool",
+      "table": "ai_request_outcomes",
+      "column": "stage3_invoked"
+    },
+    {
+      "type": "bool",
+      "table": "ai_request_outcomes",
+      "column": "model_call_skipped"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "guard_classification"
+    },
+    {
+      "type": "text",
+      "table": "ai_request_outcomes",
+      "column": "resolver_classification"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_request_outcomes",
+      "column": "diagnostic_snapshot"
+    },
+    {
+      "type": "int4",
+      "table": "ai_request_outcomes",
+      "column": "total_ms"
+    },
+    {
+      "type": "int4",
+      "table": "ai_request_outcomes",
+      "column": "input_tokens"
+    },
+    {
+      "type": "int4",
+      "table": "ai_request_outcomes",
+      "column": "output_tokens"
+    },
+    {
+      "type": "int2",
+      "table": "ai_request_outcomes",
+      "column": "telemetry_version"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_review_occurrences",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_review_occurrences",
+      "column": "answer_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_review_occurrences",
+      "column": "outcome_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_review_occurrences",
+      "column": "group_id"
+    },
+    {
+      "type": "uuid",
+      "table": "ai_review_occurrences",
+      "column": "first_feedback_event_id"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "provenance"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "origin"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "occurrence_kind"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_review_occurrences",
+      "column": "answer_completed_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_review_occurrences",
+      "column": "first_observed_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_review_occurrences",
+      "column": "recorded_at"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "original_question"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "effective_question"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "output_text"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_review_occurrences",
+      "column": "source_snapshot"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_review_occurrences",
+      "column": "selection_snapshot"
+    },
+    {
+      "type": "jsonb",
+      "table": "ai_review_occurrences",
+      "column": "resolver_snapshot"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "assistant_version"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "model"
+    },
+    {
+      "type": "text",
+      "table": "ai_review_occurrences",
+      "column": "source_family"
+    },
+    {
+      "type": "bool",
+      "table": "ai_review_occurrences",
+      "column": "redaction_applied"
+    },
+    {
+      "type": "int2",
+      "table": "ai_review_occurrences",
+      "column": "redaction_version"
+    },
+    {
+      "type": "int2",
+      "table": "ai_review_occurrences",
+      "column": "snapshot_version"
+    },
+    {
+      "type": "timestamptz",
+      "table": "ai_review_occurrences",
+      "column": "payload_purged_at"
+    },
+    {
+      "type": "uuid",
+      "table": "app_notification_subscriptions",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "endpoint"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "p256dh"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "auth"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "app_scope"
+    },
+    {
+      "type": "uuid",
+      "table": "app_notification_subscriptions",
+      "column": "round_robin_group_id"
+    },
+    {
+      "type": "uuid",
+      "table": "app_notification_subscriptions",
+      "column": "round_robin_player_id"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "recipient_email"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "recipient_phone"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "user_agent"
+    },
+    {
+      "type": "bool",
+      "table": "app_notification_subscriptions",
+      "column": "enabled"
+    },
+    {
+      "type": "timestamptz",
+      "table": "app_notification_subscriptions",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "app_notification_subscriptions",
+      "column": "updated_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "app_notification_subscriptions",
+      "column": "last_success_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "app_notification_subscriptions",
+      "column": "last_error_at"
+    },
+    {
+      "type": "text",
+      "table": "app_notification_subscriptions",
+      "column": "last_error"
+    },
+    {
+      "type": "uuid",
+      "table": "division_lines",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "division_lines",
+      "column": "division_id"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "line_number"
+    },
+    {
+      "type": "text",
+      "table": "division_lines",
+      "column": "line_name"
+    },
+    {
+      "type": "bool",
+      "table": "division_lines",
+      "column": "posted_to_dupr"
+    },
+    {
+      "type": "text",
+      "table": "division_lines",
+      "column": "game_format"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "games_per_line"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "points_to_win"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "win_by"
+    },
+    {
+      "type": "bool",
+      "table": "division_lines",
+      "column": "picklebreaker_enabled"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "picklebreaker_points"
+    },
+    {
+      "type": "text",
+      "table": "division_lines",
+      "column": "line_type"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "sort_order"
+    },
+    {
+      "type": "timestamptz",
+      "table": "division_lines",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "division_lines",
+      "column": "updated_at"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "picklebreaker_win_points"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "picklebreaker_loss_points"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "team_win_points"
+    },
+    {
+      "type": "bool",
+      "table": "division_lines",
+      "column": "uses_saved_match_lineups"
+    },
+    {
+      "type": "text",
+      "table": "division_lines",
+      "column": "standings_points_mode"
+    },
+    {
+      "type": "text",
+      "table": "division_lines",
+      "column": "score_type"
+    },
+    {
+      "type": "bool",
+      "table": "division_lines",
+      "column": "score_required"
+    },
+    {
+      "type": "int4",
+      "table": "division_lines",
+      "column": "picklebreaker_not_played_points"
+    },
+    {
+      "type": "text",
+      "table": "division_lines",
+      "column": "picklebreaker_not_played_award_rule"
+    },
+    {
+      "type": "text",
+      "table": "division_lines",
+      "column": "picklebreaker_play_rule"
+    },
+    {
+      "type": "uuid",
+      "table": "divisions",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "divisions",
+      "column": "league_id"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "skill_level"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "sort_order"
+    },
+    {
+      "type": "bool",
+      "table": "divisions",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamp",
+      "table": "divisions",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamp",
+      "table": "divisions",
+      "column": "updated_at"
+    },
+    {
+      "type": "numeric",
+      "table": "divisions",
+      "column": "min_dupr"
+    },
+    {
+      "type": "numeric",
+      "table": "divisions",
+      "column": "max_dupr"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "number_of_lines"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "default_game_format"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "games_per_line"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "points_to_win"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "win_by"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "third_game_format"
+    },
+    {
+      "type": "bool",
+      "table": "divisions",
+      "column": "picklebreaker_enabled"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "picklebreaker_points"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "line_notes"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "rating_type"
+    },
+    {
+      "type": "numeric",
+      "table": "divisions",
+      "column": "standings_win_points"
+    },
+    {
+      "type": "numeric",
+      "table": "divisions",
+      "column": "standings_tie_points"
+    },
+    {
+      "type": "numeric",
+      "table": "divisions",
+      "column": "standings_loss_points"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "standings_tiebreak_1"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "standings_tiebreak_2"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "standings_tiebreak_3"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "picklebreaker_win_points"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "picklebreaker_loss_points"
+    },
+    {
+      "type": "jsonb",
+      "table": "divisions",
+      "column": "default_lines_config"
+    },
+    {
+      "type": "numeric",
+      "table": "divisions",
+      "column": "team_dupr_max"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "playoff_team_count"
+    },
+    {
+      "type": "uuid",
+      "table": "divisions",
+      "column": "score_sheet_template_id"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "primary_team_type"
+    },
+    {
+      "type": "int4",
+      "table": "divisions",
+      "column": "secondary_number_of_lines"
+    },
+    {
+      "type": "text",
+      "table": "divisions",
+      "column": "secondary_team_type"
+    },
+    {
+      "type": "bool",
+      "table": "divisions",
+      "column": "flex_league"
+    },
+    {
+      "type": "uuid",
+      "table": "league_blackout_dates",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "league_blackout_dates",
+      "column": "league_id"
+    },
+    {
+      "type": "uuid",
+      "table": "league_blackout_dates",
+      "column": "division_id"
+    },
+    {
+      "type": "date",
+      "table": "league_blackout_dates",
+      "column": "blackout_date"
+    },
+    {
+      "type": "text",
+      "table": "league_blackout_dates",
+      "column": "reason"
+    },
+    {
+      "type": "timestamptz",
+      "table": "league_blackout_dates",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "league_blackout_dates",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "league_schedule_settings",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "league_schedule_settings",
+      "column": "league_id"
+    },
+    {
+      "type": "uuid",
+      "table": "league_schedule_settings",
+      "column": "division_id"
+    },
+    {
+      "type": "text",
+      "table": "league_schedule_settings",
+      "column": "name"
+    },
+    {
+      "type": "date",
+      "table": "league_schedule_settings",
+      "column": "season_start_date"
+    },
+    {
+      "type": "date",
+      "table": "league_schedule_settings",
+      "column": "season_end_date"
+    },
+    {
+      "type": "text",
+      "table": "league_schedule_settings",
+      "column": "default_match_day"
+    },
+    {
+      "type": "time",
+      "table": "league_schedule_settings",
+      "column": "default_match_time"
+    },
+    {
+      "type": "int4",
+      "table": "league_schedule_settings",
+      "column": "matches_per_team"
+    },
+    {
+      "type": "bool",
+      "table": "league_schedule_settings",
+      "column": "allow_byes"
+    },
+    {
+      "type": "text",
+      "table": "league_schedule_settings",
+      "column": "schedule_status"
+    },
+    {
+      "type": "text",
+      "table": "league_schedule_settings",
+      "column": "notes"
+    },
+    {
+      "type": "timestamptz",
+      "table": "league_schedule_settings",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "league_schedule_settings",
+      "column": "updated_at"
+    },
+    {
+      "type": "int4",
+      "table": "league_schedule_settings",
+      "column": "courts_needed_per_match"
+    },
+    {
+      "type": "int4",
+      "table": "league_schedule_settings",
+      "column": "lines_playing"
+    },
+    {
+      "type": "int4",
+      "table": "league_schedule_settings",
+      "column": "games_per_line"
+    },
+    {
+      "type": "bool",
+      "table": "league_schedule_settings",
+      "column": "every_other_week"
+    },
+    {
+      "type": "int4",
+      "table": "league_schedule_settings",
+      "column": "actual_schedule_weeks"
+    },
+    {
+      "type": "uuid",
+      "table": "leagues",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "leagues",
+      "column": "season_id"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "description"
+    },
+    {
+      "type": "bool",
+      "table": "leagues",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamp",
+      "table": "leagues",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamp",
+      "table": "leagues",
+      "column": "updated_at"
+    },
+    {
+      "type": "bool",
+      "table": "leagues",
+      "column": "rosters_locked"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "league_document_bucket"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "code_of_conduct_pdf_path"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "captains_guide_pdf_path"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "league_rules_pdf_path"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "score_sheet_pdf_path"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "league_waiver_pdf_path"
+    },
+    {
+      "type": "int4",
+      "table": "leagues",
+      "column": "match_setup_reminder_days_before"
+    },
+    {
+      "type": "text",
+      "table": "leagues",
+      "column": "abbreviation"
+    },
+    {
+      "type": "bool",
+      "table": "leagues",
+      "column": "flex_league"
+    },
+    {
+      "type": "bool",
+      "table": "leagues",
+      "column": "only_home_community_players"
+    },
+    {
+      "type": "uuid",
+      "table": "line_games",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "line_games",
+      "column": "match_line_id"
+    },
+    {
+      "type": "int4",
+      "table": "line_games",
+      "column": "game_number"
+    },
+    {
+      "type": "int4",
+      "table": "line_games",
+      "column": "home_score"
+    },
+    {
+      "type": "int4",
+      "table": "line_games",
+      "column": "away_score"
+    },
+    {
+      "type": "bool",
+      "table": "line_games",
+      "column": "is_picklebreaker"
+    },
+    {
+      "type": "text",
+      "table": "line_games",
+      "column": "game_status"
+    },
+    {
+      "type": "timestamptz",
+      "table": "line_games",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "line_games",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "location_court_availability",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "location_court_availability",
+      "column": "location_id"
+    },
+    {
+      "type": "text",
+      "table": "location_court_availability",
+      "column": "day_of_week"
+    },
+    {
+      "type": "date",
+      "table": "location_court_availability",
+      "column": "specific_date"
+    },
+    {
+      "type": "time",
+      "table": "location_court_availability",
+      "column": "start_time"
+    },
+    {
+      "type": "time",
+      "table": "location_court_availability",
+      "column": "end_time"
+    },
+    {
+      "type": "int4",
+      "table": "location_court_availability",
+      "column": "courts_available"
+    },
+    {
+      "type": "bool",
+      "table": "location_court_availability",
+      "column": "is_blackout"
+    },
+    {
+      "type": "text",
+      "table": "location_court_availability",
+      "column": "notes"
+    },
+    {
+      "type": "timestamptz",
+      "table": "location_court_availability",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "location_court_availability",
+      "column": "updated_at"
+    },
+    {
+      "type": "int4",
+      "table": "location_court_availability",
+      "column": "courts_unavailable"
+    },
+    {
+      "type": "uuid",
+      "table": "locations",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "locations",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "locations",
+      "column": "address"
+    },
+    {
+      "type": "text",
+      "table": "locations",
+      "column": "city"
+    },
+    {
+      "type": "text",
+      "table": "locations",
+      "column": "state"
+    },
+    {
+      "type": "text",
+      "table": "locations",
+      "column": "zip_code"
+    },
+    {
+      "type": "int4",
+      "table": "locations",
+      "column": "number_of_courts"
+    },
+    {
+      "type": "text",
+      "table": "locations",
+      "column": "court_notes"
+    },
+    {
+      "type": "text",
+      "table": "locations",
+      "column": "club_pros"
+    },
+    {
+      "type": "bool",
+      "table": "locations",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamp",
+      "table": "locations",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamp",
+      "table": "locations",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "locations",
+      "column": "club_pro_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "locations",
+      "column": "club_pro_2_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "match_id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "division_line_id"
+    },
+    {
+      "type": "int4",
+      "table": "match_lines",
+      "column": "line_number"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "home_player_1_id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "home_player_2_id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "away_player_1_id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "away_player_2_id"
+    },
+    {
+      "type": "text",
+      "table": "match_lines",
+      "column": "line_status"
+    },
+    {
+      "type": "int4",
+      "table": "match_lines",
+      "column": "home_wins"
+    },
+    {
+      "type": "int4",
+      "table": "match_lines",
+      "column": "away_wins"
+    },
+    {
+      "type": "bool",
+      "table": "match_lines",
+      "column": "posted_to_dupr"
+    },
+    {
+      "type": "timestamptz",
+      "table": "match_lines",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "match_lines",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "winning_team_id"
+    },
+    {
+      "type": "text",
+      "table": "match_lines",
+      "column": "verification_status"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "verified_by_member_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "match_lines",
+      "column": "verified_at"
+    },
+    {
+      "type": "int4",
+      "table": "match_lines",
+      "column": "home_team_games_won"
+    },
+    {
+      "type": "int4",
+      "table": "match_lines",
+      "column": "away_team_games_won"
+    },
+    {
+      "type": "int4",
+      "table": "match_lines",
+      "column": "home_team_points"
+    },
+    {
+      "type": "int4",
+      "table": "match_lines",
+      "column": "away_team_points"
+    },
+    {
+      "type": "text",
+      "table": "match_lines",
+      "column": "rating_type_at_play"
+    },
+    {
+      "type": "numeric",
+      "table": "match_lines",
+      "column": "home_player_1_rating_at_play"
+    },
+    {
+      "type": "numeric",
+      "table": "match_lines",
+      "column": "home_player_2_rating_at_play"
+    },
+    {
+      "type": "numeric",
+      "table": "match_lines",
+      "column": "away_player_1_rating_at_play"
+    },
+    {
+      "type": "numeric",
+      "table": "match_lines",
+      "column": "away_player_2_rating_at_play"
+    },
+    {
+      "type": "numeric",
+      "table": "match_lines",
+      "column": "home_team_rating_at_play"
+    },
+    {
+      "type": "numeric",
+      "table": "match_lines",
+      "column": "away_team_rating_at_play"
+    },
+    {
+      "type": "timestamptz",
+      "table": "match_lines",
+      "column": "ratings_snapshotted_at"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "match_id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "team_id"
+    },
+    {
+      "type": "int4",
+      "table": "match_lineups",
+      "column": "line_number"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "player_1_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "player_2_member_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "match_lineups",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "match_lineups",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "league_id"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "division_id"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "home_team_id"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "away_team_id"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "location_id"
+    },
+    {
+      "type": "date",
+      "table": "matches",
+      "column": "scheduled_date"
+    },
+    {
+      "type": "time",
+      "table": "matches",
+      "column": "scheduled_time"
+    },
+    {
+      "type": "int4",
+      "table": "matches",
+      "column": "week_number"
+    },
+    {
+      "type": "text",
+      "table": "matches",
+      "column": "status"
+    },
+    {
+      "type": "int4",
+      "table": "matches",
+      "column": "home_score"
+    },
+    {
+      "type": "int4",
+      "table": "matches",
+      "column": "away_score"
+    },
+    {
+      "type": "text",
+      "table": "matches",
+      "column": "notes"
+    },
+    {
+      "type": "timestamptz",
+      "table": "matches",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "matches",
+      "column": "updated_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "matches",
+      "column": "published_at"
+    },
+    {
+      "type": "bool",
+      "table": "matches",
+      "column": "is_published"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "schedule_setting_id"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "winning_team_id"
+    },
+    {
+      "type": "text",
+      "table": "matches",
+      "column": "score_status"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "score_entered_by_member_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "matches",
+      "column": "score_entered_at"
+    },
+    {
+      "type": "uuid",
+      "table": "matches",
+      "column": "score_verified_by_member_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "matches",
+      "column": "score_verified_at"
+    },
+    {
+      "type": "bool",
+      "table": "matches",
+      "column": "score_disputed"
+    },
+    {
+      "type": "text",
+      "table": "matches",
+      "column": "score_dispute_notes"
+    },
+    {
+      "type": "timestamptz",
+      "table": "matches",
+      "column": "finalized_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "matches",
+      "column": "score_exported_at"
+    },
+    {
+      "type": "text",
+      "table": "matches",
+      "column": "result_type"
+    },
+    {
+      "type": "text",
+      "table": "matches",
+      "column": "result_notes"
+    },
+    {
+      "type": "uuid",
+      "table": "member_import_batches",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "member_import_batches",
+      "column": "file_name"
+    },
+    {
+      "type": "int4",
+      "table": "member_import_batches",
+      "column": "total_rows"
+    },
+    {
+      "type": "timestamp",
+      "table": "member_import_batches",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "member_import_batches",
+      "column": "imported_by_member_id"
+    },
+    {
+      "type": "int4",
+      "table": "member_import_batches",
+      "column": "inactive_members"
+    },
+    {
+      "type": "text",
+      "table": "member_import_batches",
+      "column": "source"
+    },
+    {
+      "type": "int4",
+      "table": "member_import_batches",
+      "column": "new_members"
+    },
+    {
+      "type": "int4",
+      "table": "member_import_batches",
+      "column": "updated_members"
+    },
+    {
+      "type": "int4",
+      "table": "member_import_batches",
+      "column": "skipped_rows"
+    },
+    {
+      "type": "text",
+      "table": "member_import_batches",
+      "column": "notes"
+    },
+    {
+      "type": "uuid",
+      "table": "member_import_rows",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "member_import_rows",
+      "column": "batch_id"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "membershipworks_account_id"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "status"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "error_message"
+    },
+    {
+      "type": "jsonb",
+      "table": "member_import_rows",
+      "column": "raw_data"
+    },
+    {
+      "type": "int4",
+      "table": "member_import_rows",
+      "column": "row_number"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "action"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "email"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "first_name"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "last_name"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "membershipworks_id"
+    },
+    {
+      "type": "text",
+      "table": "member_import_rows",
+      "column": "message"
+    },
+    {
+      "type": "timestamptz",
+      "table": "member_import_rows",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "member_season_ratings",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "member_season_ratings",
+      "column": "member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "member_season_ratings",
+      "column": "season_id"
+    },
+    {
+      "type": "numeric",
+      "table": "member_season_ratings",
+      "column": "season_dupr_rating"
+    },
+    {
+      "type": "numeric",
+      "table": "member_season_ratings",
+      "column": "season_primetime_rating"
+    },
+    {
+      "type": "text",
+      "table": "member_season_ratings",
+      "column": "notes"
+    },
+    {
+      "type": "timestamptz",
+      "table": "member_season_ratings",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "member_season_ratings",
+      "column": "updated_at"
+    },
+    {
+      "type": "text",
+      "table": "member_season_ratings",
+      "column": "dupr_doubles_rating"
+    },
+    {
+      "type": "numeric",
+      "table": "member_season_ratings",
+      "column": "dupr_reliability_rating"
+    },
+    {
+      "type": "uuid",
+      "table": "members",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "membershipworks_account_id"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "full_name"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "first_name"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "last_name"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "email"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "phone"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "club_location"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "self_rating"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "dupr_id"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "member_comment"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "waiver_status"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "stripe_customer_id"
+    },
+    {
+      "type": "_text",
+      "table": "members",
+      "column": "profile_image_urls"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "membership_levels"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "membership_addons"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "labels"
+    },
+    {
+      "type": "date",
+      "table": "members",
+      "column": "join_date"
+    },
+    {
+      "type": "date",
+      "table": "members",
+      "column": "renewal_date"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "billing_method"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "auto_recurring_billing_id"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "ip_address"
+    },
+    {
+      "type": "bool",
+      "table": "members",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamp",
+      "table": "members",
+      "column": "last_imported_at"
+    },
+    {
+      "type": "timestamp",
+      "table": "members",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamp",
+      "table": "members",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "members",
+      "column": "location_id"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "membershipworks_id"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "membership_status"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "membership_level"
+    },
+    {
+      "type": "timestamptz",
+      "table": "members",
+      "column": "imported_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "members",
+      "column": "last_membership_sync_at"
+    },
+    {
+      "type": "bool",
+      "table": "members",
+      "column": "is_active_member"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "notification_preference"
+    },
+    {
+      "type": "text",
+      "table": "members",
+      "column": "notes"
+    },
+    {
+      "type": "uuid",
+      "table": "notification_template_history",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "notification_template_history",
+      "column": "template_key"
+    },
+    {
+      "type": "text",
+      "table": "notification_template_history",
+      "column": "audience"
+    },
+    {
+      "type": "text",
+      "table": "notification_template_history",
+      "column": "subject"
+    },
+    {
+      "type": "text",
+      "table": "notification_template_history",
+      "column": "body"
+    },
+    {
+      "type": "uuid",
+      "table": "notification_template_history",
+      "column": "saved_by_member_id"
+    },
+    {
+      "type": "text",
+      "table": "notification_template_history",
+      "column": "saved_by_email"
+    },
+    {
+      "type": "timestamptz",
+      "table": "notification_template_history",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "notification_template_history",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "notification_templates",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "notification_templates",
+      "column": "template_key"
+    },
+    {
+      "type": "text",
+      "table": "notification_templates",
+      "column": "subject"
+    },
+    {
+      "type": "text",
+      "table": "notification_templates",
+      "column": "body"
+    },
+    {
+      "type": "timestamptz",
+      "table": "notification_templates",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "notification_templates",
+      "column": "updated_at"
+    },
+    {
+      "type": "text",
+      "table": "password_reset_rate_limits",
+      "column": "rate_limit_key"
+    },
+    {
+      "type": "timestamptz",
+      "table": "password_reset_rate_limits",
+      "column": "window_started_at"
+    },
+    {
+      "type": "int4",
+      "table": "password_reset_rate_limits",
+      "column": "request_count"
+    },
+    {
+      "type": "timestamptz",
+      "table": "password_reset_rate_limits",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_activity_log",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_activity_log",
+      "column": "group_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_activity_log",
+      "column": "session_id"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_activity_log",
+      "column": "log_type"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_activity_log",
+      "column": "message"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_activity_log",
+      "column": "metadata"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_activity_log",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_courts",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_courts",
+      "column": "group_id"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_courts",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_courts",
+      "column": "description"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_courts",
+      "column": "sort_order"
+    },
+    {
+      "type": "bool",
+      "table": "round_robin_courts",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_courts",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_courts",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_groups",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_groups",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_groups",
+      "column": "slug"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_groups",
+      "column": "public_status"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_groups",
+      "column": "mode"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_groups",
+      "column": "admin_code"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_groups",
+      "column": "schedule_day"
+    },
+    {
+      "type": "time",
+      "table": "round_robin_groups",
+      "column": "schedule_time"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_groups",
+      "column": "timezone"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_groups",
+      "column": "settings"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_groups",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_groups",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_matches",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_matches",
+      "column": "session_id"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_matches",
+      "column": "round_number"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_matches",
+      "column": "court_number"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_matches",
+      "column": "court_name"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_matches",
+      "column": "team1_players"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_matches",
+      "column": "team2_players"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_matches",
+      "column": "bye_players"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_matches",
+      "column": "team1_score"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_matches",
+      "column": "team2_score"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_matches",
+      "column": "status"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_matches",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_matches",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_group_members",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_group_members",
+      "column": "player_group_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_group_members",
+      "column": "player_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_player_group_members",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_groups",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_groups",
+      "column": "group_id"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_player_groups",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_player_groups",
+      "column": "description"
+    },
+    {
+      "type": "bool",
+      "table": "round_robin_player_groups",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_player_groups",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_player_groups",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_session_results",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_session_results",
+      "column": "session_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_player_session_results",
+      "column": "player_id"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_player_session_results",
+      "column": "display_name"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "games"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "wins"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "losses"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "points_for"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "points_against"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "point_diff"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "byes"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_player_session_results",
+      "column": "rank"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_player_session_results",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_player_session_results",
+      "column": "updated_at"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_player_session_results",
+      "column": "metadata"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_players",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_players",
+      "column": "group_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_players",
+      "column": "member_id"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_players",
+      "column": "display_name"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_players",
+      "column": "first_name"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_players",
+      "column": "email"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_players",
+      "column": "phone"
+    },
+    {
+      "type": "bool",
+      "table": "round_robin_players",
+      "column": "is_active"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_players",
+      "column": "notes"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_players",
+      "column": "metadata"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_players",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_players",
+      "column": "updated_at"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_players",
+      "column": "dupr_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_session_players",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_session_players",
+      "column": "session_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_session_players",
+      "column": "player_id"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_session_players",
+      "column": "display_name"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_session_players",
+      "column": "email"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_session_players",
+      "column": "phone"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_session_players",
+      "column": "source"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_session_players",
+      "column": "response_status"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_session_players",
+      "column": "sort_order"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_session_players",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_session_players",
+      "column": "updated_at"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_session_players",
+      "column": "dupr_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_sessions",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_sessions",
+      "column": "group_id"
+    },
+    {
+      "type": "date",
+      "table": "round_robin_sessions",
+      "column": "session_date"
+    },
+    {
+      "type": "time",
+      "table": "round_robin_sessions",
+      "column": "starts_at"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_sessions",
+      "column": "mode"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_sessions",
+      "column": "status"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_sessions",
+      "column": "court_count"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_sessions",
+      "column": "round_count"
+    },
+    {
+      "type": "jsonb",
+      "table": "round_robin_sessions",
+      "column": "settings"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_sessions",
+      "column": "summary_text"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_sessions",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_sessions",
+      "column": "updated_at"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_sessions",
+      "column": "session_name"
+    },
+    {
+      "type": "text",
+      "table": "round_robin_sessions",
+      "column": "location"
+    },
+    {
+      "type": "int4",
+      "table": "round_robin_sessions",
+      "column": "max_players"
+    },
+    {
+      "type": "bool",
+      "table": "round_robin_sessions",
+      "column": "repeats_weekly"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_sessions",
+      "column": "host_player_id"
+    },
+    {
+      "type": "uuid",
+      "table": "round_robin_sessions",
+      "column": "cohost_player_id"
+    },
+    {
+      "type": "_uuid",
+      "table": "round_robin_sessions",
+      "column": "invited_group_ids"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_sessions",
+      "column": "opened_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "round_robin_sessions",
+      "column": "started_at"
+    },
+    {
+      "type": "uuid",
+      "table": "score_sheet_templates",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "description"
+    },
+    {
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "sheet_title"
+    },
+    {
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "template_html"
+    },
+    {
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "rules_text"
+    },
+    {
+      "type": "bool",
+      "table": "score_sheet_templates",
+      "column": "is_default"
+    },
+    {
+      "type": "bool",
+      "table": "score_sheet_templates",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamptz",
+      "table": "score_sheet_templates",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "score_sheet_templates",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "seasons",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "seasons",
+      "column": "name"
+    },
+    {
+      "type": "date",
+      "table": "seasons",
+      "column": "start_date"
+    },
+    {
+      "type": "date",
+      "table": "seasons",
+      "column": "end_date"
+    },
+    {
+      "type": "bool",
+      "table": "seasons",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamp",
+      "table": "seasons",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamp",
+      "table": "seasons",
+      "column": "updated_at"
+    },
+    {
+      "type": "text",
+      "table": "seasons",
+      "column": "abbreviation"
+    },
+    {
+      "type": "text",
+      "table": "system_settings",
+      "column": "setting_key"
+    },
+    {
+      "type": "text",
+      "table": "system_settings",
+      "column": "setting_value"
+    },
+    {
+      "type": "timestamptz",
+      "table": "system_settings",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "system_settings",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "league_id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "division_id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "team_id"
+    },
+    {
+      "type": "int4",
+      "table": "team_byes",
+      "column": "week_number"
+    },
+    {
+      "type": "date",
+      "table": "team_byes",
+      "column": "bye_date"
+    },
+    {
+      "type": "timestamptz",
+      "table": "team_byes",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "team_byes",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "team_members",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_members",
+      "column": "team_id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_members",
+      "column": "member_id"
+    },
+    {
+      "type": "text",
+      "table": "team_members",
+      "column": "role"
+    },
+    {
+      "type": "bool",
+      "table": "team_members",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamp",
+      "table": "team_members",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "league_id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "division_id"
+    },
+    {
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "team_id"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "matches_played"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "match_wins"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "match_losses"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "match_ties"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "line_wins"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "line_losses"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "line_ties"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "game_wins"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "game_losses"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "points_for"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "points_against"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "point_differential"
+    },
+    {
+      "type": "numeric",
+      "table": "team_standings",
+      "column": "standings_points"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "rank"
+    },
+    {
+      "type": "timestamptz",
+      "table": "team_standings",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "team_standings",
+      "column": "updated_at"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "home_wins"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "home_losses"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "away_wins"
+    },
+    {
+      "type": "int4",
+      "table": "team_standings",
+      "column": "away_losses"
+    },
+    {
+      "type": "text",
+      "table": "team_standings",
+      "column": "current_streak"
+    },
+    {
+      "type": "text",
+      "table": "team_standings",
+      "column": "recent_form"
+    },
+    {
+      "type": "bool",
+      "table": "team_standings",
+      "column": "finalized"
+    },
+    {
+      "type": "uuid",
+      "table": "teams",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "teams",
+      "column": "division_id"
+    },
+    {
+      "type": "text",
+      "table": "teams",
+      "column": "name"
+    },
+    {
+      "type": "uuid",
+      "table": "teams",
+      "column": "captain_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "teams",
+      "column": "co_captain_member_id"
+    },
+    {
+      "type": "bool",
+      "table": "teams",
+      "column": "is_active"
+    },
+    {
+      "type": "timestamp",
+      "table": "teams",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamp",
+      "table": "teams",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "teams",
+      "column": "home_location_id"
+    },
+    {
+      "type": "text",
+      "table": "teams",
+      "column": "team_number"
+    },
+    {
+      "type": "text",
+      "table": "teams",
+      "column": "notes"
+    },
+    {
+      "type": "text",
+      "table": "teams",
+      "column": "abbreviation"
+    },
+    {
+      "type": "uuid",
+      "table": "teams",
+      "column": "co_captain_2_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "teams",
+      "column": "club_pro_member_id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_activity_log",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_activity_log",
+      "column": "tournament_id"
+    },
+    {
+      "type": "text",
+      "table": "tournament_activity_log",
+      "column": "log_type"
+    },
+    {
+      "type": "text",
+      "table": "tournament_activity_log",
+      "column": "message"
+    },
+    {
+      "type": "jsonb",
+      "table": "tournament_activity_log",
+      "column": "metadata"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_activity_log",
+      "column": "created_at"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_courts",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_courts",
+      "column": "tournament_id"
+    },
+    {
+      "type": "text",
+      "table": "tournament_courts",
+      "column": "name"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_courts",
+      "column": "sort_order"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_courts",
+      "column": "current_match_id"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_courts",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_courts",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_divisions",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_divisions",
+      "column": "tournament_id"
+    },
+    {
+      "type": "text",
+      "table": "tournament_divisions",
+      "column": "name"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_divisions",
+      "column": "sort_order"
+    },
+    {
+      "type": "bool",
+      "table": "tournament_divisions",
+      "column": "is_active"
+    },
+    {
+      "type": "jsonb",
+      "table": "tournament_divisions",
+      "column": "settings"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_divisions",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_divisions",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_matches",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_matches",
+      "column": "tournament_id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_matches",
+      "column": "division_id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_matches",
+      "column": "home_team_id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_matches",
+      "column": "away_team_id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_matches",
+      "column": "court_id"
+    },
+    {
+      "type": "text",
+      "table": "tournament_matches",
+      "column": "legacy_id"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_matches",
+      "column": "line_number"
+    },
+    {
+      "type": "text",
+      "table": "tournament_matches",
+      "column": "status"
+    },
+    {
+      "type": "text",
+      "table": "tournament_matches",
+      "column": "result_type"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_matches",
+      "column": "winner_team_id"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_matches",
+      "column": "home_score"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_matches",
+      "column": "away_score"
+    },
+    {
+      "type": "jsonb",
+      "table": "tournament_matches",
+      "column": "game_scores"
+    },
+    {
+      "type": "text",
+      "table": "tournament_matches",
+      "column": "score_text"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_matches",
+      "column": "queue_entered_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_matches",
+      "column": "assigned_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_matches",
+      "column": "completed_at"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_matches",
+      "column": "created_order"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_matches",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_matches",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_team_contacts",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_team_contacts",
+      "column": "tournament_team_id"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_team_contacts",
+      "column": "player_slot"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_team_contacts",
+      "column": "member_id"
+    },
+    {
+      "type": "text",
+      "table": "tournament_team_contacts",
+      "column": "display_name"
+    },
+    {
+      "type": "text",
+      "table": "tournament_team_contacts",
+      "column": "phone"
+    },
+    {
+      "type": "text",
+      "table": "tournament_team_contacts",
+      "column": "email"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_team_contacts",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_team_contacts",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_teams",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_teams",
+      "column": "tournament_id"
+    },
+    {
+      "type": "uuid",
+      "table": "tournament_teams",
+      "column": "division_id"
+    },
+    {
+      "type": "text",
+      "table": "tournament_teams",
+      "column": "name"
+    },
+    {
+      "type": "int4",
+      "table": "tournament_teams",
+      "column": "line_number"
+    },
+    {
+      "type": "text",
+      "table": "tournament_teams",
+      "column": "seed"
+    },
+    {
+      "type": "text",
+      "table": "tournament_teams",
+      "column": "player_1_name"
+    },
+    {
+      "type": "text",
+      "table": "tournament_teams",
+      "column": "player_2_name"
+    },
+    {
+      "type": "bool",
+      "table": "tournament_teams",
+      "column": "player_1_checked_in"
+    },
+    {
+      "type": "bool",
+      "table": "tournament_teams",
+      "column": "player_2_checked_in"
+    },
+    {
+      "type": "bool",
+      "table": "tournament_teams",
+      "column": "checked_in"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_teams",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournament_teams",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "tournaments",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "table": "tournaments",
+      "column": "name"
+    },
+    {
+      "type": "text",
+      "table": "tournaments",
+      "column": "slug"
+    },
+    {
+      "type": "text",
+      "table": "tournaments",
+      "column": "public_status"
+    },
+    {
+      "type": "text",
+      "table": "tournaments",
+      "column": "admin_code"
+    },
+    {
+      "type": "jsonb",
+      "table": "tournaments",
+      "column": "settings"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournaments",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "tournaments",
+      "column": "updated_at"
+    },
+    {
+      "type": "uuid",
+      "table": "user_roles",
+      "column": "id"
+    },
+    {
+      "type": "uuid",
+      "table": "user_roles",
+      "column": "user_id"
+    },
+    {
+      "type": "uuid",
+      "table": "user_roles",
+      "column": "member_id"
+    },
+    {
+      "type": "text",
+      "table": "user_roles",
+      "column": "role"
+    },
+    {
+      "type": "timestamptz",
+      "table": "user_roles",
+      "column": "created_at"
+    },
+    {
+      "type": "timestamptz",
+      "table": "user_roles",
+      "column": "updated_at"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "DELETE",
+      "name": "Admins can delete seasons",
+      "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Admins can insert seasons",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Admins can update seasons",
+      "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Allow authenticated users to delete team byes",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Allow authenticated users to insert team byes",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Allow authenticated users to update team byes",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Allow authenticated users to view team byes",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert team members",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "teams"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete divisions",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete leagues",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete locations",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete team members",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert divisions",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert leagues",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert locations",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert teams",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "teams"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read division lines",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read divisions",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read league schedule settings",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "league_schedule_settings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read leagues",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read line games",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read location court availability",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "location_court_availability"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read locations",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read match lines",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read matches",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read member season ratings",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read members",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read seasons",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read team members",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read team standings",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read teams",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "teams"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read user roles",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update divisions",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "team_members"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update leagues",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update locations",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update team members",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update teams",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "teams"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Commissioners can insert roles",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles"
+    },
+    {
+      "cmd": "ALL",
+      "name": "Authenticated users full access member import batches",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_import_batches"
+    },
+    {
+      "cmd": "ALL",
+      "name": "Authenticated users full access member import rows",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_import_rows"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Captains and managers can insert own-team line games",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Captains and managers can update own-team line games",
+      "qual": "private.current_user_can_manage_match_line(match_line_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Captains and managers can update own-team match lines",
+      "qual": "private.current_user_can_manage_match(match_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Captains and managers can update own-team matches",
+      "qual": "private.current_user_can_manage_match(id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Commissioners can delete roles",
+      "qual": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Commissioners can update roles",
+      "qual": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete division lines",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete league blackout dates",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "league_blackout_dates"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete league schedule settings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "league_schedule_settings"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete line games",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete location court availability",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "location_court_availability"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete match lines",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete matches",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete member season ratings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete members",
+      "qual": "(( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text]))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete score sheet templates",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "member_season_ratings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "locations"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete team standings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert division lines",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert league blackout dates",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "league_blackout_dates"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert league schedule settings",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "league_schedule_settings"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert location court availability",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "location_court_availability"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert match lines",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert matches",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert member season ratings",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert members",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert score sheet templates",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert system settings",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "system_settings"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert team standings",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read league blackout dates",
+      "qual": "true",
+      "roles": [
+        "public"
+      ],
+      "table": "league_blackout_dates"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "matches"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read round robin logs",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "round_robin_activity_log"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read round robin player group members",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "round_robin_player_group_members"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read round robin player groups",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "round_robin_player_groups"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read round robin players",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "round_robin_players"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read round robin session players",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "round_robin_session_players"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read tournament logs",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "tournament_activity_log"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "League managers can read tournament team contacts",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "tournament_team_contacts"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update division lines",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update league blackout dates",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "league_blackout_dates"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update league schedule settings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "league_schedule_settings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "members"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update location court availability",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "location_court_availability"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update member season ratings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update score sheet templates",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update system settings",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = ( SELECT auth.uid() AS uid)) AND (user_roles.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "system_settings"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update team standings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public round robin courts are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM round_robin_groups g\n  WHERE ((g.id = round_robin_courts.group_id) AND (g.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "round_robin_courts"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public round robin groups are readable",
+      "qual": "((public_status = 'public'::text) OR (EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = ( SELECT auth.uid() AS uid)) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text]))))))",
+      "roles": [
+        "public"
+      ],
+      "table": "round_robin_groups"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public round robin matches are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (round_robin_sessions s\n     JOIN round_robin_groups g ON ((g.id = s.group_id)))\n  WHERE ((s.id = round_robin_matches.session_id) AND (g.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "round_robin_matches"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public round robin results are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (round_robin_sessions s\n     JOIN round_robin_groups g ON ((g.id = s.group_id)))\n  WHERE ((s.id = round_robin_player_session_results.session_id) AND (g.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "round_robin_player_session_results"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public round robin sessions are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM round_robin_groups g\n  WHERE ((g.id = round_robin_sessions.group_id) AND (g.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "round_robin_sessions"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public tournament courts are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_courts.tournament_id) AND (t.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "tournament_courts"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public tournament divisions are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_divisions.tournament_id) AND (t.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "tournament_divisions"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "user_roles"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public tournament matches are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_matches.tournament_id) AND (t.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "tournament_matches"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public tournament teams are readable",
+      "qual": "(EXISTS ( SELECT 1\n   FROM tournaments t\n  WHERE ((t.id = tournament_teams.tournament_id) AND (t.public_status = 'public'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "tournament_teams"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Public tournaments are readable",
+      "qual": "(public_status = 'public'::text)",
+      "roles": [
+        "public"
+      ],
+      "table": "tournaments"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Score sheet templates are readable by authenticated users",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "System settings are readable by authenticated users",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "system_settings"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Users and managers can update members",
+      "qual": "(private.current_user_can_update_member(id) OR (( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "match_lineups_delete_captains_and_managers",
+      "qual": "private.current_user_can_manage_match_lineup(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "match_lineups_insert_captains_and_managers",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "match_lineups_select_authenticated",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "match_lineups_update_captains_and_managers",
+      "qual": "private.current_user_can_manage_match_lineup(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "seasons"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "leagues"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "divisions"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "team_standings"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "system_settings"
+    }
+  ],
+  "functions": [
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "args": "p_actor uuid, p_request uuid, p_query jsonb",
+      "name": "ai_live_lookup",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": false
+    },
+    {
+      "acl": "{ai_live_retention=X/ai_live_retention,service_role=X/ai_live_retention}",
+      "args": "",
+      "name": "expire_records",
+      "owner": "ai_live_retention",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "ai_live_private",
+      "definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,lms_view_as_executor=X/postgres}",
+      "args": "p_member uuid",
+      "name": "member_role",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "view_as_private",
+      "definer": false
+    },
+    {
+      "acl": "{postgres=X/postgres,lms_view_as_executor=X/postgres}",
+      "args": "p_actor uuid",
+      "name": "actor_member",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "view_as_private",
+      "definer": false
+    },
+    {
+      "acl": "{postgres=X/postgres,lms_view_as_executor=X/postgres}",
+      "args": "p_id uuid, p_reason text",
+      "name": "end_context",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "view_as_private",
+      "definer": false
+    },
+    {
+      "acl": "{postgres=X/postgres,lms_view_as_executor=X/postgres}",
+      "args": "p_target uuid, p_role text",
+      "name": "snapshot",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "view_as_private",
+      "definer": false
+    },
+    {
+      "acl": "{lms_view_as_executor=X/lms_view_as_executor,service_role=X/lms_view_as_executor}",
+      "args": "p_op text, p_input jsonb",
+      "name": "lms_view_as",
+      "owner": "lms_view_as_executor",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,lms_view_as_executor=X/postgres}",
+      "args": "p_actor uuid, p_member uuid, p_context uuid, p_request uuid, p_query jsonb",
+      "name": "lookup",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "view_as_private",
+      "definer": false
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "args": "",
+      "name": "lms_view_as_maintenance",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,lms_view_as_executor=X/postgres}",
+      "args": "p_proof jsonb, p_kind text, p_subject uuid, p_team uuid, p_season uuid",
+      "name": "lock_authorization",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "view_as_private",
+      "definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "args": "p_actor uuid, p_request uuid, p_query jsonb",
+      "name": "lookup",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "ai_live_private",
+      "definer": false
+    }
+  ]
+}

@@ -32,7 +32,7 @@ for(const index of [12,13]) test(`0717 explicit document scope preserved: ${rows
  assert.doesNotMatch(text(selected),/3\.1\.|reimbursement|refund/i);
 });
 
-for(const [question,id] of [[rows[0].question,saturday],[rows[1].question,saturday],['When can I start adding players to my roster for the Weekday League?',weekday],['When can I start adding players to my roster for the PrimeTime League?',primetime]])test(`0717 league roster timing: ${question}`,()=>{
+for(const [question,id] of [[rows[0].question,saturday],[rows[1].question,saturday],['When do I start adding players to my roster for the Weekday League?',weekday],['When do I start adding players to my roster for the PrimeTime League?',primetime]])test(`0717 league roster timing: ${question}`,()=>{
  const selected=selectAnswerEvidence(retrieval(0,question));assert.deepEqual(ids(selected),[id]);
  assert.match(text(selected),/Sept\. 28[\s\S]*updating rosters/);assert.doesNotMatch(text(selected),/Match Setup|ENTER\/VERIFY|three \(3\) days/);
 });
@@ -66,7 +66,7 @@ test('0717 an unsupported independent issue prevents partial grounded generation
 });
 
 test('0717 missing-object clarification bypasses retrieval; signed replies resolve and standalone supersedes',async()=>{
- const userId=randomUUID(),question='When can I start adding players';
+ const userId=randomUUID(),question='When do I start adding players';
  const execution=await runPlayerOfficialAnswer({body:{question},userId,role:'player',retrieveOfficialEvidence:()=>assert.fail('no retrieval'),generateOfficialAnswer:()=>assert.fail('no generation')});
  assert.equal(execution.result.kind,'clarification');assert.match(execution.result.answer,/team roster.*match lineup/);assert.deepEqual(execution.result.sources,[]);assert.equal(execution.result.feedbackReceipt,null);
  for(const [reply,pattern,index] of [['Team roster',/team roster/,0],['Match lineup',/match lineup/,6]]){
@@ -82,7 +82,7 @@ test('0717 missing-object clarification bypasses retrieval; signed replies resol
 test('0717 corrected results retain observational 0716 capture semantics',async()=>{
  const userId=randomUUID();
  for(const [index,expected] of [[0,'answer'],[4,'answer'],[9,'insufficient_evidence'],[3,'clarification']]){
-  const e=await runPlayerOfficialAnswer({body:{question:rows[index].question},userId,role:'player',retrieveOfficialEvidence:async()=>retrieval(index),generateOfficialAnswer:async({retrieval:r})=>{
+  const e=await runPlayerOfficialAnswer({body:{question:index===3?'When do I start adding players':rows[index].question},userId,role:'player',retrieveOfficialEvidence:async()=>retrieval(index),generateOfficialAnswer:async({retrieval:r})=>{
    const selected=selectAnswerEvidence(r);return {answer:'Fixture result',evidenceSufficient:!!selected.length,selectedEvidence:selected,sources:[],model:null};
   }});
   assert.equal(e.result.kind,expected);assert.equal('applicabilityDiagnostic' in e.result,false);

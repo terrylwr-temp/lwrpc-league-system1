@@ -1,0 +1,1490 @@
+{
+  "recordedAt": "2026-09-08T11:38:53.967Z",
+  "method": "Existing source only. No SQL, network, provider, API routes, production writes or new routing implementation. Route classification is local inference, not live end-to-end execution.",
+  "summary": {
+    "cases": 63,
+    "routeMatches": 45,
+    "routeMismatches": 18
+  },
+  "timing": {
+    "method": "100 warmup batches;1000 timed batches;per-question average within each batch, not request latency",
+    "batchMeanPerQuestionMedianMs": 0.003161904761904611,
+    "batchMeanPerQuestionP95Ms": 0.004847619047618916,
+    "addedOverhead": "Not measurable before implementation"
+  },
+  "mechanicsOnlyCounterfactual": {
+    "method": "Actual current selector; actual active source text; artificial .8 score above .35 threshold; only mechanics candidate supplied. NOT observed Stage 3 rankings or model output.",
+    "selected": [
+      {
+        "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+        "evidenceSelectionReason": "Direct scoring proposition with trusted object and scope",
+        "content": "• Service Positioning: After a side out, the first serve is determined by the team's\nscore: the player on the right (baseline facing the net) serves if the score is even, and\nthe player on the left serves if the score is odd.\n\n• Switching Sides: Players only switch sides after winning a point on their own serve.\nThe same player continues serving from the new side.\n\n• Side Outs & Scoring: If the serving team loses a rally, a side out occurs; the\nopposing team earns a point and takes over the serve.\n\n• Game Points: A team can win a point regardless of whether they are serving or\nreceiving except for the winning point (see next item).\n\n• Scoring Freeze and Match Point: To keep the game competitive through the final\npoint, a scoring freeze shall take eƯect whenever a team reaches one point below\nthe game-winning score. Once a team reaches the freeze point, it may score the\ngame-winning point only while serving. For example, in a game played to 25 points,\na team’s score shall initially freeze at 24. The scoring freeze applies only to the team\nthat has reached the freeze point; the opposing team may continue to score using\nnormal Rally Scoring until it also reaches the applicable freeze point. A team must\nbe serving to score the game-winning point.\n\n• Win-by-Two (2) Games: When the game is played using a win-by-two (2) format\nand the score becomes tied at or beyond the initial freeze point, neither team can\nwin by scoring the next point. Therefore, both teams’ scores shall become\nunfrozen, and normal Rally Scoring shall resume. Thereafter, a team’s score shall\nfreeze again whenever it reaches a score at which its next point would win the"
+      }
+    ]
+  },
+  "equalDatesCounterfactual": {
+    "method": "Actual post-retrieval clarification with inspected current source candidates and artificial .8 scores; not production retrieval",
+    "clarification": {
+      "kind": "clarification",
+      "rawQuestion": "When can I start entering my roster?",
+      "effectiveQuestion": "",
+      "classification": "clarification_required",
+      "contextSuperseded": false,
+      "clarification": {
+        "category": "roster_league",
+        "reason": "missing_roster_timing_league",
+        "message": "Which league do you mean: Weekday, Saturday, PrimeTime?"
+      },
+      "clarificationQuestion": "When can I start entering my roster?"
+    }
+  },
+  "cases": [
+    {
+      "id": "Q01",
+      "family": "roster_state",
+      "question": "Who is on my roster?",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Who is on my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q02",
+      "family": "roster_state",
+      "question": "Show me my roster.",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Show me my roster."
+        }
+      }
+    },
+    {
+      "id": "Q03",
+      "family": "roster_state",
+      "question": "How many players are currently on my roster?",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": false,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": {
+          "leagues": [],
+          "division": null,
+          "question": "how many players are currently on my roster?",
+          "kind": "composition",
+          "operation": "roster",
+          "alsoRating": null,
+          "query": "Roster Courts"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How many players are currently on my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q04",
+      "family": "roster_state",
+      "question": "Who is on the Artisan Lakes roster?",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Who is on the Artisan Lakes roster?"
+        }
+      }
+    },
+    {
+      "id": "Q05",
+      "family": "roster_state",
+      "question": "Show the Artisan Lakes roster.",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "NONE",
+          "teamName": "Artisan Lakes"
+        },
+        "documentGuardIfReached": false,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Show the Artisan Lakes roster."
+        }
+      }
+    },
+    {
+      "id": "Q06",
+      "family": "roster_state",
+      "question": "Which players are on our roster?",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Which players are on our roster?"
+        }
+      }
+    },
+    {
+      "id": "Q07",
+      "family": "roster_date",
+      "question": "What date can I start entering my roster for weekday league",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF",
+          "teamName": "weekday league"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What date can I start entering my roster for weekday league"
+        }
+      }
+    },
+    {
+      "id": "Q08",
+      "family": "roster_date",
+      "question": "when can I start entering my players for my team",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "when can I start entering my players for my team"
+        }
+      }
+    },
+    {
+      "id": "Q09",
+      "family": "roster_date",
+      "question": "When can I start entering my roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": false,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I start entering my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q10",
+      "family": "roster_date",
+      "question": "What date can I start entering my roster for weekday league?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF",
+          "teamName": "weekday league"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What date can I start entering my roster for weekday league?"
+        }
+      }
+    },
+    {
+      "id": "Q11",
+      "family": "roster_date",
+      "question": "When can I add players?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I add players?"
+        }
+      }
+    },
+    {
+      "id": "Q12",
+      "family": "roster_date",
+      "question": "When does roster entry open?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When does roster entry open?"
+        }
+      }
+    },
+    {
+      "id": "Q13",
+      "family": "roster_date",
+      "question": "When can I start entering my PrimeTime players?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "PrimeTime",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I start entering my PrimeTime players?"
+        }
+      }
+    },
+    {
+      "id": "Q14",
+      "family": "roster_date",
+      "question": "When can I start entering my Saturday roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Saturday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I start entering my Saturday roster?"
+        }
+      }
+    },
+    {
+      "id": "Q15",
+      "family": "roster_date",
+      "question": "When may I begin entering team players?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When may I begin entering team players?"
+        }
+      }
+    },
+    {
+      "id": "Q16",
+      "family": "roster_date",
+      "question": "When can I build my roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": false,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I build my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q17",
+      "family": "roster_date",
+      "question": "When can I fill my roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": false,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I fill my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q18",
+      "family": "roster_date",
+      "question": "When can I start my roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": false,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I start my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q19",
+      "family": "roster_date",
+      "question": "Can I add players to my roster yet?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Can I add players to my roster yet?"
+        }
+      }
+    },
+    {
+      "id": "Q20",
+      "family": "roster_date",
+      "question": "When do we begin adding players to our team?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When do we begin adding players to our team?"
+        }
+      }
+    },
+    {
+      "id": "Q21",
+      "family": "roster_date",
+      "question": "What date does player entry open for Weekday?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What date does player entry open for Weekday?"
+        }
+      }
+    },
+    {
+      "id": "Q22",
+      "family": "roster_date",
+      "question": "When can I start entering my rosterr for weekdy league?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [
+            {
+              "originalToken": "weekdy",
+              "start": 41,
+              "end": 47,
+              "canonical": "weekday",
+              "editDistance": 1,
+              "context": "league_timing",
+              "confidence": "unique_edit_1_with_context",
+              "policyVersion": "lms0720-v1"
+            }
+          ],
+          "matchingView": "When can I start entering my rosterr for weekday league?"
+        }
+      }
+    },
+    {
+      "id": "Q23",
+      "family": "roster_date",
+      "question": "when can i add plyers to my team",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "when can i add plyers to my team"
+        }
+      }
+    },
+    {
+      "id": "Q24",
+      "family": "roster_date",
+      "question": "When can I enter players in the match lineup?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When can I enter players in the match lineup?"
+        }
+      }
+    },
+    {
+      "id": "Q25",
+      "family": "roster_procedure",
+      "question": "How do I enter players on my roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": false,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How do I enter players on my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q26",
+      "family": "roster_procedure",
+      "question": "How do I add a player to my roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": false,
+        "route": "PROTECTED",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How do I add a player to my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q27",
+      "family": "roster_procedure",
+      "question": "How can I update my roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How can I update my roster?"
+        }
+      }
+    },
+    {
+      "id": "Q28",
+      "family": "roster_procedure",
+      "question": "Where do I go to build my team roster?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "TEAM_ROSTER",
+          "subjectKind": "SELF"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Where do I go to build my team roster?"
+        }
+      }
+    },
+    {
+      "id": "Q29",
+      "family": "roster_procedure",
+      "question": "How do I enter match scores?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How do I enter match scores?"
+        }
+      }
+    },
+    {
+      "id": "Q30",
+      "family": "scoring_applicability",
+      "question": "Does the weekday dupr league use rally scoring",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "weekday"
+          ],
+          "division": null,
+          "question": "does the weekday dupr league use rally scoring",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "weekday  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does the weekday dupr league use rally scoring"
+        }
+      }
+    },
+    {
+      "id": "Q31",
+      "family": "scoring_applicability",
+      "question": "Does the Weekday DUPR League use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "weekday"
+          ],
+          "division": null,
+          "question": "does the weekday dupr league use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "weekday  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does the Weekday DUPR League use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q32",
+      "family": "scoring_applicability",
+      "question": "What scoring method does the Weekday League use?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What scoring method does the Weekday League use?"
+        }
+      }
+    },
+    {
+      "id": "Q33",
+      "family": "scoring_applicability",
+      "question": "Do regular Weekday games use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "weekday"
+          ],
+          "division": null,
+          "question": "do regular weekday games use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "weekday  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Do regular Weekday games use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q34",
+      "family": "scoring_applicability",
+      "question": "Does Weekday 9.1 use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "weekday"
+          ],
+          "division": "9.1",
+          "question": "does weekday 9.1 use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "weekday 9.1 Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does Weekday 9.1 use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q35",
+      "family": "scoring_applicability",
+      "question": "Does the Weekday 9.1 Picklebreaker use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "weekday"
+          ],
+          "division": "9.1",
+          "question": "does the weekday 9.1 picklebreaker use rally scoring?",
+          "kind": "scoring",
+          "phase": "picklebreaker",
+          "query": "Picklebreaker Match Format"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does the Weekday 9.1 Picklebreaker use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q36",
+      "family": "scoring_applicability",
+      "question": "Is Weekday all rally?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "weekday"
+          ],
+          "division": null,
+          "question": "is weekday all rally?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "weekday  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Is Weekday all rally?"
+        }
+      }
+    },
+    {
+      "id": "Q37",
+      "family": "scoring_applicability",
+      "question": "Does the weekdy league use raly scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [
+            {
+              "originalToken": "weekdy",
+              "start": 9,
+              "end": 15,
+              "canonical": "weekday",
+              "editDistance": 1,
+              "context": "league_timing",
+              "confidence": "unique_edit_1_with_context",
+              "policyVersion": "lms0720-v1"
+            }
+          ],
+          "matchingView": "Does the weekday league use raly scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q38",
+      "family": "scoring_applicability",
+      "question": "Does Saturday use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Saturday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "saturday"
+          ],
+          "division": null,
+          "question": "does saturday use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "saturday  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does Saturday use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q39",
+      "family": "scoring_applicability",
+      "question": "Do regular Saturday games use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Saturday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "saturday"
+          ],
+          "division": null,
+          "question": "do regular saturday games use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "saturday  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Do regular Saturday games use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q40",
+      "family": "scoring_applicability",
+      "question": "Does the Saturday Picklebreaker use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Saturday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "saturday"
+          ],
+          "division": null,
+          "question": "does the saturday picklebreaker use rally scoring?",
+          "kind": "scoring",
+          "phase": "picklebreaker",
+          "query": "Picklebreaker Match Format"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does the Saturday Picklebreaker use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q41",
+      "family": "scoring_applicability",
+      "question": "Does PrimeTime use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "PrimeTime",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "primetime"
+          ],
+          "division": null,
+          "question": "does primetime use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "primetime  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does PrimeTime use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q42",
+      "family": "scoring_applicability",
+      "question": "Do regular PrimeTime games use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "PrimeTime",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "primetime"
+          ],
+          "division": null,
+          "question": "do regular primetime games use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "primetime  Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Do regular PrimeTime games use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q43",
+      "family": "scoring_applicability",
+      "question": "Does the PrimeTime Picklebreaker use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "PrimeTime",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "primetime"
+          ],
+          "division": null,
+          "question": "does the primetime picklebreaker use rally scoring?",
+          "kind": "scoring",
+          "phase": "picklebreaker",
+          "query": "Picklebreaker Match Format"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does the PrimeTime Picklebreaker use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q44",
+      "family": "scoring_applicability",
+      "question": "Does Weekday 8.1 use Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Weekday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [
+            "weekday"
+          ],
+          "division": "8.1",
+          "question": "does weekday 8.1 use rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "weekday 8.1 Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Does Weekday 8.1 use Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q45",
+      "family": "scoring_mechanics",
+      "question": "How does Rally Scoring work?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [],
+          "division": null,
+          "question": "how does rally scoring work?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How does Rally Scoring work?"
+        }
+      }
+    },
+    {
+      "id": "Q46",
+      "family": "scoring_mechanics",
+      "question": "How does Rally Scoring work in a Picklebreaker?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [],
+          "division": null,
+          "question": "how does rally scoring work in a picklebreaker?",
+          "kind": "scoring",
+          "phase": "picklebreaker",
+          "query": "Picklebreaker Match Format"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How does Rally Scoring work in a Picklebreaker?"
+        }
+      }
+    },
+    {
+      "id": "Q47",
+      "family": "scoring_mechanics",
+      "question": "Do I have to be serving to win with Rally Scoring?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": {
+          "leagues": [],
+          "division": null,
+          "question": "do i have to be serving to win with rally scoring?",
+          "kind": "scoring",
+          "phase": "rally",
+          "query": "Rally Scoring Rules"
+        },
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Do I have to be serving to win with Rally Scoring?"
+        }
+      }
+    },
+    {
+      "id": "Q48",
+      "family": "scoring_mechanics",
+      "question": "What happens at 24 all in a game to 25 by 2?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What happens at 24 all in a game to 25 by 2?"
+        }
+      }
+    },
+    {
+      "id": "Q49",
+      "family": "scoring_mechanics",
+      "question": "When do scores freeze again?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When do scores freeze again?"
+        }
+      }
+    },
+    {
+      "id": "Q50",
+      "family": "rating_state",
+      "question": "What's my DUPR",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "SELF_RATING",
+          "subjectKind": "SELF",
+          "rating": "clarify"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What's my DUPR"
+        }
+      }
+    },
+    {
+      "id": "Q51",
+      "family": "rating_state",
+      "question": "What is my Season DUPR?",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "SELF_RATING",
+          "subjectKind": "SELF",
+          "rating": "season"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What is my Season DUPR?"
+        }
+      }
+    },
+    {
+      "id": "Q52",
+      "family": "rating_state",
+      "question": "What is my PrimeTime Season DUPR?",
+      "expectedRoute": "LIVE",
+      "expectedScope": "PrimeTime",
+      "baseline": {
+        "liveIntent": {
+          "intent": "SELF_RATING",
+          "subjectKind": "SELF",
+          "rating": "primetime"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What is my PrimeTime Season DUPR?"
+        }
+      }
+    },
+    {
+      "id": "Q53",
+      "family": "rating_state",
+      "question": "What is my current official DUPR?",
+      "expectedRoute": "LIVE",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "SELF_RATING",
+          "subjectKind": "SELF",
+          "rating": "unsupported"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What is my current official DUPR?"
+        }
+      }
+    },
+    {
+      "id": "Q54",
+      "family": "rating_policy",
+      "question": "When is Season DUPR established?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When is Season DUPR established?"
+        }
+      }
+    },
+    {
+      "id": "Q55",
+      "family": "rating_policy",
+      "question": "When is my Season DUPR established?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "SELF_RATING",
+          "subjectKind": "SELF",
+          "rating": "season"
+        },
+        "documentGuardIfReached": true,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When is my Season DUPR established?"
+        }
+      }
+    },
+    {
+      "id": "Q56",
+      "family": "rating_policy",
+      "question": "How is my Season DUPR calculated?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "SELF_RATING",
+          "subjectKind": "SELF",
+          "rating": "season"
+        },
+        "documentGuardIfReached": false,
+        "route": "LIVE",
+        "routeMatches": false,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "How is my Season DUPR calculated?"
+        }
+      }
+    },
+    {
+      "id": "Q57",
+      "family": "rating_policy",
+      "question": "When are Season DUPR ratings recorded for Saturday?",
+      "expectedRoute": "DOCUMENT",
+      "expectedScope": "Saturday",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": false,
+        "route": "DOCUMENT",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "When are Season DUPR ratings recorded for Saturday?"
+        }
+      }
+    },
+    {
+      "id": "Q58",
+      "family": "privacy_control",
+      "question": "Export all player emails",
+      "expectedRoute": "PROTECTED",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": false,
+        "route": "PROTECTED",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Export all player emails"
+        }
+      }
+    },
+    {
+      "id": "Q59",
+      "family": "privacy_control",
+      "question": "What is my password?",
+      "expectedRoute": "PROTECTED",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": false,
+        "route": "PROTECTED",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What is my password?"
+        }
+      }
+    },
+    {
+      "id": "Q60",
+      "family": "privacy_control",
+      "question": "Did I save my lineup?",
+      "expectedRoute": "PROTECTED",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": null,
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Did I save my lineup?"
+        }
+      }
+    },
+    {
+      "id": "Q61",
+      "family": "privacy_control",
+      "question": "Am I currently eligible for this team?",
+      "expectedRoute": "PROTECTED",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Am I currently eligible for this team?"
+        }
+      }
+    },
+    {
+      "id": "Q62",
+      "family": "privacy_control",
+      "question": "Show my rating and tell me if I am eligible",
+      "expectedRoute": "PROTECTED",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": true,
+        "route": "PROTECTED",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "Show my rating and tell me if I am eligible"
+        }
+      }
+    },
+    {
+      "id": "Q63",
+      "family": "privacy_control",
+      "question": "What is my roster and when can I add players?",
+      "expectedRoute": "PROTECTED",
+      "expectedScope": "unspecified",
+      "baseline": {
+        "liveIntent": {
+          "intent": "UNSUPPORTED"
+        },
+        "documentGuardIfReached": false,
+        "route": "PROTECTED",
+        "routeMatches": true,
+        "concept": null,
+        "interpretation": {
+          "policyVersion": "lms0720-v1",
+          "annotations": [],
+          "matchingView": "What is my roster and when can I add players?"
+        }
+      }
+    }
+  ]
+}

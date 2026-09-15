@@ -1,0 +1,15 @@
+{
+  "postgresVersion": "17.11",
+  "loopbackOnly": true,
+  "productionAccess": false,
+  "modelCalls": 0,
+  "deadlineReconcileLateCommitRetry": "PASS",
+  "concurrentOutcomeReplay": "PASS",
+  "mismatchRejected": "PASS",
+  "exceptionOccurrenceAndReviewEvent": "ONE",
+  "feedbackEventOccurrenceAndSourceObservation": "ONE",
+  "correlationReconciliation": "PASS",
+  "writeAttempts": 2,
+  "terminalSuccessEvents": 1,
+  "sqlChangesRequired": false
+}

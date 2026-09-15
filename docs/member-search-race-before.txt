@@ -1,0 +1,133 @@
+✖ fast Steve typing: older broad response cannot overwrite final rows, count or logins (8.8472ms)
+✔ slow typing still updates normally and preserves request filters (5.2439ms)
+✖ Clear Search wins over an in-flight named search (1.5259ms)
+✖ filter, page and sort changes keep only latest response (1.6171ms)
+✖ superseded authorization cannot launch an older search (3.2077ms)
+✖ stale API error is ignored; current API error remains actionable (2.8038ms)
+✖ unmount/effect cleanup invalidates late responses (1.5585ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 1
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1296.6075
+
+✖ failing tests:
+
+test at test\memberSearchRace.test.mjs:24:1
+✖ fast Steve typing: older broad response cannot overwrite final rows, count or logins (8.8472ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'stale 0' !== 'Steve'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/memberSearchRace.test.mjs:29:9)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'stale 0',
+    expected: 'Steve',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\memberSearchRace.test.mjs:36:1
+✖ Clear Search wins over an in-flight named search (1.5259ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  23 !== 1826
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/memberSearchRace.test.mjs:37:169)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 23,
+    expected: 1826,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\memberSearchRace.test.mjs:39:1
+✖ filter, page and sort changes keep only latest response (1.6171ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'old page'
+  - 'latest page'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/memberSearchRace.test.mjs:41:81)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'old page',
+    expected: 'latest page',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\memberSearchRace.test.mjs:44:1
+✖ superseded authorization cannot launch an older search (3.2077ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/memberSearchRace.test.mjs:47:51)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\memberSearchRace.test.mjs:49:1
+✖ stale API error is ignored; current API error remains actionable (2.8038ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'stale failure'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/memberSearchRace.test.mjs:51:90)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'stale failure' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test\memberSearchRace.test.mjs:54:1
+✖ unmount/effect cleanup invalidates late responses (1.5585ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     all_teams: [],
+  +     id: 'late',
+  +     teams: []
+  +   }
+  + ]
+  - undefined
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/memberSearchRace.test.mjs:58:42)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { id: 'late', teams: [], all_teams: [] } ],
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

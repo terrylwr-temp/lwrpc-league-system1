@@ -1,0 +1,21 @@
+{
+  "acceptedDeployment": "dpl_39U8T1potC5w7bhUiHFwTG1cXYBb",
+  "comparedFiles": 312,
+  "unchangedFiles": 302,
+  "changedFiles": [
+    "package-lock.json",
+    "package.json",
+    "app/lib/aiAnswerGeneration.js",
+    "app/lib/aiConversation.js",
+    "app/lib/aiEligibilityIntent.js",
+    "app/lib/aiPolicyDiagnostics.js",
+    "app/lib/aiPolicyEvidence.js",
+    "app/lib/aiQuestionApplicability.js",
+    "app/lib/aiRequestIntent.js",
+    "app/lib/version.js"
+  ],
+  "newRuntimeFiles": [
+    "app/lib/aiCommunityIntent.js"
+  ],
+  "deploymentPerformed": false
+}

@@ -1,0 +1,12 @@
+{
+  "newRuntime": "app/ai-assistant/review/approvedDraftFeedback.js",
+  "changed": [
+    "app/ai-assistant/review/approved.module.css",
+    "app/ai-assistant/review/ApprovedAnswersPanel.js",
+    "app/ai-assistant/review/page.js",
+    "app/lib/aiApprovedAnswersService.js",
+    "app/lib/version.js",
+    "package-lock.json",
+    "package.json"
+  ]
+}

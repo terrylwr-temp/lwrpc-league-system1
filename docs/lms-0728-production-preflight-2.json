@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"deployment\": {\n    \"id\": \"dpl_8AoUUZpZy4iNyCkYiAAZwqWAwCN8\",\n    \"name\": \"lwrpc-admin\",\n    \"url\": \"lwrpc-admin-rl1cl4rsf-terry-lwrpc.vercel.app\",\n    \"type\": \"LAMBDAS\",\n    \"state\": \"READY\",\n    \"createdAt\": 1788982675330,\n    \"creator\": {\n      \"uid\": \"JUuQDjLgrTx95yrq0IbiBdU6\",\n      \"username\": \"terrylwr-temp\"\n    },\n    \"project\": {\n      \"id\": \"prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3\",\n      \"name\": \"lwrpc-admin\",\n      \"framework\": \"nextjs\"\n    },\n    \"meta\": {\n      \"gitCommitAuthorName\": \"terrylwrpickleballclub\",\n      \"gitCommitAuthorEmail\": \"terry.adelman@gmail.com\",\n      \"gitCommitMessage\": \"LMS-0724 isolated read-only View As User\",\n      \"gitCommitRef\": \"main\",\n      \"gitCommitSha\": \"f9c94b948739e34be071b6af6ffbef52eebccfdc\",\n      \"gitDirty\": \"1\",\n      \"actor\": \"codex\",\n      \"lambdaRuntimeStats\": \"{\\\"nodejs\\\":3}\",\n      \"bundler\": \"turbopack\"\n    },\n    \"alias\": [\n      \"lwrpc-admin.vercel.app\",\n      \"league.lwrpickleballclub.com\",\n      \"view-as.lwrpickleballclub.com\",\n      \"lwrpc-admin-terry-lwrpc.vercel.app\"\n    ],\n    \"target\": \"production\",\n    \"regions\": [\n      \"iad1\"\n    ],\n    \"buildingAt\": 1788982676449,\n    \"ready\": 1788982725670,\n    \"readyState\": \"READY\",\n    \"source\": \"cli\",\n    \"aliasError\": null\n  }\n}"
+    }
+  ],
+  "isError": false
+}

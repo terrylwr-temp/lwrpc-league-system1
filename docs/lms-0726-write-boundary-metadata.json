@@ -1,0 +1,134 @@
+{
+  "triggers": [
+    {
+      "name": "lms0723_identity_future_member",
+      "table": "members",
+      "enabled": "O",
+      "definition": "CREATE TRIGGER lms0723_identity_future_member AFTER INSERT OR UPDATE OF email, is_active_member ON public.members FOR EACH ROW EXECUTE FUNCTION identity_repair_private.complete_future_member_side()",
+      "function_definition": "CREATE OR REPLACE FUNCTION identity_repair_private.complete_future_member_side()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE m uuid; u uuid;\nBEGIN\n IF TG_TABLE_NAME='user_roles' THEN\n  IF NEW.user_id IS NOT NULL OR NEW.member_id IS NULL THEN RETURN NEW; END IF;\n  m:=NEW.member_id;\n ELSE m:=NEW.id;\n END IF;\n SELECT a.id INTO u FROM auth.users a JOIN public.members b ON b.id=m\n  WHERE lower(btrim(a.email))=lower(btrim(b.email)) ORDER BY a.id LIMIT 1;\n IF u IS NOT NULL THEN PERFORM identity_repair_private.link_future_existing_role(u); END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "name": "lms0723_identity_member_writer",
+      "table": "members",
+      "enabled": "O",
+      "definition": "CREATE TRIGGER lms0723_identity_member_writer BEFORE INSERT OR DELETE OR UPDATE OF id, email, is_active_member ON public.members FOR EACH ROW EXECUTE FUNCTION identity_repair_private.coordinate_writer()",
+      "function_definition": "CREATE OR REPLACE FUNCTION identity_repair_private.coordinate_writer()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE o jsonb:='{}'; n jsonb:='{}'; keys text[]:='{}'; j jsonb; u uuid; m uuid; e text;\nBEGIN\n IF TG_OP<>'INSERT' THEN o:=to_jsonb(OLD); END IF;\n IF TG_OP<>'DELETE' THEN n:=to_jsonb(NEW); END IF;\n -- Some clients send unchanged identity columns with unrelated profile/sign-in edits.\n IF TG_OP='UPDATE' THEN\n  IF TG_TABLE_SCHEMA='auth' AND\n   o->>'id' IS NOT DISTINCT FROM n->>'id' AND\n   ARRAY[o->>'email',o->>'email_confirmed_at',o->>'email_change',o->>'deleted_at',o->>'banned_until',o->>'is_anonymous',o->>'is_sso_user']\n    IS NOT DISTINCT FROM ARRAY[n->>'email',n->>'email_confirmed_at',n->>'email_change',n->>'deleted_at',n->>'banned_until',n->>'is_anonymous',n->>'is_sso_user'] THEN RETURN NEW;\n  ELSIF TG_TABLE_NAME='members' AND\n   ARRAY[o->>'id',o->>'email',o->>'is_active_member'] IS NOT DISTINCT FROM ARRAY[n->>'id',n->>'email',n->>'is_active_member'] THEN RETURN NEW;\n  END IF;\n END IF;\n FOR j IN SELECT x FROM unnest(ARRAY[o,n]) x LOOP\n  IF TG_TABLE_SCHEMA='auth' THEN\n   keys:=keys||ARRAY['U:'||(j->>'id'),identity_repair_private.email_key(j->>'email')];\n  ELSIF TG_TABLE_NAME='members' THEN\n   keys:=keys||ARRAY['M:'||(j->>'id'),identity_repair_private.email_key(j->>'email')];\n  ELSE\n   keys:=keys||ARRAY['R:'||(j->>'id')]||identity_repair_private.keys_for((j->>'user_id')::uuid,(j->>'member_id')::uuid);\n  END IF;\n END LOOP;\n -- Row triggers can already own tuple locks. Never wait on coordination here.\n PERFORM identity_repair_private.take_keys(keys);\n IF TG_OP<>'DELETE' THEN\n  e:=lower(btrim(n->>'email'));\n  IF TG_TABLE_NAME='members' AND (TG_OP='INSERT' OR o->>'email' IS DISTINCT FROM n->>'email') THEN\n   IF EXISTS(SELECT 1 FROM public.members b JOIN public.user_roles r ON r.member_id=b.id\n    WHERE b.id<>(n->>'id')::uuid AND r.user_id IS NOT NULL AND lower(btrim(b.email))=e) THEN\n    RAISE EXCEPTION USING ERRCODE='23505',MESSAGE='identity_conflict';\n   END IF;\n  ELSIF TG_TABLE_SCHEMA='auth' AND (TG_OP='INSERT' OR o->>'email' IS DISTINCT FROM n->>'email') THEN\n   IF EXISTS(SELECT 1 FROM public.user_roles r JOIN public.members b ON b.id=r.member_id\n     JOIN auth.users a ON a.id=r.user_id WHERE a.id<>(n->>'id')::uuid\n     AND (lower(btrim(a.email))=e OR lower(btrim(b.email))=e)) THEN\n    RAISE EXCEPTION USING ERRCODE='23505',MESSAGE='identity_conflict';\n   END IF;\n  ELSIF TG_TABLE_NAME='user_roles' THEN\n   u:=(n->>'user_id')::uuid; m:=(n->>'member_id')::uuid;\n   IF u IS NOT NULL AND m IS NOT NULL AND (TG_OP='INSERT'\n     OR o->>'user_id' IS DISTINCT FROM n->>'user_id' OR o->>'member_id' IS DISTINCT FROM n->>'member_id')\n     AND NOT identity_repair_private.eligible(u,m) THEN\n    RAISE EXCEPTION USING ERRCODE='23505',MESSAGE='identity_conflict';\n   END IF;\n  END IF;\n END IF;\n IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n RETURN NEW;\nEND $function$\n"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "match_lineups_match_id_fkey",
+      "type": "f",
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "match_lineups_match_id_team_id_line_number_key",
+      "type": "u",
+      "table": "match_lineups",
+      "definition": "UNIQUE (match_id, team_id, line_number)"
+    },
+    {
+      "name": "match_lineups_pkey",
+      "type": "p",
+      "table": "match_lineups",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "match_lineups_player_1_member_id_fkey",
+      "type": "f",
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (player_1_member_id) REFERENCES members(id)"
+    },
+    {
+      "name": "match_lineups_player_2_member_id_fkey",
+      "type": "f",
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (player_2_member_id) REFERENCES members(id)"
+    },
+    {
+      "name": "match_lineups_team_id_fkey",
+      "type": "f",
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "member_season_ratings_dupr_doubles_rating_check",
+      "type": "c",
+      "table": "member_season_ratings",
+      "definition": "CHECK (((dupr_doubles_rating IS NULL) OR (upper(TRIM(BOTH FROM dupr_doubles_rating)) = 'NR'::text) OR (TRIM(BOTH FROM dupr_doubles_rating) ~ '^[0-9](\\.[0-9]{1,3})?$'::text)))"
+    },
+    {
+      "name": "member_season_ratings_member_id_fkey",
+      "type": "f",
+      "table": "member_season_ratings",
+      "definition": "FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "member_season_ratings_member_id_season_id_key",
+      "type": "u",
+      "table": "member_season_ratings",
+      "definition": "UNIQUE (member_id, season_id)"
+    },
+    {
+      "name": "member_season_ratings_pkey",
+      "type": "p",
+      "table": "member_season_ratings",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "member_season_ratings_season_id_fkey",
+      "type": "f",
+      "table": "member_season_ratings",
+      "definition": "FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "members_location_id_fkey",
+      "type": "f",
+      "table": "members",
+      "definition": "FOREIGN KEY (location_id) REFERENCES locations(id)"
+    },
+    {
+      "name": "members_membershipworks_account_id_key",
+      "type": "u",
+      "table": "members",
+      "definition": "UNIQUE (membershipworks_account_id)"
+    },
+    {
+      "name": "members_notification_preference_check",
+      "type": "c",
+      "table": "members",
+      "definition": "CHECK ((notification_preference = ANY (ARRAY['email'::text, 'text'::text])))"
+    },
+    {
+      "name": "members_pkey",
+      "type": "p",
+      "table": "members",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "team_members_member_id_fkey",
+      "type": "f",
+      "table": "team_members",
+      "definition": "FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "team_members_pkey",
+      "type": "p",
+      "table": "team_members",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "team_members_team_id_fkey",
+      "type": "f",
+      "table": "team_members",
+      "definition": "FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "team_members_team_id_member_id_key",
+      "type": "u",
+      "table": "team_members",
+      "definition": "UNIQUE (team_id, member_id)"
+    }
+  ]
+}

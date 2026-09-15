@@ -1,0 +1,9 @@
+{
+  "category": "PRODUCTION_ACCEPTANCE",
+  "calls": 7,
+  "inputTokens": 11894,
+  "outputTokens": 703,
+  "cachedInputTokens": null,
+  "cacheNote": "Not retained by deployed production telemetry; unavailable, not zero.",
+  "estimatedUsd": 0.08056
+}

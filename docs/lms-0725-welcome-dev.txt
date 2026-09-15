@@ -1,0 +1,54 @@
+
+> dev
+> next dev --webpack -p 3125
+
+▲ Next.js 16.2.4 (webpack)
+- Local:         http://localhost:3125
+- Network:       http://192.168.4.44:3125
+✓ Ready in 1335ms
+
+○ Compiling / ...
+ GET / 200 in 9.7s (next.js: 9.2s, application-code: 415ms)
+⚠ Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "127.0.0.1".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['127.0.0.1'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / 200 in 79ms (next.js: 17ms, application-code: 62ms)
+ GET / 200 in 53ms (next.js: 6ms, application-code: 48ms)
+ GET / 200 in 37ms (next.js: 3ms, application-code: 34ms)
+ GET / 200 in 301ms (next.js: 126ms, application-code: 175ms)
+ GET / 200 in 49ms (next.js: 5ms, application-code: 44ms)
+ GET / 200 in 77ms (next.js: 8ms, application-code: 70ms)
+ GET /view-as 200 in 1734ms (next.js: 1477ms, application-code: 257ms)
+ GET /view-as 200 in 60ms (next.js: 8ms, application-code: 52ms)
+ GET / 200 in 576ms (next.js: 237ms, application-code: 340ms)
+ GET / 200 in 52ms (next.js: 6ms, application-code: 45ms)
+ GET / 200 in 45ms (next.js: 6ms, application-code: 39ms)
+ GET / 200 in 40ms (next.js: 4ms, application-code: 36ms)
+ GET / 200 in 38ms (next.js: 4ms, application-code: 34ms)
+ GET / 200 in 40ms (next.js: 3ms, application-code: 36ms)
+ GET /view-as 200 in 1208ms (next.js: 1078ms, application-code: 130ms)
+ GET /view-as 200 in 35ms (next.js: 2ms, application-code: 33ms)
+ GET /view-as 200 in 45ms (next.js: 3ms, application-code: 42ms)
+⨯ ../../lwrpc-admin/app/components/AskLwrAssistant.js
+Error:   x The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+   ,-[C:\lwrpc-league-system\lwrpc-admin\app\components\AskLwrAssistant.js:3:1]
+ 1 | "use client";
+ 2 | import {eligibilityIntent} from '../lib/aiEligibilityIntent.js';
+ 3 | "use client";
+   : ^^^^^^^^^^^^^
+ 4 | import AskLwrWelcome from './AskLwrWelcome.js';
+ 5 | import AskLwrChoices from './AskLwrChoices.js';
+ 5 | import {liveIntent} from '../lib/liveLmsIntent.js';
+   `----
+
+Import trace for requested module:
+../../lwrpc-admin/app/components/AskLwrAssistant.js
+./app/page.js

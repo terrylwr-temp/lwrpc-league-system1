@@ -1,0 +1,47 @@
+(node:62392) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityGrouping.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ai_quality_capture {
+  event: 'capture_failed',
+  stage: 'observer',
+  assistant_version: 'LMS-0725',
+  time: '2026-09-08T18:18:22.937Z'
+}
+✔ 0716 Unicode expansion retained; byte boundary and boundary+1 (3.2867ms)
+✔ 0716 conservative versioned fingerprints preserve material distinctions (2.1215ms)
+✔ 0716 unvoted grounded metadata only; correlated receipt and unchanged result keys (30.2916ms)
+✔ 0716 automatic insufficient_evidence detail without vote (2.6528ms)
+✔ 0716 automatic conflict detail without vote (0.3905ms)
+✔ 0716 candidate conflict hint alone creates no occurrence (0.2145ms)
+✔ 0716 protected no text, group or feedback (0.2381ms)
+✔ 0716 clarification no text, group or feedback (0.1535ms)
+✔ 0716 clarification ending in no source retains bounded resolver only (0.4326ms)
+✔ 0716 manager tests separate and ineligible (0.2628ms)
+✔ 0716 legacy receipt and four-click append-only transition unchanged (0.7726ms)
+✔ 0716 privacy redaction isolates group and excludes chunks/URLs/vectors (0.5691ms)
+✔ 0716 build/oversize/write/logger/timeout failures fail open (17.7673ms)
+✔ 0716 technical failure operational only and original error preserved (0.6788ms)
+✔ 0716 static migration and player payload boundaries (7.5052ms)
+(node:1152) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualitySnapshots.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ 0716 real PostgreSQL migration, transactions, constraints and browser denial (isolated PGlite)
+  ✔ effective operations and replay under production-like default grants (159.1582ms)
+  ✔ repeat capture one occurrence/group/case/audit; mismatched same ID rejected (37.1797ms)
+  ✔ forced digest collision retains exact full text, separate slots and groups (27.9446ms)
+  ✔ final conflict creates high-priority case without feedback (18.9902ms)
+  ✔ legacy feedback remains parentless, two transitions and one occurrence/case (17.036ms)
+  ✔ Unicode expansion and exact 32KiB accepted, one-byte-over rolls back safely (15.0466ms)
+  ✔ RLS enabled, browser grants and RPC denied, audit update denied (52.1011ms)
+  ✔ nullable parent reference preserves occurrence on outcome deletion (6.5981ms)
+✔ 0716 real PostgreSQL migration, transactions, constraints and browser denial (isolated PGlite) (2907.3903ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3310.414

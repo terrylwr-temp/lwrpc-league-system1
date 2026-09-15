@@ -1,0 +1,9 @@
+- generic
+  - complementary "View As User status"
+    - strong
+      - StaticText "VIEWING AS: Validating… · READ-ONLY"
+  - alert
+  - alert
+    - StaticText "View As User session expired."
+  - status
+    - StaticText "Validating read-only access…"

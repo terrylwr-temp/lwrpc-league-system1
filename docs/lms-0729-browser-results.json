@@ -1,0 +1,100 @@
+{
+  "results": [
+    {
+      "normal": "Commissioner",
+      "path": "/",
+      "pass": true
+    },
+    {
+      "normal": "Commissioner",
+      "path": "/teams/10000000-0000-4000-8000-000000000030",
+      "pass": true
+    },
+    {
+      "normal": "Commissioner",
+      "path": "/standings",
+      "pass": true
+    },
+    {
+      "normal": "Commissioner",
+      "path": "/matches",
+      "pass": true
+    },
+    {
+      "normal": "Captain",
+      "path": "/captain-dashboard",
+      "pass": true
+    },
+    {
+      "normal": "Captain",
+      "path": "/teams/10000000-0000-4000-8000-000000000030",
+      "pass": true
+    },
+    {
+      "normal": "Captain",
+      "path": "/standings",
+      "pass": true
+    },
+    {
+      "normal": "Captain",
+      "path": "/matches",
+      "pass": true
+    },
+    {
+      "normal": "implicit Player",
+      "path": "/player-dashboard",
+      "pass": true
+    },
+    {
+      "normal": "implicit Player",
+      "path": "/teams/10000000-0000-4000-8000-000000000030",
+      "pass": true
+    },
+    {
+      "normal": "implicit Player",
+      "path": "/standings",
+      "pass": true
+    },
+    {
+      "normal": "implicit Player",
+      "path": "/matches",
+      "pass": true
+    },
+    {
+      "normalImplicitLiveRecord": true,
+      "rankDeferred": true,
+      "widths": [
+        1280,
+        390,
+        320
+      ]
+    },
+    {
+      "confirmationEscapeCloses": true,
+      "focusReturn": false,
+      "baselineFocusReturn": false,
+      "existingLimitationUnchanged": true
+    },
+    {
+      "confirmationEscapeCloses": true,
+      "focusReturn": false,
+      "baselineFocusReturn": false,
+      "existingLimitationUnchanged": true
+    },
+    {
+      "viewAsEffectiveRecord": true,
+      "feedbackDisabled": true,
+      "readOnly": true,
+      "exit": true,
+      "originalTabUnchanged": true,
+      "widths": [
+        1280,
+        390,
+        320
+      ]
+    }
+  ],
+  "errors": [],
+  "modelCalls": 0,
+  "productionAccess": false
+}

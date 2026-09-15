@@ -1,0 +1,42 @@
+{
+  "file": "C:/Users/t_ade/Downloads/members-list-lakewoodranchpickleballclub-091026223019.csv",
+  "sha256": "a4857c7a1d9ee43261ec29a7e226d478bec4f4b2b47253cc4e3a77a2c247a704",
+  "header": "\"duprId\",\"name\",\"email\",\"phone\",\"singles\",\"singlesReliability\",\"doubles\",\"doublesReliability\",\"status\",\"metrics\",\"\"",
+  "stats": {
+    "rows": 886,
+    "valid": 886,
+    "invalid": 0,
+    "age65": 297,
+    "age50": 398,
+    "ageMissing": 191,
+    "singlesDiffersFromDoubles": 813,
+    "singlesRfDiffersFromDoublesRf": 804,
+    "primaryRfHeader": true
+  },
+  "terry": {
+    "duprId": "1R9LNE",
+    "raw": {
+      "doubles": "4.077",
+      "doublesReliability": "100",
+      "over65": null,
+      "over50": "4.311",
+      "singles": "3.604",
+      "singlesReliability": "30",
+      "careerHigh": "4.152"
+    },
+    "oldParser": {
+      "doubles": "4.077",
+      "rf": 100,
+      "age": 4.311,
+      "ageSource": "over_50",
+      "ageMissing": false,
+      "rfMissing": false,
+      "doublesMissing": false
+    },
+    "expectedWorking": {
+      "doubles": 4,
+      "rf": 100,
+      "age": 4.3
+    }
+  }
+}

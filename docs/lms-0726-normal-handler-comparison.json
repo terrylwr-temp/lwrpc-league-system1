@@ -1,0 +1,74 @@
+[
+  {
+    "file": "app/teams/[id]/page.js",
+    "name": "addPlayer",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/teams/[id]/page.js",
+    "name": "removePlayer",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/captain-dashboard/page.js",
+    "name": "saveMatchSetup",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/captain-dashboard/page.js",
+    "name": "saveFlexSchedule",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/captain-dashboard/page.js",
+    "name": "sendFlexScheduleNotification",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/captain-dashboard/page.js",
+    "name": "sendMatchSetupNotification",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/captain-dashboard/page.js",
+    "name": "emailMatchSetupPlayers",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/captain-dashboard/page.js",
+    "name": "saveCaptainProfileImage",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/player-dashboard/page.js",
+    "name": "saveDesignPreviewProfileImage",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/player-dashboard/page.js",
+    "name": "logoutFromDesignPreview",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/components/AppHeader.js",
+    "name": "saveHeaderProfileImage",
+    "found": true,
+    "normalBodyUnchanged": true
+  },
+  {
+    "file": "app/components/AppHeader.js",
+    "name": "logoutFromProfile",
+    "found": true,
+    "normalBodyUnchanged": true
+  }
+]

@@ -82,10 +82,11 @@ test('0721 detail skips NULL case lookup; genuine case navigation is retained',a
   if(name==='ai_approved_answers')return query({id:answer_id,source_review_case_id:caseLink});
   if(name==='ai_approved_answer_events')return query([]);
   if(name==='ai_manager_review_cases'){lookups++;return query({group_id,status:'new'});}
+  if(name==='ai_question_groups')return query({canonical_question:'Original linked question'});
   throw Error(name);
  }};
  assert.equal((await approvedDetail(db,id)).linkedCase,null);assert.equal(lookups,0);
- caseLink=caseId;assert.equal((await approvedDetail(db,id)).linkedCase.group_id,group_id);assert.equal(lookups,1);
+ caseLink=caseId;const detail=await approvedDetail(db,id);assert.equal(detail.linkedCase.group_id,group_id);assert.equal(detail.linkedCase.question,'Original linked question');assert.equal(lookups,1);
 });
 
 test('0721 activation checks overlapping Drafts as well as Active managed policy',async()=>{

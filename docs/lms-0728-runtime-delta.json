@@ -1,0 +1,22 @@
+[
+  {
+    "file": "package-lock.json",
+    "baseline": "473fe84decfb7d89f7d3ab117d0bf7aefb1e8a684598e11e2b87d72557b3f8f0",
+    "current": "b6185bc89341ad2c2f658d623dcdf0029e1792e0967e9545be96f56a381a087d"
+  },
+  {
+    "file": "package.json",
+    "baseline": "c1d01ed4a622932c5b2e03a7a3c8dd02a3b17d47e9df530ea98eb2a64fd8f480",
+    "current": "5dbcb895eb64665950609a78cd50e70e42fa543b57ce51f62911a6cba3c54da6"
+  },
+  {
+    "file": "app/components/ViewAsSharedPages.js",
+    "baseline": "c47ad9d5d2aa65e0d91dff7f8bfff3a9b5d328155d32babedb92fe5696e633ef",
+    "current": "db40ea34a308fdc03684ffa3b43d5fd1836bc5bac385c51bd359ab57b7b7a9cb"
+  },
+  {
+    "file": "app/lib/version.js",
+    "baseline": "7767e1224e566992c3cff98949b318e388d5e47222adf972549701ca38f666f7",
+    "current": "3133118b69807fa12a062a30649164eac0aac89bd43f489d1a52b9fec958a809"
+  }
+]

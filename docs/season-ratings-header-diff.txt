@@ -1,0 +1,5 @@
+warning: in the working copy of 'lwrpc-admin/app/components/SeasonRatingsWorkflow.js', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/app/lib/seasonRatingsImport.js', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/test/seasonRatingsImport.test.mjs', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'lwrpc-admin/test/seasonRatingsNormalActionsUi.test.mjs', CRLF will be replaced by LF the next time Git touches it

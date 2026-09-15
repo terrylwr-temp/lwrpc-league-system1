@@ -1,0 +1,248 @@
+{
+  "preflight": {
+    "preflight": {
+      "migration": [
+        {
+          "name": "lms0725_clarification_choices",
+          "version": "20260908123627"
+        }
+      ],
+      "maintenance": [
+        {
+          "name": "lms0724-view-as-maintenance",
+          "jobid": 3,
+          "active": true,
+          "schedule": "* * * * *"
+        }
+      ],
+      "recent_runs": [
+        {
+          "runs": 60,
+          "latest": "2026-09-08T15:44:00.038806+00:00",
+          "status": "succeeded"
+        }
+      ],
+      "approved_events": 7,
+      "approved_answers": 1,
+      "approved_revisions": 2
+    }
+  },
+  "corpusComparison": {
+    "expected": 108,
+    "current": 108,
+    "drift": []
+  },
+  "baseline": {
+    "baseline": {
+      "chunks": {
+        "n": 1823,
+        "hash": "58ecf50908df4225bf91257bfb61c157"
+      },
+      "events": {
+        "n": 7,
+        "hash": "1a8aeecd3237a48cea7a41366911c98d"
+      },
+      "answers": {
+        "n": 1,
+        "hash": "a0ba3d0cb8a3257bad09c7deeac02847"
+      },
+      "feedback": {
+        "n": 20,
+        "hash": "8c75eaf1fc1da099d79bba4c7b24553b"
+      },
+      "outcomes": {
+        "n": 224,
+        "hash": "3a16fbfbc288ecc9c6adef2005fabb40"
+      },
+      "versions": {
+        "n": 24,
+        "hash": "e0011e959c0c0d5d23dc87fc83fa0944"
+      },
+      "documents": {
+        "n": 7,
+        "hash": "05d1723b158eab211eb8d8aae82bb68d"
+      },
+      "revisions": {
+        "n": 2,
+        "hash": "404cbfae87bb73312f9412f627402356"
+      },
+      "captured_at": "2026-09-08T15:47:57.463629+00:00"
+    }
+  },
+  "firstOutcome": {
+    "id": "aa8b8a8f-84d4-46d5-bd1e-edee049eda89",
+    "request_started_at": "2026-09-08 15:49:17.588+00",
+    "completed_at": "2026-09-08 15:49:23.162+00",
+    "final_kind": "answer",
+    "reason_code": "validated_structured_output",
+    "origin": "player_interface",
+    "assistant_version": "LMS-0725",
+    "model": "gpt-5.5-2026-04-23",
+    "source_family": "lwr",
+    "selected_evidence_count": 2,
+    "model_call_skipped": false,
+    "total_ms": 5574,
+    "input_tokens": 1874,
+    "output_tokens": 64,
+    "diagnostic_snapshot": {
+      "candidateCount": 32,
+      "embeddingModel": "text-embedding-3-small",
+      "retrievalLimit": 8,
+      "stage3Sufficient": true,
+      "evidenceThreshold": 0.35,
+      "authorityReviewLimit": 12,
+      "configurationVersion": "LMS-0725",
+      "equipmentProbeInvoked": false,
+      "equipmentProbeRetrieved": false
+    }
+  },
+  "firstEvidence": {
+    "answer_id": "aa8b8a8f-84d4-46d5-bd1e-edee049eda89",
+    "occurrence_kind": "grounded_feedback",
+    "original_question": "What date can I start entering my roster for weekday league",
+    "effective_question": "What date can I start entering my roster for weekday league",
+    "source_snapshot": [
+      {
+        "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+        "heading": "Weekday DUPR League Key Dates",
+        "citation": "2026 Fall League Important Dates \u2014 Weekday DUPR League Key Dates \u2014 Page 1",
+        "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "pageNumber": 1,
+        "ruleNumber": "",
+        "excerptItems": [
+          {
+            "end": 165,
+            "start": 118,
+            "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+            "pageNumber": 1,
+            "ruleNumber": "",
+            "applicability": {
+              "role": "opening_date",
+              "league": "weekday"
+            },
+            "scopeBindings": [
+              {
+                "end": 29,
+                "kind": "league",
+                "start": 0,
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              }
+            ],
+            "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+          }
+        ],
+        "sectionLabel": "Weekday DUPR League Key Dates",
+        "documentTitle": "2026 Fall League Important Dates",
+        "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+      },
+      {
+        "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+        "heading": "HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM)",
+        "citation": "LWR Pickleball Club DUPR Captains Guide \u2014 HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) \u2014 Page 5",
+        "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "pageNumber": 5,
+        "ruleNumber": "",
+        "excerptItems": [
+          {
+            "end": 1084,
+            "start": 0,
+            "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+            "pageNumber": 5,
+            "ruleNumber": "",
+            "applicability": {
+              "role": "unlock_qualification"
+            },
+            "scopeBindings": [],
+            "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+          }
+        ],
+        "sectionLabel": "HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM)",
+        "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+        "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+      }
+    ],
+    "selection_snapshot": {
+      "candidates": [],
+      "selectedEvidence": [
+        {
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "heading": "",
+          "citation": "",
+          "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "documentType": null,
+          "evidenceRole": "opening_date",
+          "excerptItems": [
+            {
+              "end": 165,
+              "start": 118,
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "end": 29,
+                  "kind": "league",
+                  "start": 0,
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+                }
+              ],
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            }
+          ],
+          "sectionLabel": "",
+          "combinedScore": null,
+          "documentTitle": "",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "sourceClassification": "lwr_supporting_guide",
+          "evidenceSelectionReason": "Active-version exact policy excerpts"
+        },
+        {
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "heading": "",
+          "citation": "",
+          "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "documentType": null,
+          "evidenceRole": "unlock_qualification",
+          "excerptItems": [
+            {
+              "end": 1084,
+              "start": 0,
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": [],
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+            }
+          ],
+          "sectionLabel": "",
+          "combinedScore": null,
+          "documentTitle": "",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "sourceClassification": "lwr_supporting_guide",
+          "evidenceSelectionReason": "Active-version exact policy excerpts"
+        }
+      ]
+    },
+    "resolver_snapshot": {
+      "classification": "standalone",
+      "rawLiveDataGuard": false,
+      "contextSuperseded": false,
+      "clarificationConsumed": false,
+      "priorContextAvailable": false,
+      "effectiveLiveDataGuard": false
+    }
+  }
+}

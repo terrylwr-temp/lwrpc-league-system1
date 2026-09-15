@@ -695,6 +695,8 @@ function printCurrentHistory() {
                 Show Player History
               </button>
 
+              {hasRole(currentUserRole,"league_manager") && <ViewAsStartButton memberId={id} />}
+
               {!memberIsActive && (
                 <button
                   type="button"
@@ -735,7 +737,6 @@ function printCurrentHistory() {
                   <h1 className="text-4xl font-bold text-slate-900">
                     {member.first_name || ""} {member.last_name || ""}
                   </h1>
-                  {hasRole(currentUserRole,"league_manager") && <ViewAsStartButton memberId={id} name={[member.first_name,member.last_name].filter(Boolean).join(" ")} />}
 
                   <div className="mt-4 space-y-2 text-slate-600">
                     <div className="flex items-center gap-1">

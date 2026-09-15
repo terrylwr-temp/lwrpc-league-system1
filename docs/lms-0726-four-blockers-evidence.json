@@ -1,0 +1,846 @@
+{
+  "observed": "2026-09-08",
+  "scope": "Read-only nonmember configuration and schema/policy metadata; no member contact/rating records",
+  "helpers": [
+    {
+      "name": "private.current_user_can_manage_team(uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_can_manage_team(target_team_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select private.current_user_is_lwrpc_admin() or exists (\n    select 1\n    from public.user_roles ur\n    join public.teams t on t.id = target_team_id\n    where ur.user_id = (select auth.uid())\n      and ur.role in ('captain', 'club_pro', 'league_manager', 'commissioner')\n      and ur.member_id in (t.captain_member_id, t.co_captain_member_id,\n                           t.co_captain_2_member_id, t.club_pro_member_id)\n  )\n$function$\n"
+    },
+    {
+      "name": "private.current_user_is_admin()",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_is_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\n  select exists (\r\n    select 1\r\n    from public.user_roles ur\r\n    where ur.user_id = auth.uid()\r\n      and ur.role in ('league_manager', 'commissioner')\r\n  )\r\n$function$\n"
+    },
+    {
+      "name": "private.current_user_is_lwrpc_admin()",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_is_lwrpc_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (\n    select 1\n    from public.user_roles ur\n    where ur.user_id = (select auth.uid())\n      and ur.role in ('league_manager', 'commissioner')\n  )\n$function$\n"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "division_lines",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can read division lines",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "division_lines",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can delete division lines",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "division_lines",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can insert division lines",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "division_lines",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can update division lines",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "divisions",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can delete divisions",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "divisions",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can insert divisions",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "divisions",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can read divisions",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "divisions",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can update divisions",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "tablename": "divisions",
+      "permissive": "PERMISSIVE",
+      "policyname": "view_as_executor_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "leagues",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can delete leagues",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "leagues",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can insert leagues",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "leagues",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can read leagues",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "leagues",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can update leagues",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "tablename": "leagues",
+      "permissive": "PERMISSIVE",
+      "policyname": "view_as_executor_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "score_sheet_templates",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can delete score sheet templates",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "score_sheet_templates",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can insert score sheet templates",
+      "schemaname": "public",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "score_sheet_templates",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can update score sheet templates",
+      "schemaname": "public",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "score_sheet_templates",
+      "permissive": "PERMISSIVE",
+      "policyname": "Score sheet templates are readable by authenticated users",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "seasons",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can delete seasons",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "seasons",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can insert seasons",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_admin() AS current_user_is_admin)"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "seasons",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can update seasons",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_admin() AS current_user_is_admin)"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "seasons",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can read seasons",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "tablename": "seasons",
+      "permissive": "PERMISSIVE",
+      "policyname": "view_as_executor_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "team_standings",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can read team standings",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "team_standings",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can delete team standings",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "team_standings",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can insert team standings",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "team_standings",
+      "permissive": "PERMISSIVE",
+      "policyname": "League managers can update team standings",
+      "schemaname": "public",
+      "with_check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "tablename": "team_standings",
+      "permissive": "PERMISSIVE",
+      "policyname": "view_as_executor_read",
+      "schemaname": "public",
+      "with_check": null
+    }
+  ],
+  "configuration": [
+    {
+      "league": "PrimeTime DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MPT 7",
+      "end_date": "2026-12-03",
+      "max_dupr": 3.8,
+      "min_dupr": 2.7,
+      "league_id": "01dc00dd-f3fa-4e57-9d9f-b1a7ae91d046",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "4c2e1df4-964b-4dca-a3f4-5eea02405d4c",
+      "rating_type": "primetime",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 7.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 2,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": false
+    },
+    {
+      "league": "PrimeTime DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MPT 9",
+      "end_date": "2026-12-03",
+      "max_dupr": 4.9,
+      "min_dupr": 3.3,
+      "league_id": "01dc00dd-f3fa-4e57-9d9f-b1a7ae91d046",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "c2cf8705-f8a8-44c3-aa4f-500d23f36de2",
+      "rating_type": "primetime",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 9.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 2,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": false
+    },
+    {
+      "league": "PrimeTime DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WPT 7",
+      "end_date": "2026-12-03",
+      "max_dupr": 3.8,
+      "min_dupr": 2.7,
+      "league_id": "01dc00dd-f3fa-4e57-9d9f-b1a7ae91d046",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "e813f233-26b0-48e1-8b30-cf30ebfb7d5f",
+      "rating_type": "primetime",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 7.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 2,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": false
+    },
+    {
+      "league": "PrimeTime DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WPT 9",
+      "end_date": "2026-12-03",
+      "max_dupr": 4.9,
+      "min_dupr": 3.3,
+      "league_id": "01dc00dd-f3fa-4e57-9d9f-b1a7ae91d046",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "f8e93f13-968d-4c77-958e-8bc88c019e4c",
+      "rating_type": "primetime",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 9.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 2,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": false
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MDUPR5",
+      "end_date": "2026-12-03",
+      "max_dupr": 2.8,
+      "min_dupr": 2,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "7c564e96-cb01-46b3-826f-5fb5de8470bb",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 5.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MDUPR6",
+      "end_date": "2026-12-03",
+      "max_dupr": 3.3,
+      "min_dupr": 2.3,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "67467899-fdac-430f-b9f0-bf906d3c96b7",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 6.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MDUPR7",
+      "end_date": "2026-12-03",
+      "max_dupr": 3.8,
+      "min_dupr": 2.8,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "69f6b54d-4028-4d2f-96ca-ddc57adadb18",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 7.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MDUPR8",
+      "end_date": "2026-12-03",
+      "max_dupr": 4.3,
+      "min_dupr": 3.3,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "92b36d71-c0b3-4ebc-b3e9-29d42ef06bd2",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 8.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "MDUPR9",
+      "end_date": "2026-12-03",
+      "max_dupr": 4.8,
+      "min_dupr": 3.8,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "c4614fd8-ab4b-4cc9-8077-c12e79c592e7",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 9.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 2,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WDUPR5",
+      "end_date": "2026-12-03",
+      "max_dupr": 2.8,
+      "min_dupr": 2,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "c546abf1-1983-456f-b2ed-bb9d7d1c085d",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 5.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WDUPR6",
+      "end_date": "2026-12-03",
+      "max_dupr": 3.3,
+      "min_dupr": 2.3,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "4a6d1678-fc9a-4a06-9acc-9c0a3c4d0458",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 6.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WDUPR7",
+      "end_date": "2026-12-03",
+      "max_dupr": 3.8,
+      "min_dupr": 2.8,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "32b94e9f-fca4-4a9e-b1a7-d89b0a07fdae",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 7.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WDUPR8",
+      "end_date": "2026-12-03",
+      "max_dupr": 4.3,
+      "min_dupr": 3.3,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "5e4cad06-b884-4a5c-87de-f969b1cf3b1d",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 8.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 3,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "season": "2026 Fall Season",
+      "division": "WDUPR9",
+      "end_date": "2026-12-03",
+      "max_dupr": 4.8,
+      "min_dupr": 3.8,
+      "league_id": "55abc961-df03-441b-bed2-338cf547da78",
+      "season_id": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+      "start_date": "2026-10-14",
+      "division_id": "b7cb8ef1-1de2-4d03-bac5-b120ad4ab856",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 9.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 2,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": null,
+      "secondary_number_of_lines": null,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Saturday DUPR League",
+      "season": "26/27 Saturday Season",
+      "division": "SDUPR6",
+      "end_date": "2027-03-13",
+      "max_dupr": 3.3,
+      "min_dupr": 2.3,
+      "league_id": "ec8d32c4-cfef-4b49-9a46-fe4f8fdbfcf5",
+      "season_id": "073a4b31-7e66-460c-87bb-65ff29d1d341",
+      "start_date": "2026-10-17",
+      "division_id": "8fbab176-b1ea-44b1-aebf-3b613a458642",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 6.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 6,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": "mixed_doubles",
+      "secondary_number_of_lines": 6,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Saturday DUPR League",
+      "season": "26/27 Saturday Season",
+      "division": "SDUPR7",
+      "end_date": "2027-03-13",
+      "max_dupr": 3.8,
+      "min_dupr": 2.8,
+      "league_id": "ec8d32c4-cfef-4b49-9a46-fe4f8fdbfcf5",
+      "season_id": "073a4b31-7e66-460c-87bb-65ff29d1d341",
+      "start_date": "2026-10-17",
+      "division_id": "4e7754f9-01ea-4ba9-b44d-ecac7be5e644",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 7.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 6,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": "mixed_doubles",
+      "secondary_number_of_lines": 6,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Saturday DUPR League",
+      "season": "26/27 Saturday Season",
+      "division": "SDUPR8",
+      "end_date": "2027-03-13",
+      "max_dupr": 4.3,
+      "min_dupr": 3.3,
+      "league_id": "ec8d32c4-cfef-4b49-9a46-fe4f8fdbfcf5",
+      "season_id": "073a4b31-7e66-460c-87bb-65ff29d1d341",
+      "start_date": "2026-10-17",
+      "division_id": "1de9f483-3d13-4dc2-a082-5dfc7ed908eb",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 8.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 6,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": "mixed_doubles",
+      "secondary_number_of_lines": 6,
+      "only_home_community_players": true
+    },
+    {
+      "league": "Saturday DUPR League",
+      "season": "26/27 Saturday Season",
+      "division": "SDUPR9",
+      "end_date": "2027-03-13",
+      "max_dupr": 4.8,
+      "min_dupr": 3.8,
+      "league_id": "ec8d32c4-cfef-4b49-9a46-fe4f8fdbfcf5",
+      "season_id": "073a4b31-7e66-460c-87bb-65ff29d1d341",
+      "start_date": "2026-10-17",
+      "division_id": "6e1dd7f0-0000-4322-8241-df8a9519ad2e",
+      "rating_type": "dupr",
+      "league_active": true,
+      "season_active": true,
+      "team_dupr_max": 9.1,
+      "rosters_locked": true,
+      "division_active": true,
+      "number_of_lines": 6,
+      "primary_team_type": "gender_doubles",
+      "secondary_team_type": "mixed_doubles",
+      "secondary_number_of_lines": 6,
+      "only_home_community_players": true
+    }
+  ],
+  "retained_security": [
+    {
+      "rls": true,
+      "table": "division_lines",
+      "forced": false
+    },
+    {
+      "rls": true,
+      "table": "divisions",
+      "forced": false
+    },
+    {
+      "rls": true,
+      "table": "leagues",
+      "forced": false
+    },
+    {
+      "rls": true,
+      "table": "score_sheet_templates",
+      "forced": false
+    },
+    {
+      "rls": true,
+      "table": "seasons",
+      "forced": false
+    },
+    {
+      "rls": true,
+      "table": "team_standings",
+      "forced": false
+    }
+  ],
+  "roster_constraints": [
+    {
+      "table": "match_lineups",
+      "definition": "UNIQUE (match_id, team_id, line_number)"
+    },
+    {
+      "table": "match_lineups",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "team_members",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "team_members",
+      "definition": "UNIQUE (team_id, member_id)"
+    },
+    {
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (player_1_member_id) REFERENCES members(id)"
+    },
+    {
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (player_2_member_id) REFERENCES members(id)"
+    },
+    {
+      "table": "match_lineups",
+      "definition": "FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "team_members",
+      "definition": "FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "team_members",
+      "definition": "FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE"
+    }
+  ]
+}

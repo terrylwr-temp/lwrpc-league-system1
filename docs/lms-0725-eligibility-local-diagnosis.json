@@ -1,0 +1,345 @@
+{
+  "diagnosisOnly": true,
+  "networkCalls": 0,
+  "modelCalls": 0,
+  "personalDataReads": 0,
+  "expandedCount": 120,
+  "observations": [
+    {
+      "id": "Q104",
+      "question": "Can I play on a DUPR5 team",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play on a dupr5 team"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q105",
+      "question": "Can I play on a DUPR5 team?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play on a dupr5 team?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q106",
+      "question": "What are the requirements for DUPR5?",
+      "expectedRoute": "DOCUMENT",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what are the requirements for dupr5?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q107",
+      "question": "Am I eligible for DUPR5?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "am i eligible for dupr5?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q108",
+      "question": "Can I play DUPR7?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play dupr7?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q109",
+      "question": "Do I qualify for DUPR9?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "do i qualify for dupr9?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q110",
+      "question": "What DUPR range is allowed in DUPR5?",
+      "expectedRoute": "DOCUMENT",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what dupr range is allowed in dupr5?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q111",
+      "question": "What age do I need to be for PrimeTime?",
+      "expectedRoute": "DOCUMENT",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what age do i need to be for primetime?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q112",
+      "question": "Am I eligible for PrimeTime?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "am i eligible for primetime?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q113",
+      "question": "Do I qualify for PrimeTime?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "do i qualify for primetime?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q114",
+      "question": "Can I play in the Weekday 8.1 division?",
+      "expectedRoute": "HYBRID_CLARIFICATION",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "weekday"
+        ],
+        "division": "8.1",
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play in the weekday 8.1 division?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q115",
+      "question": "Am I eligible for this division?",
+      "expectedRoute": "HYBRID_CLARIFICATION",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "am i eligible for this division?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q116",
+      "question": "Am I eligible for DUPR7?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "am i eligible for dupr7?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q117",
+      "question": "Can I play in DUPR9?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play in dupr9?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q118",
+      "question": "Can I play on an MDUPR5 team?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play on an mdupr5 team?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q119",
+      "question": "Can I play on a WDUPR5 team?",
+      "expectedRoute": "HYBRID",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play on a wdupr5 team?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q120",
+      "question": "Can I play on an SDUPR5 team?",
+      "expectedRoute": "HYBRID_UNAVAILABLE_CONTEXT",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "can i play on an sdupr5 team?"
+      },
+      "live": null,
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    },
+    {
+      "id": "Q51",
+      "question": "What is my Season DUPR?",
+      "expectedRoute": "LIVE_SELF_RATING",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is my season dupr?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "season"
+      },
+      "concept": null,
+      "weekdayTableGenericPassages": 0
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+(node:55552) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF01 below (3.0814ms)
+✔ RF02 fraction (0.2199ms)
+✔ RF03 boundary (0.2162ms)
+✔ RF04 above (0.1061ms)
+✔ RF05 missing (0.1984ms)
+✔ RF06 numeric NR (0.1282ms)
+✔ RF07 rated below (0.1273ms)
+✔ RF08 rated inside (0.1108ms)
+✔ RF09 rated above (0.2053ms)
+✔ RF10 independent NR (0.2818ms)
+✔ RF11 independent unknown (0.2239ms)
+✔ RF12 pair unknown (0.0974ms)
+✔ Exact official source gate + NR precedence + sanitized single telemetry outcome (18.4875ms)
+✔ Policy only never reads SELF (7.1492ms)
+✔ PT9 conflict blocks personal lookup; no crossing to Weekday rules (6.4574ms)
+✔ PrimeTime age policy includes exact 6.3.2 source; no live lookup (1.4055ms)
+✔ Clarification binds subject session, exact choice and current source (6.8154ms)
+✔ Inactive or unavailable SDUPR5 does not substitute another division (1.7951ms)
+✔ Missing RF stays unknown and denied subject remains protected (8.5325ms)
+✔ Telemetry exceptions fail open with exactly one logical attempt (4.0576ms)
+✔ Standalone other-player RF is protected before catalog or provider (0.8635ms)
+✔ Changed policy version, future season and missing continuation fail closed (0.86ms)
+✔ LMS-0725 SELF-only RF migration, replay, roles, projection and effective target (2949.248ms)
+(node:53132) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiQualityPersistence.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 Q78 450ms success (12.2523ms)
+✔ 0725 Q78 deadline then found (3.9883ms)
+✔ 0725 Q78 deadline absent then retry (1.2449ms)
+✔ 0725 Q78 late first commit races retry (3.8762ms)
+✔ 0725 Q78 reconciliation timeout (2.164ms)
+✔ 0725 Q78 reconciliation failure (0.9312ms)
+✔ 0725 Q78 second deadline then found (2.3625ms)
+✔ 0725 Q78 second deadline absent (1.3673ms)
+✔ 0725 Q78 mismatch never retries (1.1427ms)
+✔ 0725 Q78 safe answer returns before recovery and no answer rerun (7.8418ms)
+✔ 0725 reconciliation cannot accept an older positive occurrence for missing negative review case (2.6197ms)
+✔ 0725 recovery scheduling failure is visible and never runs detached (2.6063ms)
+✔ 0725 recovery keeps origin and never introduces actor or effective member identifiers (2.512ms)
+✔ 0725 recovery callback reentry cannot exceed one retry or terminal diagnostic (1.0662ms)
+✔ 0725 all ordinary capture route callers register framework-owned recovery (1.7027ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3338.8263

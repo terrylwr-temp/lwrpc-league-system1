@@ -1,0 +1,11 @@
+✔ 0726 fixture nested inner count evaluates null/empty/zero, scope AND OR, and missing joins with PostgreSQL (2756.1588ms)
+✔ 0726 fixture rejects unknown operators/selections instead of guessing results (2.0513ms)
+✔ 0726 additive migration preserves accepted snapshot/context/maintenance for application-only rollback (2969.2933ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5686.0891

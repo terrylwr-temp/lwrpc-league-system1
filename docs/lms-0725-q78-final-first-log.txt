@@ -1,0 +1,38 @@
+## Runtime Logs
+
+**Project:** prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3
+**Deployment:** dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM
+**Time range:** 2026-09-08T20:02:40.000Z → 2026-09-08T20:03:20.000Z
+
+### 20:02:50 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T20:02:54.840Z',
+      operation: 'capture_ai_quality',
+      correlation_id: '73a67adf-5e7b-47b8-931e-c2538069f544',
+      origin: 'player_interface',
+      result_shape: 'answer',
+      evidence_count: 1,
+      reason: 'RECORDED',
+      sqlstate: null,
+      attempt: 1,
+      duration_ms: 55,
+      commit_status: 'FOUND',
+      payload_bytes: 2340,
+      metadata_count: 10,
+      reference_count: 8,
+      timings: {
+        build_ms: 1,
+        invocation_start_ms: 1,
+        rpc_ms: 54,
+        acknowledgement_ms: 55,
+        deadline_ms: null,
+        reconciliation_ms: 0,
+        retry_ms: 0,
+        total_ms: 55
+      }
+    }
+

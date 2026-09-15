@@ -1,0 +1,208 @@
+{
+  "method": "Deduplicated correlation IDs; nearest-rank percentiles; successful captures only; failure right-censored at application deadline",
+  "n": 21,
+  "p50": 52,
+  "p95": 417,
+  "max": 450,
+  "min": 27,
+  "records": [
+    {
+      "id": "77848361-efa8-400c-be6b-dbb8648039b2",
+      "time": "2026-09-08T19:19:05.202Z",
+      "event": "capture_failed",
+      "durationMs": 502,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "b2ce0efe-10f5-4e8f-9663-aa8af7672098",
+      "time": "2026-09-08T19:18:41.629Z",
+      "event": "capture_succeeded",
+      "durationMs": 417,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "d404b8b6-1108-4369-b9f0-8d7a9b64aef9",
+      "time": "2026-09-08T19:18:16.607Z",
+      "event": "capture_succeeded",
+      "durationMs": 126,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "c1c35577-707c-4dd5-be2b-19a51fff7bf4",
+      "time": "2026-09-08T19:17:48.837Z",
+      "event": "capture_succeeded",
+      "durationMs": 39,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "965f772e-9dbb-4760-b0f2-424c2f0c856c",
+      "time": "2026-09-08T19:17:05.303Z",
+      "event": "capture_succeeded",
+      "durationMs": 49,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "12b35459-1ef9-4adc-9a27-793bddfb35ce",
+      "time": "2026-09-08T19:16:30.907Z",
+      "event": "capture_succeeded",
+      "durationMs": 41,
+      "evidenceCount": 0,
+      "result": "clarification",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "eba171ef-ea5e-4920-b95b-8550d25a4e58",
+      "time": "2026-09-08T19:16:03.649Z",
+      "event": "capture_succeeded",
+      "durationMs": 46,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "f6581336-2144-4093-a5c6-38a739a47b30",
+      "time": "2026-09-08T19:15:34.729Z",
+      "event": "capture_succeeded",
+      "durationMs": 60,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "a3a1862f-3360-4e82-ae6b-e78bf3b9255e",
+      "time": "2026-09-08T19:15:02.249Z",
+      "event": "capture_succeeded",
+      "durationMs": 118,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "e3f81203-f7e0-4a3c-b2e8-23501051a8b6",
+      "time": "2026-09-08T19:14:27.076Z",
+      "event": "capture_succeeded",
+      "durationMs": 47,
+      "evidenceCount": 0,
+      "result": "protected",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "9a23a3e1-a742-43c7-b4d0-e5f4b6b3acd1",
+      "time": "2026-09-08T19:14:22.195Z",
+      "event": "capture_succeeded",
+      "durationMs": 50,
+      "evidenceCount": 0,
+      "result": "protected",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "36a6cd2e-bf32-4018-98c0-d03b397ca433",
+      "time": "2026-09-08T19:14:02.674Z",
+      "event": "capture_succeeded",
+      "durationMs": 67,
+      "evidenceCount": 0,
+      "result": "protected",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "799d99d7-09ef-451d-9a5b-752e68a302d7",
+      "time": "2026-09-08T19:13:18.913Z",
+      "event": "capture_succeeded",
+      "durationMs": 65,
+      "evidenceCount": 0,
+      "result": "protected",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "f9f91334-1fe4-4a82-96e1-258d2da5b5a1",
+      "time": "2026-09-08T19:12:53.047Z",
+      "event": "capture_succeeded",
+      "durationMs": 78,
+      "evidenceCount": 0,
+      "result": "protected",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "00e97852-31c3-48ec-ae63-a446c86e4231",
+      "time": "2026-09-08T19:12:48.711Z",
+      "event": "capture_succeeded",
+      "durationMs": 52,
+      "evidenceCount": 0,
+      "result": "protected",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "44acc87e-f152-48c1-b3c9-a0a6169b47ff",
+      "time": "2026-09-08T19:12:11.657Z",
+      "event": "capture_succeeded",
+      "durationMs": 450,
+      "evidenceCount": 1,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "8bcb814c-58ce-4fe0-8416-bb5de73a8a3d",
+      "time": "2026-09-08T19:11:20.820Z",
+      "event": "capture_succeeded",
+      "durationMs": 36,
+      "evidenceCount": 3,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "32d17b55-8015-456e-be8f-2289d18dd99d",
+      "time": "2026-09-08T19:09:51.758Z",
+      "event": "capture_succeeded",
+      "durationMs": 44,
+      "evidenceCount": 0,
+      "result": "clarification",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "43655c0d-e383-4a3d-9de6-2bd1df85cbb8",
+      "time": "2026-09-08T19:09:15.100Z",
+      "event": "capture_succeeded",
+      "durationMs": 68,
+      "evidenceCount": 0,
+      "result": "clarification",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "a3837931-a450-4d9d-be64-67fd5158a447",
+      "time": "2026-09-08T19:07:57.965Z",
+      "event": "capture_succeeded",
+      "durationMs": 34,
+      "evidenceCount": 4,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "320b180a-07ee-4e50-85f9-0022e1dffda7",
+      "time": "2026-09-08T19:07:10.835Z",
+      "event": "capture_succeeded",
+      "durationMs": 27,
+      "evidenceCount": 4,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    },
+    {
+      "id": "59e99390-e495-41f4-9537-be7f01904dbc",
+      "time": "2026-09-08T19:06:11.446Z",
+      "event": "capture_succeeded",
+      "durationMs": 107,
+      "evidenceCount": 4,
+      "result": "answer",
+      "operation": "capture_ai_quality"
+    }
+  ]
+}

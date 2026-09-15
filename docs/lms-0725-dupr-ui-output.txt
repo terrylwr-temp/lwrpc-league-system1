@@ -1,0 +1,18 @@
+(node:18148) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+REQUEST normal 1440 {"question":"What's my DUPR?","conversationReceipt":null,"context":{"currentPath":"/","featureModule":"LMS"}}
+RESULT normal 1440 {"kind":"clarification","answer":"Current official DUPR isn't available through this Live LMS lookup. Which rating and season do you mean?"}
+REQUEST normal 1440 {"question":"choice:b466cf08-ab9f-4cf7-8232-b309a2bf906e","conversationReceipt":"live1.GKJkeEmPw6-Tq9ZHDkgsGf_Ze1I0p47zynqjeTv3pGzA5OaRi1uLwAi45t4Cz_h5KJrFHs9g0a3spJt3XvdaRMEqlyuLSnYuJwb9z_I1Eixo9fmK9RoixTsNlo9QezH42MPGegMtq44i6_TNCe0t9BKBD0wlqHs4eKlrgHzX8DxCkFD6tpW8NMfafi6stC-KOr12T0I1Vzl2VKNbIckyPJZbtMLFF1wygUqvwwD0F8kFH7orF7bjNKZN5NOmWMVZ48EO5XboCK46lbFVzkPZTfgifoyioOZuXNqWZw0k4xhOjyNvon7CdGoJQVoEsr3Vj8rTUUcA9bUH-h52mLNDhtn6gDKbkZhUbf3HhOAF_tVMsQalGXyvZCMRM5sT1-n7oYsWyORB2FU-4LzGh2fTpUVRTvJG80fTBsWpvjrh4OYn5Q3eouQWtlCX42GFaueV9z_aiPU_qD_quOdszrYA9Adocaa29AcicGd95KDVEyT0S54L-rtMz8q136nIV0_zJm4eW6XmUMVBXPOSctjxXaTd7-H-InrVmSRciLyD9c99IdbxmvdEAfdLwpfJat-J1Eew_J49qzAQFsZAUPnRZdCsTcj7y9T6WP9sOV-lEmrUl4l05P0o9NwvDXFNIdD7SU1E-JJKAkKpO_H9HzBpszChB_DoIar62n4H1kCLWLoQ7N_h6bZEkLl4Yr74mUPXSrySjwcmOaLKwQJwk7cO_eawWHZdlZLFN9G-BtYeOF6M32YVIZH2Ex6p660","context":{"currentPath":"/","featureModule":"LMS"}}
+RESULT normal 1440 {"kind":"answer","answer":"You don't currently have a Season DUPR recorded for 2026 Fall Season."}
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByText('You don\'t currently have a Season DUPR recorded for the 2026 Fall Season.', { exact: true }) to be visible
+
+    at C:\lwrpc-league-system\.local-validation\lms0725-dupr-ui.cjs:24:147 {
+  log: [
+    "  - waiting for getByText('You don\\'t currently have a Season DUPR recorded for the 2026 Fall Season.', { exact: true }) to be visible"
+  ],
+  name: 'TimeoutError'
+}

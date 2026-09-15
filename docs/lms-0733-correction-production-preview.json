@@ -1,0 +1,505 @@
+{
+  "status": "STOP_FOR_OWNER_AUTHORIZATION_BEFORE_IMPORT",
+  "release": "LMS-0733",
+  "version": "0.1.555",
+  "commit": "a9a515da7287f50408fcd98b6779f3d7ad6806bb",
+  "deploymentId": "dpl_2HH3eaFjrPesqRASyy6SacX4TQUT",
+  "deploymentReady": true,
+  "tree": "8627c4a9a36598c0801872c935a645251d50732b",
+  "preview": {
+    "source": "Actual production UI: all 879 rendered rows across 18 pages",
+    "total": 879,
+    "matchedUnique": 696,
+    "activeUnique": 660,
+    "inactive": 36,
+    "notFound": 177,
+    "ambiguous": 6,
+    "missingId": 0,
+    "invalid": 0,
+    "noChange": 0,
+    "ready": 660,
+    "skipped": 219,
+    "populatedLockedSeasonRows": 0,
+    "protectedStatusRows": 0,
+    "ageReady": {
+      "over65": 238,
+      "over50": 315,
+      "missing": 107
+    },
+    "fullCsvAge": {
+      "over65": 295,
+      "over50": 394,
+      "missing": 190
+    },
+    "sourceFields": [
+      "doubles",
+      "rf",
+      "age",
+      "ageSource",
+      "ageMissing",
+      "rfMissing",
+      "doublesMissing"
+    ]
+  },
+  "confirmation": {
+    "opened": true,
+    "targetSeason": "2026 Fall Season",
+    "seasonId": "3780e56b-adeb-46be-ab1c-b754bc8aa737",
+    "ready": 660,
+    "noChange": 0,
+    "skippedInvalid": 219,
+    "seasonFieldsPreserved": true,
+    "finalConfirmed": false,
+    "cancelled": true
+  },
+  "businessBefore": [
+    {
+      "captured_at": "2026-09-10 15:23:17.824043+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "dd28041d5831bde799870753445056c9"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+        },
+        {
+          "name": "locations",
+          "rows": 137,
+          "fingerprint": "ad8768b59dc159e7a5cb779f49657635"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1012,
+          "fingerprint": "45213079f14e8e6374c4cb7876d0e6e7"
+        },
+        {
+          "name": "members",
+          "rows": 1974,
+          "fingerprint": "6ca306fb711ec8f29e27b676e8aef9fb"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 105,
+          "fingerprint": "83ec67dc7e6ca9664b35a4cf09790a1b"
+        },
+        {
+          "name": "user_roles",
+          "rows": 183,
+          "fingerprint": "2dd120cf3ac7ed71b296b4610802e87c"
+        }
+      ]
+    }
+  ],
+  "businessAfter": [
+    {
+      "captured_at": "2026-09-10 15:33:49.760023+00",
+      "tables": [
+        {
+          "name": "division_lines",
+          "rows": 204,
+          "fingerprint": "dd28041d5831bde799870753445056c9"
+        },
+        {
+          "name": "divisions",
+          "rows": 18,
+          "fingerprint": "071dd07920e42a72cdeb6d849b7b68fa"
+        },
+        {
+          "name": "league_blackout_dates",
+          "rows": 7,
+          "fingerprint": "efcbb82c875d613da4c980c7a71e53a0"
+        },
+        {
+          "name": "league_schedule_settings",
+          "rows": 9,
+          "fingerprint": "6e42deba2bb54be986388c3600ca3690"
+        },
+        {
+          "name": "leagues",
+          "rows": 3,
+          "fingerprint": "0c1e03808d32f97c5002861c66e68e72"
+        },
+        {
+          "name": "line_games",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "location_court_availability",
+          "rows": 1,
+          "fingerprint": "a0bacd2c97b132c5855dd581ff02171c"
+        },
+        {
+          "name": "locations",
+          "rows": 137,
+          "fingerprint": "ad8768b59dc159e7a5cb779f49657635"
+        },
+        {
+          "name": "match_lines",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "match_lineups",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "matches",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "member_season_ratings",
+          "rows": 1012,
+          "fingerprint": "45213079f14e8e6374c4cb7876d0e6e7"
+        },
+        {
+          "name": "members",
+          "rows": 1974,
+          "fingerprint": "bb1b7209faaa20f1dd8c9867278d0e67"
+        },
+        {
+          "name": "seasons",
+          "rows": 2,
+          "fingerprint": "567fbd9c62bb8861ffc7df9469e76074"
+        },
+        {
+          "name": "team_byes",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_members",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "team_standings",
+          "rows": 0,
+          "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "name": "teams",
+          "rows": 105,
+          "fingerprint": "83ec67dc7e6ca9664b35a4cf09790a1b"
+        },
+        {
+          "name": "user_roles",
+          "rows": 183,
+          "fingerprint": "2dd120cf3ac7ed71b296b4610802e87c"
+        }
+      ]
+    }
+  ],
+  "unchangedOperationalTables": 18,
+  "membersChangedByOwnerConfirmedConcurrentEditing": true,
+  "zeroCandidateBusinessWritesObserved": true,
+  "sourceRows": 0,
+  "batches": 0,
+  "migrationReapplied": false,
+  "migrationRecordedOnce": true,
+  "existingSecurityUnchanged": true,
+  "modelCallsThisContinuation": 0,
+  "modelCostThisContinuation": 0,
+  "identitySamples": [
+    {
+      "duprid": "125941",
+      "matches": 0,
+      "members": []
+    },
+    {
+      "duprid": "16X4Z0",
+      "matches": 1,
+      "members": [
+        {
+          "active": false,
+          "initials": "M. S.",
+          "memberId": "a702948c-8198-4666-9aa8-e9ec1c6d10fe"
+        }
+      ]
+    },
+    {
+      "duprid": "1R9LNE",
+      "matches": 2,
+      "members": [
+        {
+          "active": true,
+          "initials": "T. C.",
+          "memberId": "a6cc5885-f6da-41f2-8bdc-88596b176d96"
+        },
+        {
+          "active": true,
+          "initials": "T. A.",
+          "memberId": "43e1e363-82f1-47d7-a869-befed4c967b8"
+        }
+      ]
+    },
+    {
+      "duprid": "3L4VK3",
+      "matches": 1,
+      "members": [
+        {
+          "active": true,
+          "initials": "B. W.",
+          "memberId": "4bac0dc8-5d6c-4f6f-8b19-405876d4d85e"
+        }
+      ]
+    },
+    {
+      "duprid": "3PPODX",
+      "matches": 1,
+      "members": [
+        {
+          "active": false,
+          "initials": "C. J.",
+          "memberId": "aa43cfa7-b919-4c30-923b-5c5a9714fb67"
+        }
+      ]
+    },
+    {
+      "duprid": "3ZXM6L",
+      "matches": 2,
+      "members": [
+        {
+          "active": true,
+          "initials": "R. B.",
+          "memberId": "be07f09a-e1c3-4e78-93fc-ab629ae9885a"
+        },
+        {
+          "active": false,
+          "initials": "R. B.",
+          "memberId": "e8d096ed-64c1-400f-acac-3fc7f3d0276b"
+        }
+      ]
+    },
+    {
+      "duprid": "8D9V2L",
+      "matches": 1,
+      "members": [
+        {
+          "active": false,
+          "initials": "H. J.",
+          "memberId": "c83573ae-3a27-402c-a71b-2a9eebd21498"
+        }
+      ]
+    },
+    {
+      "duprid": "8E9WJ8",
+      "matches": 1,
+      "members": [
+        {
+          "active": true,
+          "initials": "A. C.",
+          "memberId": "9a533ccc-276e-450f-8833-0f561cff7281"
+        }
+      ]
+    },
+    {
+      "duprid": "8GGLQ8",
+      "matches": 1,
+      "members": [
+        {
+          "active": true,
+          "initials": "K. M.",
+          "memberId": "4a3f42ed-a3cb-44f9-83ba-2dd356ac7727"
+        }
+      ]
+    },
+    {
+      "duprid": "8GYXG8",
+      "matches": 0,
+      "members": []
+    },
+    {
+      "duprid": "EGL7GM",
+      "matches": 2,
+      "members": [
+        {
+          "active": true,
+          "initials": "S. H.",
+          "memberId": "193fc856-4c23-4982-b0dd-74edbf593423"
+        },
+        {
+          "active": true,
+          "initials": "S. H.",
+          "memberId": "d0f2a815-88c9-4811-b4b7-b0d1d47d4dcb"
+        }
+      ]
+    },
+    {
+      "duprid": "G7QJ5M",
+      "matches": 1,
+      "members": [
+        {
+          "active": true,
+          "initials": "S. M.",
+          "memberId": "ef8b28be-8d2b-4eed-96f7-5d9ba9425d5e"
+        }
+      ]
+    },
+    {
+      "duprid": "GGRG5Q",
+      "matches": 2,
+      "members": [
+        {
+          "active": true,
+          "initials": "P. P.",
+          "memberId": "87df2550-e06e-4ef1-bfc6-a8abad26cd48"
+        },
+        {
+          "active": false,
+          "initials": "P. P.",
+          "memberId": "90cae732-0ff5-4111-ab69-161d04c7e600"
+        }
+      ]
+    },
+    {
+      "duprid": "QP7W65",
+      "matches": 2,
+      "members": [
+        {
+          "active": true,
+          "initials": "B. R.",
+          "memberId": "6420be8c-ce13-4eb0-b1a4-817b24888e5c"
+        },
+        {
+          "active": true,
+          "initials": "B. R.",
+          "memberId": "bba725bf-1dac-4109-bd76-08d438235722"
+        }
+      ]
+    },
+    {
+      "duprid": "XJNDN5",
+      "matches": 2,
+      "members": [
+        {
+          "active": false,
+          "initials": "M. H.",
+          "memberId": "e35686b3-ac8d-4563-8a85-209473498693"
+        },
+        {
+          "active": true,
+          "initials": "M. H.",
+          "memberId": "c26e4e1e-a186-482b-a090-c3723f1b3a37"
+        }
+      ]
+    }
+  ],
+  "csvSamples": {
+    "total": 879,
+    "age": {
+      "over65": 295,
+      "over50": 394,
+      "missing": 190
+    },
+    "samples": [
+      {
+        "line": 2,
+        "duprId": "8GGLQ8",
+        "doubles": "3.237",
+        "rf": "30",
+        "ageSource": "over50",
+        "age": "3.478",
+        "emailPresentNotDisplayed": true
+      },
+      {
+        "line": 5,
+        "duprId": "8E9WJ8",
+        "doubles": "4.620",
+        "rf": "100",
+        "ageSource": "missing",
+        "age": null,
+        "emailPresentNotDisplayed": true
+      },
+      {
+        "line": 8,
+        "duprId": "3L4VK3",
+        "doubles": "4.196",
+        "rf": "100",
+        "ageSource": "over65",
+        "age": "4.744",
+        "emailPresentNotDisplayed": true
+      }
+    ]
+  },
+  "concurrentStaleness": {
+    "duprId": "G7QJ5M",
+    "previewAction": "SKIP — not found",
+    "laterCurrentMembers": 1,
+    "memberUpdatedAt": "2026-09-10 15:32:40.283",
+    "ownerConfirmedEditing": true,
+    "refreshRequiredBeforeFutureImport": true
+  },
+  "rollback": {
+    "release": "LMS-0732",
+    "deploymentId": "dpl_414rqyGtFAFrcQ6JNRTVH9Qs2cGU",
+    "ready": true,
+    "executed": false
+  }
+}

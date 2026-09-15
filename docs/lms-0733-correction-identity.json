@@ -1,0 +1,66 @@
+{
+  "release": "LMS-0733",
+  "packageVersion": "0.1.555",
+  "commit": "a9a515da7287f50408fcd98b6779f3d7ad6806bb",
+  "tree": "8627c4a9a36598c0801872c935a645251d50732b",
+  "parent": "e24d27f64953a6128383bb6393bcb383ba67f5dc",
+  "branch": "codex/lms0733-trailing-header-correction",
+  "clean": true,
+  "filesChanged": [
+    "docs/lms-0733-correction-review.md",
+    "lwrpc-admin/app/lib/seasonRatingsImport.js",
+    "lwrpc-admin/scripts/verify-season-ratings-csv-preview.mjs",
+    "lwrpc-admin/test/seasonRatingsCsvHeader.test.mjs"
+  ],
+  "runtimeDelta": [
+    "lwrpc-admin/app/lib/seasonRatingsImport.js"
+  ],
+  "deployableFiles": 323,
+  "migrationSha256": "8f532af5b44644e749696d3903785236c6fe173b3119408ca896a220f4543df4",
+  "tests": 1165,
+  "criticalTests": 69,
+  "lintErrors": 0,
+  "lintWarnings": 6,
+  "validationEvidence": {
+    "tests": {
+      "file": "lms-0733-correction-tests.txt",
+      "sha256": "1d96a926bc6bfe3e49f2116b6c35fdb37f1699197151d14db0ec1fef16ed2fa6"
+    },
+    "critical": {
+      "file": "lms-0733-correction-critical.txt",
+      "sha256": "68f00689e939642a41529b4e375195246c95c79918e4ea97668f64ca32a3b5fd"
+    },
+    "lint": {
+      "file": "lms-0733-correction-lint.txt",
+      "sha256": "5cee64f230a1a5595b64120679abb55c8b5ffc733b64644cf06d96e0f77e4dfe"
+    },
+    "types": {
+      "file": "lms-0733-correction-types.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build": {
+      "file": "lms-0733-correction-build.txt",
+      "sha256": "feccf6e88b62395be0f078749efd15f219c39cc3eda2ac27cdc0b2cf99b86462"
+    },
+    "build-local-env": {
+      "file": "lms-0733-correction-build-local-env.txt",
+      "sha256": "665b7baccbafae7db178be657f031a639e38b75fc09555f38c124b278102c0de"
+    },
+    "pdf": {
+      "file": "lms-0733-correction-pdf.txt",
+      "sha256": "3ed5f6130f8727b29b99129e6fbb046afd9115c470d5961f43d67db5d2001164"
+    },
+    "pdf-final": {
+      "file": "lms-0733-correction-pdf-final.txt",
+      "sha256": "3ed5f6130f8727b29b99129e6fbb046afd9115c470d5961f43d67db5d2001164"
+    },
+    "diff-check": {
+      "file": "lms-0733-correction-diff-check.txt",
+      "sha256": "e93a63fada63549c9429b4d611ed2f22e81143665a722e3a4b08e50342ceee4b"
+    }
+  },
+  "deployed": false,
+  "productionCsvRetried": false,
+  "productionSql": false,
+  "modelCalls": 0
+}

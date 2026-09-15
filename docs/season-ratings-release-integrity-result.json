@@ -1,0 +1,10 @@
+{
+  "before": "2026-09-11T12:32:47.740Z",
+  "after": "2026-09-11T12:46:01.001Z",
+  "tableCount": 19,
+  "changedTables": [],
+  "sourcesUnchanged": true,
+  "productionDeployment": "dpl_6tkBP82qYfhA6amAQB8zqq5ZHFfU",
+  "expectedDeployment": "dpl_6tkBP82qYfhA6amAQB8zqq5ZHFfU",
+  "readyState": "READY"
+}

@@ -1,0 +1,104 @@
+{
+  "footprint": {
+    "functions": [
+      {
+        "signature": "lms_read_private.competition(jsonb,text,jsonb)",
+        "md5": "b2372df84a3444e6867e99b47da76200",
+        "owner": "lms_view_as_reader",
+        "definer": false,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "acl": [
+          "lms_view_as_reader=X/lms_view_as_reader"
+        ]
+      },
+      {
+        "signature": "lms_read_private.people(jsonb,text,jsonb)",
+        "md5": "57d6481715e219e65a2bc0ab9125def3",
+        "owner": "lms_view_as_reader",
+        "definer": false,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "acl": [
+          "lms_view_as_reader=X/lms_view_as_reader"
+        ]
+      },
+      {
+        "signature": "lms_read_private.lock_viewer(jsonb,text,jsonb)",
+        "md5": "1289822d8a7ef617c75e3db997faf302",
+        "owner": "postgres",
+        "definer": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "acl": [
+          "postgres=X/postgres",
+          "lms_view_as_reader=X/postgres"
+        ]
+      },
+      {
+        "signature": "view_as_private.page_read(jsonb,text,jsonb)",
+        "md5": "dd863d21b369c899fd713573ef3f05db",
+        "owner": "lms_view_as_reader",
+        "definer": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "acl": [
+          "lms_view_as_reader=X/lms_view_as_reader",
+          "lms_view_as_executor=X/lms_view_as_reader"
+        ]
+      }
+    ],
+    "policies": 19,
+    "columns": 238,
+    "table_acl": 0,
+    "membership": []
+  },
+  "rlsEnabledOnPublicFixtures": true,
+  "normalMemberDirectoryUnchanged": true,
+  "mode": "clean-superuser",
+  "postgres": "17.11",
+  "membership": [],
+  "unchangedMigrationReproduces": false,
+  "correctedApply": true,
+  "replays": 2,
+  "unsafeRejected": [
+    "login",
+    "super",
+    "inherit",
+    "bypass",
+    "createdb",
+    "createrole",
+    "replication",
+    "browser_membership",
+    "outbound_membership",
+    "creator_set",
+    "creator_inherit",
+    "role_config",
+    "table_write",
+    "table_read",
+    "column_write",
+    "persistent_ddl",
+    "function_acl",
+    "function_owner",
+    "default_acl"
+  ],
+  "partialRecovery": true,
+  "compatibleExistingRoleRecovery": true,
+  "normalPoliciesUnchanged": true,
+  "publicBusinessTables": 23,
+  "publicBusinessUnchanged": true,
+  "directHelperDenied": [
+    "anon",
+    "authenticated",
+    "service_role"
+  ],
+  "postCommitDdlPrivilege": false,
+  "postCommitSetOrInherit": false,
+  "acceptedSnapshotRollback": true,
+  "maintenanceUnchanged": true,
+  "correctedPageReadAfterRollbackReapply": true
+}

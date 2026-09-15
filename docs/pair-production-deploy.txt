@@ -1,0 +1,40 @@
+
+  Set up "C:\lwrpc-league-system\.local-validation\pair-production-deploy"
+Loading teams…
+Searching for existing projects…
+  No framework detected. Default Project Settings:
+  Build Command: `npm run vercel-build` or `npm run build`
+  Development Command: None
+  Install Command: `yarn install`, `pnpm install`, `npm install`, or `bun install`
+  Output Directory: `public` if it exists, or `.`
+  Linked      terry-lwrpc/pair-production-deploy
+Deploying terry-lwrpc/pair-production-deploy
+Uploading [--------------------] (0.0B/621.1KB)
+Uploading [=====---------------] (156.8KB/621.1KB)
+Uploading [==========----------] (314.7KB/621.1KB)
+Uploading [===============-----] (473.6KB/621.1KB)
+Uploading [====================] (621.1KB/621.1KB)
+  Inspect     https://vercel.com/terry-lwrpc/pair-production-deploy/CzDZe1gmv7CL8owvrkuHHgLdPxp5
+▲ Production  https://pair-production-deploy-m4ntbcnp5-terry-lwrpc.vercel.app
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_CzDZe1gmv7CL8owvrkuHHgLdPxp5",
+    "url": "https://pair-production-deploy-m4ntbcnp5-terry-lwrpc.vercel.app",
+    "inspectorUrl": "https://vercel.com/terry-lwrpc/pair-production-deploy/CzDZe1gmv7CL8owvrkuHHgLdPxp5",
+    "readyState": "INITIALIZING",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_CzDZe1gmv7CL8owvrkuHHgLdPxp5"
+  },
+  "message": "Deployment pair-production-deploy-m4ntbcnp5-terry-lwrpc.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect pair-production-deploy-m4ntbcnp5-terry-lwrpc.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}

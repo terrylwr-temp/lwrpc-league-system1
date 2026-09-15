@@ -1,0 +1,23 @@
+{
+  "managedRoster": true,
+  "prospectivePair": true,
+  "mixedPair": true,
+  "coCaptains": true,
+  "unmanagedTeamDenied": true,
+  "contextRequired": true,
+  "playerDenied": true,
+  "viewAsDenied": true,
+  "commissionerPreserved": true,
+  "clubProUnchanged": true,
+  "minimalProjection": true,
+  "communityScope": true,
+  "revocation": true,
+  "audit": true,
+  "replay": true,
+  "transactionRollback": true,
+  "operationalRollback": true,
+  "browserDenied": true,
+  "businessDataUnchanged": true,
+  "postgres": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+  "loopbackOnly": true
+}

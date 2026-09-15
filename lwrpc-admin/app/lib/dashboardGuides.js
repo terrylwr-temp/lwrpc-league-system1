@@ -1,3 +1,4 @@
+import {isViewAsMode,getViewAsPageState,viewAsRequest,viewAsBlobUrl} from "./viewAsPageState.js";
 import { getRequestAuthorizationHeaders } from "./auth";
 
 export const GUIDE_DOCUMENT_TYPES = [
@@ -74,6 +75,7 @@ export function normalizeGuideDocument(document) {
 }
 
 export async function loadGuideDocument(templateKey) {
+  if(isViewAsMode())return parseGuideDocument(getViewAsPageState().tables.notification_templates?.find(r=>r.template_key===templateKey));
   const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`, {
     headers: await getRequestAuthorizationHeaders(),
   });
@@ -108,6 +110,7 @@ export async function openGuideDocument(supabase, guideType) {
 }
 
 export async function guidePdfDocument(supabase, guideType) {
+  if(isViewAsMode()){const response=await viewAsRequest({operation:"guide",key:guideType.key});return {title:guideType.label,leagueName:"Dashboard Guide",teamName:guideType.buttonLabel,url:viewAsBlobUrl(await response.blob())};}
   const guideDocument = await loadGuideDocument(guideType.key);
 
   if (!guideDocument.path) {

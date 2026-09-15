@@ -1,0 +1,155 @@
+[
+  {
+    "id": "1d373f9f-5f54-4429-81ec-ac8d6da346cb",
+    "completed_at": "2026-09-12 12:07:45.312+00",
+    "final_kind": "answer",
+    "source_family": "lwr",
+    "selected_evidence_count": 1,
+    "policy": {
+      "scope": [],
+      "intent": "community_policy",
+      "object": "community_participation",
+      "origin": "player_interface",
+      "zeroStage": null,
+      "candidates": [
+        {
+          "reason": "SELECTED",
+          "chunkId": "35758e12-119d-45c6-87ad-15b722816a8d",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "2dabff48-03e0-45e9-ab75-2683bc61d170",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "7d0f3cd5-7023-46e6-9642-501428742086",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "4aa9d800-44ef-4f2d-89c1-7991524a0684",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "427c8eb8-2a18-4f22-826f-c03dc578ab3a",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "b0305ae6-16ec-4d84-9dad-5a461518237f",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "d195c75e-9958-4c61-b8e2-936b9761ddce",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "a4e948a6-a521-4cc1-b8c4-c27bab1c2baf",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        }
+      ],
+      "completion": "complete",
+      "finalCount": 1,
+      "validation": "VALIDATED",
+      "completionMs": 109,
+      "applicability": "SELECTED",
+      "correlationId": "1d373f9f-5f54-4429-81ec-ac8d6da346cb",
+      "selectedCount": 1,
+      "candidateCount": 32,
+      "completionCount": 71,
+      "completionStage": null,
+      "completionReason": null,
+      "referencesTruncated": true
+    },
+    "model": "gpt-5.5-2026-04-23",
+    "input_tokens": 1745,
+    "output_tokens": 71
+  },
+  {
+    "id": "02336ed9-4ecd-4e91-8c17-6443105cdb93",
+    "completed_at": "2026-09-12 12:08:04.342+00",
+    "final_kind": "answer",
+    "source_family": "lwr",
+    "selected_evidence_count": 1,
+    "policy": {
+      "scope": [],
+      "intent": "community_policy",
+      "object": "community_participation",
+      "origin": "player_interface",
+      "zeroStage": null,
+      "candidates": [
+        {
+          "reason": "SELECTED",
+          "chunkId": "35758e12-119d-45c6-87ad-15b722816a8d",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "2dabff48-03e0-45e9-ab75-2683bc61d170",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "7d0f3cd5-7023-46e6-9642-501428742086",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "4aa9d800-44ef-4f2d-89c1-7991524a0684",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "427c8eb8-2a18-4f22-826f-c03dc578ab3a",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "b0305ae6-16ec-4d84-9dad-5a461518237f",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "d195c75e-9958-4c61-b8e2-936b9761ddce",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        },
+        {
+          "reason": "NOT_SELECTED",
+          "chunkId": "a4e948a6-a521-4cc1-b8c4-c27bab1c2baf",
+          "versionId": "478a87bb-1b05-4da9-ac09-7ddecec64f69"
+        }
+      ],
+      "completion": "complete",
+      "finalCount": 1,
+      "validation": "VALIDATED",
+      "completionMs": 73,
+      "applicability": "SELECTED",
+      "correlationId": "02336ed9-4ecd-4e91-8c17-6443105cdb93",
+      "selectedCount": 1,
+      "candidateCount": 32,
+      "completionCount": 71,
+      "completionStage": null,
+      "completionReason": null,
+      "referencesTruncated": true
+    },
+    "model": "gpt-5.5-2026-04-23",
+    "input_tokens": 1745,
+    "output_tokens": 62
+  },
+  {
+    "id": "e27381ac-64a4-4771-8616-25f7aef569eb",
+    "completed_at": "2026-09-12 12:08:35.818+00",
+    "final_kind": "answer",
+    "source_family": "LIVE_LMS_DATA",
+    "selected_evidence_count": 0,
+    "policy": null,
+    "model": null,
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+]

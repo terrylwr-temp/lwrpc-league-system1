@@ -47,3 +47,7 @@
   .actions { flex-direction: row; flex: auto; }
   .actions button { flex: 1; }
 }
+
+/* The isolated reader reserves its persistent status banner. */
+:global(html[data-lms-view-as="true"]) .overlay { bottom: var(--view-as-banner-height,0px); }
+@media(max-width:639px){:global(html[data-lms-view-as="true"]) .overlay {height:calc(var(--ask-height,100dvh) - var(--view-as-banner-height,0px));}}

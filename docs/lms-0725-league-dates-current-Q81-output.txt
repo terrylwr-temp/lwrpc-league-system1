@@ -1,0 +1,2 @@
+{"id":"Q81","status":"generated","calls":1,"answer":"The Weekday DUPR League championship days are Dec. 9/10, 2026, for the 2026 Fall League.","materialPass":true}
+{"calls":1,"statuses":{"generated":1}}

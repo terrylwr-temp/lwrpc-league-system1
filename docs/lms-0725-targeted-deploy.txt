@@ -1,0 +1,179 @@
+Retrieving project…
+Deploying terry-lwrpc/lwrpc-admin
+Uploading [--------------------] (0.0B/2.8MB)
+Uploading [=====---------------] (715.5KB/2.8MB)
+Uploading [==========----------] (1.4MB/2.8MB)
+Uploading [===============-----] (2.1MB/2.8MB)
+Uploading [====================] (2.8MB/2.8MB)
+  Inspect     https://vercel.com/terry-lwrpc/lwrpc-admin/9S7a2B1hMEMZ1VzF1uzAPWfVo9hm
+▲ Production  https://lwrpc-admin-6ehxay69w-terry-lwrpc.vercel.app
+Building…
+2026-09-08T19:01:59.428Z  Running build in Washington, D.C., USA (East) – iad1
+2026-09-08T19:01:59.428Z  Build machine configuration: 2 cores, 8 GB
+2026-09-08T19:01:59.461Z  Retrieving list of deployment files...
+2026-09-08T19:01:59.882Z  Downloading 2209 deployment files...
+2026-09-08T19:02:05.301Z  Restored build cache from previous deployment (4m9BT41z6J2fGpthJpmHYHo2VSyy)
+2026-09-08T19:02:05.603Z  Running "vercel build"
+2026-09-08T19:02:05.622Z  Vercel CLI 59.11.7
+2026-09-08T19:02:05.895Z  Installing dependencies...
+2026-09-08T19:02:08.069Z  
+2026-09-08T19:02:08.070Z  up to date in 2s
+2026-09-08T19:02:08.071Z  
+2026-09-08T19:02:08.071Z  152 packages are looking for funding
+2026-09-08T19:02:08.071Z  run `npm fund` for details
+2026-09-08T19:02:08.071Z  npm warn allow-scripts 2 packages have install scripts not yet covered by allowScripts:
+2026-09-08T19:02:08.071Z  npm warn allow-scripts   sharp@0.34.5 (install: node install/check.js || npm run build)
+2026-09-08T19:02:08.071Z  npm warn allow-scripts   unrs-resolver@1.11.1 (postinstall: napi-postinstall unrs-resolver 1.11.1 check)
+2026-09-08T19:02:08.073Z  npm warn allow-scripts
+2026-09-08T19:02:08.073Z  npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+2026-09-08T19:02:08.101Z  Detected Next.js version: 16.2.4
+2026-09-08T19:02:08.106Z  Running "npm run build"
+2026-09-08T19:02:08.216Z  
+2026-09-08T19:02:08.216Z  > lwrpc-admin@0.1.547 build
+2026-09-08T19:02:08.216Z  > next build
+2026-09-08T19:02:08.217Z  
+2026-09-08T19:02:08.973Z  Applying modifyConfig from Vercel
+2026-09-08T19:02:08.993Z  ▲ Next.js 16.2.4 (Turbopack)
+2026-09-08T19:02:08.995Z  
+2026-09-08T19:02:09.041Z  Creating an optimized production build ...
+2026-09-08T19:02:35.293Z  ✓ Compiled successfully in 25.9s
+2026-09-08T19:02:35.297Z  Running TypeScript ...
+2026-09-08T19:02:39.456Z  Finished TypeScript in 4.2s ...
+2026-09-08T19:02:39.462Z  Collecting page data using 1 worker ...
+2026-09-08T19:02:40.531Z  Generating static pages using 1 worker (0/80) ...
+2026-09-08T19:02:40.747Z  Generating static pages using 1 worker (20/80)
+2026-09-08T19:02:40.756Z  Generating static pages using 1 worker (40/80)
+2026-09-08T19:02:40.881Z  Generating static pages using 1 worker (60/80)
+2026-09-08T19:02:41.082Z  ✓ Generating static pages using 1 worker (80/80) in 551ms
+2026-09-08T19:02:41.099Z  Finalizing page optimization ...
+2026-09-08T19:02:41.269Z  Running onBuildComplete from Vercel
+2026-09-08T19:02:41.499Z  
+2026-09-08T19:02:41.502Z  Route (app)
+2026-09-08T19:02:41.504Z  ┌ ƒ /
+2026-09-08T19:02:41.504Z  ├ ƒ /_not-found
+2026-09-08T19:02:41.504Z  ├ ƒ /ai-assistant
+2026-09-08T19:02:41.504Z  ├ ƒ /ai-assistant/console
+2026-09-08T19:02:41.504Z  ├ ƒ /ai-assistant/review
+2026-09-08T19:02:41.504Z  ├ ƒ /ai-insights
+2026-09-08T19:02:41.505Z  ├ ƒ /api/account-identity
+2026-09-08T19:02:41.505Z  ├ ƒ /api/admin/delete-member
+2026-09-08T19:02:41.505Z  ├ ƒ /api/admin/member-directory
+2026-09-08T19:02:41.505Z  ├ ƒ /api/admin/member-last-login
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-assistant/answer
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-assistant/approved-answers
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-assistant/capture-health
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-assistant/documents
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-assistant/live-review
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-assistant/retrieval
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-assistant/review
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ai-insights
+2026-09-08T19:02:41.505Z  ├ ƒ /api/app-notifications/public-key
+2026-09-08T19:02:41.505Z  ├ ƒ /api/app-notifications/subscribe
+2026-09-08T19:02:41.505Z  ├ ƒ /api/approved-answer-viewer
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ask-lwr
+2026-09-08T19:02:41.505Z  ├ ƒ /api/ask-lwr/feedback
+2026-09-08T19:02:41.505Z  ├ ƒ /api/brevo-diagnostics
+2026-09-08T19:02:41.505Z  ├ ƒ /api/league-communications
+2026-09-08T19:02:41.505Z  ├ ƒ /api/master-reset
+2026-09-08T19:02:41.505Z  ├ ƒ /api/match-lineups
+2026-09-08T19:02:41.505Z  ├ ƒ /api/match-setup-reminders
+2026-09-08T19:02:41.505Z  ├ ƒ /api/member-password-reset-check
+2026-09-08T19:02:41.505Z  ├ ƒ /api/notification-template-history
+2026-09-08T19:02:41.505Z  ├ ƒ /api/notification-templates
+2026-09-08T19:02:41.505Z  ├ ƒ /api/notifications
+2026-09-08T19:02:41.506Z  ├ ƒ /api/official-document-viewer
+2026-09-08T19:02:41.506Z  ├ ƒ /api/official-document-viewer/pdf
+2026-09-08T19:02:41.506Z  ├ ƒ /api/pbcc/reminders
+2026-09-08T19:02:41.506Z  ├ ƒ /api/round-robin/action
+2026-09-08T19:02:41.524Z  ├ ƒ /api/round-robin/admin
+2026-09-08T19:02:41.525Z  ├ ƒ /api/round-robin/player
+2026-09-08T19:02:41.525Z  ├ ƒ /api/score-notification
+2026-09-08T19:02:41.525Z  ├ ƒ /api/season-reset
+2026-09-08T19:02:41.525Z  ├ ƒ /api/season-rollover
+2026-09-08T19:02:41.525Z  ├ ƒ /api/system-settings
+2026-09-08T19:02:41.525Z  ├ ƒ /api/teams/delete
+2026-09-08T19:02:41.525Z  ├ ƒ /api/tournaments/action
+2026-09-08T19:02:41.525Z  ├ ƒ /api/tournaments/admin
+2026-09-08T19:02:41.525Z  ├ ƒ /api/tournaments/sms
+2026-09-08T19:02:41.525Z  ├ ƒ /api/user-last-logins
+2026-09-08T19:02:41.525Z  ├ ƒ /api/view-as/bootstrap
+2026-09-08T19:02:41.525Z  ├ ƒ /api/view-as/exchange
+2026-09-08T19:02:41.526Z  ├ ƒ /api/view-as/read
+2026-09-08T19:02:41.526Z  ├ ƒ /api/view-as/start
+2026-09-08T19:02:41.526Z  ├ ƒ /approved-answer/[citation]
+2026-09-08T19:02:41.526Z  ├ ƒ /ask-lwr
+2026-09-08T19:02:41.526Z  ├ ƒ /captain-dashboard
+2026-09-08T19:02:41.526Z  ├ ƒ /design-preview
+2026-09-08T19:02:41.526Z  ├ ƒ /design-preview/admin
+2026-09-08T19:02:41.526Z  ├ ƒ /design-preview/captain
+2026-09-08T19:02:41.526Z  ├ ƒ /divisions
+2026-09-08T19:02:41.526Z  ├ ƒ /divisions/[id]
+2026-09-08T19:02:41.526Z  ├ ƒ /email-options
+2026-09-08T19:02:41.526Z  ├ ƒ /help/[role]
+2026-09-08T19:02:41.526Z  ├ ƒ /league-communications
+2026-09-08T19:02:41.526Z  ├ ƒ /leagues
+2026-09-08T19:02:41.526Z  ├ ƒ /live-match/[id]
+2026-09-08T19:02:41.526Z  ├ ƒ /locations
+2026-09-08T19:02:41.526Z  ├ ƒ /login
+2026-09-08T19:02:41.526Z  ├ ƒ /matches
+2026-09-08T19:02:41.526Z  ├ ƒ /matches/[id]
+2026-09-08T19:02:41.526Z  ├ ƒ /member-import
+2026-09-08T19:02:41.526Z  ├ ƒ /members
+2026-09-08T19:02:41.526Z  ├ ƒ /members/[id]
+2026-09-08T19:02:41.526Z  ├ ƒ /official-document/[citation]
+2026-09-08T19:02:41.526Z  ├ ƒ /player-dashboard
+2026-09-08T19:02:41.526Z  ├ ƒ /print
+2026-09-08T19:02:41.526Z  ├ ƒ /ratings
+2026-09-08T19:02:41.526Z  ├ ƒ /reset-password
+2026-09-08T19:02:41.527Z  ├ ƒ /round-robin
+2026-09-08T19:02:41.527Z  ├ ƒ /round-robin/[id]
+2026-09-08T19:02:41.527Z  ├ ƒ /round-robin/[id]/admin
+2026-09-08T19:02:41.527Z  ├ ƒ /round-robin/[id]/player
+2026-09-08T19:02:41.527Z  ├ ƒ /schedule-editor
+2026-09-08T19:02:41.533Z  ├ ƒ /scheduling
+2026-09-08T19:02:41.533Z  ├ ƒ /score-entry/[id]
+2026-09-08T19:02:41.533Z  ├ ƒ /score-sheets
+2026-09-08T19:02:41.533Z  ├ ƒ /scoring
+2026-09-08T19:02:41.533Z  ├ ƒ /seasons
+2026-09-08T19:02:41.534Z  ├ ƒ /standings
+2026-09-08T19:02:41.534Z  ├ ƒ /system-setup
+2026-09-08T19:02:41.534Z  ├ ƒ /teams
+2026-09-08T19:02:41.534Z  ├ ƒ /teams/[id]
+2026-09-08T19:02:41.534Z  ├ ƒ /tournaments
+2026-09-08T19:02:41.534Z  ├ ƒ /tournaments/[id]
+2026-09-08T19:02:41.534Z  ├ ƒ /tournaments/[id]/admin
+2026-09-08T19:02:41.534Z  ├ ƒ /tournaments/[id]/display
+2026-09-08T19:02:41.534Z  ├ ƒ /tournaments/[id]/player
+2026-09-08T19:02:41.534Z  ├ ƒ /tournaments/[id]/standings
+2026-09-08T19:02:41.534Z  └ ƒ /view-as
+2026-09-08T19:02:41.534Z  
+2026-09-08T19:02:41.534Z  
+2026-09-08T19:02:41.534Z  ƒ Proxy (Middleware)
+2026-09-08T19:02:41.534Z  
+2026-09-08T19:02:41.535Z  ƒ  (Dynamic)  server-rendered on demand
+2026-09-08T19:02:41.535Z  
+2026-09-08T19:02:42.001Z  Build Completed in /vercel/output [36s]
+2026-09-08T19:02:42.023Z  Deploying outputs...
+▲ Aliased     https://lwrpc-admin.vercel.app
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_9S7a2B1hMEMZ1VzF1uzAPWfVo9hm",
+    "url": "https://lwrpc-admin-6ehxay69w-terry-lwrpc.vercel.app",
+    "inspectorUrl": "https://vercel.com/terry-lwrpc/lwrpc-admin/9S7a2B1hMEMZ1VzF1uzAPWfVo9hm",
+    "readyState": "READY",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_9S7a2B1hMEMZ1VzF1uzAPWfVo9hm"
+  },
+  "message": "Deployment lwrpc-admin-6ehxay69w-terry-lwrpc.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect lwrpc-admin-6ehxay69w-terry-lwrpc.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}

@@ -19,7 +19,7 @@ test("centralizes page-aware suggestions without fabricating LMS scope IDs", () 
   assert.equal(assistantPageContext("/player-dashboard?view=standings", "player").featureModule, "Standings");
   assert.equal(assistantPageContext("/members", "commissioner").featureModule, "Member Administration");
   assert.equal(assistantPageContext("/player-dashboard", "player").featureModule, "LMS");
-  assert.match(ASK_LWR_INITIAL_COPY, /complete USA Pickleball Rulebook/);
+  assert.match(ASK_LWR_INITIAL_COPY, /your authorized LMS information/);
 });
 
 test("player response is deliberately limited to plain answer and trusted citations", () => {
@@ -28,7 +28,7 @@ test("player response is deliberately limited to plain answer and trusted citati
     conflict: { requiresClarification: false }, model: "gpt-5.5", metrics: { totalTokens: 99 },
     sources: [{ documentId: TEST_DOCUMENT_ID, documentVersionId: TEST_VERSION_ID, chunkId: TEST_CHUNK_ID, documentTitle: "League Rules", pageNumber: 5, ruleNumber: "5.7", citation: "League Rules — Rule 5.7 — Page 5", officialDocumentUrl: "https://signed.example/rules#page=5" }],
   }, TEST_USER_ID);
-  assert.deepEqual(Object.keys(result).sort(), ["answer", "conflict", "conversationReceipt", "evidenceSufficient", "feedbackReceipt", "kind", "sources"]);
+  assert.deepEqual(Object.keys(result).sort(), ["answer", "conflict", "conversationReceipt", "evidenceSufficient", "feedbackReceipt", "kind", "provenance", "sources"]);
   assert.equal(result.sources[0].documentId, undefined); assert.equal(result.sources[0].chunkId, undefined);
   assert.match(result.sources[0].officialDocumentUrl, /^\/official-document\//);
   assert.doesNotMatch(result.sources[0].officialDocumentUrl, /signed\.example|secret-id|chunk-id/);

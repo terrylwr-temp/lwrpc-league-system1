@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const execute=process.argv.includes('--execute');
+if(execute)process.loadEnvFile('.env.local');else process.env.OPENAI_API_KEY='offline-preflight';
+const {generateOfficialAnswer,resolveOfficialSources}=await import('../app/lib/aiAnswerGeneration.js');
+const candidates=JSON.parse(fs.readFileSync(new URL('../test/fixtures/lms0727-community-source.json',import.meta.url))).map(c=>({...c,structuralCompletion:true}));
+const questions=['Can I play on a team in a different community?','Can I play in a different community?','Are cross-community teams allowed?',"My community doesn't have a DUPR7 team. Can I play for another community in DUPR7?",'My community has a team in my division but the roster is full. Can I play for another community?','My community already has a team in my division and has room. Can I play for another community?','My community has a DUPR7 team. Can I play for another community in DUPR8?','My community has a Saturday DUPR7 team with room. Can I play for another community in Weekday DUPR7?'];
+function db(){return {from(table){assert.ok(['ai_document_versions','ai_document_chunks'].includes(table));let rows=table==='ai_document_versions'?candidates.map(c=>({id:c.documentVersionId,document_id:c.documentId,storage_bucket:'offline',storage_path:'rules.pdf',processing_status:'ready',document:{id:c.documentId,title:c.documentTitle,document_type:c.documentType,status:'active',active_version_id:c.documentVersionId}})):candidates.map(c=>({id:c.chunkId,document_version_id:c.documentVersionId,rule_number:c.ruleNumber,heading:c.heading,page_number:c.pageNumber,content:c.content,is_searchable:true}));return {select(){return this;},in(k,v){rows=rows.filter(r=>v.includes(r[k]));return this;},then(resolve,reject){return Promise.resolve({data:rows}).then(resolve,reject);}};},storage:{from(){return {async createSignedUrl(){return {data:{signedUrl:'https://example.invalid/fixture.pdf'}};}};}}};}
+const out={category:'LOCAL_BENCHMARK',mode:execute?'provider':'offline',method:'Verified active official snapshot; actual selection and citation resolver; fixture DB/signing. No production HTTP or ranking replay.',calls:0,usage:[],cases:[]};
+const scopeOnly=process.argv.includes('--scope-only');
+const path=new URL(`../../docs/lms-0727-${scopeOnly?'scope-':''}${execute?'model-results':'model-preflight'}.json`,import.meta.url),persist=()=>fs.writeFileSync(path,JSON.stringify(out,null,2));
+for(const question of (scopeOnly?questions.slice(6):questions)){
+ const r={request:{question,askAbout:'all'},candidates:[],suppliedEvidence:[],authorityReviewCandidates:[],policyEvidence:{status:'complete',candidates:structuredClone(candidates)},evidence:{sufficient:false,threshold:.35},metrics:{}};
+ const answer=await generateOfficialAnswer({retrieval:r,supabase:db(),resolveSources:resolveOfficialSources,fetchImpl:async(url,init)=>{
+  assert.equal(url,'https://api.openai.com/v1/responses');const payload=JSON.parse(init.body);assert.equal(payload.store,false);assert.equal(payload.model,'gpt-5.5');assert.doesNotMatch(payload.input[0].content,/primary address|3\.4\.|example\.invalid|memberId|Bearer/);assert.equal(r.policyDiagnostic.selectedCount,1);assert.equal(r.policyDiagnostic.validation,'VALIDATED');
+  if(!execute)return {ok:true,json:async()=>({status:'completed',model:'offline',output_text:JSON.stringify({answer:'Offline preflight.',conflict:false})})};
+  out.calls++;persist();const response=await fetch(url,{...init,signal:AbortSignal.timeout(90000)});const raw=await response.clone().json();out.usage.push({requestedModel:payload.model,returnedModel:raw.model,usage:raw.usage});persist();return response;
+ }});
+ assert.equal(answer.evidenceSufficient,true);assert.equal(answer.sources[0].ruleNumber,'3.5');assert.equal(answer.sources[0].pageNumber,2);out.cases.push({question,answer:answer.answer,metrics:answer.metrics,sources:answer.sources.map(s=>({ruleNumber:s.ruleNumber,pageNumber:s.pageNumber,documentVersionId:s.documentVersionId}))});persist();console.log(`${out.cases.length}/${questions.length} ${execute?'generated':'preflight'}`);
+}

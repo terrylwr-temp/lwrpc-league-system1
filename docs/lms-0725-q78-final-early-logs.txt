@@ -1,0 +1,166 @@
+## Runtime Logs
+
+**Project:** prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3
+**Deployment:** dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM
+**Time range:** 2026-09-08T20:03:30.000Z → 2026-09-08T20:05:40.000Z
+
+### 20:05:05 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T20:05:09.088Z',
+      operation: 'capture_ai_quality',
+      correlation_id: 'c559d683-a6ba-4451-a76e-a2fe9e6a14a2',
+      origin: 'player_interface',
+      result_shape: 'answer',
+      evidence_count: 1,
+      reason: 'RECORDED',
+      sqlstate: null,
+      attempt: 1,
+      duration_ms: 46,
+      commit_status: 'FOUND',
+      payload_bytes: 2382,
+      metadata_count: 10,
+      reference_count: 8,
+      timings: {
+        build_ms: 0,
+        invocation_start_ms: 0,
+        rpc_ms: 46,
+        acknowledgement_ms: 46,
+        deadline_ms: null,
+        reconciliation_ms: 0,
+        retry_ms: 0,
+        total_ms: 46
+      }
+    }
+
+### 20:05:01 POST /api/ask-lwr 200 [info/serverless]
+dep=dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T20:05:04.462Z',
+      operation: 'capture_ai_quality',
+      correlation_id: '7abc290c-d0b4-4038-9417-25810ea3567d',
+      origin: 'player_interface',
+      result_shape: 'answer',
+      evidence_count: 1,
+      reason: 'RECORDED',
+      sqlstate: null,
+      attempt: 1,
+      duration_ms: 75,
+      commit_status: 'FOUND',
+      payload_bytes: 2341,
+      metadata_count: 10,
+      reference_count: 8,
+      timings: {
+        build_ms: 0,
+        invocation_start_ms: 0,
+        rpc_ms: 75,
+        acknowledgement_ms: 75,
+        deadline_ms: null,
+        reconciliation_ms: 0,
+        retry_ms: 0,
+        total_ms: 75
+      }
+    }
+
+### 20:04:52 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T20:04:56.052Z',
+      operation: 'capture_ai_quality',
+      correlation_id: '502ed018-1a69-4b3f-8eff-96796ff51b1d',
+      origin: 'player_interface',
+      result_shape: 'answer',
+      evidence_count: 1,
+      reason: 'RECORDED',
+      sqlstate: null,
+      attempt: 1,
+      duration_ms: 37,
+      commit_status: 'FOUND',
+      payload_bytes: 2340,
+      metadata_count: 10,
+      reference_count: 8,
+      timings: {
+        build_ms: 1,
+        invocation_start_ms: 1,
+        rpc_ms: 36,
+        acknowledgement_ms: 37,
+        deadline_ms: null,
+        reconciliation_ms: 0,
+        retry_ms: 0,
+        total_ms: 37
+      }
+    }
+
+### 20:04:34 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T20:04:37.879Z',
+      operation: 'capture_ai_quality',
+      correlation_id: '14c43f8a-4dc4-4eb0-8b7a-6eff1d500331',
+      origin: 'player_interface',
+      result_shape: 'answer',
+      evidence_count: 1,
+      reason: 'RECORDED',
+      sqlstate: null,
+      attempt: 1,
+      duration_ms: 55,
+      commit_status: 'FOUND',
+      payload_bytes: 2343,
+      metadata_count: 10,
+      reference_count: 8,
+      timings: {
+        build_ms: 0,
+        invocation_start_ms: 0,
+        rpc_ms: 55,
+        acknowledgement_ms: 55,
+        deadline_ms: null,
+        reconciliation_ms: 0,
+        retry_ms: 0,
+        total_ms: 55
+      }
+    }
+
+### 20:03:44 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_J1ojp2e3tgqTgx2Fm3BVLuwtHrrM cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T20:03:49.001Z',
+      operation: 'capture_ai_quality',
+      correlation_id: '546df09c-5f42-42d6-ba8d-ecdb643d3ad6',
+      origin: 'player_interface',
+      result_shape: 'answer',
+      evidence_count: 1,
+      reason: 'RECORDED',
+      sqlstate: null,
+      attempt: 1,
+      duration_ms: 57,
+      commit_status: 'FOUND',
+      payload_bytes: 2342,
+      metadata_count: 10,
+      reference_count: 8,
+      timings: {
+        build_ms: 0,
+        invocation_start_ms: 0,
+        rpc_ms: 57,
+        acknowledgement_ms: 57,
+        deadline_ms: null,
+        reconciliation_ms: 0,
+        retry_ms: 0,
+        total_ms: 57
+      }
+    }
+

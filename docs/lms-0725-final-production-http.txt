@@ -1,0 +1,230 @@
+## Runtime Logs
+
+**Project:** prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3
+**Deployment:** dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL
+**Time range:** 2026-09-08T17:09:36.000Z - 2026-09-08T17:21:32.494Z
+
+### 17:19:19 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:19:19.612Z'
+    }
+
+### 17:18:59 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:19:04.205Z'
+    }
+
+### 17:18:09 POST /api/ask-lwr 200 [info/serverless]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:18:13.214Z'
+    }
+
+### 17:17:58 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:18:00.352Z'
+    }
+
+### 17:17:15 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:17:19.384Z'
+    }
+
+### 17:17:00 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:17:03.654Z'
+    }
+
+### 17:16:35 POST /api/ask-lwr 200 [info/serverless]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:16:43.111Z'
+    }
+
+### 17:16:04 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:16:08.029Z'
+    }
+
+### 17:15:52 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:15:54.972Z'
+    }
+
+### 17:15:28 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:15:30.756Z'
+    }
+
+### 17:15:02 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:15:05.891Z'
+    }
+
+### 17:15:00 POST /api/ask-lwr/feedback 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:15:02.010Z'
+    }
+
+### 17:14:35 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:14:40.062Z'
+    }
+
+### 17:14:12 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:14:16.216Z'
+    }
+
+### 17:13:52 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:13:57.187Z'
+    }
+
+### 17:13:31 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:13:35.510Z'
+    }
+
+### 17:13:08 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:13:11.921Z'
+    }
+
+### 17:12:52 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:12:56.322Z'
+    }
+
+### 17:12:38 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:12:41.478Z'
+    }
+
+### 17:12:04 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:12:06.660Z'
+    }
+
+### 17:11:34 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:11:38.317Z'
+    }
+
+### 17:11:09 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:11:12.560Z'
+    }
+
+### 17:10:48 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:10:52.640Z'
+    }
+
+### 17:10:19 POST /api/ask-lwr/feedback 200 [info/serverless]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:10:20.389Z'
+    }
+
+### 17:10:01 POST /api/ask-lwr 200 [info/serverless-middleware]
+dep=dpl_6ajhMvN7dTuRaZXJaDP3RrPM92dL cache=MISS
+    ai_quality_capture {
+      event: 'capture_succeeded',
+      stage: 'persistence',
+      assistant_version: 'LMS-0725',
+      time: '2026-09-08T17:10:07.849Z'
+    }

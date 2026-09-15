@@ -1,0 +1,49 @@
+{
+  "category": "LOCAL_BENCHMARK",
+  "mode": "offline",
+  "method": "Verified active official snapshot; actual selection and citation resolver; fixture DB/signing. No production HTTP or ranking replay.",
+  "calls": 0,
+  "usage": [],
+  "cases": [
+    {
+      "question": "My community has a DUPR7 team. Can I play for another community in DUPR8?",
+      "answer": "Offline preflight.",
+      "metrics": {
+        "generationMs": 2,
+        "sourceResolutionMs": 3,
+        "totalMs": 15,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "estimatedGenerationCostUsd": null
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    },
+    {
+      "question": "My community has a Saturday DUPR7 team with room. Can I play for another community in Weekday DUPR7?",
+      "answer": "Offline preflight.",
+      "metrics": {
+        "generationMs": 1,
+        "sourceResolutionMs": 1,
+        "totalMs": 4,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "estimatedGenerationCostUsd": null
+      },
+      "sources": [
+        {
+          "ruleNumber": "3.5",
+          "pageNumber": 2,
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+(node:20068) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ A/B: empty trailing header and ordinary ten-column export preserve every field (3.4672ms)
+✔ C named extra header remains invalid (1.4278ms)
+✔ D short data row remains invalid (0.3514ms)
+✔ E populated extra data field remains invalid (0.2852ms)
+✔ F unnamed interior header remains invalid (0.3082ms)
+✔ punctuation-only named suffix is not padding remains invalid (0.2267ms)
+✔ duplicate normalized header remains invalid (0.2245ms)
+✔ trailing header padding does not allow extra populated data remains invalid (0.2368ms)
+✔ G/H: quotes, commas, escaped quotes, BOM and LF/CRLF retain positional empty cells (1.1968ms)
+✔ a trailing comma is a real empty data field, never stripped to repair width (0.9752ms)
+✔ 879-row export-shaped fixture reaches the complete preview service without writes (59.8618ms)
+(node:13376) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ distinct numeric fields and reordered headers map only named Doubles, RF and age paths (2.0013ms)
+✔ valid over_65 takes precedence over different over_50 and careerHigh (0.2521ms)
+✔ absent or invalid over_65 uses valid over_50: undefined (0.1655ms)
+✔ absent or invalid over_65 uses valid over_50: null (0.116ms)
+✔ absent or invalid over_65 uses valid over_50: "" (0.1698ms)
+✔ absent or invalid over_65 uses valid over_50: "NR" (0.1709ms)
+✔ absent or invalid over_65 uses valid over_50: "bad" (0.128ms)
+✔ absent or invalid over_65 uses valid over_50: "-1" (0.1376ms)
+✔ absent or invalid over_65 uses valid over_50: "8.1" (0.2002ms)
+✔ absent or invalid over_65 uses valid over_50: {} (0.2982ms)
+✔ absent or invalid over_65 uses valid over_50: [] (0.2839ms)
+✔ absent or invalid over_65 uses valid over_50: [4.487] (0.2034ms)
+✔ no valid age remains blank; normal doubles and careerHigh never substitute: {} (0.5982ms)
+✔ no valid age remains blank; normal doubles and careerHigh never substitute: {"over_65":"NR","over_50":"bad"} (0.2719ms)
+✔ current RF header wins over legacy alias, including invalid or conflicting alias (0.275ms)
+✔ legacy RF alias is used only when current RF header is absent (0.357ms)
+✔ present current RF header with empty row never falls back to legacy or singles (0.3177ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: bad (1.005ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: 87.5 (0.2829ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: 101 (0.1693ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: -1 (0.1151ms)
+✔ real preview transaction truncates distinct named values and exposes source mapping without writes (3880.9086ms)
+(node:21028) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 879-row scrubbed actual export reconciles source fields and recorded identity categories (76.9122ms)
+✔ DUPR only, normalized exact match, missing/unmatched and all duplicate rows rejected (1.5517ms)
+✔ missing age preserves existing source age without touching locked inputs; unchanged repeat is no-op (2.3885ms)
+✔ invalid values do not become ratings: {"doubles":"3abc"} (2.3434ms)
+✔ invalid values do not become ratings: {"doubles":"-3"} (0.6449ms)
+✔ invalid values do not become ratings: {"doubles":"Infinity"} (2.4303ms)
+✔ invalid values do not become ratings: {"doubles":"8.1"} (0.3318ms)
+✔ invalid values do not become ratings: {"doubles":"3.2345"} (0.3427ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29%"} (0.6035ms)
+✔ invalid values do not become ratings: {"doublesReliability":"-1"} (0.6931ms)
+✔ invalid values do not become ratings: {"doublesReliability":"101"} (0.3685ms)
+✔ invalid values do not become ratings: {"doublesReliability":"1e1"} (0.3412ms)
+✔ invalid values do not become ratings: {"metrics":"{broken"} (0.368ms)
+✔ invalid values do not become ratings: {"metrics":"[]"} (0.3443ms)
+✔ full RF header is primary; short alias works only when primary absent (0.3541ms)
+✔ strict CSV multiline, escaping, duplicate headers, width and row bound (2.2119ms)
+✔ signed exact preview rejects tampering, wrong session, expiration and wrong purpose (2.8955ms)
+✔ preview calls only read RPC; commit requires explicit confirmation and same season (8.3564ms)
+✔ current-policy RF 28 (1.0664ms)
+✔ current-policy RF 29 (0.1971ms)
+✔ current-policy RF 30 (0.168ms)
+✔ current-policy RF 29.0 (0.1444ms)
+✔ current-policy RF 29.01 (0.109ms)
+✔ Ask LWR supplied RF: My Reliability Factor is 29. Am I NR? (13.0636ms)
+✔ Ask LWR supplied RF: Is a Reliability Factor of 30 considered NR? (4.9248ms)
+✔ Ask LWR supplied RF: What happens if my RF is 28? (3.4085ms)
+✔ unchanged substitute Approved Answer applies current NR rules at RF29 (5.5205ms)
+✔ import rejects View-As credentials before authentication or database access (69.9988ms)
+✔ RF cutoff comes from evidence, with no implicit fallback or importer classification (0.46ms)
+✔ source-only transaction, rollback, identity revalidation, role boundary and idempotency (6051.8521ms)
+(node:20368) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsInitialization.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Phase 1 boundaries, missing/invalid/conflicting input, independent protected value (8.5958ms)
+✔ atomic success, source immutable, PrimeTime untouched, provenance retained and idempotency (5937.7098ms)
+✔ unexpected failure rolls back earlier writes, records failed audit, no provenance; stale inputs fail (4739.1089ms)
+✔ manual established rating and changed source/rules block stale preview (19481.3083ms)
+✔ server receipt tampering, origin actor/session binding and write-disabled gate (7.4557ms)
+✔ private grants, unauthorized actor denied and snapshot works read-only (4365.0619ms)
+(node:13308) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ gate OFF: authorized Upload/Clean issue receipts and commit once through reviewed transactions (5655.4867ms)
+✔ gate OFF: missing, forged, expired, wrong session/season/operation and cutoff receipts deny before writes (5753.4253ms)
+✔ gate OFF: existing League Manager authorization permits both normal signed actions (6847.7251ms)
+✔ gate OFF: Player/Captain cannot preview or commit; revoked administrator rejected at commit (6830.2295ms)
+✔ gate OFF: Transfer/Clear remain unsigned and deny even a valid maintenance receipt; unknown operations deny (5112.077ms)
+✔ gate OFF: fresh receipt required after input state changes; zero ready rows have no receipt (3489.1289ms)
+(node:28216) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsClean.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Upload: selection/preview/reselect/cancel retain file; summary action precedes table; success resets (22.3578ms)
+✔ Upload: zero ready rows explain and cannot import; a new file invalidates the old preview (4.7705ms)
+✔ Clean: Rules default, summary action, full combined confirmation, cancel retains preview, cutoff re-previews (4.7084ms)
+✔ Clean: confirmation pending disables cutoff and generation change rejects outdated confirmation (6.2123ms)
+✔ Upload preview labels current CSV fields and age path, including excluded identities (12.9383ms)
+(node:7464) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/aiEligibilityPolicy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ current Rules govern explicit Clean inclusive RF boundary; Ask classification unchanged (6782.015ms)
+✔ normal controls expose Upload and Clean, retain explicit Delete/Copy, and hide maintenance operations (10.8686ms)
+✔ one Upload records history and fills only blank inputs; repeat preserves inputs and never invokes Clean (8585.0391ms)
+✔ integrated Upload, field-independent preservation, Clear and explicit Clean; immutable finals and notes (10263.7109ms)
+✔ NR nine lifecycle states, read-only candidate, failed admission, explicit Clean, higher/lower and retain after all removed (6831.6217ms)
+✔ stale conflict, atomic rollback after partial work, replay and grants (5338.6006ms)
+(node:24532) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ receipt ties actor/session/season/operation; write-disabled route makes no RPC (30.3762ms)
+✔ each transaction rolls back its own partial writes and rejects changed Rules/roster/input/source (11323.1375ms)
+✔ DUPR-only matching skips inactive/not-found/ambiguous and invalid source; numeric truncation and missing age (6350.4564ms)
+✔ approved 659 source values yield 659/659/551 independent fills, 108 missing ages, 538 Rated creates and 121 valid NR deferrals (14974.1355ms)
+(node:21376) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsWorkflowServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF cutoff validation has no implicit default (3.2034ms)
+✔ selected RF drives BOTH fields; signed receipt, audit provenance, dynamic Rules default (9490.7456ms)
+✔ both NR lifecycles: blank, actual roster, explicit Clean, higher/lower roster, retain all removed; RF boundary (5228.8281ms)
+✔ stale cutoff, legacy receipt, changed Rules/input/roster/finals fail without writes (2591.2391ms)
+✔ atomic rollback, Rated age input independent of roster/doubles, missing age defers only PrimeTime (1705.2188ms)
+✔ 659-row reviewed local snapshot: combined 538 regular / 489 PrimeTime with selected Rules default (3665.5718ms)
+ℹ tests 96
+ℹ suites 0
+ℹ pass 96
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 50804.8822

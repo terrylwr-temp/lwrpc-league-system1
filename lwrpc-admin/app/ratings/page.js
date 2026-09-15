@@ -1,5 +1,6 @@
 "use client";
 
+import RatingsImportPreview from "../components/RatingsImportPreview";
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -25,7 +26,10 @@ export default function RatingsPage() {
   const [seasons, setSeasons] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [allRatings, setAllRatings] = useState([]);
-  const [ratingImportRows, setRatingImportRows] = useState([]);
+  const [ratingImportPreview, setRatingImportPreview] = useState(null);
+  const selectedSeasonRef = useRef("");
+  const importEpochRef = useRef(0);
+  const setRatingImportRows = () => setRatingImportPreview(null);
   const [ratingImportStatus, setRatingImportStatus] = useState("");
   const [isImportingRatings, setIsImportingRatings] = useState(false);
   const [isDeletingSeasonRatings, setIsDeletingSeasonRatings] = useState(false);
@@ -416,372 +420,68 @@ export default function RatingsPage() {
     }
   }
 
-  function normalizeText(value) {
-    return String(value || "").trim();
-  }
+  useEffect(() => {
+    selectedSeasonRef.current = selectedSeason;
+    importEpochRef.current++;
+    setRatingImportPreview(null);
+  }, [selectedSeason]);
 
-  function isBlankRating(value) {
-    return value === null || value === undefined || String(value).trim() === "";
-  }
-
-  function normalizeEmail(value) {
-    return normalizeText(value).toLowerCase();
-  }
-
-  function normalizeName(value) {
-    return normalizeText(value).toLowerCase().replace(/\s+/g, " ");
-  }
-
-  function findCsvValue(row, names) {
-    const keys = Object.keys(row);
-    for (const name of names) {
-      const key = keys.find((candidate) => normalizeCsvHeader(candidate) === normalizeCsvHeader(name));
-      if (key) return row[key];
-    }
-    return "";
-  }
-
-  function hasCsvColumn(row, names) {
-    const keys = Object.keys(row);
-    return names.some((name) =>
-      keys.some((candidate) => normalizeCsvHeader(candidate) === normalizeCsvHeader(name))
-    );
-  }
-
-  function findAgeBasedRating(row) {
-    if (hasCsvColumn(row, ["metrics", "metric"])) {
-      const metricsValue = findCsvValue(row, ["metrics", "metric"]);
-      const over65Rating = findMetricRating(metricsValue, "over_65");
-      if (parseAgeBasedRating(over65Rating) !== null) {
-        return { value: over65Rating, source: "over_65" };
-      }
-
-      const over50Rating = findMetricRating(metricsValue, "over_50");
-      return { value: over50Rating, source: over50Rating ? "over_50" : null };
-    }
-
-    const exactValue = findCsvValue(row, [
-      "age-based rating",
-      "age based rating",
-      "agebased rating",
-      "age-based dupr rating",
-      "age based dupr rating",
-      "age dupr rating",
-      "age rating",
-      "age doubles rating",
-      "age-based doubles rating",
-      "age based doubles rating",
-      "age bracket rating",
-      "primetime rating",
-      "prime time rating",
-    ]);
-
-    if (exactValue !== "") return { value: exactValue, source: null };
-
-    const ageKey = Object.keys(row).find((key) => {
-      const normalized = normalizeCsvHeader(key);
-      return (
-        (normalized.includes("age") && normalized.includes("rating")) ||
-        normalized.includes("primetime") ||
-        normalized.includes("primetimerating")
-      );
-    });
-
-    return { value: ageKey ? row[ageKey] : "", source: null };
-  }
-
-  function hasAgeBasedRatingSource(row) {
-    if (hasCsvColumn(row, [
-      "metrics",
-      "metric",
-      "age-based rating",
-      "age based rating",
-      "agebased rating",
-      "age-based dupr rating",
-      "age based dupr rating",
-      "age dupr rating",
-      "age rating",
-      "age doubles rating",
-      "age-based doubles rating",
-      "age based doubles rating",
-      "age bracket rating",
-      "primetime rating",
-      "prime time rating",
-    ])) return true;
-
-    return Object.keys(row).some((key) => {
-      const normalized = normalizeCsvHeader(key);
-      return (
-        (normalized.includes("age") && normalized.includes("rating")) ||
-        normalized.includes("primetime") ||
-        normalized.includes("primetimerating")
-      );
-    });
-  }
-
-  function findMetricRating(metricsValue, metricName) {
-    const metricsText = normalizeText(metricsValue);
-    if (!metricsText) return "";
-
-    try {
-      const metrics = JSON.parse(metricsText);
-      const rating = metrics?.subscores?.doubles?.[metricName];
-      if (rating !== null && rating !== undefined && String(rating).trim() !== "") {
-        return String(rating);
-      }
-    } catch {
-      // Keep supporting legacy non-JSON Metrics values below.
-    }
-
-    const normalizedMetric = metricName.replace("_", "[_\\s-]*");
-    const match = metricsText.match(
-      new RegExp(`(?:^|[^a-z0-9])"?${normalizedMetric}(?:[_\\s-]*rating)?"?\\s*(?::|=|,|\\||-)?\\s*"?([0-9]+(?:\\.[0-9]+)?)`, "i")
-    );
-
-    return match?.[1] || "";
-  }
-
-  function normalizeCsvHeader(value) {
-    return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  }
-
-  function parseRating(value) {
-    const cleaned = normalizeText(value).replace(/[^\d.]/g, "");
-    if (!cleaned) return null;
-    const rating = Number(cleaned);
-    return Number.isNaN(rating) ? null : rating;
-  }
-
-  function parseAgeBasedRating(value) {
-    const rating = parseRating(value);
-    return rating === null ? null : truncateToTenth(rating);
-  }
-
-  function parseDuprDoublesRating(value) {
-    const text = normalizeText(value);
-    if (!text) return null;
-    if (text.toUpperCase() === "NR") return "NR";
-
-    const rating = parseRating(text);
-    return rating === null ? null : rating.toFixed(3);
-  }
-
-  function parseReliabilityRating(value) {
-    const text = normalizeText(value);
-    if (!text) return null;
-
-    const rating = parseRating(text);
-    return rating === null ? null : rating;
-  }
-
-  function getReadyRatingsImportRows(rows) {
-    const readyRowsByMemberId = new Map();
-    rows
-      .filter((row) => row.action === "ready")
-      .forEach((row) => readyRowsByMemberId.set(String(row.memberId), row));
-    return Array.from(readyRowsByMemberId.values());
+  async function requestSourceImport(body) {
+    const { data } = await supabase.auth.getSession();
+    const response = await fetch("/api/ratings/import", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token || ""}` }, body: JSON.stringify(body) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Source import failed.");
+    return result;
   }
 
   async function chooseRatingsImportFile() {
-    if (!selectedSeason) {
-      alert("Select a season before importing ratings.");
-      return;
-    }
-
-    const ok = await appConfirm([
-      `Upload ratings for ${selectedSeasonLabel()}?`,
-      "",
-      "Choose a CSV with member name/email, DUPR ID, doubles rating, reliability rating, and age-based rating.",
-      "Age-Based rating is read from Metrics.subscores.doubles.over_65, falling back to over_50.",
-      "When the 50+ rating is used, DUPR Notes will indicate the fallback.",
-      "",
-      "DUPR Doubles values only fill blank rating fields. Existing DUPR Doubles values are never overwritten.",
-      "DUPR IDs are only written when the member does not already have one.",
-      "",
-      "To replace all ratings for this season, use Delete Season Ratings first, then upload a new CSV.",
-      "",
-      "Continue to choose a CSV file.",
-    ].join("\n"), { title: "Upload Ratings CSV", confirmLabel: "Continue", tone: "warning" });
-
+    if (!selectedSeason) return;
+    const ok = await appConfirm("Choose a DUPR CSV to preview current source ratings. Matching uses DUPR ID only. Existing season ratings and member details are preserved. No ratings change until you review and confirm.", { title: "Upload Ratings CSV", confirmLabel: "Continue" });
     if (ok) ratingsImportInputRef.current?.click();
   }
 
   async function handleRatingsImportFile(event) {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!selectedSeason) {
-      alert("Select a season before importing ratings.");
-      event.target.value = "";
-      return;
-    }
-
-    const text = await file.text();
-    const parsedRows = parseCsv(text);
-    const byEmail = {};
-    const byName = {};
-    const selectedSeasonRatingsByMemberId = Object.fromEntries(
-      allRatings
-        .filter((rating) => String(rating.season_id) === String(selectedSeason))
-        .map((rating) => [String(rating.member_id), rating])
-    );
-
-    members.forEach((member) => {
-      if (member.email) byEmail[normalizeEmail(member.email)] = member;
-      byName[normalizeName(memberFullName(member))] = member;
-      byName[normalizeName(`${member.last_name || ""}, ${member.first_name || ""}`)] = member;
-    });
-
-    const rows = parsedRows.map((row, index) => {
-      const email = normalizeEmail(findCsvValue(row, ["email", "email address", "primary email"]));
-      const firstName = normalizeText(findCsvValue(row, ["first name", "firstname", "first"]));
-      const lastName = normalizeText(findCsvValue(row, ["last name", "lastname", "last"]));
-      const name = normalizeText(findCsvValue(row, ["name", "member name", "player", "player name"]));
-      const duprId = normalizeText(findCsvValue(row, ["dupr id", "duprid", "dupr", "dupr number"]));
-      const duprDoublesRating = parseDuprDoublesRating(findCsvValue(row, ["doubles rating", "doubles", "dupr doubles", "dupr doubles rating", "doubles dupr", "rating"]));
-      const duprReliabilityRating = parseReliabilityRating(findCsvValue(row, ["doublesReliability", "doubles reliability", "doubles reliability rating", "reliability", "reliability rating", "dupr reliability"]));
-      const ageBasedRating = findAgeBasedRating(row);
-      const ageRating = parseAgeBasedRating(ageBasedRating.value);
-      const ageRatingSourcePresent = hasAgeBasedRatingSource(row);
-      const lookupName = name || `${firstName} ${lastName}`.trim();
-      const member = (email && byEmail[email]) || byName[normalizeName(lookupName)] || null;
-      const existingSeasonRating = member ? selectedSeasonRatingsByMemberId[String(member.id)] : null;
-      const shouldClearAgeRating = Boolean(
-        member &&
-        ageRatingSourcePresent &&
-        ageRating === null &&
-        existingSeasonRating?.season_primetime_rating !== null &&
-        existingSeasonRating?.season_primetime_rating !== undefined
-      );
-
-      const shouldUpdateDuprDoublesRating = Boolean(
-        member &&
-        duprDoublesRating !== null &&
-        (!existingSeasonRating || isBlankRating(existingSeasonRating.dupr_doubles_rating))
-      );
-      const usesOver50AgeBasedRating = ageBasedRating.source === "over_50" && ageRating !== null;
-
-      const hasRating = shouldUpdateDuprDoublesRating || duprReliabilityRating !== null || ageRating !== null || shouldClearAgeRating;
-
-      return {
-        rowNumber: index + 1,
-        action: member && hasRating ? "ready" : "skip",
-        message: !member
-          ? "No matching member by email or name."
-          : hasRating
-            ? shouldClearAgeRating
-              ? "Matched member; Age-Based rating will be cleared."
-              : usesOver50AgeBasedRating
-                ? "Matched member; Age-Based rating uses the 50+ fallback and DUPR Notes will be updated."
-              : "Matched member."
-            : duprDoublesRating !== null && existingSeasonRating && !isBlankRating(existingSeasonRating.dupr_doubles_rating)
-              ? "Matched member; existing DUPR Doubles rating will be kept."
-              : "Matched member, but no rating or reliability will be imported from this CSV row.",
-        memberId: member?.id || null,
-        memberName: member ? memberFullName(member) : lookupName,
-        email,
-        duprId,
-        shouldUpdateDuprId: Boolean(member && duprId && !member.dupr_id),
-        duprDoublesRating,
-        shouldUpdateDuprDoublesRating,
-        duprReliabilityRating,
-        ageRating,
-        ageRatingSourcePresent,
-        usesOver50AgeBasedRating,
-        existingNotes: existingSeasonRating?.notes || "",
-      };
-    });
-
-    setRatingImportRows(rows);
-    setRatingImportStatus(`Previewed ${rows.length} row(s).`);
     event.target.value = "";
-
-    const readyRows = getReadyRatingsImportRows(rows);
-    if (readyRows.length === 0) return;
-
-    const ok = await appConfirm([
-      `Apply ratings for ${readyRows.length} matched member(s) to ${selectedSeasonLabel()}?`,
-      "",
-      "Existing DUPR Doubles values will be kept; only blank DUPR Doubles fields will be filled.",
-      "Continue to apply this ratings import.",
-    ].join("\n"), { title: "Apply Ratings Import", confirmLabel: "Apply Ratings Import", tone: "warning" });
-
-    if (ok) await applyRatingsImport(readyRows);
+    const epoch = ++importEpochRef.current;
+    setRatingImportPreview(null);
+    if (!file || !selectedSeason) return;
+    if (file.size > 2 * 1024 * 1024) { setRatingImportStatus("Error: CSV exceeds 2 MiB."); return; }
+    const seasonId = selectedSeason;
+    setIsImportingRatings(true);
+    setRatingImportStatus("Preparing source ratings preview…");
+    try {
+      const result = await requestSourceImport({ action: "preview", seasonId, csv: await file.text() });
+      if (selectedSeasonRef.current !== seasonId || epoch !== importEpochRef.current) return;
+      setRatingImportPreview(result);
+      setRatingImportStatus(`Previewed ${result.counts.total} rows. No data has changed.`);
+    } catch (error) { setRatingImportStatus(`Error: ${error.message}`); }
+    finally { setIsImportingRatings(false); }
   }
 
-  async function applyRatingsImport(importRows = ratingImportRows) {
-    if (!selectedSeason) {
-      alert("Select a season before importing ratings.");
-      return;
-    }
-
-    const readyRows = getReadyRatingsImportRows(importRows);
-    if (readyRows.length === 0) {
-      alert("No matched rating rows to import.");
-      return;
-    }
-
+  async function applyRatingsImport() {
+    const preview = ratingImportPreview;
+    if (!preview?.receipt || !preview.counts.ready || preview.season.id !== selectedSeasonRef.current) return;
+    const epoch = importEpochRef.current;
+    const fields = [...new Set(preview.rows.filter(r => r.action === "UPDATE").flatMap(r => r.changes.map(c => c.field)))];
+    const ok = await appConfirm([
+      `Target Season: ${preview.season.name}`,
+      `Rows to update: ${preview.counts.ready}`,
+      `No change: ${preview.counts.noChange}`,
+      `Skipped/invalid: ${preview.counts.skipped + preview.counts.invalid}`,
+      `Season ID: ${preview.season.id}`,
+      `Source fields: ${fields.map(field => ({ doubles: "DUPR Doubles", rf: "Reliability Factor", age: "Age-based DUPR", ageSource: "age metric", ageMissing: "age presence", rfMissing: "RF presence", doublesMissing: "Doubles presence" })[field] || field).join(", ")}`,
+      "Season DUPR, PrimeTime Season DUPR, season RF, notes and member details are preserved. Clean Ratings will not run.",
+    ].join("\n"), { title: "Confirm Source Ratings Import", confirmLabel: "Import Matched Ratings", tone: "warning" });
+    if (!ok || preview.season.id !== selectedSeasonRef.current || epoch !== importEpochRef.current) return;
     setIsImportingRatings(true);
-    setRatingImportStatus("Importing ratings...");
-
+    setRatingImportStatus("Importing source ratings…");
     try {
-      const now = new Date().toISOString();
-      const memberUpdates = readyRows
-        .filter((row) => row.shouldUpdateDuprId)
-        .map((row) =>
-          supabase
-            .from("members")
-            .update({ dupr_id: row.duprId, updated_at: now })
-            .eq("id", row.memberId)
-        );
-
-      for (let i = 0; i < memberUpdates.length; i += 25) {
-        const results = await Promise.all(memberUpdates.slice(i, i + 25));
-        const failed = results.find((result) => result.error);
-        if (failed?.error) throw new Error(failed.error.message);
-      }
-
-      const ratingUpserts = readyRows.map((row) => {
-        const payload = {
-          member_id: row.memberId,
-          season_id: selectedSeason,
-          updated_at: now,
-        };
-
-        if (row.shouldUpdateDuprDoublesRating) payload.dupr_doubles_rating = row.duprDoublesRating;
-        if (row.duprReliabilityRating !== null) payload.dupr_reliability_rating = row.duprReliabilityRating;
-        if (row.ageRatingSourcePresent) {
-          payload.season_primetime_rating = row.ageRating;
-        }
-        if (row.usesOver50AgeBasedRating) {
-          payload.notes = ratingNotesWithAgeBasedFallback(row.existingNotes);
-        }
-
-        return payload;
-      });
-
-      if (ratingUpserts.length > 0) {
-        const { error } = await supabase
-          .from("member_season_ratings")
-          .upsert(ratingUpserts, { onConflict: "member_id,season_id" });
-        if (error) throw new Error(error.message);
-      }
-
-      setMembers((current) =>
-        current.map((member) => {
-          const imported = readyRows.find((row) => row.memberId === member.id && row.shouldUpdateDuprId);
-          return imported ? { ...member, dupr_id: imported.duprId } : member;
-        })
-      );
-      await loadRatings(selectedSeason);
-      await loadAllRatings();
-      setRatingImportRows([]);
-      setRatingImportStatus(`Imported ${readyRows.length} rating row(s).`);
-    } catch (error) {
-      setRatingImportStatus(`Import failed: ${error.message}`);
-    } finally {
-      setIsImportingRatings(false);
-    }
+      const result = await requestSourceImport({ action: "commit", confirmed: true, seasonId: preview.season.id, receipt: preview.receipt });
+      setRatingImportPreview({ ...preview, receipt: null, committed: true });
+      setRatingImportStatus(`Imported ${result.updated} source rating rows. Season ratings preserved.`);
+    } catch (error) { setRatingImportStatus(`Import failed: ${error.message}. No successful commit is confirmed; retrying this same preview is safe.`); }
+    finally { setIsImportingRatings(false); }
   }
 
   async function copyRatingsBetweenSeasons() {
@@ -1244,6 +944,8 @@ export default function RatingsPage() {
     }
 
     if (showNewMembersOnly) {
+      // Preserve the existing rolling New Members filter during this import-only change.
+      // eslint-disable-next-line react-hooks/purity
       const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
       nextMembers = nextMembers.filter((member) => {
         const createdAt = new Date(member.created_at).getTime();
@@ -1655,51 +1357,7 @@ function goToPage(value) {
             </div>
           )}
 
-          {ratingImportRows.length > 0 && (
-            <div className="mt-4 overflow-x-auto rounded-xl bg-white">
-              <table className="w-full border-collapse text-sm">
-                <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
-                  <tr>
-                    <th className="p-3 text-left">Row</th>
-                    <th className="p-3 text-left">Status</th>
-                    <th className="p-3 text-left">Member</th>
-                    <th className="p-3 text-left">Email</th>
-                    <th className="p-3 text-left">DUPR ID</th>
-                    <th className="p-3 text-left">DUPR Doubles</th>
-                    <th className="p-3 text-left">Reliability</th>
-                    <th className="p-3 text-left">Age-Based</th>
-                    <th className="p-3 text-left">Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ratingImportRows.slice(0, 50).map((row) => (
-                    <tr key={row.rowNumber} className="border-b border-slate-100">
-                      <td className="p-3">{row.rowNumber}</td>
-                      <td className="p-3">
-                        <span className={`rounded-full px-2 py-1 text-xs font-bold uppercase ${
-                          row.action === "ready" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}>
-                          {row.action}
-                        </span>
-                      </td>
-                      <td className="p-3 font-semibold text-slate-900">{row.memberName}</td>
-                      <td className="p-3">{row.email}</td>
-                      <td className="p-3">{row.duprId}{row.shouldUpdateDuprId ? " (will update)" : ""}</td>
-                      <td className="p-3">{row.duprDoublesRating ?? ""}</td>
-                      <td className="p-3">{row.duprReliabilityRating ?? ""}</td>
-                      <td className="p-3">{row.ageRating ?? ""}</td>
-                      <td className="p-3 text-slate-600">{row.message}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {ratingImportRows.length > 50 && (
-                <div className="px-4 py-3 text-sm text-slate-500">
-                  Showing first 50 preview rows.
-                </div>
-              )}
-            </div>
-          )}
+          {ratingImportPreview?.season.id === selectedSeason && <RatingsImportPreview preview={ratingImportPreview} busy={isImportingRatings} onImport={applyRatingsImport} />}
         </div>
         )}
 
@@ -2453,62 +2111,6 @@ async function loadAllRatingRosterRows() {
   return { rows, error: null };
 }
 
-function parseCsv(text) {
-  const lines = text
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .split("\n")
-    .filter((line) => line.trim() !== "");
-
-  if (lines.length === 0) return [];
-
-  const headers = splitCsvLine(lines[0]);
-
-  return lines.slice(1).map((line) => {
-    const values = splitCsvLine(line);
-    const row = {};
-
-    headers.forEach((header, index) => {
-      row[header] = values[index] || "";
-    });
-
-    return row;
-  });
-}
-
-function splitCsvLine(line) {
-  const values = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const next = line[i + 1];
-
-    if (char === '"' && inQuotes && next === '"') {
-      current += '"';
-      i++;
-      continue;
-    }
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-
-    if (char === "," && !inQuotes) {
-      values.push(current.trim());
-      current = "";
-      continue;
-    }
-
-    current += char;
-  }
-
-  values.push(current.trim());
-  return values;
-}
-
 function parseReliabilityThreshold(value) {
   const text = String(value || "").trim();
   if (!text) return 0;
@@ -2546,17 +2148,6 @@ function ratingNotesWithReliabilityAdjustment(existingNotes, reliabilityThreshol
       (line) =>
         !/^Season DUPR rating is adjusted based on the Reliability rating (of|threshold of) .+ (and automatically adjusted to NR|and treated as NR for the division-based Season DUPR adjustment)\.$/.test(line)
     );
-
-  return [...cleanedLines, note].join("\n");
-}
-
-function ratingNotesWithAgeBasedFallback(existingNotes) {
-  const note = "Age-Based rating imported from the 50+ DUPR rating because no 65+ DUPR rating was available.";
-  const cleanedLines = String(existingNotes || "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((line) => line !== note);
 
   return [...cleanedLines, note].join("\n");
 }

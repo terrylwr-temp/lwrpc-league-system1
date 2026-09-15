@@ -1,0 +1,1695 @@
+{
+  "method": "Read-only static source inventory. Regex evidence is not an authorization proof; indirect imports and operation permissions require the design matrix and implementation tests.",
+  "routes": [
+    {
+      "route": "/ai-assistant/console",
+      "file": "lwrpc-admin/app/ai-assistant/console/page.js",
+      "loc": 65,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/ai-assistant",
+      "file": "lwrpc-admin/app/ai-assistant/page.js",
+      "loc": 313,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/ai-assistant/review",
+      "file": "lwrpc-admin/app/ai-assistant/review/page.js",
+      "loc": 105,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/ai-insights",
+      "file": "lwrpc-admin/app/ai-insights/page.js",
+      "loc": 546,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/approved-answer/[citation]",
+      "file": "lwrpc-admin/app/approved-answer/[citation]/page.js",
+      "loc": 16,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/ask-lwr",
+      "file": "lwrpc-admin/app/ask-lwr/page.js",
+      "loc": 16,
+      "guards": [
+        "player"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/captain-dashboard",
+      "file": "lwrpc-admin/app/captain-dashboard/page.js",
+      "loc": 6159,
+      "guards": [
+        "captain"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "divisions",
+        "leagues",
+        "locations",
+        "match_lineups",
+        "matches",
+        "member_season_ratings",
+        "members",
+        "score_sheet_templates",
+        "team_byes",
+        "team_members",
+        "team_standings",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "remove",
+        "update"
+      ]
+    },
+    {
+      "route": "/design-preview/admin",
+      "file": "lwrpc-admin/app/design-preview/admin/page.js",
+      "loc": 5,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/design-preview/captain",
+      "file": "lwrpc-admin/app/design-preview/captain/page.js",
+      "loc": 5,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/design-preview",
+      "file": "lwrpc-admin/app/design-preview/page.js",
+      "loc": 5,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/divisions/[id]",
+      "file": "lwrpc-admin/app/divisions/[id]/page.js",
+      "loc": 1134,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "division_lines",
+        "divisions",
+        "match_lines"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/divisions",
+      "file": "lwrpc-admin/app/divisions/page.js",
+      "loc": 1624,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "division_lines",
+        "divisions",
+        "leagues",
+        "score_sheet_templates",
+        "team_byes"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/email-options",
+      "file": "lwrpc-admin/app/email-options/page.js",
+      "loc": 788,
+      "guards": [
+        "commissioner"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/help/[role]",
+      "file": "lwrpc-admin/app/help/[role]/page.js",
+      "loc": 22,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/league-communications",
+      "file": "lwrpc-admin/app/league-communications/page.js",
+      "loc": 109,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/leagues",
+      "file": "lwrpc-admin/app/leagues/page.js",
+      "loc": 722,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "leagues",
+        "seasons"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/live-match/[id]",
+      "file": "lwrpc-admin/app/live-match/[id]/page.js",
+      "loc": 490,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "line_games",
+        "match_lines",
+        "matches"
+      ],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/locations",
+      "file": "lwrpc-admin/app/locations/page.js",
+      "loc": 756,
+      "guards": [
+        "commissioner"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "location_court_availability",
+        "locations",
+        "matches",
+        "members",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/login",
+      "file": "lwrpc-admin/app/login/page.js",
+      "loc": 492,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/matches/[id]",
+      "file": "lwrpc-admin/app/matches/[id]/page.js",
+      "loc": 2870,
+      "guards": [
+        "captain"
+      ],
+      "roleChecks": [
+        "league_manager"
+      ],
+      "browserSession": true,
+      "tables": [
+        "division_lines",
+        "line_games",
+        "match_lines",
+        "match_lineups",
+        "matches",
+        "member_season_ratings",
+        "members",
+        "team_members",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/matches",
+      "file": "lwrpc-admin/app/matches/page.js",
+      "loc": 5,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/member-import",
+      "file": "lwrpc-admin/app/member-import/page.js",
+      "loc": 1126,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "locations",
+        "member_import_batches",
+        "member_import_rows",
+        "members"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/members/[id]",
+      "file": "lwrpc-admin/app/members/[id]/page.js",
+      "loc": 1361,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [
+        "league_manager"
+      ],
+      "browserSession": true,
+      "tables": [
+        "locations",
+        "match_lines",
+        "member_season_ratings",
+        "members",
+        "team_members",
+        "user_roles"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/members",
+      "file": "lwrpc-admin/app/members/page.js",
+      "loc": 2255,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "locations",
+        "match_lines",
+        "member_season_ratings",
+        "members",
+        "seasons",
+        "team_members",
+        "teams",
+        "user_roles"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "insert",
+        "remove",
+        "update"
+      ]
+    },
+    {
+      "route": "/official-document/[citation]",
+      "file": "lwrpc-admin/app/official-document/[citation]/page.js",
+      "loc": 9,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/",
+      "file": "lwrpc-admin/app/page.js",
+      "loc": 5,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/player-dashboard",
+      "file": "lwrpc-admin/app/player-dashboard/page.js",
+      "loc": 4164,
+      "guards": [
+        "player"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "divisions",
+        "leagues",
+        "match_lines",
+        "match_lineups",
+        "matches",
+        "member_season_ratings",
+        "members",
+        "team_byes",
+        "team_members",
+        "team_standings",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/print",
+      "file": "lwrpc-admin/app/print/page.js",
+      "loc": 115,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/ratings",
+      "file": "lwrpc-admin/app/ratings/page.js",
+      "loc": 2611,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "member_season_ratings",
+        "members",
+        "seasons",
+        "team_members"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update",
+        "upsert"
+      ]
+    },
+    {
+      "route": "/reset-password",
+      "file": "lwrpc-admin/app/reset-password/page.js",
+      "loc": 231,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/round-robin/[id]/admin",
+      "file": "lwrpc-admin/app/round-robin/[id]/admin/page.js",
+      "loc": 6678,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": [
+        "delete"
+      ]
+    },
+    {
+      "route": "/round-robin/[id]",
+      "file": "lwrpc-admin/app/round-robin/[id]/page.js",
+      "loc": 235,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/round-robin/[id]/player",
+      "file": "lwrpc-admin/app/round-robin/[id]/player/page.js",
+      "loc": 2859,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/round-robin",
+      "file": "lwrpc-admin/app/round-robin/page.js",
+      "loc": 88,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/schedule-editor",
+      "file": "lwrpc-admin/app/schedule-editor/page.js",
+      "loc": 1862,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "divisions",
+        "league_blackout_dates",
+        "league_schedule_settings",
+        "leagues",
+        "line_games",
+        "location_court_availability",
+        "locations",
+        "match_lines",
+        "matches",
+        "members",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "update"
+      ]
+    },
+    {
+      "route": "/scheduling",
+      "file": "lwrpc-admin/app/scheduling/page.js",
+      "loc": 1683,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "division_lines",
+        "divisions",
+        "league_blackout_dates",
+        "league_schedule_settings",
+        "leagues",
+        "line_games",
+        "location_court_availability",
+        "locations",
+        "match_lines",
+        "matches",
+        "team_byes",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/score-entry/[id]",
+      "file": "lwrpc-admin/app/score-entry/[id]/page.js",
+      "loc": 803,
+      "guards": [
+        "captain"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "line_games",
+        "match_lines",
+        "matches",
+        "member_season_ratings",
+        "members",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "update"
+      ]
+    },
+    {
+      "route": "/score-sheets",
+      "file": "lwrpc-admin/app/score-sheets/page.js",
+      "loc": 689,
+      "guards": [
+        "commissioner"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "score_sheet_templates"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/scoring",
+      "file": "lwrpc-admin/app/scoring/page.js",
+      "loc": 1577,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "division_lines",
+        "divisions",
+        "leagues",
+        "line_games",
+        "locations",
+        "match_lines",
+        "match_lineups",
+        "matches",
+        "members",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "remove",
+        "update"
+      ]
+    },
+    {
+      "route": "/seasons",
+      "file": "lwrpc-admin/app/seasons/page.js",
+      "loc": 582,
+      "guards": [
+        "league_manager"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "divisions",
+        "leagues",
+        "seasons",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/standings",
+      "file": "lwrpc-admin/app/standings/page.js",
+      "loc": 883,
+      "guards": [
+        "player"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [
+        "divisions",
+        "leagues",
+        "matches",
+        "member_season_ratings",
+        "team_byes",
+        "team_standings",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/system-setup",
+      "file": "lwrpc-admin/app/system-setup/page.js",
+      "loc": 212,
+      "guards": [
+        "commissioner"
+      ],
+      "roleChecks": [],
+      "browserSession": true,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/teams/[id]",
+      "file": "lwrpc-admin/app/teams/[id]/page.js",
+      "loc": 1814,
+      "guards": [
+        "captain"
+      ],
+      "roleChecks": [
+        "captain",
+        "league_manager"
+      ],
+      "browserSession": true,
+      "tables": [
+        "locations",
+        "match_lines",
+        "member_season_ratings",
+        "members",
+        "team_members",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "delete",
+        "insert"
+      ]
+    },
+    {
+      "route": "/teams",
+      "file": "lwrpc-admin/app/teams/page.js",
+      "loc": 1936,
+      "guards": [
+        "captain"
+      ],
+      "roleChecks": [
+        "league_manager"
+      ],
+      "browserSession": true,
+      "tables": [
+        "divisions",
+        "leagues",
+        "locations",
+        "matches",
+        "member_season_ratings",
+        "members",
+        "team_byes",
+        "team_members",
+        "team_standings",
+        "teams"
+      ],
+      "rpcs": [],
+      "mutations": [
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "route": "/tournaments/[id]/admin",
+      "file": "lwrpc-admin/app/tournaments/[id]/admin/page.js",
+      "loc": 4336,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": [
+        "remove"
+      ]
+    },
+    {
+      "route": "/tournaments/[id]/display",
+      "file": "lwrpc-admin/app/tournaments/[id]/display/page.js",
+      "loc": 977,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/tournaments/[id]",
+      "file": "lwrpc-admin/app/tournaments/[id]/page.js",
+      "loc": 120,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/tournaments/[id]/player",
+      "file": "lwrpc-admin/app/tournaments/[id]/player/page.js",
+      "loc": 322,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/tournaments/[id]/standings",
+      "file": "lwrpc-admin/app/tournaments/[id]/standings/page.js",
+      "loc": 278,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/tournaments",
+      "file": "lwrpc-admin/app/tournaments/page.js",
+      "loc": 70,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    },
+    {
+      "route": "/view-as",
+      "file": "lwrpc-admin/app/view-as/page.js",
+      "loc": 69,
+      "guards": [],
+      "roleChecks": [],
+      "browserSession": false,
+      "tables": [],
+      "rpcs": [],
+      "mutations": []
+    }
+  ],
+  "viewAsReferences": [
+    {
+      "file": "lwrpc-admin/app/api/account-identity/route.js",
+      "loc": 14,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/admin/delete-member/route.js",
+      "loc": 152,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/admin/member-directory/route.js",
+      "loc": 185,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/admin/member-last-login/route.js",
+      "loc": 88,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/answer/route.js",
+      "loc": 108,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/approved-answers/route.js",
+      "loc": 31,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/capture-health/route.js",
+      "loc": 19,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/documents/route.js",
+      "loc": 269,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/live-review/route.js",
+      "loc": 17,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/retrieval/route.js",
+      "loc": 33,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-assistant/review/route.js",
+      "loc": 7,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ai-insights/route.js",
+      "loc": 594,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/app-notifications/public-key/route.js",
+      "loc": 14,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/app-notifications/subscribe/route.js",
+      "loc": 113,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/approved-answer-viewer/route.js",
+      "loc": 18,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ask-lwr/feedback/route.js",
+      "loc": 55,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/ask-lwr/route.js",
+      "loc": 50,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/brevo-diagnostics/route.js",
+      "loc": 126,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/league-communications/route.js",
+      "loc": 19,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/master-reset/route.js",
+      "loc": 45,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/match-lineups/route.js",
+      "loc": 387,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/match-setup-reminders/route.js",
+      "loc": 110,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/member-password-reset-check/route.js",
+      "loc": 347,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/notification-template-history/route.js",
+      "loc": 164,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/notification-templates/route.js",
+      "loc": 223,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/notifications/route.js",
+      "loc": 131,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/official-document-viewer/pdf/route.js",
+      "loc": 28,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/official-document-viewer/route.js",
+      "loc": 29,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/pbcc/reminders/route.js",
+      "loc": 60,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/round-robin/action/route.js",
+      "loc": 3563,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/round-robin/admin/route.js",
+      "loc": 433,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/round-robin/player/route.js",
+      "loc": 1194,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/score-notification/route.js",
+      "loc": 167,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/season-reset/route.js",
+      "loc": 54,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/season-rollover/route.js",
+      "loc": 133,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/system-settings/route.js",
+      "loc": 156,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/teams/delete/route.js",
+      "loc": 58,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/tournaments/action/route.js",
+      "loc": 3113,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/tournaments/admin/route.js",
+      "loc": 231,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/tournaments/sms/route.js",
+      "loc": 108,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/user-last-logins/route.js",
+      "loc": 123,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/bootstrap/route.js",
+      "loc": 4,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/exchange/route.js",
+      "loc": 2,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/read/route.js",
+      "loc": 65,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/api/view-as/start/route.js",
+      "loc": 13,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/components/ViewAsStartButton.js",
+      "loc": 34,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/layout.tsx",
+      "loc": 39,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/lib/aiResultSource.js",
+      "loc": 33,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsBoundary.js",
+      "loc": 36,
+      "classification": "KEEP",
+      "reason": "Accepted origin/auth/context/crypto/mutation security; only bounded integration after review."
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsCrypto.js",
+      "loc": 21,
+      "classification": "KEEP",
+      "reason": "Accepted origin/auth/context/crypto/mutation security; only bounded integration after review."
+    },
+    {
+      "file": "lwrpc-admin/app/lib/viewAsServer.js",
+      "loc": 47,
+      "classification": "KEEP",
+      "reason": "Accepted origin/auth/context/crypto/mutation security; only bounded integration after review."
+    },
+    {
+      "file": "lwrpc-admin/app/members/[id]/page.js",
+      "loc": 1361,
+      "classification": "ADAPT",
+      "reason": "Shared consumer or transport/boundary integration; retain unrelated behavior."
+    },
+    {
+      "file": "lwrpc-admin/app/view-as/page.js",
+      "loc": 69,
+      "classification": "ADAPT",
+      "reason": "Mixed: extract KEEP lifecycle/banner/credential purge; REMOVE mini navigation, cards, Ask wrapper and snapshot rendering after parity."
+    },
+    {
+      "file": "lwrpc-admin/test/helpers/eligibilityDatabase.mjs",
+      "loc": 50,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/lms0725Database.test.mjs",
+      "loc": 36,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/lms0725Eligibility.test.mjs",
+      "loc": 35,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/lms0725SourceClassification.test.mjs",
+      "loc": 70,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/lms0725TelemetryRecovery.test.mjs",
+      "loc": 81,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/viewAsBoundary.test.mjs",
+      "loc": 51,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/viewAsDatabase.test.mjs",
+      "loc": 95,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/viewAsLockCorrection.test.mjs",
+      "loc": 72,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/viewAsMaintenance.test.mjs",
+      "loc": 41,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/test/viewAsSchemaContract.test.mjs",
+      "loc": 20,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0724-build-lock-migration.mjs",
+      "loc": 88,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0724-concurrency-tests.mjs",
+      "loc": 93,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0724-local-verification.mjs",
+      "loc": 32,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0724-lock-correction-source.sql",
+      "loc": 88,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0724-lock-postgres-tests.mjs",
+      "loc": 91,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0725-build-eligibility-migration.mjs",
+      "loc": 50,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0725-build-migration.mjs",
+      "loc": 40,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0725-postgres-replay.mjs",
+      "loc": 58,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/scripts/lms0725-q78-postgres.mjs",
+      "loc": 91,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/supabase/migrations/20260907201448_lms0724_view_as.sql",
+      "loc": 417,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/supabase/migrations/20260908011413_lms0724_view_as_authorization_locks.sql",
+      "loc": 340,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/supabase/migrations/20260908114532_lms0725_clarification_choices.sql",
+      "loc": 328,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/supabase/migrations/20260908203904_lms0725_eligibility_self.sql",
+      "loc": 378,
+      "classification": "KEEP",
+      "reason": "Security/regression/history; split any presentation-only assertion after replacement coverage."
+    },
+    {
+      "file": "lwrpc-admin/proxy.js",
+      "loc": 38,
+      "classification": "ADAPT",
+      "reason": "Preserve all security headers/guards; replace catch-all mini page rewrite with explicit shared route dispatch."
+    }
+  ],
+  "api": [
+    {
+      "route": "/api/account-identity",
+      "file": "lwrpc-admin/app/api/account-identity/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/admin/delete-member",
+      "file": "lwrpc-admin/app/api/admin/delete-member/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/admin/member-directory",
+      "file": "lwrpc-admin/app/api/admin/member-directory/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/admin/member-last-login",
+      "file": "lwrpc-admin/app/api/admin/member-last-login/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-assistant/answer",
+      "file": "lwrpc-admin/app/api/ai-assistant/answer/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-assistant/approved-answers",
+      "file": "lwrpc-admin/app/api/ai-assistant/approved-answers/route.js",
+      "methods": [],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-assistant/capture-health",
+      "file": "lwrpc-admin/app/api/ai-assistant/capture-health/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-assistant/documents",
+      "file": "lwrpc-admin/app/api/ai-assistant/documents/route.js",
+      "methods": [
+        "GET",
+        "PATCH",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-assistant/live-review",
+      "file": "lwrpc-admin/app/api/ai-assistant/live-review/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-assistant/retrieval",
+      "file": "lwrpc-admin/app/api/ai-assistant/retrieval/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-assistant/review",
+      "file": "lwrpc-admin/app/api/ai-assistant/review/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ai-insights",
+      "file": "lwrpc-admin/app/api/ai-insights/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/app-notifications/public-key",
+      "file": "lwrpc-admin/app/api/app-notifications/public-key/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/app-notifications/subscribe",
+      "file": "lwrpc-admin/app/api/app-notifications/subscribe/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/approved-answer-viewer",
+      "file": "lwrpc-admin/app/api/approved-answer-viewer/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ask-lwr/feedback",
+      "file": "lwrpc-admin/app/api/ask-lwr/feedback/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/ask-lwr",
+      "file": "lwrpc-admin/app/api/ask-lwr/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/brevo-diagnostics",
+      "file": "lwrpc-admin/app/api/brevo-diagnostics/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/league-communications",
+      "file": "lwrpc-admin/app/api/league-communications/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/master-reset",
+      "file": "lwrpc-admin/app/api/master-reset/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/match-lineups",
+      "file": "lwrpc-admin/app/api/match-lineups/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/match-setup-reminders",
+      "file": "lwrpc-admin/app/api/match-setup-reminders/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/member-password-reset-check",
+      "file": "lwrpc-admin/app/api/member-password-reset-check/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/notification-template-history",
+      "file": "lwrpc-admin/app/api/notification-template-history/route.js",
+      "methods": [
+        "DELETE",
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/notification-templates",
+      "file": "lwrpc-admin/app/api/notification-templates/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/notifications",
+      "file": "lwrpc-admin/app/api/notifications/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/official-document-viewer/pdf",
+      "file": "lwrpc-admin/app/api/official-document-viewer/pdf/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/official-document-viewer",
+      "file": "lwrpc-admin/app/api/official-document-viewer/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/pbcc/reminders",
+      "file": "lwrpc-admin/app/api/pbcc/reminders/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/round-robin/action",
+      "file": "lwrpc-admin/app/api/round-robin/action/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/round-robin/admin",
+      "file": "lwrpc-admin/app/api/round-robin/admin/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/round-robin/player",
+      "file": "lwrpc-admin/app/api/round-robin/player/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/score-notification",
+      "file": "lwrpc-admin/app/api/score-notification/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/season-reset",
+      "file": "lwrpc-admin/app/api/season-reset/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/season-rollover",
+      "file": "lwrpc-admin/app/api/season-rollover/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/system-settings",
+      "file": "lwrpc-admin/app/api/system-settings/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/teams/delete",
+      "file": "lwrpc-admin/app/api/teams/delete/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/tournaments/action",
+      "file": "lwrpc-admin/app/api/tournaments/action/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/tournaments/admin",
+      "file": "lwrpc-admin/app/api/tournaments/admin/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/tournaments/sms",
+      "file": "lwrpc-admin/app/api/tournaments/sms/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/user-last-logins",
+      "file": "lwrpc-admin/app/api/user-last-logins/route.js",
+      "methods": [
+        "GET"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/view-as/bootstrap",
+      "file": "lwrpc-admin/app/api/view-as/bootstrap/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": false
+    },
+    {
+      "route": "/api/view-as/exchange",
+      "file": "lwrpc-admin/app/api/view-as/exchange/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": false
+    },
+    {
+      "route": "/api/view-as/read",
+      "file": "lwrpc-admin/app/api/view-as/read/route.js",
+      "methods": [
+        "POST"
+      ],
+      "explicitBoundary": true
+    },
+    {
+      "route": "/api/view-as/start",
+      "file": "lwrpc-admin/app/api/view-as/start/route.js",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "explicitBoundary": true
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 "use client";
+import {isViewAsMode} from "../lib/viewAsPageState.js";
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -182,12 +183,12 @@ export default function DashboardProfileDialog({
             <button type="button" onClick={onClose} aria-label="Close profile">×</button>
           </header>
           <div className={styles.profileActions}>
-            <button type="button" onClick={onChangePassword}>
+            <button type="button" disabled={isViewAsMode()} onClick={onChangePassword}>
               <Icon name="lock" />
               <span><strong>Change Password</strong><small>Update the password for this account</small></span>
               <Icon name="arrow" size={17} />
             </button>
-            <button type="button" onClick={() => photoInputRef.current?.click()} disabled={profileImageSaving}>
+            <button type="button" onClick={() => photoInputRef.current?.click()} disabled={isViewAsMode() || profileImageSaving}>
               <Icon name="camera" />
               <span><strong>{profileImageSaving ? "Saving Profile Icon Picture..." : displayedProfileImage ? "Change Profile Icon Picture" : "Add Profile Icon Picture"}</strong><small>JPG, PNG, or WebP · maximum 2 MB</small></span>
               <Icon name="arrow" size={17} />
@@ -206,7 +207,7 @@ export default function DashboardProfileDialog({
               <span><strong>Club Membership</strong><small>Open the club membership website</small></span>
               <Icon name="arrow" size={17} />
             </a>
-            <button type="button" className={styles.logoutAction} onClick={() => setLogoutConfirmOpen(true)}>
+            <button type="button" className={styles.logoutAction} disabled={isViewAsMode()} onClick={() => setLogoutConfirmOpen(true)}>
               <Icon name="logout" />
               <span><strong>Log Out</strong><small>Log out of this browser or device only</small></span>
               <Icon name="arrow" size={17} />
@@ -217,7 +218,7 @@ export default function DashboardProfileDialog({
           <footer className={styles.profileMeta}>
             <span>Version {APP_VERSION}</span>
             <span>© {currentYear} Lakewood Ranch Pickleball Club</span>
-            <LmsInstallButton iconOnly />
+            {!isViewAsMode() && <LmsInstallButton iconOnly />}
           </footer>
         </section>
       </div>

@@ -1,0 +1,517 @@
+{
+  "method": "Existing pure classifiers only; no database, HTTP, embeddings, or model calls. Baseline diagnosis, not corrected tests.",
+  "rows": [
+    {
+      "question": "How do I register my PrimeTime team for 2026 Fall?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "how do i register my primetime team for 2026 fall?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "I'm trying to sign up our team for the 2026 Fall PrimeTime DUPR league. Will you send me step-by-step instructions?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "i'm trying to sign up our team for the 2026 fall primetime dupr league. will you send me step-by-step instructions?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "primetime"
+      },
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "What do I need to do to register a Weekday team for 2026 Fall?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "weekday"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what do i need to do to register a weekday team for 2026 fall?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "How do I sign up a Saturday team for the 26/27 Saturday Season?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "saturday"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "how do i sign up a saturday team for the 26/27 saturday season?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "How does a Captain register a team?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "how does a captain register a team?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "How do I register it?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "how do i register it?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When will you send out the schedules?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will you send out the schedules?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When will the schedules be done?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will the schedules be done?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When are schedules coming out?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when are schedules coming out?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When will schedules be released?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will schedules be released?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When will schedules be posted?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will schedules be posted?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When can we expect our schedule?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when can we expect our schedule?"
+      },
+      "live": {
+        "intent": "UNSUPPORTED"
+      },
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When do Captains get schedules?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when do captains get schedules?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "What date will schedules be available?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what date will schedules be available?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When will the 2026 Fall PrimeTime schedules be released?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will the 2026 fall primetime schedules be released?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When will the Weekday schedules be released?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "weekday"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will the weekday schedules be released?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When will the Saturday schedule be released?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "saturday"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will the saturday schedule be released?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "What is my PrimeTime Season DUPR for 2026 Fall?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is my primetime season dupr for 2026 fall?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "primetime"
+      },
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "Is my PrimeTime team registered for 2026 Fall?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "is my primetime team registered for 2026 fall?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "What teams are registered in PrimeTime?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what teams are registered in primetime?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "Is my team's schedule ready?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "is my team's schedule ready?"
+      },
+      "live": {
+        "intent": "UNSUPPORTED"
+      },
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "What is my next match?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is my next match?"
+      },
+      "live": {
+        "intent": "NEXT_MATCH",
+        "subjectKind": "SELF"
+      },
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "Who do we play first?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "who do we play first?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "How do I create a schedule?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "how do i create a schedule?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When does registration close?",
+      "semantic": {
+        "kind": "policy_date",
+        "object": "league_date",
+        "leagues": [],
+        "division": null,
+        "gender": null,
+        "category": null,
+        "policyYear": null,
+        "event": "registration_close",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when does registration close?"
+      },
+      "live": null,
+      "policyCompletion": true,
+      "scheduling": ""
+    },
+    {
+      "question": "When can I start entering my roster?",
+      "semantic": {
+        "kind": "policy_date",
+        "object": "roster",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when can i start entering my roster?"
+      },
+      "live": null,
+      "policyCompletion": true,
+      "scheduling": ""
+    },
+    {
+      "question": "When does the PrimeTime league start?",
+      "semantic": {
+        "kind": "policy_date",
+        "object": "league_date",
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "gender": null,
+        "category": null,
+        "policyYear": null,
+        "event": "season_start",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when does the primetime league start?"
+      },
+      "live": null,
+      "policyCompletion": true,
+      "scheduling": ""
+    },
+    {
+      "question": "When is the Captain meeting?",
+      "semantic": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when is the captain meeting?"
+      },
+      "live": null,
+      "policyCompletion": false,
+      "scheduling": ""
+    },
+    {
+      "question": "When does the PrimeTime season end?",
+      "semantic": {
+        "kind": "policy_date",
+        "object": "league_date",
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "gender": null,
+        "category": null,
+        "policyYear": null,
+        "event": "season_end",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when does the primetime season end?"
+      },
+      "live": null,
+      "policyCompletion": true,
+      "scheduling": ""
+    }
+  ]
+}

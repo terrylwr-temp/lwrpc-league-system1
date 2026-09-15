@@ -1,0 +1,62 @@
+{
+  "scope": "Read-only active guide and catalog verification; no DELETE executed",
+  "locks": [
+    {
+      "league": "Saturday DUPR League",
+      "rosters_locked": true
+    },
+    {
+      "league": "PrimeTime DUPR League",
+      "rosters_locked": true
+    },
+    {
+      "league": "Weekday DUPR League",
+      "rosters_locked": true
+    }
+  ],
+  "grants": [
+    {
+      "role": "anon",
+      "delete": true
+    },
+    {
+      "role": "authenticated",
+      "delete": true
+    },
+    {
+      "role": "lms_view_as_executor",
+      "delete": false
+    }
+  ],
+  "guides": [
+    {
+      "page": 8,
+      "title": "LWRPC-Captains Guide to the LMS",
+      "content": "Managing Team Rosters\nTo update your team roster, go to the Captain Tools section on your Captain Dashboard\nand click Manage Roster to add, change, or remove players.\n• Changing Captains or Co-Captains: On the Team Roster Management screen, click\nChange Captain/Co-Captain next to your team name. This opens an email draft to\nsubmit your request directly to League Management.\nTeam Roster Management Window",
+      "version": "v20260903215721-7ec16cf5"
+    },
+    {
+      "page": 7,
+      "title": "LWR Pickleball Club DUPR Captains Guide",
+      "content": "CREATE/UPDATE TEAM ROSTER\no Enter or update your player team roster prior to the commencement of each season. Use the\nManage Roster option to add or remove players.\n All players must be active Lakewood Ranch Pickleball Club members before playing. To\njoin, they can visit: https://lwrpickleballclub.com/signup.\n All DUPR League players must have a free DUPR ID which can be created at\nhttps://www.dupr.com.\n All players must join the Lakewood Ranch Pickleball Club DUPR club (free and\nseparate from the LWR PC membership) so we can accurately sync player ratings.\nCaptains should share this link with all players: https://tinyurl.com/LWRPC-DUPRCLUB.\no Roster Requirements & Substitutes: Teams must roster enough players and substitutes (who\nare not already on another team) to field a full lineup weekly. For example, if your match\nrequires 6 players, an 8–10 player roster is recommended. Additional substitutes may be drawn\nfrom other teams in the same community, provided they meet the DUPR division rating\nrequirements. For complete details, see the Player Requirements and DUPR Rating/Divisions\nsections in the DUPR League Mission and Rules.\no Captain Roster Control: Captains are responsible for building their own rosters and may add\nor delete players throughout the season as needed provided the player is a current, valid\nmember of the LWR PC, has a DUPR ID and is eligible for that division.\no Player DUPR Ratings: Season DUPR ratings are updated in the LMS before the season starts\nand remain visible to captains all season. For players added midseason, their rating is based on\nthe date the league's season ratings were originally recorded.",
+      "version": "v20260908144326-816a2cd7"
+    }
+  ],
+  "helper": "CREATE OR REPLACE FUNCTION private.current_user_can_manage_team(target_team_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select private.current_user_is_lwrpc_admin() or exists (\n    select 1\n    from public.user_roles ur\n    join public.teams t on t.id = target_team_id\n    where ur.user_id = (select auth.uid())\n      and ur.role in ('captain', 'club_pro', 'league_manager', 'commissioner')\n      and ur.member_id in (t.captain_member_id, t.co_captain_member_id,\n                           t.co_captain_2_member_id, t.club_pro_member_id)\n  )\n$function$\n",
+  "policy": [
+    {
+      "cmd": "DELETE",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "team_members",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authenticated users can delete team members",
+      "schemaname": "public",
+      "with_check": null
+    }
+  ],
+  "ownerResolution": "Captain / authorized Co-Captain may remove managed-team players with enforced locks; LM/Commissioner broader existing management; Club Pro alone denied; View-As denied",
+  "interpretation": "Owner final clarification supersedes earlier Co-Captain-only denial. One bounded operation and identical downstream behavior for every authorized remover."
+}

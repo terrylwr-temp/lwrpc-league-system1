@@ -1,3 +1,6 @@
+import {documentProvenance} from './aiResultSource.js';
+import {excerptReferences} from './aiEvidenceExcerpts.js';
+import {questionIntent,isDocumentIntent} from './aiRequestIntent.js';
 import { matchingQuestion } from "./aiQuestionInterpretation.js";
 import { apparelQuestion, generalDocumentedProcedure } from './aiQuestionConcepts.js';
 import { isRosterParticipationQuestion, isCommunityParticipationQuestion } from "./aiQuestionApplicability.js";
@@ -34,6 +37,7 @@ export function isUnsupportedOperationalQuestion(question) {
     || /\bmy\s+next\s+(?:opponent|match)\b/i.test(value)
     || /\bwhere\s+do\s+i\s+play\s+next\b/i.test(value);
   if (ratingValue || completedAction || personalSchedule) return true;
+  if (isDocumentIntent(questionIntent(value))) return false;
   if (generalDocumentedProcedure(value) || apparelQuestion(value) && /\b(?:colou?r|wear|restrictions?)\b/i.test(value) || /\bwhat colou?r can (?:our|the) team wear\b/i.test(value)) return false;
   if (isCommunityParticipationQuestion(value)) return false;
   if (/\bhow\s+is\s+(?:my\s+|the\s+)?season\s+dupr(?:\s+rating)?\s+(?:determined|calculated|established|set|truncated)\b/i.test(value)) return false;
@@ -72,7 +76,7 @@ export function playerRetrievalBody(body = {}, role = "player") {
   };
 }
 
-export async function runPlayerOfficialAnswer({ body, role, userId, memberId = null, supabase, retrieveOfficialEvidence, generateOfficialAnswer, now = Date.now, answerId }) {
+export async function runPlayerOfficialAnswer({ body, role, userId, memberId = null, supabase, retrieveOfficialEvidence, generateOfficialAnswer, now = Date.now, answerId, diagnosticOrigin = "player_interface" }) {
   const rawQuestion = body?.question;
   const resolution = resolveOfficialConversation({ question: rawQuestion, userId, receipt: body?.conversationReceipt, now: now() });
   if (resolution.kind === "protected") return { retrieval: null, conversationResolution: resolution, result: playerFallbackResult("protected") };
@@ -82,6 +86,7 @@ export async function runPlayerOfficialAnswer({ body, role, userId, memberId = n
   };
 
   const retrieval = await retrieveOfficialEvidence({ supabase, body: playerRetrievalBody({ ...body, question: resolution.effectiveQuestion }, role) });
+  retrieval.policyContext={correlationId:answerId,origin:diagnosticOrigin};
   retrieval.conversationResolution = { ...resolution, rawLiveDataGuard: false, effectiveLiveDataGuard: false };
   const retrievalClarification = clarificationFromRetrieval(resolution, retrieval);
   if (retrievalClarification) return {
@@ -109,7 +114,7 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
   const evidenceSufficient = answer?.evidenceSufficient === true;
   const conflict = answer?.conflict?.requiresClarification === true;
   const sources = (answer?.sources || []).map((source) => ({
-    ...approvedSourceIdentity(source),
+    ...approvedSourceIdentity(source), ...excerptReferences(source),
     documentId: source.documentId, documentVersionId: source.documentVersionId, chunkId: source.chunkId,
     documentTitle: String(source.documentTitle || "Official LWR Pickleball Club document"),
     pageNumber: source.pageNumber || null,
@@ -127,7 +132,8 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
   return {
     kind: conflict ? "conflict" : evidenceSufficient ? "answer" : "insufficient_evidence",
     answer: String(answer?.answer || INSUFFICIENT_EVIDENCE_ANSWER),
-    evidenceSufficient, conflict,
+    ...(evidenceSufficient && !conflict ? {provenance: documentProvenance(answer)} : {}),
+    evidenceSufficient, conflict, ...(effectiveQuestion && effectiveQuestion !== originalQuestion ? {resolvedQuestion:effectiveQuestion} : {}),
     sources: sources.map(({ documentId, documentVersionId, chunkId, ...source }) => source),
     conversationReceipt: evidenceSufficient ? createFollowUpReceipt(userId, effectiveQuestion || originalQuestion, { now }) : null,
     feedbackReceipt,
@@ -136,8 +142,9 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
 
 function clarificationResult(resolution, userId, now) {
   return {
+    clarification: {kind:resolution.clarification.category,options:(resolution.clarification.options || (resolution.clarification.category==='roster_league'?['Weekday','Saturday','PrimeTime']:resolution.clarification.category==='player_entry_object'?['team roster','match lineup']:resolution.clarification.category==='color_subject'?['ball','paddle','clothing']:[])).map(label=>({key:label,label}))},
     kind: "clarification", answer: resolution.clarification.message, evidenceSufficient: false, conflict: false, sources: [], feedbackReceipt: null,
-    conversationReceipt: ["color_subject", "player_entry_object", "roster_league"].includes(resolution.clarification.category) ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category, { now }) : null,
+    conversationReceipt: ["color_subject", "player_entry_object", "roster_league", "league_date", "scoring_method"].includes(resolution.clarification.category) ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category, { now }) : null,
   };
 }
 

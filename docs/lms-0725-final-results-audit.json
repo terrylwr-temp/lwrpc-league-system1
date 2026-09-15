@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-09-08T15:32:22.239Z",
+  "routingPass": 63,
+  "generatedPass": 45,
+  "deterministicNoModel": 16,
+  "clarificationNoModel": 2,
+  "finalSourceContainers": 143,
+  "finalExcerptItems": 203,
+  "maxContainers": 4,
+  "maxItemsPerAnswer": 12,
+  "maxQuestionEvidenceCharacters": 7605,
+  "finalGenerationMedianMs": 2729,
+  "finalGenerationMaxMs": 10720,
+  "finalInputTokens": 109247,
+  "finalOutputTokens": 5809,
+  "correctionCalls": 121,
+  "callLedger": [
+    {
+      "file": "lms-0725-final-failed-first-model-results-attempt1.json",
+      "calls": 12
+    },
+    {
+      "file": "lms-0725-final-failed-first-model-results.json",
+      "calls": 16
+    },
+    {
+      "file": "lms-0725-final-failed-first-Q56-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-final-full-model-results-attempt1.json",
+      "calls": 45
+    },
+    {
+      "file": "lms-0725-final-failed-first-Q29-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-final-failed-first-Q42-model-results.json",
+      "calls": 1
+    },
+    {
+      "file": "lms-0725-final-full-model-results.json",
+      "calls": 45
+    }
+  ],
+  "correctionInputTokens": 283768,
+  "correctionOutputTokens": 15113,
+  "correctionEstimatedCostUsd": 1.87223,
+  "sourceFidelityPass": 45,
+  "matchingCitationItemSets": 45,
+  "finalObservedQualityFailures": {
+    "crossLeagueLeakage": 0,
+    "syntheticExcerptsAccepted": 0,
+    "mechanicsAsApplicability": 0,
+    "materialQualificationsOmitted": 0,
+    "unsupportedGroundedAnswers": 0,
+    "incorrectGroundedYears": 0,
+    "knownEvidenceCompletenessFailures": 0
+  },
+  "qualityReviewMethod": "Manual proposition review of all final generated answers against exact selected sources, supplemented by assertions for literal ranges, source/citation equality, routes, dates/defaults and diagnosed requirements. Observed benchmark gates, not production acceptance or a guarantee of future model outputs."
+}

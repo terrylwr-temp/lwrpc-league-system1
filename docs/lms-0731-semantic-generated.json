@@ -1,0 +1,239 @@
+{
+  "method": "Isolated current-policy fixture, deterministic candidate score .5, real unchanged production answer model; no database/embedding/telemetry mutation. Six affected scenarios only, inverse first, stop on failure.",
+  "results": [
+    {
+      "question": "Can my sub be outside the DUPR range?",
+      "passed": true,
+      "answer": "No. A substitute must meet the division’s applicable Season DUPR rating requirements; being a sub does not waive or change those eligibility requirements. If the sub is Not Rated (NR), the applicable NR eligibility rules also apply.",
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 1455,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 115,
+        "output_tokens_details": {
+          "reasoning_tokens": 46
+        },
+        "total_tokens": 1570
+      },
+      "metrics": {
+        "generationMs": 3857,
+        "sourceResolutionMs": 0,
+        "totalMs": 3889,
+        "inputTokens": 1455,
+        "outputTokens": 115,
+        "totalTokens": 1570,
+        "estimatedGenerationCostUsd": 0.010725
+      },
+      "source": "LWR Pickleball Club Approved Answer — Substitute Player Eligibility",
+      "selection": [
+        {
+          "revisionId": "10000000-0000-4000-8000-000000000001",
+          "semanticScore": 0.5,
+          "reason": "substitute_policy_equivalent",
+          "decision": "selected"
+        }
+      ]
+    },
+    {
+      "question": "Do subs have to meet the DUPR rating range?",
+      "passed": true,
+      "answer": "Yes. Substitute players must meet the division’s player eligibility requirements, including the applicable Season DUPR rating requirements. Being a substitute does not waive or change those requirements. If the sub is Not Rated (NR), the applicable NR eligibility rules also apply.",
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 1456,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 72,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1528
+      },
+      "metrics": {
+        "generationMs": 3993,
+        "sourceResolutionMs": 0,
+        "totalMs": 4000,
+        "inputTokens": 1456,
+        "outputTokens": 72,
+        "totalTokens": 1528,
+        "estimatedGenerationCostUsd": 0.00944
+      },
+      "source": "LWR Pickleball Club Approved Answer — Substitute Player Eligibility",
+      "selection": [
+        {
+          "revisionId": "10000000-0000-4000-8000-000000000001",
+          "semanticScore": 0.5,
+          "reason": "substitute_policy_equivalent",
+          "decision": "selected"
+        }
+      ]
+    },
+    {
+      "question": "Can a substitute be above the DUPR limit?",
+      "passed": true,
+      "answer": "No. A substitute’s status does not waive or modify division eligibility requirements, including the applicable Season DUPR rating requirements. If the substitute is Not Rated (NR), the applicable NR eligibility rules also apply.",
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 1455,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 63,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1518
+      },
+      "metrics": {
+        "generationMs": 2532,
+        "sourceResolutionMs": 0,
+        "totalMs": 2552,
+        "inputTokens": 1455,
+        "outputTokens": 63,
+        "totalTokens": 1518,
+        "estimatedGenerationCostUsd": 0.009165
+      },
+      "source": "LWR Pickleball Club Approved Answer — Substitute Player Eligibility",
+      "selection": [
+        {
+          "revisionId": "10000000-0000-4000-8000-000000000001",
+          "semanticScore": 0.5,
+          "reason": "substitute_policy_equivalent",
+          "decision": "selected"
+        }
+      ]
+    },
+    {
+      "question": "Can a substitute be below the minimum DUPR?",
+      "passed": true,
+      "answer": "No. A substitute’s status does not waive or modify division eligibility requirements, including the applicable Season DUPR minimum. Substitute players must meet all applicable eligibility requirements for the division. If the substitute is Not Rated (NR), the applicable NR eligibility rules also apply.",
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 1455,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 74,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1529
+      },
+      "metrics": {
+        "generationMs": 1939,
+        "sourceResolutionMs": 0,
+        "totalMs": 1949,
+        "inputTokens": 1455,
+        "outputTokens": 74,
+        "totalTokens": 1529,
+        "estimatedGenerationCostUsd": 0.009495
+      },
+      "source": "LWR Pickleball Club Approved Answer — Substitute Player Eligibility",
+      "selection": [
+        {
+          "revisionId": "10000000-0000-4000-8000-000000000001",
+          "semanticScore": 0.5,
+          "reason": "substitute_policy_equivalent",
+          "decision": "selected"
+        }
+      ]
+    },
+    {
+      "question": "Do substitute players have to qualify for the division?",
+      "passed": true,
+      "answer": "Yes. Substitute players must meet all applicable eligibility requirements for the division they play in, including the applicable Season DUPR rating requirements. Substitute status does not waive or modify division eligibility requirements. If the substitute is Not Rated (NR), the applicable NR eligibility rules also apply.",
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 1455,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 76,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1531
+      },
+      "metrics": {
+        "generationMs": 2416,
+        "sourceResolutionMs": 0,
+        "totalMs": 2419,
+        "inputTokens": 1455,
+        "outputTokens": 76,
+        "totalTokens": 1531,
+        "estimatedGenerationCostUsd": 0.009555
+      },
+      "source": "LWR Pickleball Club Approved Answer — Substitute Player Eligibility",
+      "selection": [
+        {
+          "revisionId": "10000000-0000-4000-8000-000000000001",
+          "semanticScore": 0.5,
+          "reason": "substitute_policy_equivalent",
+          "decision": "selected"
+        }
+      ]
+    },
+    {
+      "question": "Do NR rules apply to substitute players?",
+      "passed": true,
+      "answer": "Yes. If a substitute player is classified as Not Rated (NR), all applicable NR eligibility rules apply. Being a substitute does not waive or modify division eligibility requirements, including applicable Season DUPR rating requirements.",
+      "modelCalls": 1,
+      "requestedModel": "gpt-5.5",
+      "returnedModel": "gpt-5.5-2026-04-23",
+      "category": "LOCAL_BENCHMARK",
+      "usage": {
+        "input_tokens": 1453,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 77,
+        "output_tokens_details": {
+          "reasoning_tokens": 12
+        },
+        "total_tokens": 1530
+      },
+      "metrics": {
+        "generationMs": 2043,
+        "sourceResolutionMs": 0,
+        "totalMs": 2047,
+        "inputTokens": 1453,
+        "outputTokens": 77,
+        "totalTokens": 1530,
+        "estimatedGenerationCostUsd": 0.009575
+      },
+      "source": "LWR Pickleball Club Approved Answer — Substitute Player Eligibility",
+      "selection": [
+        {
+          "revisionId": "10000000-0000-4000-8000-000000000001",
+          "semanticScore": 0.5,
+          "reason": "substitute_policy_equivalent",
+          "decision": "selected"
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,7 @@
+import {needsEligibility} from '../../lib/aiEligibilityIntent.js';
+import {runEligibility} from '../../lib/aiEligibilityService.js';
 import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { generateOfficialAnswer } from "../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../lib/aiRetrieval";
 import { runPlayerOfficialAnswer } from "../../lib/askLwrPlayerAnswer";
@@ -14,15 +16,22 @@ export async function POST(req) {
   if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
+    if(needsEligibility(body)) {
+      const eligibilityAuth=await authorizeAdminRequest(req,"player");
+      if(eligibilityAuth.error)return failure(eligibilityAuth.status);
+      const result=await runEligibility({body,principal:await authenticateLive(req),deferRecovery:after});
+      if(result)return NextResponse.json({success:true,result:result},{headers:{'Cache-Control':'private, no-store'}});
+      body.conversationReceipt=null;
+    }
     if(needsLive(body)) {
-      const result=await runLive({body,principal:await authenticateLive(req)});
+      const result=await runLive({deferRecovery:after,body,principal:await authenticateLive(req)});
       if(result)return NextResponse.json({success:true,result},{headers:{'Cache-Control':'private, no-store'}});
       body.conversationReceipt=null;
     }
     const authorization = await authorizeAdminRequest(req, "player");
     if (authorization.error) return failure(authorization.status);
 
-    const { result } = await observeQualityRequest({ supabase: authorization.supabase, run: (answerId, trace) => runPlayerOfficialAnswer({
+    const { result } = await observeQualityRequest({ deferRecovery: after, supabase: authorization.supabase, run: (answerId, trace) => runPlayerOfficialAnswer({
       body, role: authorization.role, userId: authorization.user.id, memberId: authorization.memberRows?.[0]?.id || null, supabase: authorization.supabase,
       answerId, retrieveOfficialEvidence: args => { trace.stage3Invoked = true; return retrieveOfficialEvidence(args); }, generateOfficialAnswer,
     }) });

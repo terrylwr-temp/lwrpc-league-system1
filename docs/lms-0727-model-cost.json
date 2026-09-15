@@ -1,0 +1,10 @@
+{
+  "completedCalls": 10,
+  "noResponseAttempts": 1,
+  "inputTokens": 16523,
+  "outputTokens": 1419,
+  "cachedInputTokens": 0,
+  "category": "LOCAL_BENCHMARK",
+  "pricingBasis": "Existing approved project estimate: $5/M input, $30/M output; no cached input observed",
+  "estimatedUsd": 0.125185
+}

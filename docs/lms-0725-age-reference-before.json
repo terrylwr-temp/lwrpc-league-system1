@@ -1,0 +1,285 @@
+[
+  {
+    "question": "What is the date for the primetime league for basing the age on",
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "primetime"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "what is the date for the primetime league for basing the age on"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "What is the date for the primetime league for basing the age on",
+      "effectiveQuestion": "What is the date for the primetime league for basing the age on",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": false,
+    "selected": []
+  },
+  {
+    "question": "What date is my age based on for PrimeTime?",
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "primetime"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "what date is my age based on for primetime?"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "What date is my age based on for PrimeTime?",
+      "effectiveQuestion": "What date is my age based on for PrimeTime?",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": false,
+    "selected": [
+      {
+        "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+        "content": "6.3. PrimeTime DUPR League\nThe PrimeTime DUPR League is exclusively for players age 65 and older who want\ncompetitive play against others in the same age group. Using DUPR's 65+ age-based rating\nsystem, the league provides a more level playing field by matching players of similar age and\nability. Separate men's and women's divisions compete weekly with two doubles teams\nrepresenting each squad, and any tied team match is decided by the exciting Picklebreaker\nformat. PrimeTime emphasizes spirited competition, sportsmanship, and the opportunity\nfor experienced players to continue enjoying high-quality league play in a community-\nfocused environment.\nPlayer Age Eligibility: A player’s age for league eligibility shall be determined by the age\nthey will attain as of December 31 of the current calendar year. A player is considered\nage-eligible for the entire season even if they have not yet reached the required age by the\nseason’s start date."
+      }
+    ]
+  },
+  {
+    "question": "What is the PrimeTime age cutoff date?",
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "primetime"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "what is the primetime age cutoff date?"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "What is the PrimeTime age cutoff date?",
+      "effectiveQuestion": "What is the PrimeTime age cutoff date?",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": false,
+    "selected": []
+  },
+  {
+    "question": "When do I have to turn 65 to play PrimeTime?",
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "primetime"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "when do i have to turn 65 to play primetime?"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "When do I have to turn 65 to play PrimeTime?",
+      "effectiveQuestion": "When do I have to turn 65 to play PrimeTime?",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": false,
+    "selected": []
+  },
+  {
+    "question": "Do I have to be 65 when the PrimeTime season starts?",
+    "intent": {
+      "kind": "policy_date",
+      "object": "league_date",
+      "leagues": [
+        "primetime"
+      ],
+      "division": null,
+      "gender": null,
+      "category": null,
+      "policyYear": null,
+      "event": "season_start",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "do i have to be 65 when the primetime season starts?"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "Do I have to be 65 when the PrimeTime season starts?",
+      "effectiveQuestion": "Do I have to be 65 when the PrimeTime season starts?",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": true,
+    "selected": [
+      {
+        "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+        "content": "• Oct. 16 - PrimeTime League Starts"
+      }
+    ]
+  },
+  {
+    "question": "If I turn 65 later this year can I play PrimeTime?",
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "primetime"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "if i turn 65 later this year can i play primetime?"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "If I turn 65 later this year can I play PrimeTime?",
+      "effectiveQuestion": "If I turn 65 later this year can I play PrimeTime?",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": false,
+    "selected": []
+  },
+  {
+    "question": "I turn 65 in December. Can I play PrimeTime?",
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [
+        "primetime"
+      ],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "i turn 65 in december. can i play primetime?"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "I turn 65 in December. Can I play PrimeTime?",
+      "effectiveQuestion": "I turn 65 in December. Can I play PrimeTime?",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": false,
+    "selected": []
+  },
+  {
+    "question": "What date do you use to determine age for the 65+ league?",
+    "intent": {
+      "kind": "unresolved",
+      "object": null,
+      "leagues": [],
+      "division": null,
+      "event": "opening",
+      "phase": "unspecified",
+      "currentDate": false,
+      "matchingQuestion": "what date do you use to determine age for the 65+ league?"
+    },
+    "live": null,
+    "operational": false,
+    "conversation": {
+      "priorContextPurpose": null,
+      "receiptValidation": "absent",
+      "clarificationConsumed": false,
+      "kind": "resolved",
+      "classification": "standalone",
+      "rawQuestion": "What date do you use to determine age for the 65+ league?",
+      "effectiveQuestion": "What date do you use to determine age for the 65+ league?",
+      "priorContextAvailable": false,
+      "contextSuperseded": false,
+      "clarification": null,
+      "receiptSupplied": false,
+      "rawLiveDataGuard": false,
+      "effectiveLiveDataGuard": false
+    },
+    "policyCompletion": false,
+    "selected": []
+  }
+]

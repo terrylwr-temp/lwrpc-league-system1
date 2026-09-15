@@ -1,0 +1,749 @@
+(node:28560) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/app/lib/aiQuestionApplicability.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-season-dupr-date\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 global extraction: every unit in current 108-chunk bounded official snapshot is literal source text (7.2442ms)
+✔ 0725 Q57 compatibility loophole closed: synthetic heading/date fails; separate exact items pass (18.6584ms)
+✔ 0725 nonadjacent list child gets exact separate governing parent, not siblings or synthetic prose (1.2684ms)
+✔ 0725 table text preserves original rows, columns, labels and CRLF; invented table sentence is rejected (0.3144ms)
+✔ 0725 year derivation preserves exact period labels and never collapses season ranges (12.0115ms)
+✖ 0725 formerly missing evidence is selected from current sources with all distinct rating requirements (6.1837ms)
+(node:17392) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-season-dupr-date\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ 0725 policy operation: When is my Season DUPR established? (5.8207ms)
+✖ 0725 policy operation: When is Season DUPR established? (0.786ms)
+✖ 0725 policy operation: When is my Season DUPR set? (0.3246ms)
+✖ 0725 policy operation: When is my Season DUPR locked? (0.8705ms)
+✖ 0725 policy operation: When does my Season DUPR lock? (0.6319ms)
+✔ 0725 policy operation: Can my Season DUPR change during the season? (22.9039ms)
+✔ 0725 policy operation: Does my Season DUPR stay the same all season? (2.3542ms)
+✔ 0725 policy operation: How long does my Season DUPR remain in effect? (3.1134ms)
+✔ 0725 policy operation: Can my rating be reset during the season? (3.3616ms)
+✔ 0725 policy operation: How is my Season DUPR determined? (2.9602ms)
+✖ 0725 policy operation: When is my PrimeTime Season DUPR established? (0.4246ms)
+✔ 0725 policy operation: When is my season rating updated? (2.9262ms)
+✔ 0725 value contrast season (1.5ms)
+✔ 0725 value contrast primetime (0.7752ms)
+✔ 0725 value contrast unsupported (0.3225ms)
+✔ 0725 completion failure and dedup conflict remain empty with safe reasons (2.0606ms)
+✔ 0725 duration selects separately documented reset qualification (1.689ms)
+✔ 0725 bounded telemetry reason build (0.6634ms)
+✔ 0725 bounded telemetry reason rpc (0.5647ms)
+✔ 0725 bounded telemetry reason timeout (10.2338ms)
+ai_policy_evidence {
+  event: 'policy_evidence_failed',
+  time: '2026-09-11T11:53:51.228Z',
+  correlationId: null,
+  origin: null,
+  intent: 'policy_date',
+  object: null,
+  scope: [],
+  candidateCount: 109,
+  completionCount: 109,
+  candidates: [
+    {
+      chunkId: 'c4ab8544-decb-4ea1-b856-2df4a2d196f1',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9f05921-2ee9-46fc-9b44-e5a861d7dd6f',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: '950a54ab-aa3b-4f43-9c51-88ce0ca803ae',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9e04de7-e031-4446-b14d-ad4484157cd2',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '6cab8beb-ccf1-4c30-b8ba-a032f3e582d6',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'af393e89-06b0-406c-99ab-eaffeb369c7c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'ea519f19-a038-4eb5-b391-3868da7efe2c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '07463ae2-a809-4a86-b77e-4fa022176b07',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    }
+  ],
+  referencesTruncated: true,
+  selectedCount: 3,
+  applicability: 'SELECTED',
+  validation: 'SOURCE_REVALIDATION_FAILED',
+  finalCount: 0,
+  zeroStage: 'validation',
+  completion: 'complete',
+  completionStage: null,
+  completionReason: null,
+  completionMs: 0
+}
+✔ 0725 diagnostic snapshot fits existing PostgreSQL and replay remains idempotent (2362.4053ms)
+✔ 0725 no evidence or failed source validation never invokes model (58.6938ms)
+✔ 0725 private injected diagnostics are sanitized; View-As stays separate (1.0757ms)
+✔ 0725 View-As policy clears Live clarification without a lookup or provider call (232.5498ms)
+(node:22904) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-season-dupr-date\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0728 normal implicit Player and explicit role precedence remain unchanged (7.5253ms)
+✔ 0728 implicit Player role, page and Live privacy matrix (4014.8909ms)
+✖ 0728 rollback and partial recovery retain metadata and business data (3886.0507ms)
+(node:2664) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-season-dupr-date\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0729 record and deferred rank routing, no external calls (22.8897ms)
+✖ 0729 SQL identity, record, feedback and effective View-As (4837.7997ms)
+✔ 0729 signed clarification binds identity, named scope, pagination and rejects forged selection (26.278ms)
+✔ 0724 production RLS reproduces denial; proof-bound lock correction restores SELF only (4650.2491ms)
+✔ 0724 corrected locks preserve team/captain scope and reject expiry/helper tampering (1623.8062ms)
+✔ 0724 corrected Captain contact remains team-scoped; location-only Club Pro grants no live contact (1593.5847ms)
+✔ 0724 correction refuses helper ACL drift and preserves policy/function footprint on replay (1521.6751ms)
+✖ 0724 review-only rollback restores prior function and privilege state without data changes (1478.155ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 31
+ℹ fail 10
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17727.1694
+
+✖ failing tests:
+
+test at test\lms0725FinalCorrection.test.mjs:49:1
+✖ 0725 formerly missing evidence is selected from current sources with all distinct rating requirements (6.1837ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(timing.some(c=>c.content.includes('date\ncommunicated')))
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/lms0725FinalCorrection.test.mjs:51:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test\lms0725PolicyObservability.test.mjs:13:30
+✖ 0725 policy operation: When is my Season DUPR established? (5.8207ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'season_rating_date'
+  - 'rating'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/lms0725PolicyObservability.test.mjs:14:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'season_rating_date',
+    expected: 'rating',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\lms0725PolicyObservability.test.mjs:13:30
+✖ 0725 policy operation: When is Season DUPR established? (0.786ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'season_rating_date'
+  - 'rating'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/lms0725PolicyObservability.test.mjs:14:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'season_rating_date',
+    expected: 'rating',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\lms0725PolicyObservability.test.mjs:13:30
+✖ 0725 policy operation: When is my Season DUPR set? (0.3246ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'season_rating_date'
+  - 'rating'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/lms0725PolicyObservability.test.mjs:14:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'season_rating_date',
+    expected: 'rating',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\lms0725PolicyObservability.test.mjs:13:30
+✖ 0725 policy operation: When is my Season DUPR locked? (0.8705ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'season_rating_date'
+  - 'rating'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/lms0725PolicyObservability.test.mjs:14:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'season_rating_date',
+    expected: 'rating',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\lms0725PolicyObservability.test.mjs:13:30
+✖ 0725 policy operation: When does my Season DUPR lock? (0.6319ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'season_rating_date'
+  - 'rating'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/lms0725PolicyObservability.test.mjs:14:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'season_rating_date',
+    expected: 'rating',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\lms0725PolicyObservability.test.mjs:13:30
+✖ 0725 policy operation: When is my PrimeTime Season DUPR established? (0.4246ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'season_rating_date'
+  - 'rating'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/lms0725PolicyObservability.test.mjs:14:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'season_rating_date',
+    expected: 'rating',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\lms0728ImplicitPlayer.test.mjs:19:1
+✖ 0728 rollback and partial recovery retain metadata and business data (3886.0507ms)
+  error: LMS-0728 function drift: view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)
+      at pe.Ue (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/chunk-2BOC2OMW.js:1:17959)
+      at pe.tt (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/chunk-2BOC2OMW.js:1:15347)
+      at pe.parse (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/chunk-2BOC2OMW.js:1:14021)
+      at N.qe (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/index.js:5:1762)
+      at file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/index.js:5:1155
+      at wasm://wasm/0267bb86:wasm-function[10930]:0x5a5ccf
+      at wasm://wasm/0267bb86:wasm-function[3585]:0x27eaeb
+      at wasm://wasm/0267bb86:wasm-function[3627]:0x2869d1
+      at wasm://wasm/0267bb86:wasm-function[3637]:0x286c2d
+      at wasm://wasm/0267bb86:wasm-function[9914]:0x54fd4d {
+    length: 189,
+    severity: 'ERROR',
+    code: 'P0001',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: 'PL/pgSQL function inline_code_block line 4 at RAISE',
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'pl_exec.c',
+    line: '3923',
+    routine: 'exec_stmt_raise',
+    query: `-- LMS-0728 / 0.1.550. Local candidate; production requires exact approval.\nbegin;\ndo $guard$ declare p pg_catalog.pg_proc;begin\n select * into p from pg_catalog.pg_proc where oid=pg_catalog.to_regprocedure('view_as_private.member_role(uuid)');\n if not found or p.proowner<>'postgres'::regrole or p.prosecdef or p.proconfig is distinct from array['search_path=""']\n or p.proisstrict or p.proleakproof or pg_catalog.md5(p.prosrc) not in('0929cadc3946616a91615b2574401984','8ffcd39ccac0b130699a103caefedcd0') then raise exception 'LMS-0728 function drift: view_as_private.member_role(uuid)';end if;\n if exists(select 1 from pg_catalog.aclexplode(coalesce(p.proacl,pg_catalog.acldefault('f',p.proowner))) a where a.grantee not in(p.proowner,'lms_view_as_executor'::regrole::oid) or a.is_grantable)\n or not pg_catalog.has_function_privilege('lms_view_as_executor',p.oid,'EXECUTE') then raise exception 'LMS-0728 ACL drift: view_as_private.member_role(uuid)';end if;\nend $guard$;\ndo $guard$ declare p pg_catalog.pg_proc;begin\n select * into p from pg_catalog.pg_proc where oid=pg_catalog.to_regprocedure('view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)');\n if not found or p.proowner<>'postgres'::regrole or p.prosecdef or p.proconfig is distinct from array['search_path=""']\n or p.proisstrict or p.proleakproof or pg_catalog.md5(p.prosrc) not in('302293b776d734e1573238116c01ec4d','3d8ce5f61c83215561784840ff7ee551') then raise exception 'LMS-0728 function drift: view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)';end if;\n if exists(select 1 from pg_catalog.aclexplode(coalesce(p.proacl,pg_catalog.acldefault('f',p.proowner))) a where a.grantee not in(p.proowner,'lms_view_as_executor'::regrole::oid) or a.is_grantable)\n or not pg_catalog.has_function_privilege('lms_view_as_executor',p.oid,'EXECUTE') then raise exception 'LMS-0728 ACL drift: view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)';end if;\nend $guard$;\ncreate or replace function view_as_private.member_role(p_member uuid) returns text\nlanguage sql stable security invoker set search_path='' as $$\n -- Member validity is independent of whether a baseline role is stored.\n select case when not exists(select 1 from public.user_roles u where u.member_id=m.id) then 'player'\n else (select (array_agg(u.role order by case u.role when 'commissioner' then 5 when 'league_manager' then 4 when 'club_pro' then 3 when 'captain' then 2 when 'player' then 1 else 0 end desc))[1]\n       from public.user_roles u where u.member_id=m.id and u.role in('commissioner','league_manager','club_pro','captain','player')) end\n from public.members m where m.id=p_member and m.is_active_member is true\n and (select count(distinct u.user_id) from public.user_roles u where u.member_id=m.id)<=1\n and not exists(select 1 from public.user_roles a join public.user_roles b on a.user_id=b.user_id where a.member_id=m.id and b.member_id<>m.id)\n$$;\ncreate or replace function view_as_private.lookup(p_actor uuid,p_member uuid,p_context uuid,p_request uuid,p_query jsonb)\nreturns jsonb language plpgsql security invoker set search_path='' as $$\ndeclare\n v_member uuid; v_role text; v_intent text:=p_query->>'intent'; v_target uuid; v_team uuid;\n v_season uuid; v_name text; v_label text; v_rating text:=p_query->>'rating'; v_value text;\n v_teams uuid[]; v_population uuid[]; v_choices jsonb; v_context record; v_match record;\n v_count int; v_choice_offset int:=coalesce((p_query->>'choiceOffset')::int,0); v_offset int:=coalesce((p_query->>'offset')::int,0); v_relation text; v_tz text;\n v_person_lookup boolean; v_subject_kind text:=p_query->>'subjectKind';\n v_proof jsonb:=p_query->'_view_proof'; v_result jsonb; v_query_started timestamptz; v_start timestamptz:=clock_timestamp();\nv_eligibility_snapshot jsonb;v_eligibility_inputs jsonb;\nbegin\n\n if p_query->>'intent'='ELIGIBILITY_SELF' then\n  if p_query->>'subjectKind' is distinct from 'SELF' or p_query->>'rating' is null or p_query->>'rating' not in ('season','primetime')\n   or exists(select 1 from pg_catalog.jsonb_object_keys(p_query) k where k not in ('intent','origin','rating','season','subjectKind','_view_proof')) then return jsonb_build_object('status','denied');end if;\n  v_eligibility_snapshot:=view_as_private.lookup(p_actor,p_member,p_context,p_request,jsonb_set(jsonb_set(p_query,'{intent}','"SELF_RATING"'::jsonb),'{_view_proof,intent}','"SELF_RATING"'::jsonb));\n  if v_eligibility_snapshot->>'status' not in ('success','missing') then return jsonb_build_object('status',v_eligibility_snapshot->>'status','choiceKind',v_eligibility_snapshot->>'choiceKind','choices',v_eligibility_snapshot->'choices');end if;\n  if (v_eligibility_snapshot->>'subject')::uuid is distinct from p_member then return jsonb_build_object('status','denied');end if;\n  select jsonb_build_object('sourceIsNr',case when upper(trim(r.dupr_doubles_rating))='NR' then true when trim(r.dupr_doubles_rating) ~ '^[0-9]+([.][0-9]+)?$' then false else null end,'rf',r.dupr_reliability_rating,'value',case when p_query->>'rating'='primetime' then r.season_primetime_rating else r.season_dupr_rating end) into v_eligibility_inputs from public.member_season_ratings r where r.member_id=(v_eligibility_snapshot->>'subject')::uuid and r.season_id=(v_eligibility_snapshot->>'seasonRef')::uuid;\n  insert into view_as_private.audit_events(context_id,actor,effective_member,subject,event,capability,reason) values(p_context,p_actor,p_member,p_member,'SENSITIVE_READ','ELIGIBILITY_SELF',v_eligibility_snapshot->>'status');\n  return jsonb_build_object('status',v_eligibility_snapshot->>'status','season',v_eligibility_snapshot->>'season','seasonRef',v_eligibility_snapshot->>'seasonRef','rating',p_query->>'rating')||coalesce(v_eligibility_inputs,jsonb_build_object('sourceIsNr',null,'rf',null,'value',null));\n end if;\n p_query:=p_query-'_view_proof';\n if v_proof is null or (v_proof->>'actor')::uuid is distinct from p_actor\n or (v_proof->>'id')::uuid is distinct from p_context\n or (v_proof->>'target')::uuid is distinct from p_member\n or not view_as_private.lock_authorization(v_proof,'identity') then return jsonb_build_object('status','denied');end if;\n if p_actor is null then return jsonb_build_object('status','denied'); end if;\n -- The preceding context proof/lock remains authoritative; never infer the actor as SELF.\n v_role:=view_as_private.member_role(p_member);\n if v_role is not null then v_member:=p_member; end if;\n if p_query->>'origin'='manager_test' and v_role not in ('league_manager','commissioner') then return jsonb_build_object('status','denied'); end if;\n if v_member is null then return jsonb_build_object('status','denied'); end if;\n if v_intent not in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') then return jsonb_build_object('status','unsupported'); end if;\n if v_choice_offset<0 or v_choice_offset>5000 or v_offset<0 or v_offset>5000 or octet_length(p_query::text)>4096 then return jsonb_build_object('status','unsupported'); end if;\n -- Subject classification is server-generated. Explicit/referential requests\n -- cannot recover by defaulting to the requester when identity is absent.\n if v_subject_kind is not null and v_subject_kind not in ('SELF','EXPLICIT_PERSON','FOLLOWUP_REFERENT','NONE') then return jsonb_build_object('status','unsupported'); end if;\n if p_query?'subject' and coalesce(p_query->>'subject','') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then return jsonb_build_object('status','denied'); end if;\n if (v_subject_kind='EXPLICIT_PERSON' and not(p_query?'name' or p_query?'subject'))\n or (v_subject_kind='FOLLOWUP_REFERENT' and not(p_query?'subject'))\n or (p_query?'name' and p_query?'subject')\n or ((v_subject_kind='SELF' or p_query->>'self'='true' or v_intent='SELF_RATING') and (p_query?'name' or (p_query?'subject' and (p_query->>'subject')::uuid<>v_member)))\n or (v_intent='SELF_RATING' and v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')) then return jsonb_build_object('status','denied'); end if;\n v_person_lookup:=v_intent in ('PLAYER_RATING','PLAYER_CONTACT') or p_query?'name'\n   or v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')\n   or (p_query?'subject' and (p_query->>'subject')::uuid is distinct from v_member);\n -- Serialize budgets and feedback independently of hosting instances.\n perform pg_advisory_xact_lock(hashtextextended(p_actor::text,724));\n if (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 minute')>=10\n or (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 day')>=100\n or (v_intent='PLAYER_CONTACT' and ((select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 minute')>=5\n or (select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 day')>=30)) then return jsonb_build_object('status','rate_limited'); end if;\n insert into view_as_private.attempts(actor,contact) values(p_actor,v_intent='PLAYER_CONTACT');\n -- Active state comes from LMS flags, not today's date or browser claims.\n select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t\n join public.divisions d on d.id=t.division_id and d.is_active is true\n join public.leagues l on l.id=d.league_id and l.is_active is true\n join public.seasons s on s.id=l.season_id and s.is_active is true\n where t.is_active is true and (v_role in ('league_manager','commissioner')\n or (v_role in ('captain','club_pro') and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id))\n or (v_intent in ('SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') and exists(select 1 from public.team_members tm where tm.team_id=t.id and tm.member_id=v_member and tm.is_active is true)));\n if p_query?'teamName' then select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t where t.id=any(v_teams) and lower(trim(t.name))=lower(trim(p_query->>'teamName')); end if;\n v_relation:=ca`... 12412 more characters,
+    params: undefined,
+    queryOptions: undefined
+  }
+
+test at test\lms0729LiveRecord.test.mjs:19:1
+✖ 0729 SQL identity, record, feedback and effective View-As (4837.7997ms)
+  error: LMS-0729 function drift public.ai_live_feedback(uuid,uuid,boolean,jsonb)
+      at pe.Ue (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/chunk-2BOC2OMW.js:1:17959)
+      at pe.tt (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/chunk-2BOC2OMW.js:1:15347)
+      at pe.parse (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/chunk-2BOC2OMW.js:1:14021)
+      at N.qe (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/index.js:5:1762)
+      at file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/node_modules/@electric-sql/pglite/dist/index.js:5:1155
+      at wasm://wasm/0267bb86:wasm-function[10930]:0x5a5ccf
+      at wasm://wasm/0267bb86:wasm-function[3585]:0x27eaeb
+      at wasm://wasm/0267bb86:wasm-function[3627]:0x2869d1
+      at wasm://wasm/0267bb86:wasm-function[3637]:0x286c2d
+      at wasm://wasm/0267bb86:wasm-function[9914]:0x54fd4d {
+    length: 187,
+    severity: 'ERROR',
+    code: 'P0001',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: 'PL/pgSQL function inline_code_block line 1 at RAISE',
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'pl_exec.c',
+    line: '3923',
+    routine: 'exec_stmt_raise',
+    query: `-- LMS-0729 / 0.1.551 local candidate. No production approval.\nbegin;\ndo $guard$ begin\n if not exists(select 1 from pg_roles where rolname='lms_view_as_reader' and not rolsuper and not rolinherit and not rolcreaterole and not rolcreatedb and not rolcanlogin and not rolreplication and not rolbypassrls) then raise exception 'LMS-0729 reader role drift';end if;\n if exists(select 1 from pg_auth_members where member='lms_view_as_reader'::regrole) or exists(select 1 from pg_auth_members where roleid='lms_view_as_reader'::regrole and member<>'postgres'::regrole) then raise exception 'LMS-0729 reader membership drift';end if;\n if has_schema_privilege('anon','lms_read_private','USAGE') or has_schema_privilege('authenticated','lms_read_private','USAGE') then raise exception 'LMS-0729 browser schema drift';end if;\nend $guard$;\ndo $guard$ declare p pg_catalog.pg_proc;begin select * into p from pg_catalog.pg_proc where oid=to_regprocedure('ai_live_private.lookup(uuid,uuid,jsonb)');if not found or p.proowner<>'postgres'::regrole or p.prosecdef or p.proconfig is distinct from array['search_path=""'] or md5(p.prosrc) not in('fecb77efcf5c33008b43a230fc31d3e9','57f4a0385936a691935dd1c73fd81d90') then raise exception 'LMS-0729 function drift ai_live_private.lookup(uuid,uuid,jsonb)';end if;if exists(select 1 from aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a where a.grantee not in(p.proowner,'service_role'::regrole::oid) or a.is_grantable) or not has_function_privilege('service_role',p.oid,'EXECUTE') then raise exception 'LMS-0729 ACL drift';end if;end $guard$;\ndo $guard$ declare p pg_catalog.pg_proc;begin select * into p from pg_catalog.pg_proc where oid=to_regprocedure('public.ai_live_feedback(uuid,uuid,boolean,jsonb)');if not found or p.proowner<>'postgres'::regrole or p.prosecdef or p.proconfig is distinct from array['search_path=""'] or md5(p.prosrc) not in('b8f129db990b3f4001b11cb72874f1b1','690795e9d4a67cef7fe43d6b3f1e7b9a') then raise exception 'LMS-0729 function drift public.ai_live_feedback(uuid,uuid,boolean,jsonb)';end if;if exists(select 1 from aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a where a.grantee not in(p.proowner,'service_role'::regrole::oid) or a.is_grantable) or not has_function_privilege('service_role',p.oid,'EXECUTE') then raise exception 'LMS-0729 ACL drift';end if;end $guard$;\ndo $guard$ declare p pg_catalog.pg_proc;begin select * into p from pg_catalog.pg_proc where oid=to_regprocedure('view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)');if not found or p.proowner<>'postgres'::regrole or p.prosecdef or p.proconfig is distinct from array['search_path=""'] or md5(p.prosrc) not in('3d8ce5f61c83215561784840ff7ee551','000f219d61b182494ced2bb1bf2f4b1e') then raise exception 'LMS-0729 function drift view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)';end if;if exists(select 1 from aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a where a.grantee not in(p.proowner,'lms_view_as_executor'::regrole::oid) or a.is_grantable) or not has_function_privilege('lms_view_as_executor',p.oid,'EXECUTE') then raise exception 'LMS-0729 ACL drift';end if;end $guard$;\ndo $guard$ declare p pg_proc;begin select * into p from pg_proc where oid=to_regprocedure('ai_live_private.resolve_identity(uuid)');if found and (md5(p.prosrc)<>'3d9f92aa75d5c06f59e535c12170c086' or p.proowner<>'postgres'::regrole or p.prosecdef is distinct from true or p.proconfig is distinct from array['search_path=""'] or exists(select 1 from aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a where a.grantee not in(p.proowner,'service_role'::regrole::oid) or a.is_grantable)) then raise exception 'LMS-0729 helper drift';end if;end $guard$;\ndo $guard$ declare p pg_proc;begin select * into p from pg_proc where oid=to_regprocedure('lms_read_private.team_record(uuid,text,jsonb)');if found and (md5(p.prosrc)<>'9c56f5f5679651cdec658548d2162a71' or p.proowner<>'lms_view_as_reader'::regrole or p.prosecdef is distinct from true or p.proconfig is distinct from array['search_path=""'] or exists(select 1 from aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a where a.grantee not in(p.proowner,'service_role'::regrole::oid,'lms_view_as_executor'::regrole::oid) or a.is_grantable)) then raise exception 'LMS-0729 helper drift';end if;end $guard$;\ncreate or replace function ai_live_private.resolve_identity(p_actor uuid) returns jsonb\nlanguage plpgsql security definer set search_path='' as $$\ndeclare m uuid; n integer; r text; linked uuid;\nbegin\n if p_actor is null then return null;end if;\n select count(distinct member_id),min(member_id::text)::uuid into n,linked from public.user_roles where user_id=p_actor;\n if n>1 then return null;end if;\n m:=linked;\n if m is null then\n  select count(*),min(b.id::text)::uuid into n,m from auth.users a join public.members b on lower(btrim(b.email))=lower(btrim(a.email)) where a.id=p_actor;\n  if n<>1 then return null;end if;\n end if;\n perform identity_repair_private.take_keys(identity_repair_private.keys_for(p_actor,m));\n if not exists(select 1 from auth.users where id=p_actor and deleted_at is null and is_anonymous is not true and (banned_until is null or banned_until<=statement_timestamp())) then return null;end if;\n if not exists(select 1 from public.members where id=m and is_active_member is true) then return null;end if;\n if exists(select 1 from public.user_roles where (user_id=p_actor and member_id is distinct from m) or (member_id=m and user_id is not null and user_id<>p_actor)) then return null;end if;\n if linked is null then\n  if exists(select 1 from public.user_roles where member_id=m) or not identity_repair_private.eligible(p_actor,m) then return null;end if;\n  r:='player';\n else\n  select role into r from public.user_roles where member_id=m and role in('player','captain','club_pro','league_manager','commissioner')\n  order by case role when 'commissioner' then 5 when 'league_manager' then 4 when 'club_pro' then 3 when 'captain' then 2 else 1 end desc limit 1;\n end if;\n if r is null then return null;end if;\n return jsonb_build_object('memberId',m,'role',r);\nend $$;\nrevoke all on function ai_live_private.resolve_identity(uuid) from public,anon,authenticated,service_role;\ngrant execute on function ai_live_private.resolve_identity(uuid) to service_role;\n\ngrant lms_view_as_reader to postgres with admin false, inherit false, set true;\ngrant create on schema lms_read_private to lms_view_as_reader;\nset local role lms_view_as_reader;\ncreate or replace function lms_read_private.team_record(p_member uuid,p_role text,p_query jsonb) returns jsonb\nlanguage plpgsql security definer set search_path='' as $$\ndeclare result jsonb; off integer:=coalesce((p_query->>'choiceOffset')::integer,0);\nbegin\n if p_member is null or p_role is null or p_role not in('player','captain','club_pro','league_manager','commissioner')\n or not exists(select 1 from public.members where id=p_member and is_active_member is true)\n or p_query->>'intent' is distinct from 'TEAM_RECORD' or off<0 or off>5000 or octet_length(p_query::text)>4096\n or exists(select 1 from jsonb_object_keys(p_query) k where k not in('intent','origin','subjectKind','self','projection','team','teamName','season','seasonName','scopeName','choiceOffset'))\n or coalesce(p_query->>'self','') not in('true','false') or (p_query->>'self'='false' and nullif(btrim(p_query->>'teamName'),'') is null)\n or coalesce(p_query->>'projection','record') not in('record','wins','losses','played','points')\n or (p_query?'team' and p_query->>'team' !~* '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$') or (p_query?'season' and p_query->>'season' !~* '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')\n then return jsonb_build_object('status','denied');end if;\n -- One statement snapshot binds relationship, hierarchy, choices and result.\n with candidates as materialized (\n  select t.id,t.name team,d.id division_id,d.name division,l.id league_id,l.name league,s.id season_id,s.name season\n  from public.teams t join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id join public.seasons s on s.id=l.season_id\n  where ((not(p_query?'seasonName') and t.is_active is true and d.is_active is true and l.is_active is true and s.is_active is true)\n    or (p_query?'seasonName' and (lower(s.name)=lower(p_query->>'seasonName') or p_query->>'seasonName'='__clarify_history__' and s.is_active is false)))\n  and (not(p_query?'scopeName') or lower(d.name)=lower(p_query->>'scopeName') or lower(l.name)=lower(p_query->>'scopeName'))\n  and (not(p_query?'season') or s.id=(p_query->>'season')::uuid)\n  and (not(p_query?'teamName') or lower(btrim(t.name))=lower(btrim(p_query->>'teamName')))\n  and ((p_query->>'self'='true' and (exists(select 1 from public.team_members tm where tm.team_id=t.id and tm.member_id=p_member and tm.is_active is true)\n    or p_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)))\n    or (p_query->>'self'='false' and nullif(btrim(p_query->>'teamName'),'') is not null))\n ), selected as (select * from candidates where not(p_query?'team') or id=(p_query->>'team')::uuid),\n choices as (select id team,team||' — '||division||', '||league||', '||season label from candidates order by candidates.team,division,league,season,id offset off limit 6),\n snapshot as (select c.*,st.match_wins,st.match_losses,st.match_ties,st.matches_played,st.standings_points,st.team_id standing_team from selected c\n left join public.team_standings st on st.team_id=c.id and st.division_id=c.division_id and st.league_id=c.league_id)\n select case when (select count(*) from candidates)=0 then jsonb_build_object('status','no_team')\n when p_query?'team' and (select count(*) from selected)=0 then jsonb_build_object('status','denied')\n when (select count(*) from selected)>1 then jsonb_build_object('status','ambiguous','choiceKind','team and season','choices',(select coalesce(jsonb_agg(to_jsonb(c)),'[]') from (select * fro`... 42142 more characters,
+    params: undefined,
+    queryOptions: undefined
+  }
+
+test at test\viewAsLockCorrection.test.mjs:65:1
+✖ 0724 review-only rollback restores prior function and privilege state without data changes (1478.155ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      {
+        proacl: [
+          'postgres=X/postgres',
+          'lms_view_as_executor=X/postgres'
+  ...
+        prosecdef: false,
+  +     prosrc: '\r\n' +
+  +       'declare\r\n' +
+  +       " v_member uuid; v_role text; v_intent text:=p_query->>'intent'; v_target uuid; v_team uuid;\r\n" +
+  +       " v_season uuid; v_name text; v_label text; v_rating text:=p_query->>'rating'; v_value text;\r\n" +
+  +       ' v_teams uuid[]; v_population uuid[]; v_choices jsonb; v_context record; v_match record;\r\n' +
+  +       " v_count int; v_choice_offset int:=coalesce((p_query->>'choiceOffset')::int,0); v_offset int:=coalesce((p_query->>'offset')::int,0); v_relation text; v_tz text;\r\n" +
+  +       " v_person_lookup boolean; v_subject_kind text:=p_query->>'subjectKind';\r\n" +
+  +       ' v_result jsonb; v_query_started timestamptz; v_start timestamptz:=clock_timestamp();\r\n' +
+  +       'begin\r\n' +
+  +       " if p_actor is null then return jsonb_build_object('status','denied'); end if;\r\n" +
+  +       ' select u.member_id,u.role into v_member,v_role from public.user_roles u join public.members m on m.id=u.member_id\r\n' +
+  +       " where u.member_id=p_member and m.is_active_member is true and u.role in ('player','captain','club_pro','league_manager','commissioner') order by case u.role when 'commissioner' then 5 when 'league_manager' then 4 when 'club_pro' then 3 when 'captain' then 2 else 1 end desc limit 1 for share of u,m;\r\n" +
+  +       " if p_query->>'origin'='manager_test' and v_role not in ('league_manager','commissioner') then return jsonb_build_object('status','denied'); end if;\r\n" +
+  +       " if v_member is null then return jsonb_build_object('status','denied'); end if;\r\n" +
+  +       " if v_intent not in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') then return jsonb_build_object('status','unsupported'); end if;\r\n" +
+  +       " if v_choice_offset<0 or v_choice_offset>5000 or v_offset<0 or v_offset>5000 or octet_length(p_query::text)>4096 then return jsonb_build_object('status','unsupported'); end if;\r\n" +
+  +       ' -- Subject classification is server-generated. Explicit/referential requests\r\n' +
+  +       ' -- cannot recover by defaulting to the requester when identity is absent.\r\n' +
+  +       " if v_subject_kind is not null and v_subject_kind not in ('SELF','EXPLICIT_PERSON','FOLLOWUP_REFERENT','NONE') then return jsonb_build_object('status','unsupported'); end if;\r\n" +
+  +       " if p_query?'subject' and coalesce(p_query->>'subject','') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then return jsonb_build_object('status','denied'); end if;\r\n" +
+  +       " if (v_subject_kind='EXPLICIT_PERSON' and not(p_query?'name' or p_query?'subject'))\r\n" +
+  +       " or (v_subject_kind='FOLLOWUP_REFERENT' and not(p_query?'subject'))\r\n" +
+  +       " or (p_query?'name' and p_query?'subject')\r\n" +
+  +       " or ((v_subject_kind='SELF' or p_query->>'self'='true' or v_intent='SELF_RATING') and (p_query?'name' or (p_query?'subject' and (p_query->>'subject')::uuid<>v_member)))\r\n" +
+  +       " or (v_intent='SELF_RATING' and v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')) then return jsonb_build_object('status','denied'); end if;\r\n" +
+  +       " v_person_lookup:=v_intent in ('PLAYER_RATING','PLAYER_CONTACT') or p_query?'name'\r\n" +
+  +       "   or v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')\r\n" +
+  +       "   or (p_query?'subject' and (p_query->>'subject')::uuid is distinct from v_member);\r\n" +
+  +       ' -- Serialize budgets and feedback independently of hosting instances.\r\n' +
+  +       ' perform pg_advisory_xact_lock(hashtextextended(p_actor::text,724));\r\n' +
+  +       " if (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 minute')>=10\r\n" +
+  +       " or (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 day')>=100\r\n" +
+  +       " or (v_intent='PLAYER_CONTACT' and ((select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 minute')>=5\r\n" +
+  +       " or (select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 day')>=30)) then return jsonb_build_object('status','rate_limited'); end if;\r\n" +
+  +       " insert into view_as_private.attempts(actor,contact) values(p_actor,v_intent='PLAYER_CONTACT');\r\n" +
+  +       " -- Active state comes from LMS flags, not today's date or browser claims.\r\n" +
+  +       " select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t\r\n" +
+  +       ' join public.divisions d on d.id=t.division_id and d.is_active is true\r\n' +
+  +       ' join public.leagues l on l.id=d.league_id and l.is_active is true\r\n' +
+  +       ' join public.seasons s on s.id=l.season_id and s.is_active is true\r\n' +
+  +       " where t.is_active is true and (v_role in ('league_manager','commissioner')\r\n" +
+  +       " or (v_role in ('captain','club_pro') and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id))\r\n" +
+  +       " or (v_intent in ('SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') and exists(select 1 from public.team_members tm where tm.team_id=t.id and tm.member_id=v_member and tm.is_active is true)));\r\n" +
+  +       " if p_query?'teamName' then select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t where t.id=any(v_teams) and lower(trim(t.name))=lower(trim(p_query->>'teamName')); end if;\r\n" +
+  +       " v_relation:=case when v_role in ('league_manager','commissioner') then 'manager' when v_intent='SELF_RATING' then 'self' else 'team' end;\r\n" +
+  +       ' if v_person_lookup then\r\n' +
+  +       "  if v_role='player' then return jsonb_build_object('status','denied'); end if;\r\n" +
+  +       '  -- Only IDs/names are available during resolution. No contact/rating lookup yet.\r\n' +
+  +       "  select coalesce(array_agg(m.id),'{}'::uuid[]) into v_population from public.members m\r\n" +
+  +       "  where m.is_active_member is true and (v_role in ('league_manager','commissioner') or exists(\r\n" +
+  +       '   select 1 from public.team_members tm join public.teams t on t.id=tm.team_id\r\n' +
+  +       '   where tm.member_id=m.id and tm.is_active is true and tm.team_id=any(v_teams)\r\n' +
+  +       '   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)));\r\n' +
+  +       "  if p_query?'subject' then v_target:=(p_query->>'subject')::uuid;\r\n" +
+  +       "   if not(v_target=any(v_population)) then return jsonb_build_object('status','not_found'); end if;\r\n" +
+  +       '  else\r\n' +
+  +       "   v_name:=lower(regexp_replace(trim(p_query->>'name'),'\\s+',' ','g'));\r\n" +
+  +       "   if v_name is null or length(v_name)<3 or v_name ~ '[%_@]' then return jsonb_build_object('status','not_found'); end if;\r\n" +
+  +       "   select count(*),min(m.id::text)::uuid into v_count,v_target from public.members m where m.id=any(v_population) and lower(trim(m.first_name||' '||m.last_name))=v_name;\r\n" +
+  +       '   if v_count<>1 then\r\n' +
+  +       "    select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (\r\n" +
+  +       "     select m.id as subject,trim(m.first_name||' '||m.last_name) as label from public.members m where m.id=any(v_population)\r\n" +
+  +       "     and lower(trim(m.first_name||' '||m.last_name)) like '%'||v_name||'%' order by m.first_name,m.last_name,m.id limit 5\r\n" +
+  +       '    ) x;\r\n' +
+  +       "    if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','not_found'); end if;\r\n" +
+  +       "    if (select count(distinct x->>'label') from jsonb_array_elements(v_choices) x)<jsonb_array_length(v_choices) then return jsonb_build_object('status','ambiguous','choices','[]'::jsonb,'relationship',v_relation); end if;\r\n" +
+  +       "    return jsonb_build_object('status','ambiguous','choices',v_choices,'relationship',v_relation);\r\n" +
+  +       '   end if;\r\n' +
+  +       '  end if;\r\n' +
+  +       " else v_target:=v_member; v_relation:=case when v_intent='SELF_RATING' or v_role='player' then 'self' else v_relation end;\r\n" +
+  +       ' end if;\r\n' +
+  +       ' -- Lock and recheck the resolved subject and the granting relationships before\r\n' +
+  +       ' -- the field query. Removal during name resolution cannot leave a stale grant.\r\n' +
+  +       ' perform 1 from public.members where id=v_target and is_active_member is true for share;\r\n' +
+  +       " if not found then return jsonb_build_object('status','not_found'); end if;\r\n" +
+  +       " if v_target<>v_member and v_role not in ('league_manager','commissioner') then\r\n" +
+  +       '  perform 1 from public.team_members tm join public.teams t on t.id=tm.team_id\r\n' +
+  +       '   join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id join public.seasons s on s.id=l.season_id\r\n' +
+  +       '   where tm.member_id=v_target and tm.is_active is true and t.is_active is true and d.is_active is true and l.is_active is true and s.is_active is true\r\n' +
+  +       '   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)\r\n' +
+  +       '   for share of tm,t,d,l,s;\r\n' +
+  +       "  if not found then return jsonb_build_object('status','not_found'); end if;\r\n" +
+  +       ' end if;\r\n' +
+  +       " if v_intent in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT') then select trim(first_name||' '||last_name) into v_label from public.members where id=v_target; end if;\r\n" +
+  +       ' v_query_started:=clock_timestamp();\r\n' +
+  +       " if v_intent='PLAYER_CONTACT' then\r\n" +
+  +       '  select email into v_value from public.members where id=v_target and id=any(v_population) and is_active_member is true;\r\n' +
+  +       '  -- Audit insert failure rolls back and prevents email disclosure.\r\n' +
+  +       "  insert into view_as_private.audit_events(context_id,actor,effective_member,subject,event,capability,reason) values(p_context,p_actor,p_member,v_target,'SENSITIVE_READ',v_intent,case when nullif(v_value,'') is null then 'missing' else 'success' end);\r\n" +
+  +       "  return jsonb_build_object('status',case when nullif(v_value,'') is null then 'missing' else 'success' end,'intent',v_intent,'label',v_label,'value',v_value,'subject',v_target,'relationship',v_relation,'resolutionMs',extract(epoch from(v_query_started-v_start))*1000,'queryMs',extract(epoch from(clock_timestamp()-v_query_started))*1000);\r\n" +
+  +       ' end if;\r\n' +
+  +       " if v_intent in ('SELF_RATING','PLAYER_RATING') then\r\n" +
+  +       "  if v_rating not in ('season','primetime') or v_rating is null then return jsonb_build_object('status','rating_clarification','subject',v_target,'relationship',v_relation); end if;\r\n" +
+  +       "  select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (select s.id as season,s.name as label from public.seasons s where s.is_active is true\r\n" +
+  +       "   and (v_intent='SELF_RATING' or v_role in ('league_manager','commissioner') or exists(select 1 from public.team_members tm join public.teams t on t.id=tm.team_id join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id where tm.member_id=v_target and tm.is_active is true and t.id=any(v_teams) and l.season_id=s.id)) order by s.name,s.id limit 5) x;\r\n" +
+  +       "  if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','no_season','relationship',v_relation); end if;\r\n" +
+  +       "  if p_query?'season' then v_season:=(p_quer"... 7175 more characters,
+  -     prosrc: '\n' +
+  -       'declare\n' +
+  -       " v_member uuid; v_role text; v_intent text:=p_query->>'intent'; v_target uuid; v_team uuid;\n" +
+  -       " v_season uuid; v_name text; v_label text; v_rating text:=p_query->>'rating'; v_value text;\n" +
+  -       ' v_teams uuid[]; v_population uuid[]; v_choices jsonb; v_context record; v_match record;\n' +
+  -       " v_count int; v_choice_offset int:=coalesce((p_query->>'choiceOffset')::int,0); v_offset int:=coalesce((p_query->>'offset')::int,0); v_relation text; v_tz text;\n" +
+  -       " v_person_lookup boolean; v_subject_kind text:=p_query->>'subjectKind';\n" +
+  -       ' v_result jsonb; v_query_started timestamptz; v_start timestamptz:=clock_timestamp();\n' +
+  -       'begin\n' +
+  -       " if p_actor is null then return jsonb_build_object('status','denied'); end if;\n" +
+  -       ' select u.member_id,u.role into v_member,v_role from public.user_roles u join public.members m on m.id=u.member_id\n' +
+  -       " where u.member_id=p_member and m.is_active_member is true and u.role in ('player','captain','club_pro','league_manager','commissioner') order by case u.role when 'commissioner' then 5 when 'league_manager' then 4 when 'club_pro' then 3 when 'captain' then 2 else 1 end desc limit 1 for share of u,m;\n" +
+  -       " if p_query->>'origin'='manager_test' and v_role not in ('league_manager','commissioner') then return jsonb_build_object('status','denied'); end if;\n" +
+  -       " if v_member is null then return jsonb_build_object('status','denied'); end if;\n" +
+  -       " if v_intent not in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') then return jsonb_build_object('status','unsupported'); end if;\n" +
+  -       " if v_choice_offset<0 or v_choice_offset>5000 or v_offset<0 or v_offset>5000 or octet_length(p_query::text)>4096 then return jsonb_build_object('status','unsupported'); end if;\n" +
+  -       ' -- Subject classification is server-generated. Explicit/referential requests\n' +
+  -       ' -- cannot recover by defaulting to the requester when identity is absent.\n' +
+  -       " if v_subject_kind is not null and v_subject_kind not in ('SELF','EXPLICIT_PERSON','FOLLOWUP_REFERENT','NONE') then return jsonb_build_object('status','unsupported'); end if;\n" +
+  -       " if p_query?'subject' and coalesce(p_query->>'subject','') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then return jsonb_build_object('status','denied'); end if;\n" +
+  -       " if (v_subject_kind='EXPLICIT_PERSON' and not(p_query?'name' or p_query?'subject'))\n" +
+  -       " or (v_subject_kind='FOLLOWUP_REFERENT' and not(p_query?'subject'))\n" +
+  -       " or (p_query?'name' and p_query?'subject')\n" +
+  -       " or ((v_subject_kind='SELF' or p_query->>'self'='true' or v_intent='SELF_RATING') and (p_query?'name' or (p_query?'subject' and (p_query->>'subject')::uuid<>v_member)))\n" +
+  -       " or (v_intent='SELF_RATING' and v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')) then return jsonb_build_object('status','denied'); end if;\n" +
+  -       " v_person_lookup:=v_intent in ('PLAYER_RATING','PLAYER_CONTACT') or p_query?'name'\n" +
+  -       "   or v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')\n" +
+  -       "   or (p_query?'subject' and (p_query->>'subject')::uuid is distinct from v_member);\n" +
+  -       ' -- Serialize budgets and feedback independently of hosting instances.\n' +
+  -       ' perform pg_advisory_xact_lock(hashtextextended(p_actor::text,724));\n' +
+  -       " if (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 minute')>=10\n" +
+  -       " or (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 day')>=100\n" +
+  -       " or (v_intent='PLAYER_CONTACT' and ((select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 minute')>=5\n" +
+  -       " or (select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 day')>=30)) then return jsonb_build_object('status','rate_limited'); end if;\n" +
+  -       " insert into view_as_private.attempts(actor,contact) values(p_actor,v_intent='PLAYER_CONTACT');\n" +
+  -       " -- Active state comes from LMS flags, not today's date or browser claims.\n" +
+  -       " select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t\n" +
+  -       ' join public.divisions d on d.id=t.division_id and d.is_active is true\n' +
+  -       ' join public.leagues l on l.id=d.league_id and l.is_active is true\n' +
+  -       ' join public.seasons s on s.id=l.season_id and s.is_active is true\n' +
+  -       " where t.is_active is true and (v_role in ('league_manager','commissioner')\n" +
+  -       " or (v_role in ('captain','club_pro') and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id))\n" +
+  -       " or (v_intent in ('SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') and exists(select 1 from public.team_members tm where tm.team_id=t.id and tm.member_id=v_member and tm.is_active is true)));\n" +
+  -       " if p_query?'teamName' then select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t where t.id=any(v_teams) and lower(trim(t.name))=lower(trim(p_query->>'teamName')); end if;\n" +
+  -       " v_relation:=case when v_role in ('league_manager','commissioner') then 'manager' when v_intent='SELF_RATING' then 'self' else 'team' end;\n" +
+  -       ' if v_person_lookup then\n' +
+  -       "  if v_role='player' then return jsonb_build_object('status','denied'); end if;\n" +
+  -       '  -- Only IDs/names are available during resolution. No contact/rating lookup yet.\n' +
+  -       "  select coalesce(array_agg(m.id),'{}'::uuid[]) into v_population from public.members m\n" +
+  -       "  where m.is_active_member is true and (v_role in ('league_manager','commissioner') or exists(\n" +
+  -       '   select 1 from public.team_members tm join public.teams t on t.id=tm.team_id\n' +
+  -       '   where tm.member_id=m.id and tm.is_active is true and tm.team_id=any(v_teams)\n' +
+  -       '   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)));\n' +
+  -       "  if p_query?'subject' then v_target:=(p_query->>'subject')::uuid;\n" +
+  -       "   if not(v_target=any(v_population)) then return jsonb_build_object('status','not_found'); end if;\n" +
+  -       '  else\n' +
+  -       "   v_name:=lower(regexp_replace(trim(p_query->>'name'),'\\s+',' ','g'));\n" +
+  -       "   if v_name is null or length(v_name)<3 or v_name ~ '[%_@]' then return jsonb_build_object('status','not_found'); end if;\n" +
+  -       "   select count(*),min(m.id::text)::uuid into v_count,v_target from public.members m where m.id=any(v_population) and lower(trim(m.first_name||' '||m.last_name))=v_name;\n" +
+  -       '   if v_count<>1 then\n' +
+  -       "    select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (\n" +
+  -       "     select m.id as subject,trim(m.first_name||' '||m.last_name) as label from public.members m where m.id=any(v_population)\n" +
+  -       "     and lower(trim(m.first_name||' '||m.last_name)) like '%'||v_name||'%' order by m.first_name,m.last_name,m.id limit 5\n" +
+  -       '    ) x;\n' +
+  -       "    if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','not_found'); end if;\n" +
+  -       "    if (select count(distinct x->>'label') from jsonb_array_elements(v_choices) x)<jsonb_array_length(v_choices) then return jsonb_build_object('status','ambiguous','choices','[]'::jsonb,'relationship',v_relation); end if;\n" +
+  -       "    return jsonb_build_object('status','ambiguous','choices',v_choices,'relationship',v_relation);\n" +
+  -       '   end if;\n' +
+  -       '  end if;\n' +
+  -       " else v_target:=v_member; v_relation:=case when v_intent='SELF_RATING' or v_role='player' then 'self' else v_relation end;\n" +
+  -       ' end if;\n' +
+  -       ' -- Lock and recheck the resolved subject and the granting relationships before\n' +
+  -       ' -- the field query. Removal during name resolution cannot leave a stale grant.\n' +
+  -       ' perform 1 from public.members where id=v_target and is_active_member is true for share;\n' +
+  -       " if not found then return jsonb_build_object('status','not_found'); end if;\n" +
+  -       " if v_target<>v_member and v_role not in ('league_manager','commissioner') then\n" +
+  -       '  perform 1 from public.team_members tm join public.teams t on t.id=tm.team_id\n' +
+  -       '   join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id join public.seasons s on s.id=l.season_id\n' +
+  -       '   where tm.member_id=v_target and tm.is_active is true and t.is_active is true and d.is_active is true and l.is_active is true and s.is_active is true\n' +
+  -       '   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)\n' +
+  -       '   for share of tm,t,d,l,s;\n' +
+  -       "  if not found then return jsonb_build_object('status','not_found'); end if;\n" +
+  -       ' end if;\n' +
+  -       " if v_intent in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT') then select trim(first_name||' '||last_name) into v_label from public.members where id=v_target; end if;\n" +
+  -       ' v_query_started:=clock_timestamp();\n' +
+  -       " if v_intent='PLAYER_CONTACT' then\n" +
+  -       '  select email into v_value from public.members where id=v_target and id=any(v_population) and is_active_member is true;\n' +
+  -       '  -- Audit insert failure rolls back and prevents email disclosure.\n' +
+  -       "  insert into view_as_private.audit_events(context_id,actor,effective_member,subject,event,capability,reason) values(p_context,p_actor,p_member,v_target,'SENSITIVE_READ',v_intent,case when nullif(v_value,'') is null then 'missing' else 'success' end);\n" +
+  -       "  return jsonb_build_object('status',case when nullif(v_value,'') is null then 'missing' else 'success' end,'intent',v_intent,'label',v_label,'value',v_value,'subject',v_target,'relationship',v_relation,'resolutionMs',extract(epoch from(v_query_started-v_start))*1000,'queryMs',extract(epoch from(clock_timestamp()-v_query_started))*1000);\n" +
+  -       ' end if;\n' +
+  -       " if v_intent in ('SELF_RATING','PLAYER_RATING') then\n" +
+  -       "  if v_rating not in ('season','primetime') or v_rating is null then return jsonb_build_object('status','rating_clarification','subject',v_target,'relationship',v_relation); end if;\n" +
+  -       "  select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (select s.id as season,s.name as label from public.seasons s where s.is_active is true\n" +
+  -       "   and (v_intent='SELF_RATING' or v_role in ('league_manager','commissioner') or exists(select 1 from public.team_members tm join public.teams t on t.id=tm.team_id join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id where tm.member_id=v_target and tm.is_active is true and t.id=any(v_teams) and l.season_id=s.id)) order by s.name,s.id limit 5) x;\n" +
+  -       "  if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','no_season','relationship',v_relation); end if;\n" +
+  -       "  if p_query?'season' then v_season:=(p_query->>'season')::uuid;\n" +
+  -       '   if not exists(select 1 from jsonb_array_elements(v_choices) x where (x->'... 7026 more characters,
+        signature: 'view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)'
+      },
+      {
+        proacl: [
+          'lms_view_as_executor=X/lms_view_as_executor',
+  ...
+        prosecdef: true,
+  +     prosrc: '\r\n' +
+  +       'declare c view_as_private.contexts; actor_member uuid; actor_role text; target_role text; target uuid;\r\n' +
+  +       ' result jsonb; actor_name text; target_name text;\r\n' +
+  +       'begin\r\n' +
+  +       " if octet_length(p_input::text)>32000 then return jsonb_build_object('denied',true);end if;\r\n" +
+  +       " if p_op='can_start' then return jsonb_build_object('allowed',coalesce(view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid)) in('commissioner','league_manager'),false));end if;\r\n" +
+  +       " if p_op='preflight' then\r\n" +
+  +       "  actor_role:=view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid));\r\n" +
+  +       "  target:=(p_input->>'target')::uuid;target_role:=view_as_private.member_role(target);\r\n" +
+  +       "  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then return jsonb_build_object('allowed',false);end if;\r\n" +
+  +       "  select concat_ws(' ',first_name,last_name) into target_name from public.members where id=target;\r\n" +
+  +       "  return jsonb_build_object('allowed',true,'name',target_name);\r\n" +
+  +       ' end if;\r\n' +
+  +       " if p_op='start' then\r\n" +
+  +       "  actor_member:=view_as_private.actor_member((p_input->>'actor')::uuid);\r\n" +
+  +       "  actor_role:=view_as_private.member_role(actor_member);target:=(p_input->>'target')::uuid;\r\n" +
+  +       '  target_role:=view_as_private.member_role(target);\r\n' +
+  +       "  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\r\n" +
+  +       "   return jsonb_build_object('denied',true,'message','This member does not yet have enough LMS account information to simulate their signed-in experience.'); end if;\r\n" +
+  +       "  perform pg_advisory_xact_lock(hashtextextended(p_input->>'actor',724));\r\n" +
+  +       "  if (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 minute')>=5\r\n" +
+  +       "    or (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 hour')>=30\r\n" +
+  +       "    then return jsonb_build_object('denied',true);end if;\r\n" +
+  +       "  if (p_input->>'expires')::timestamptz<=clock_timestamp() or length(p_input->>'credential')>25000 then return jsonb_build_object('denied',true);end if;\r\n" +
+  +       '  insert into view_as_private.contexts(id,actor,target,binding,browser,code,credential,expires_at)\r\n' +
+  +       "  values((p_input->>'id')::uuid,(p_input->>'actor')::uuid,target,p_input->>'binding',p_input->>'browser',p_input->>'code',p_input->>'credential',least((p_input->>'expires')::timestamptz,clock_timestamp()+interval '30 minutes')) returning * into c;\r\n" +
+  +       "  return jsonb_build_object('expires',c.expires_at);\r\n" +
+  +       ' end if;\r\n' +
+  +       " if p_op='load_handoff' then select * into c from view_as_private.contexts where code=p_input->>'code' and browser=p_input->>'browser' and started_at is null for update;\r\n" +
+  +       " elsif p_op='load' then select * into c from view_as_private.contexts where context=p_input->>'context' and browser=p_input->>'browser' and started_at is not null for update;\r\n" +
+  +       " else select * into c from view_as_private.contexts where id=(p_input->>'id')::uuid and actor=(p_input->>'actor')::uuid and browser=p_input->>'browser' for update;\r\n" +
+  +       ' end if;\r\n' +
+  +       " if c.id is null or c.ended_at is not null then return jsonb_build_object('denied',true);end if;\r\n" +
+  +       " if c.expires_at<=clock_timestamp() then perform view_as_private.end_context(c.id,'expiration');return jsonb_build_object('denied',true,'message','View As User session expired.');end if;\r\n" +
+  +       ' perform 1 from public.user_roles u join public.members m on m.id=u.member_id where u.user_id=c.actor or u.member_id=c.target for share of u,m;\r\n' +
+  +       ' actor_member:=view_as_private.actor_member(c.actor);actor_role:=view_as_private.member_role(actor_member);target_role:=view_as_private.member_role(c.target);\r\n' +
+  +       " if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\r\n" +
+  +       "  perform view_as_private.end_context(c.id,case when target_role is null then 'target_invalidation' else 'authorization_loss' end);\r\n" +
+  +       "  return jsonb_build_object('denied',true);end if;\r\n" +
+  +       " if p_op in('load','load_handoff') then\r\n" +
+  +       "  if p_op='load_handoff' and c.exchange_by<=clock_timestamp() then perform view_as_private.end_context(c.id,'handoff_expiration');return jsonb_build_object('denied',true);end if;\r\n" +
+  +       "  return jsonb_build_object('id',c.id,'actor',c.actor,'binding',c.binding,'credential',c.credential);\r\n" +
+  +       ' end if;\r\n' +
+  +       " if p_op='exchange' then\r\n" +
+  +       "  if c.code is distinct from p_input->>'code' or c.started_at is not null or c.exchange_by<=clock_timestamp() then return jsonb_build_object('denied',true);end if;\r\n" +
+  +       "  update view_as_private.contexts set code=null,context=p_input->>'context',started_at=clock_timestamp() where id=c.id returning * into c;\r\n" +
+  +       '  insert into view_as_private.audit_events(context_id,actor,effective_member,event,actor_role,effective_role)\r\n' +
+  +       "  values(c.id,c.actor,c.target,'VIEW_AS_STARTED',actor_role,target_role);\r\n" +
+  +       " elsif c.context is distinct from p_input->>'context' or c.started_at is null then return jsonb_build_object('denied',true);\r\n" +
+  +       ' end if;\r\n' +
+  +       " if p_op='end' then perform view_as_private.end_context(c.id,'explicit_exit');return jsonb_build_object('ended',true);end if;\r\n" +
+  +       " if p_op='reserve_document' then\r\n" +
+  +       '  perform pg_advisory_xact_lock(hashtextextended(c.actor::text,724));\r\n' +
+  +       "  if (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 minute')>=10\r\n" +
+  +       "   or (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 day')>=100 then return jsonb_build_object('rate_limited',true);end if;\r\n" +
+  +       "  insert into view_as_private.attempts(actor,contact) values(c.actor,false);return jsonb_build_object('allowed',true);\r\n" +
+  +       ' end if;\r\n' +
+  +       " if p_op='snapshot' then return view_as_private.snapshot(c.target,target_role);end if;\r\n" +
+  +       " if p_op='live' then\r\n" +
+  +       "  result:=view_as_private.lookup(c.actor,c.target,c.id,(p_input->>'request')::uuid,p_input->'query');\r\n" +
+  +       "  if result->>'status' in('denied','not_found','rate_limited') then\r\n" +
+  +       "   insert into view_as_private.audit_events(context_id,actor,effective_member,event,capability,reason) values(c.id,c.actor,c.target,'READ_DENIED',p_input->'query'->>'intent',result->>'status');\r\n" +
+  +       '  end if;\r\n' +
+  +       '  return result;\r\n' +
+  +       ' end if;\r\n' +
+  +       " if p_op='diagnostic' then\r\n" +
+  +       "  if p_input->>'family' not in('document','LIVE_LMS_DATA') or p_input->>'kind' not in('answer','clarification','protected','insufficient_evidence','conflict','technical_error') then return jsonb_build_object('denied',true);end if;\r\n" +
+  +       "  insert into view_as_private.diagnostic_outcomes(id,context_id,family,kind,total_ms) values((p_input->>'request')::uuid,c.id,p_input->>'family',p_input->>'kind',least(greatest((p_input->>'total_ms')::int,0),600000));\r\n" +
+  +       "  return jsonb_build_object('recorded',true);\r\n" +
+  +       ' end if;\r\n' +
+  +       " if p_op not in('resolve','exchange') then return jsonb_build_object('denied',true);end if;\r\n" +
+  +       " select concat_ws(' ',first_name,last_name) into actor_name from public.members where id=actor_member;\r\n" +
+  +       " select concat_ws(' ',first_name,last_name) into target_name from public.members where id=c.target;\r\n" +
+  +       " return jsonb_build_object('mode','VIEW_AS_READ_ONLY','readOnly',true,'actorName',actor_name,'actorRole',actor_role,\r\n" +
+  +       " 'targetName',target_name,'role',target_role,'roles',(select jsonb_agg(distinct role) from public.user_roles where member_id=c.target),\r\n" +
+  +       " 'hasAuth',(select exists(select 1 from public.user_roles where member_id=c.target and user_id is not null)),\r\n" +
+  +       " 'expires',c.expires_at,'returnPath','/members/'||c.target::text);\r\n" +
+  -     prosrc: '\n' +
+  -       'declare c view_as_private.contexts; actor_member uuid; actor_role text; target_role text; target uuid;\n' +
+  -       ' result jsonb; actor_name text; target_name text;\n' +
+  -       'begin\n' +
+  -       " if octet_length(p_input::text)>32000 then return jsonb_build_object('denied',true);end if;\n" +
+  -       " if p_op='can_start' then return jsonb_build_object('allowed',coalesce(view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid)) in('commissioner','league_manager'),false));end if;\n" +
+  -       " if p_op='preflight' then\n" +
+  -       "  actor_role:=view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid));\n" +
+  -       "  target:=(p_input->>'target')::uuid;target_role:=view_as_private.member_role(target);\n" +
+  -       "  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then return jsonb_build_object('allowed',false);end if;\n" +
+  -       "  select concat_ws(' ',first_name,last_name) into target_name from public.members where id=target;\n" +
+  -       "  return jsonb_build_object('allowed',true,'name',target_name);\n" +
+  -       ' end if;\n' +
+  -       " if p_op='start' then\n" +
+  -       "  actor_member:=view_as_private.actor_member((p_input->>'actor')::uuid);\n" +
+  -       "  actor_role:=view_as_private.member_role(actor_member);target:=(p_input->>'target')::uuid;\n" +
+  -       '  target_role:=view_as_private.member_role(target);\n' +
+  -       "  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\n" +
+  -       "   return jsonb_build_object('denied',true,'message','This member does not yet have enough LMS account information to simulate their signed-in experience.'); end if;\n" +
+  -       "  perform pg_advisory_xact_lock(hashtextextended(p_input->>'actor',724));\n" +
+  -       "  if (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 minute')>=5\n" +
+  -       "    or (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 hour')>=30\n" +
+  -       "    then return jsonb_build_object('denied',true);end if;\n" +
+  -       "  if (p_input->>'expires')::timestamptz<=clock_timestamp() or length(p_input->>'credential')>25000 then return jsonb_build_object('denied',true);end if;\n" +
+  -       '  insert into view_as_private.contexts(id,actor,target,binding,browser,code,credential,expires_at)\n' +
+  -       "  values((p_input->>'id')::uuid,(p_input->>'actor')::uuid,target,p_input->>'binding',p_input->>'browser',p_input->>'code',p_input->>'credential',least((p_input->>'expires')::timestamptz,clock_timestamp()+interval '30 minutes')) returning * into c;\n" +
+  -       "  return jsonb_build_object('expires',c.expires_at);\n" +
+  -       ' end if;\n' +
+  -       " if p_op='load_handoff' then select * into c from view_as_private.contexts where code=p_input->>'code' and browser=p_input->>'browser' and started_at is null for update;\n" +
+  -       " elsif p_op='load' then select * into c from view_as_private.contexts where context=p_input->>'context' and browser=p_input->>'browser' and started_at is not null for update;\n" +
+  -       " else select * into c from view_as_private.contexts where id=(p_input->>'id')::uuid and actor=(p_input->>'actor')::uuid and browser=p_input->>'browser' for update;\n" +
+  -       ' end if;\n' +
+  -       " if c.id is null or c.ended_at is not null then return jsonb_build_object('denied',true);end if;\n" +
+  -       " if c.expires_at<=clock_timestamp() then perform view_as_private.end_context(c.id,'expiration');return jsonb_build_object('denied',true,'message','View As User session expired.');end if;\n" +
+  -       ' perform 1 from public.user_roles u join public.members m on m.id=u.member_id where u.user_id=c.actor or u.member_id=c.target for share of u,m;\n' +
+  -       ' actor_member:=view_as_private.actor_member(c.actor);actor_role:=view_as_private.member_role(actor_member);target_role:=view_as_private.member_role(c.target);\n' +
+  -       " if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\n" +
+  -       "  perform view_as_private.end_context(c.id,case when target_role is null then 'target_invalidation' else 'authorization_loss' end);\n" +
+  -       "  return jsonb_build_object('denied',true);end if;\n" +
+  -       " if p_op in('load','load_handoff') then\n" +
+  -       "  if p_op='load_handoff' and c.exchange_by<=clock_timestamp() then perform view_as_private.end_context(c.id,'handoff_expiration');return jsonb_build_object('denied',true);end if;\n" +
+  -       "  return jsonb_build_object('id',c.id,'actor',c.actor,'binding',c.binding,'credential',c.credential);\n" +
+  -       ' end if;\n' +
+  -       " if p_op='exchange' then\n" +
+  -       "  if c.code is distinct from p_input->>'code' or c.started_at is not null or c.exchange_by<=clock_timestamp() then return jsonb_build_object('denied',true);end if;\n" +
+  -       "  update view_as_private.contexts set code=null,context=p_input->>'context',started_at=clock_timestamp() where id=c.id returning * into c;\n" +
+  -       '  insert into view_as_private.audit_events(context_id,actor,effective_member,event,actor_role,effective_role)\n' +
+  -       "  values(c.id,c.actor,c.target,'VIEW_AS_STARTED',actor_role,target_role);\n" +
+  -       " elsif c.context is distinct from p_input->>'context' or c.started_at is null then return jsonb_build_object('denied',true);\n" +
+  -       ' end if;\n' +
+  -       " if p_op='end' then perform view_as_private.end_context(c.id,'explicit_exit');return jsonb_build_object('ended',true);end if;\n" +
+  -       " if p_op='reserve_document' then\n" +
+  -       '  perform pg_advisory_xact_lock(hashtextextended(c.actor::text,724));\n' +
+  -       "  if (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 minute')>=10\n" +
+  -       "   or (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 day')>=100 then return jsonb_build_object('rate_limited',true);end if;\n" +
+  -       "  insert into view_as_private.attempts(actor,contact) values(c.actor,false);return jsonb_build_object('allowed',true);\n" +
+  -       ' end if;\n' +
+  -       " if p_op='snapshot' then return view_as_private.snapshot(c.target,target_role);end if;\n" +
+  -       " if p_op='live' then\n" +
+  -       "  result:=view_as_private.lookup(c.actor,c.target,c.id,(p_input->>'request')::uuid,p_input->'query');\n" +
+  -       "  if result->>'status' in('denied','not_found','rate_limited') then\n" +
+  -       "   insert into view_as_private.audit_events(context_id,actor,effective_member,event,capability,reason) values(c.id,c.actor,c.target,'READ_DENIED',p_input->'query'->>'intent',result->>'status');\n" +
+  -       '  end if;\n' +
+  -       '  return result;\n' +
+  -       ' end if;\n' +
+  -       " if p_op='diagnostic' then\n" +
+  -       "  if p_input->>'family' not in('document','LIVE_LMS_DATA') or p_input->>'kind' not in('answer','clarification','protected','insufficient_evidence','conflict','technical_error') then return jsonb_build_object('denied',true);end if;\n" +
+  -       "  insert into view_as_private.diagnostic_outcomes(id,context_id,family,kind,total_ms) values((p_input->>'request')::uuid,c.id,p_input->>'family',p_input->>'kind',least(greatest((p_input->>'total_ms')::int,0),600000));\n" +
+  -       "  return jsonb_build_object('recorded',true);\n" +
+  -       ' end if;\n' +
+  -       " if p_op not in('resolve','exchange') then return jsonb_build_object('denied',true);end if;\n" +
+  -       " select concat_ws(' ',first_name,last_name) into actor_name from public.members where id=actor_member;\n" +
+  -       " select concat_ws(' ',first_name,last_name) into target_name from public.members where id=c.target;\n" +
+  -       " return jsonb_build_object('mode','VIEW_AS_READ_ONLY','readOnly',true,'actorName',actor_name,'actorRole',actor_role,\n" +
+  -       " 'targetName',target_name,'role',target_role,'roles',(select jsonb_agg(distinct role) from public.user_roles where member_id=c.target),\n" +
+  -       " 'hasAuth',(select exists(select 1 from public.user_roles where member_id=c.target and user_id is not null)),\n" +
+  -       " 'expires',c.expires_at,'returnPath','/members/'||c.target::text);\n" +
+          'end ',
+        signature: 'lms_view_as(text,jsonb)'
+      }
+    ]
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-season-dupr-date/lwrpc-admin/test/viewAsLockCorrection.test.mjs:70:9)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { signature: 'view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)', prosrc: "\r\ndeclare\r\n v_member uuid; v_role text; v_intent text:=p_query->>'intent'; v_target uuid; v_team uuid;\r\n v_season uuid; v_name text; v_label text; v_rating text:=p_query->>'rating'; v_value text;\r\n v_teams uuid[]; v_population uuid[]; v_choices jsonb; v_context record; v_match record;\r\n v_count int; v_choice_offset int:=coalesce((p_query->>'choiceOffset')::int,0); v_offset int:=coalesce((p_query->>'offset')::int,0); v_relation text; v_tz text;\r\n v_person_lookup boolean; v_subject_kind text:=p_query->>'subjectKind';\r\n v_result jsonb; v_query_started timestamptz; v_start timestamptz:=clock_timestamp();\r\nbegin\r\n if p_actor is null then return jsonb_build_object('status','denied'); end if;\r\n select u.member_id,u.role into v_member,v_role from public.user_roles u join public.members m on m.id=u.member_id\r\n where u.member_id=p_member and m.is_active_member is true and u.role in ('player','captain','club_pro','league_manager','commissioner') order by case u.role when 'commissioner' then 5 when 'league_manager' then 4 when 'club_pro' then 3 when 'captain' then 2 else 1 end desc limit 1 for share of u,m;\r\n if p_query->>'origin'='manager_test' and v_role not in ('league_manager','commissioner') then return jsonb_build_object('status','denied'); end if;\r\n if v_member is null then return jsonb_build_object('status','denied'); end if;\r\n if v_intent not in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') then return jsonb_build_object('status','unsupported'); end if;\r\n if v_choice_offset<0 or v_choice_offset>5000 or v_offset<0 or v_offset>5000 or octet_length(p_query::text)>4096 then return jsonb_build_object('status','unsupported'); end if;\r\n -- Subject classification is server-generated. Explicit/referential requests\r\n -- cannot recover by defaulting to the requester when identity is absent.\r\n if v_subject_kind is not null and v_subject_kind not in ('SELF','EXPLICIT_PERSON','FOLLOWUP_REFERENT','NONE') then return jsonb_build_object('status','unsupported'); end if;\r\n if p_query?'subject' and coalesce(p_query->>'subject','') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then return jsonb_build_object('status','denied'); end if;\r\n if (v_subject_kind='EXPLICIT_PERSON' and not(p_query?'name' or p_query?'subject'))\r\n or (v_subject_kind='FOLLOWUP_REFERENT' and not(p_query?'subject'))\r\n or (p_query?'name' and p_query?'subject')\r\n or ((v_subject_kind='SELF' or p_query->>'self'='true' or v_intent='SELF_RATING') and (p_query?'name' or (p_query?'subject' and (p_query->>'subject')::uuid<>v_member)))\r\n or (v_intent='SELF_RATING' and v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')) then return jsonb_build_object('status','denied'); end if;\r\n v_person_lookup:=v_intent in ('PLAYER_RATING','PLAYER_CONTACT') or p_query?'name'\r\n   or v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')\r\n   or (p_query?'subject' and (p_query->>'subject')::uuid is distinct from v_member);\r\n -- Serialize budgets and feedback independently of hosting instances.\r\n perform pg_advisory_xact_lock(hashtextextended(p_actor::text,724));\r\n if (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 minute')>=10\r\n or (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 day')>=100\r\n or (v_intent='PLAYER_CONTACT' and ((select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 minute')>=5\r\n or (select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 day')>=30)) then return jsonb_build_object('status','rate_limited'); end if;\r\n insert into view_as_private.attempts(actor,contact) values(p_actor,v_intent='PLAYER_CONTACT');\r\n -- Active state comes from LMS flags, not today's date or browser claims.\r\n select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t\r\n join public.divisions d on d.id=t.division_id and d.is_active is true\r\n join public.leagues l on l.id=d.league_id and l.is_active is true\r\n join public.seasons s on s.id=l.season_id and s.is_active is true\r\n where t.is_active is true and (v_role in ('league_manager','commissioner')\r\n or (v_role in ('captain','club_pro') and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id))\r\n or (v_intent in ('SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') and exists(select 1 from public.team_members tm where tm.team_id=t.id and tm.member_id=v_member and tm.is_active is true)));\r\n if p_query?'teamName' then select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t where t.id=any(v_teams) and lower(trim(t.name))=lower(trim(p_query->>'teamName')); end if;\r\n v_relation:=case when v_role in ('league_manager','commissioner') then 'manager' when v_intent='SELF_RATING' then 'self' else 'team' end;\r\n if v_person_lookup then\r\n  if v_role='player' then return jsonb_build_object('status','denied'); end if;\r\n  -- Only IDs/names are available during resolution. No contact/rating lookup yet.\r\n  select coalesce(array_agg(m.id),'{}'::uuid[]) into v_population from public.members m\r\n  where m.is_active_member is true and (v_role in ('league_manager','commissioner') or exists(\r\n   select 1 from public.team_members tm join public.teams t on t.id=tm.team_id\r\n   where tm.member_id=m.id and tm.is_active is true and tm.team_id=any(v_teams)\r\n   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)));\r\n  if p_query?'subject' then v_target:=(p_query->>'subject')::uuid;\r\n   if not(v_target=any(v_population)) then return jsonb_build_object('status','not_found'); end if;\r\n  else\r\n   v_name:=lower(regexp_replace(trim(p_query->>'name'),'\\s+',' ','g'));\r\n   if v_name is null or length(v_name)<3 or v_name ~ '[%_@]' then return jsonb_build_object('status','not_found'); end if;\r\n   select count(*),min(m.id::text)::uuid into v_count,v_target from public.members m where m.id=any(v_population) and lower(trim(m.first_name||' '||m.last_name))=v_name;\r\n   if v_count<>1 then\r\n    select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (\r\n     select m.id as subject,trim(m.first_name||' '||m.last_name) as label from public.members m where m.id=any(v_population)\r\n     and lower(trim(m.first_name||' '||m.last_name)) like '%'||v_name||'%' order by m.first_name,m.last_name,m.id limit 5\r\n    ) x;\r\n    if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','not_found'); end if;\r\n    if (select count(distinct x->>'label') from jsonb_array_elements(v_choices) x)<jsonb_array_length(v_choices) then return jsonb_build_object('status','ambiguous','choices','[]'::jsonb,'relationship',v_relation); end if;\r\n    return jsonb_build_object('status','ambiguous','choices',v_choices,'relationship',v_relation);\r\n   end if;\r\n  end if;\r\n else v_target:=v_member; v_relation:=case when v_intent='SELF_RATING' or v_role='player' then 'self' else v_relation end;\r\n end if;\r\n -- Lock and recheck the resolved subject and the granting relationships before\r\n -- the field query. Removal during name resolution cannot leave a stale grant.\r\n perform 1 from public.members where id=v_target and is_active_member is true for share;\r\n if not found then return jsonb_build_object('status','not_found'); end if;\r\n if v_target<>v_member and v_role not in ('league_manager','commissioner') then\r\n  perform 1 from public.team_members tm join public.teams t on t.id=tm.team_id\r\n   join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id join public.seasons s on s.id=l.season_id\r\n   where tm.member_id=v_target and tm.is_active is true and t.is_active is true and d.is_active is true and l.is_active is true and s.is_active is true\r\n   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)\r\n   for share of tm,t,d,l,s;\r\n  if not found then return jsonb_build_object('status','not_found'); end if;\r\n end if;\r\n if v_intent in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT') then select trim(first_name||' '||last_name) into v_label from public.members where id=v_target; end if;\r\n v_query_started:=clock_timestamp();\r\n if v_intent='PLAYER_CONTACT' then\r\n  select email into v_value from public.members where id=v_target and id=any(v_population) and is_active_member is true;\r\n  -- Audit insert failure rolls back and prevents email disclosure.\r\n  insert into view_as_private.audit_events(context_id,actor,effective_member,subject,event,capability,reason) values(p_context,p_actor,p_member,v_target,'SENSITIVE_READ',v_intent,case when nullif(v_value,'') is null then 'missing' else 'success' end);\r\n  return jsonb_build_object('status',case when nullif(v_value,'') is null then 'missing' else 'success' end,'intent',v_intent,'label',v_label,'value',v_value,'subject',v_target,'relationship',v_relation,'resolutionMs',extract(epoch from(v_query_started-v_start))*1000,'queryMs',extract(epoch from(clock_timestamp()-v_query_started))*1000);\r\n end if;\r\n if v_intent in ('SELF_RATING','PLAYER_RATING') then\r\n  if v_rating not in ('season','primetime') or v_rating is null then return jsonb_build_object('status','rating_clarification','subject',v_target,'relationship',v_relation); end if;\r\n  select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (select s.id as season,s.name as label from public.seasons s where s.is_active is true\r\n   and (v_intent='SELF_RATING' or v_role in ('league_manager','commissioner') or exists(select 1 from public.team_members tm join public.teams t on t.id=tm.team_id join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id where tm.member_id=v_target and tm.is_active is true and t.id=any(v_teams) and l.season_id=s.id)) order by s.name,s.id limit 5) x;\r\n  if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','no_season','relationship',v_relation); end if;\r\n  if p_query?'season' then v_season:=(p_quer"... 7175 more characters, proowner: 10, prosecdef: false, proconfig: [Array], proacl: [Array] }, { signature: 'lms_view_as(text,jsonb)', prosrc: "\r\ndeclare c view_as_private.contexts; actor_member uuid; actor_role text; target_role text; target uuid;\r\n result jsonb; actor_name text; target_name text;\r\nbegin\r\n if octet_length(p_input::text)>32000 then return jsonb_build_object('denied',true);end if;\r\n if p_op='can_start' then return jsonb_build_object('allowed',coalesce(view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid)) in('commissioner','league_manager'),false));end if;\r\n if p_op='preflight' then\r\n  actor_role:=view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid));\r\n  target:=(p_input->>'target')::uuid;target_role:=view_as_private.member_role(target);\r\n  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then return jsonb_build_object('allowed',false);end if;\r\n  select concat_ws(' ',first_name,last_name) into target_name from public.members where id=target;\r\n  return jsonb_build_object('allowed',true,'name',target_name);\r\n end if;\r\n if p_op='start' then\r\n  actor_member:=view_as_private.actor_member((p_input->>'actor')::uuid);\r\n  actor_role:=view_as_private.member_role(actor_member);target:=(p_input->>'target')::uuid;\r\n  target_role:=view_as_private.member_role(target);\r\n  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\r\n   return jsonb_build_object('denied',true,'message','This member does not yet have enough LMS account information to simulate their signed-in experience.'); end if;\r\n  perform pg_advisory_xact_lock(hashtextextended(p_input->>'actor',724));\r\n  if (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 minute')>=5\r\n    or (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 hour')>=30\r\n    then return jsonb_build_object('denied',true);end if;\r\n  if (p_input->>'expires')::timestamptz<=clock_timestamp() or length(p_input->>'credential')>25000 then return jsonb_build_object('denied',true);end if;\r\n  insert into view_as_private.contexts(id,actor,target,binding,browser,code,credential,expires_at)\r\n  values((p_input->>'id')::uuid,(p_input->>'actor')::uuid,target,p_input->>'binding',p_input->>'browser',p_input->>'code',p_input->>'credential',least((p_input->>'expires')::timestamptz,clock_timestamp()+interval '30 minutes')) returning * into c;\r\n  return jsonb_build_object('expires',c.expires_at);\r\n end if;\r\n if p_op='load_handoff' then select * into c from view_as_private.contexts where code=p_input->>'code' and browser=p_input->>'browser' and started_at is null for update;\r\n elsif p_op='load' then select * into c from view_as_private.contexts where context=p_input->>'context' and browser=p_input->>'browser' and started_at is not null for update;\r\n else select * into c from view_as_private.contexts where id=(p_input->>'id')::uuid and actor=(p_input->>'actor')::uuid and browser=p_input->>'browser' for update;\r\n end if;\r\n if c.id is null or c.ended_at is not null then return jsonb_build_object('denied',true);end if;\r\n if c.expires_at<=clock_timestamp() then perform view_as_private.end_context(c.id,'expiration');return jsonb_build_object('denied',true,'message','View As User session expired.');end if;\r\n perform 1 from public.user_roles u join public.members m on m.id=u.member_id where u.user_id=c.actor or u.member_id=c.target for share of u,m;\r\n actor_member:=view_as_private.actor_member(c.actor);actor_role:=view_as_private.member_role(actor_member);target_role:=view_as_private.member_role(c.target);\r\n if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\r\n  perform view_as_private.end_context(c.id,case when target_role is null then 'target_invalidation' else 'authorization_loss' end);\r\n  return jsonb_build_object('denied',true);end if;\r\n if p_op in('load','load_handoff') then\r\n  if p_op='load_handoff' and c.exchange_by<=clock_timestamp() then perform view_as_private.end_context(c.id,'handoff_expiration');return jsonb_build_object('denied',true);end if;\r\n  return jsonb_build_object('id',c.id,'actor',c.actor,'binding',c.binding,'credential',c.credential);\r\n end if;\r\n if p_op='exchange' then\r\n  if c.code is distinct from p_input->>'code' or c.started_at is not null or c.exchange_by<=clock_timestamp() then return jsonb_build_object('denied',true);end if;\r\n  update view_as_private.contexts set code=null,context=p_input->>'context',started_at=clock_timestamp() where id=c.id returning * into c;\r\n  insert into view_as_private.audit_events(context_id,actor,effective_member,event,actor_role,effective_role)\r\n  values(c.id,c.actor,c.target,'VIEW_AS_STARTED',actor_role,target_role);\r\n elsif c.context is distinct from p_input->>'context' or c.started_at is null then return jsonb_build_object('denied',true);\r\n end if;\r\n if p_op='end' then perform view_as_private.end_context(c.id,'explicit_exit');return jsonb_build_object('ended',true);end if;\r\n if p_op='reserve_document' then\r\n  perform pg_advisory_xact_lock(hashtextextended(c.actor::text,724));\r\n  if (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 minute')>=10\r\n   or (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 day')>=100 then return jsonb_build_object('rate_limited',true);end if;\r\n  insert into view_as_private.attempts(actor,contact) values(c.actor,false);return jsonb_build_object('allowed',true);\r\n end if;\r\n if p_op='snapshot' then return view_as_private.snapshot(c.target,target_role);end if;\r\n if p_op='live' then\r\n  result:=view_as_private.lookup(c.actor,c.target,c.id,(p_input->>'request')::uuid,p_input->'query');\r\n  if result->>'status' in('denied','not_found','rate_limited') then\r\n   insert into view_as_private.audit_events(context_id,actor,effective_member,event,capability,reason) values(c.id,c.actor,c.target,'READ_DENIED',p_input->'query'->>'intent',result->>'status');\r\n  end if;\r\n  return result;\r\n end if;\r\n if p_op='diagnostic' then\r\n  if p_input->>'family' not in('document','LIVE_LMS_DATA') or p_input->>'kind' not in('answer','clarification','protected','insufficient_evidence','conflict','technical_error') then return jsonb_build_object('denied',true);end if;\r\n  insert into view_as_private.diagnostic_outcomes(id,context_id,family,kind,total_ms) values((p_input->>'request')::uuid,c.id,p_input->>'family',p_input->>'kind',least(greatest((p_input->>'total_ms')::int,0),600000));\r\n  return jsonb_build_object('recorded',true);\r\n end if;\r\n if p_op not in('resolve','exchange') then return jsonb_build_object('denied',true);end if;\r\n select concat_ws(' ',first_name,last_name) into actor_name from public.members where id=actor_member;\r\n select concat_ws(' ',first_name,last_name) into target_name from public.members where id=c.target;\r\n return jsonb_build_object('mode','VIEW_AS_READ_ONLY','readOnly',true,'actorName',actor_name,'actorRole',actor_role,\r\n 'targetName',target_name,'role',target_role,'roles',(select jsonb_agg(distinct role) from public.user_roles where member_id=c.target),\r\n 'hasAuth',(select exists(select 1 from public.user_roles where member_id=c.target and user_id is not null)),\r\n 'expires',c.expires_at,'returnPath','/members/'||c.target::text);\r\nend ", proowner: 16566, prosecdef: true, proconfig: [Array], proacl: [Array] } ],
+    expected: [ { signature: 'view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)', prosrc: "\ndeclare\n v_member uuid; v_role text; v_intent text:=p_query->>'intent'; v_target uuid; v_team uuid;\n v_season uuid; v_name text; v_label text; v_rating text:=p_query->>'rating'; v_value text;\n v_teams uuid[]; v_population uuid[]; v_choices jsonb; v_context record; v_match record;\n v_count int; v_choice_offset int:=coalesce((p_query->>'choiceOffset')::int,0); v_offset int:=coalesce((p_query->>'offset')::int,0); v_relation text; v_tz text;\n v_person_lookup boolean; v_subject_kind text:=p_query->>'subjectKind';\n v_result jsonb; v_query_started timestamptz; v_start timestamptz:=clock_timestamp();\nbegin\n if p_actor is null then return jsonb_build_object('status','denied'); end if;\n select u.member_id,u.role into v_member,v_role from public.user_roles u join public.members m on m.id=u.member_id\n where u.member_id=p_member and m.is_active_member is true and u.role in ('player','captain','club_pro','league_manager','commissioner') order by case u.role when 'commissioner' then 5 when 'league_manager' then 4 when 'club_pro' then 3 when 'captain' then 2 else 1 end desc limit 1 for share of u,m;\n if p_query->>'origin'='manager_test' and v_role not in ('league_manager','commissioner') then return jsonb_build_object('status','denied'); end if;\n if v_member is null then return jsonb_build_object('status','denied'); end if;\n if v_intent not in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT','SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') then return jsonb_build_object('status','unsupported'); end if;\n if v_choice_offset<0 or v_choice_offset>5000 or v_offset<0 or v_offset>5000 or octet_length(p_query::text)>4096 then return jsonb_build_object('status','unsupported'); end if;\n -- Subject classification is server-generated. Explicit/referential requests\n -- cannot recover by defaulting to the requester when identity is absent.\n if v_subject_kind is not null and v_subject_kind not in ('SELF','EXPLICIT_PERSON','FOLLOWUP_REFERENT','NONE') then return jsonb_build_object('status','unsupported'); end if;\n if p_query?'subject' and coalesce(p_query->>'subject','') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then return jsonb_build_object('status','denied'); end if;\n if (v_subject_kind='EXPLICIT_PERSON' and not(p_query?'name' or p_query?'subject'))\n or (v_subject_kind='FOLLOWUP_REFERENT' and not(p_query?'subject'))\n or (p_query?'name' and p_query?'subject')\n or ((v_subject_kind='SELF' or p_query->>'self'='true' or v_intent='SELF_RATING') and (p_query?'name' or (p_query?'subject' and (p_query->>'subject')::uuid<>v_member)))\n or (v_intent='SELF_RATING' and v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')) then return jsonb_build_object('status','denied'); end if;\n v_person_lookup:=v_intent in ('PLAYER_RATING','PLAYER_CONTACT') or p_query?'name'\n   or v_subject_kind in ('EXPLICIT_PERSON','FOLLOWUP_REFERENT')\n   or (p_query?'subject' and (p_query->>'subject')::uuid is distinct from v_member);\n -- Serialize budgets and feedback independently of hosting instances.\n perform pg_advisory_xact_lock(hashtextextended(p_actor::text,724));\n if (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 minute')>=10\n or (select count(*) from view_as_private.attempts where actor=p_actor and at>v_start-interval '1 day')>=100\n or (v_intent='PLAYER_CONTACT' and ((select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 minute')>=5\n or (select count(*) from view_as_private.attempts where actor=p_actor and contact and at>v_start-interval '1 day')>=30)) then return jsonb_build_object('status','rate_limited'); end if;\n insert into view_as_private.attempts(actor,contact) values(p_actor,v_intent='PLAYER_CONTACT');\n -- Active state comes from LMS flags, not today's date or browser claims.\n select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t\n join public.divisions d on d.id=t.division_id and d.is_active is true\n join public.leagues l on l.id=d.league_id and l.is_active is true\n join public.seasons s on s.id=l.season_id and s.is_active is true\n where t.is_active is true and (v_role in ('league_manager','commissioner')\n or (v_role in ('captain','club_pro') and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id))\n or (v_intent in ('SELF_TEAM','TEAM_ROSTER','NEXT_MATCH') and exists(select 1 from public.team_members tm where tm.team_id=t.id and tm.member_id=v_member and tm.is_active is true)));\n if p_query?'teamName' then select coalesce(array_agg(t.id),'{}'::uuid[]) into v_teams from public.teams t where t.id=any(v_teams) and lower(trim(t.name))=lower(trim(p_query->>'teamName')); end if;\n v_relation:=case when v_role in ('league_manager','commissioner') then 'manager' when v_intent='SELF_RATING' then 'self' else 'team' end;\n if v_person_lookup then\n  if v_role='player' then return jsonb_build_object('status','denied'); end if;\n  -- Only IDs/names are available during resolution. No contact/rating lookup yet.\n  select coalesce(array_agg(m.id),'{}'::uuid[]) into v_population from public.members m\n  where m.is_active_member is true and (v_role in ('league_manager','commissioner') or exists(\n   select 1 from public.team_members tm join public.teams t on t.id=tm.team_id\n   where tm.member_id=m.id and tm.is_active is true and tm.team_id=any(v_teams)\n   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)));\n  if p_query?'subject' then v_target:=(p_query->>'subject')::uuid;\n   if not(v_target=any(v_population)) then return jsonb_build_object('status','not_found'); end if;\n  else\n   v_name:=lower(regexp_replace(trim(p_query->>'name'),'\\s+',' ','g'));\n   if v_name is null or length(v_name)<3 or v_name ~ '[%_@]' then return jsonb_build_object('status','not_found'); end if;\n   select count(*),min(m.id::text)::uuid into v_count,v_target from public.members m where m.id=any(v_population) and lower(trim(m.first_name||' '||m.last_name))=v_name;\n   if v_count<>1 then\n    select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (\n     select m.id as subject,trim(m.first_name||' '||m.last_name) as label from public.members m where m.id=any(v_population)\n     and lower(trim(m.first_name||' '||m.last_name)) like '%'||v_name||'%' order by m.first_name,m.last_name,m.id limit 5\n    ) x;\n    if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','not_found'); end if;\n    if (select count(distinct x->>'label') from jsonb_array_elements(v_choices) x)<jsonb_array_length(v_choices) then return jsonb_build_object('status','ambiguous','choices','[]'::jsonb,'relationship',v_relation); end if;\n    return jsonb_build_object('status','ambiguous','choices',v_choices,'relationship',v_relation);\n   end if;\n  end if;\n else v_target:=v_member; v_relation:=case when v_intent='SELF_RATING' or v_role='player' then 'self' else v_relation end;\n end if;\n -- Lock and recheck the resolved subject and the granting relationships before\n -- the field query. Removal during name resolution cannot leave a stale grant.\n perform 1 from public.members where id=v_target and is_active_member is true for share;\n if not found then return jsonb_build_object('status','not_found'); end if;\n if v_target<>v_member and v_role not in ('league_manager','commissioner') then\n  perform 1 from public.team_members tm join public.teams t on t.id=tm.team_id\n   join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id join public.seasons s on s.id=l.season_id\n   where tm.member_id=v_target and tm.is_active is true and t.is_active is true and d.is_active is true and l.is_active is true and s.is_active is true\n   and v_member in(t.captain_member_id,t.co_captain_member_id,t.co_captain_2_member_id,t.club_pro_member_id)\n   for share of tm,t,d,l,s;\n  if not found then return jsonb_build_object('status','not_found'); end if;\n end if;\n if v_intent in ('SELF_RATING','PLAYER_RATING','PLAYER_CONTACT') then select trim(first_name||' '||last_name) into v_label from public.members where id=v_target; end if;\n v_query_started:=clock_timestamp();\n if v_intent='PLAYER_CONTACT' then\n  select email into v_value from public.members where id=v_target and id=any(v_population) and is_active_member is true;\n  -- Audit insert failure rolls back and prevents email disclosure.\n  insert into view_as_private.audit_events(context_id,actor,effective_member,subject,event,capability,reason) values(p_context,p_actor,p_member,v_target,'SENSITIVE_READ',v_intent,case when nullif(v_value,'') is null then 'missing' else 'success' end);\n  return jsonb_build_object('status',case when nullif(v_value,'') is null then 'missing' else 'success' end,'intent',v_intent,'label',v_label,'value',v_value,'subject',v_target,'relationship',v_relation,'resolutionMs',extract(epoch from(v_query_started-v_start))*1000,'queryMs',extract(epoch from(clock_timestamp()-v_query_started))*1000);\n end if;\n if v_intent in ('SELF_RATING','PLAYER_RATING') then\n  if v_rating not in ('season','primetime') or v_rating is null then return jsonb_build_object('status','rating_clarification','subject',v_target,'relationship',v_relation); end if;\n  select coalesce(jsonb_agg(x),'[]'::jsonb) into v_choices from (select s.id as season,s.name as label from public.seasons s where s.is_active is true\n   and (v_intent='SELF_RATING' or v_role in ('league_manager','commissioner') or exists(select 1 from public.team_members tm join public.teams t on t.id=tm.team_id join public.divisions d on d.id=t.division_id join public.leagues l on l.id=d.league_id where tm.member_id=v_target and tm.is_active is true and t.id=any(v_teams) and l.season_id=s.id)) order by s.name,s.id limit 5) x;\n  if jsonb_array_length(v_choices)=0 then return jsonb_build_object('status','no_season','relationship',v_relation); end if;\n  if p_query?'season' then v_season:=(p_query->>'season')::uuid;\n   if not exists(select 1 from jsonb_array_elements(v_choices) x where (x->"... 7026 more characters, proowner: 10, prosecdef: false, proconfig: [Array], proacl: [Array] }, { signature: 'lms_view_as(text,jsonb)', prosrc: "\ndeclare c view_as_private.contexts; actor_member uuid; actor_role text; target_role text; target uuid;\n result jsonb; actor_name text; target_name text;\nbegin\n if octet_length(p_input::text)>32000 then return jsonb_build_object('denied',true);end if;\n if p_op='can_start' then return jsonb_build_object('allowed',coalesce(view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid)) in('commissioner','league_manager'),false));end if;\n if p_op='preflight' then\n  actor_role:=view_as_private.member_role(view_as_private.actor_member((p_input->>'actor')::uuid));\n  target:=(p_input->>'target')::uuid;target_role:=view_as_private.member_role(target);\n  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then return jsonb_build_object('allowed',false);end if;\n  select concat_ws(' ',first_name,last_name) into target_name from public.members where id=target;\n  return jsonb_build_object('allowed',true,'name',target_name);\n end if;\n if p_op='start' then\n  actor_member:=view_as_private.actor_member((p_input->>'actor')::uuid);\n  actor_role:=view_as_private.member_role(actor_member);target:=(p_input->>'target')::uuid;\n  target_role:=view_as_private.member_role(target);\n  if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\n   return jsonb_build_object('denied',true,'message','This member does not yet have enough LMS account information to simulate their signed-in experience.'); end if;\n  perform pg_advisory_xact_lock(hashtextextended(p_input->>'actor',724));\n  if (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 minute')>=5\n    or (select count(*) from view_as_private.contexts where actor=(p_input->>'actor')::uuid and created_at>clock_timestamp()-interval '1 hour')>=30\n    then return jsonb_build_object('denied',true);end if;\n  if (p_input->>'expires')::timestamptz<=clock_timestamp() or length(p_input->>'credential')>25000 then return jsonb_build_object('denied',true);end if;\n  insert into view_as_private.contexts(id,actor,target,binding,browser,code,credential,expires_at)\n  values((p_input->>'id')::uuid,(p_input->>'actor')::uuid,target,p_input->>'binding',p_input->>'browser',p_input->>'code',p_input->>'credential',least((p_input->>'expires')::timestamptz,clock_timestamp()+interval '30 minutes')) returning * into c;\n  return jsonb_build_object('expires',c.expires_at);\n end if;\n if p_op='load_handoff' then select * into c from view_as_private.contexts where code=p_input->>'code' and browser=p_input->>'browser' and started_at is null for update;\n elsif p_op='load' then select * into c from view_as_private.contexts where context=p_input->>'context' and browser=p_input->>'browser' and started_at is not null for update;\n else select * into c from view_as_private.contexts where id=(p_input->>'id')::uuid and actor=(p_input->>'actor')::uuid and browser=p_input->>'browser' for update;\n end if;\n if c.id is null or c.ended_at is not null then return jsonb_build_object('denied',true);end if;\n if c.expires_at<=clock_timestamp() then perform view_as_private.end_context(c.id,'expiration');return jsonb_build_object('denied',true,'message','View As User session expired.');end if;\n perform 1 from public.user_roles u join public.members m on m.id=u.member_id where u.user_id=c.actor or u.member_id=c.target for share of u,m;\n actor_member:=view_as_private.actor_member(c.actor);actor_role:=view_as_private.member_role(actor_member);target_role:=view_as_private.member_role(c.target);\n if actor_role is null or actor_role not in('commissioner','league_manager') or target_role is null then\n  perform view_as_private.end_context(c.id,case when target_role is null then 'target_invalidation' else 'authorization_loss' end);\n  return jsonb_build_object('denied',true);end if;\n if p_op in('load','load_handoff') then\n  if p_op='load_handoff' and c.exchange_by<=clock_timestamp() then perform view_as_private.end_context(c.id,'handoff_expiration');return jsonb_build_object('denied',true);end if;\n  return jsonb_build_object('id',c.id,'actor',c.actor,'binding',c.binding,'credential',c.credential);\n end if;\n if p_op='exchange' then\n  if c.code is distinct from p_input->>'code' or c.started_at is not null or c.exchange_by<=clock_timestamp() then return jsonb_build_object('denied',true);end if;\n  update view_as_private.contexts set code=null,context=p_input->>'context',started_at=clock_timestamp() where id=c.id returning * into c;\n  insert into view_as_private.audit_events(context_id,actor,effective_member,event,actor_role,effective_role)\n  values(c.id,c.actor,c.target,'VIEW_AS_STARTED',actor_role,target_role);\n elsif c.context is distinct from p_input->>'context' or c.started_at is null then return jsonb_build_object('denied',true);\n end if;\n if p_op='end' then perform view_as_private.end_context(c.id,'explicit_exit');return jsonb_build_object('ended',true);end if;\n if p_op='reserve_document' then\n  perform pg_advisory_xact_lock(hashtextextended(c.actor::text,724));\n  if (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 minute')>=10\n   or (select count(*) from view_as_private.attempts where actor=c.actor and at>clock_timestamp()-interval '1 day')>=100 then return jsonb_build_object('rate_limited',true);end if;\n  insert into view_as_private.attempts(actor,contact) values(c.actor,false);return jsonb_build_object('allowed',true);\n end if;\n if p_op='snapshot' then return view_as_private.snapshot(c.target,target_role);end if;\n if p_op='live' then\n  result:=view_as_private.lookup(c.actor,c.target,c.id,(p_input->>'request')::uuid,p_input->'query');\n  if result->>'status' in('denied','not_found','rate_limited') then\n   insert into view_as_private.audit_events(context_id,actor,effective_member,event,capability,reason) values(c.id,c.actor,c.target,'READ_DENIED',p_input->'query'->>'intent',result->>'status');\n  end if;\n  return result;\n end if;\n if p_op='diagnostic' then\n  if p_input->>'family' not in('document','LIVE_LMS_DATA') or p_input->>'kind' not in('answer','clarification','protected','insufficient_evidence','conflict','technical_error') then return jsonb_build_object('denied',true);end if;\n  insert into view_as_private.diagnostic_outcomes(id,context_id,family,kind,total_ms) values((p_input->>'request')::uuid,c.id,p_input->>'family',p_input->>'kind',least(greatest((p_input->>'total_ms')::int,0),600000));\n  return jsonb_build_object('recorded',true);\n end if;\n if p_op not in('resolve','exchange') then return jsonb_build_object('denied',true);end if;\n select concat_ws(' ',first_name,last_name) into actor_name from public.members where id=actor_member;\n select concat_ws(' ',first_name,last_name) into target_name from public.members where id=c.target;\n return jsonb_build_object('mode','VIEW_AS_READ_ONLY','readOnly',true,'actorName',actor_name,'actorRole',actor_role,\n 'targetName',target_name,'role',target_role,'roles',(select jsonb_agg(distinct role) from public.user_roles where member_id=c.target),\n 'hasAuth',(select exists(select 1 from public.user_roles where member_id=c.target and user_id is not null)),\n 'expires',c.expires_at,'returnPath','/members/'||c.target::text);\nend ", proowner: 16566, prosecdef: true, proconfig: [Array], proacl: [Array] } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

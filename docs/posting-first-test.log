@@ -1,0 +1,21 @@
+(node:11752) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiQuestionConcepts.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Do all games in the Saturday league post to DUPR (23.9514ms)
+✔ Are all Saturday league games submitted to DUPR? (5.6293ms)
+✔ Which Saturday games get uploaded to DUPR? (4.9266ms)
+✔ Do Saturday mixed doubles games post to DUPR? (3.4942ms)
+✔ Are Saturday Picklebreaker games recorded in DUPR? (2.8177ms)
+✔ Are Saturday league results posted to DUPR for all matches? (4.4737ms)
+✔ existing assisted search retrieves posting clause and same-version league context (23.8541ms)
+✔ generic submission rule, wrong league, unscoped and missing clauses cannot replace Saturday posting (5.8984ms)
+✔ personal status, score entry and Saturday format stay separate (1.8005ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 383.8444

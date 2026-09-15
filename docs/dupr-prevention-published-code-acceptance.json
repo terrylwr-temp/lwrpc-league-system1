@@ -1,0 +1,178 @@
+{
+  "origin": "https://league.lwrpickleballclub.com",
+  "publishedModules": [
+    {
+      "url": "https://league.lwrpickleballclub.com/_next/static/chunks/0lpvoc8d3swh4.js",
+      "sha256": "82ad8154f7917bee122a7fff94ecb691fa321acb1a536cfa9d0848dbb5394233"
+    },
+    {
+      "url": "https://league.lwrpickleballclub.com/_next/static/chunks/098xzq5l.ofig.js",
+      "sha256": "9101956ce5c1250a71603f25cb8efecb105e199c83dbf5ce91b4c2c3a96b31fa"
+    },
+    {
+      "url": "https://league.lwrpickleballclub.com/_next/static/chunks/05k2a-tmonzgh.js",
+      "sha256": "8f10bf174e0688ce555519bb1e4ed92161fe064fac8b16e51a13be31614cd162"
+    },
+    {
+      "url": "https://league.lwrpickleballclub.com/_next/static/chunks/15h54~un7wckq.js",
+      "sha256": "b38bd6a8ed004e9639bb931a23768104ddb20d0dbb19c14b15d14ce150f46e2d"
+    }
+  ],
+  "memberCount": 1980,
+  "reads": 125,
+  "writes": 0,
+  "cases": [
+    {
+      "label": "Create: another member ID",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "Create: normalized duplicate",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "Create: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "Create: unused ID",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "Edit: another member ID",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "Edit: own unchanged ID",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "Edit: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "Ratings inline: another member ID",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "Ratings inline: own unchanged ID",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "Ratings inline: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "MembershipWorks: new duplicate",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "MembershipWorks: fill blank duplicate",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "MembershipWorks: unchanged own",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "MembershipWorks: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/0lpvoc8d3swh4.js: normalized duplicate",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/0lpvoc8d3swh4.js: own unchanged",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/0lpvoc8d3swh4.js: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/098xzq5l.ofig.js: normalized duplicate",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/098xzq5l.ofig.js: own unchanged",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/098xzq5l.ofig.js: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/05k2a-tmonzgh.js: normalized duplicate",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/05k2a-tmonzgh.js: own unchanged",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/05k2a-tmonzgh.js: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/15h54~un7wckq.js: normalized duplicate",
+      "result": "BLOCKED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/15h54~un7wckq.js: own unchanged",
+      "result": "ALLOWED",
+      "writes": 0
+    },
+    {
+      "label": "https://league.lwrpickleballclub.com/_next/static/chunks/15h54~un7wckq.js: blank",
+      "result": "ALLOWED",
+      "writes": 0
+    }
+  ],
+  "wiring": [
+    {
+      "route": "/members",
+      "guardBeforeWrite": true,
+      "sha256": "ebb731331c80c4334b63dbf0553d16d61618ae5485fdda296a3ccea27478bbf8"
+    },
+    {
+      "route": "/members/43e1e363-82f1-47d7-a869-befed4c967b8",
+      "guardBeforeWrite": true,
+      "sha256": "f37e6c633791edb6183614969821a1670b21ca9c27d03481c5c6dc4b853d9f92"
+    },
+    {
+      "route": "/ratings",
+      "guardBeforeWrite": true,
+      "sha256": "332c4c640064e9ac80889ce9322557d67c750a8dc7eedaafbe16a65cccab2fe0"
+    },
+    {
+      "route": "/member-import",
+      "guardBeforeWrite": true,
+      "sha256": "ccf72ccb3ca2c67d5973d4a6434cb91c8f6caecd185bbe245523483c1bb25a9a"
+    }
+  ]
+}

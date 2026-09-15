@@ -1,0 +1,38 @@
+(node:23112) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Document-only What are the requirements for DUPR5? (14.8556ms)
+✔ Document-only What DUPR range is allowed in DUPR5? (4.3991ms)
+✔ Document-only How does NR work for DUPR5? (4.5465ms)
+✔ Hybrid Can I play on a DUPR5 team? (4.043ms)
+✔ Hybrid Am I eligible for DUPR5? (3.6452ms)
+✔ Existing document policy When is my Season DUPR established? (5.12ms)
+✔ Existing document policy Can my Season DUPR change during the season? (2.2808ms)
+✔ Existing document policy How does NR eligibility work? (2.5689ms)
+✔ Existing document policy What does the Reliability Factor rule say? (1.9833ms)
+✔ Existing Live SELF_RATING remains live-only (0.7799ms)
+✔ Authorized missing RF is consulted and hybrid but UNKNOWN (3.5822ms)
+✔ No successful personal inputs: denied (0.6233ms)
+✔ No successful personal inputs: not_found (0.4506ms)
+✔ No successful personal inputs: rate_limited (0.419ms)
+✔ No successful personal inputs: unsupported (0.4765ms)
+✔ No successful personal inputs: ambiguous (2.0636ms)
+✔ No successful personal inputs: no_season (4.5835ms)
+✔ Planned personal access not performed Can I play PrimeTime 9? (3.7601ms)
+✔ Planned personal access not performed Can I play DUPR7? (0.5818ms)
+✔ Planned personal access not performed Can I play SDUPR5? (0.1621ms)
+✔ Failed source validation cannot claim successful personal comparison (0.7904ms)
+✔ View-As uses identical trusted source classifications with no role inference (15.0893ms)
+✔ Source metadata contains no private values or member identifiers (3.2382ms)
+✔ Privacy history is independent of document-only badge and stale result.live (4.8045ms)
+✔ Normal and View-As UI use shared presentation and avoid hardcoded eligibility LIVE banner (1.1634ms)
+✔ Actual player Exchange markup renders official/hybrid/live badges and timestamp truthfully (42.1601ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 894.651

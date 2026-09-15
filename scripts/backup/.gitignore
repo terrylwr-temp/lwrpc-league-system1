@@ -1,0 +1,6 @@
+backup-config.json
+backup-secrets.dpapi.json
+*.7z
+*.sha256
+*.sql
+Logs/

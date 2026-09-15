@@ -1,0 +1,1077 @@
+{
+  "readAt": "2026-09-08T20:17:49.294Z",
+  "method": "Read-only REST GET; allowlisted usage metadata only; Eastern calendar day",
+  "rows": [
+    {
+      "id": "73a67adf-5e7b-47b8-931e-c2538069f544",
+      "request_started_at": "2026-09-08T20:02:50.55+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1571,
+      "output_tokens": 45,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "weekday"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "87baef4e-08f9-4571-a0b5-85747a8ebf66",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "70843ff0-4964-4d71-b6c5-37bf52de54fc",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "2070049f-fd52-4006-b824-8ce27ea67758",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "75dafd71-642e-4728-ba90-82ea6cbee1c2",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "2ab86486-e9d5-4ae9-970d-097472b0e32b",
+              "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 96,
+          "applicability": "SELECTED",
+          "correlationId": "73a67adf-5e7b-47b8-931e-c2538069f544",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:02:54.784+00:00"
+    },
+    {
+      "id": "546df09c-5f42-42d6-ba8d-ecdb643d3ad6",
+      "request_started_at": "2026-09-08T20:03:45.845+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1573,
+      "output_tokens": 37,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "saturday"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "2070049f-fd52-4006-b824-8ce27ea67758",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "066178be-452b-4866-ba3a-d5d000d95c87",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "9c3dcc55-85e0-4cd0-a69c-d8fd43972fb9",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "60ef7e04-695c-4a52-b05f-776b487947d8",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 145,
+          "applicability": "SELECTED",
+          "correlationId": "546df09c-5f42-42d6-ba8d-ecdb643d3ad6",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:03:48.944+00:00"
+    },
+    {
+      "id": "14c43f8a-4dc4-4eb0-8b7a-6eff1d500331",
+      "request_started_at": "2026-09-08T20:04:34.738+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1576,
+      "output_tokens": 42,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "primetime"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "03674b99-bc4a-4668-8994-8da95031fdd9",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "9c3dcc55-85e0-4cd0-a69c-d8fd43972fb9",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "282fa8f4-d1bf-4351-902a-29507ea31937",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "9d5ab0dd-453d-408d-8e92-d94d276470b4",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 107,
+          "applicability": "SELECTED",
+          "correlationId": "14c43f8a-4dc4-4eb0-8b7a-6eff1d500331",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:04:37.824+00:00"
+    },
+    {
+      "id": "502ed018-1a69-4b3f-8eff-96796ff51b1d",
+      "request_started_at": "2026-09-08T20:04:52.865+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1585,
+      "output_tokens": 46,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "weekday"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "846a9a9a-89c3-4769-99fb-c931a9ee2feb",
+              "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "624ab4fa-b48c-4ce5-9acb-ef0423e1269e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "75dafd71-642e-4728-ba90-82ea6cbee1c2",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "066178be-452b-4866-ba3a-d5d000d95c87",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "0e426c80-8b81-480f-8970-e2b149e164c3",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 66,
+          "applicability": "SELECTED",
+          "correlationId": "502ed018-1a69-4b3f-8eff-96796ff51b1d",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:04:56.015+00:00"
+    },
+    {
+      "id": "7abc290c-d0b4-4038-9417-25810ea3567d",
+      "request_started_at": "2026-09-08T20:05:02.131+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1587,
+      "output_tokens": 46,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "weekday"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "87baef4e-08f9-4571-a0b5-85747a8ebf66",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "75dafd71-642e-4728-ba90-82ea6cbee1c2",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "70843ff0-4964-4d71-b6c5-37bf52de54fc",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "2ab86486-e9d5-4ae9-970d-097472b0e32b",
+              "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 107,
+          "applicability": "SELECTED",
+          "correlationId": "7abc290c-d0b4-4038-9417-25810ea3567d",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:05:04.387+00:00"
+    },
+    {
+      "id": "c559d683-a6ba-4451-a76e-a2fe9e6a14a2",
+      "request_started_at": "2026-09-08T20:05:05.693+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1951,
+      "output_tokens": 86,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "primetime"
+          ],
+          "intent": "eligibility_reference_date",
+          "object": "age_eligibility",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "058299be-3adf-4a07-a275-71c24b7ad6e2",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "320b5028-e787-40b2-89db-109194bff596",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f62cd1e2-ba60-404e-89e1-9a232cd39cb5",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "aae95c91-940a-41b2-b26d-f1df8270c1da",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "6319b60e-62e3-46a1-90e9-03d2a47bc306",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "d24fc44a-a089-42b1-9f1f-d60efc3a6be2",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 128,
+          "applicability": "SELECTED",
+          "correlationId": "c559d683-a6ba-4451-a76e-a2fe9e6a14a2",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 68,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:05:09.042+00:00"
+    },
+    {
+      "id": "10b14eef-c7a6-4385-9e90-d4a33c3b43aa",
+      "request_started_at": "2026-09-08T20:06:42.515+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1843,
+      "output_tokens": 96,
+      "source_family": "usap",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 2,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:06:45.419+00:00"
+    },
+    {
+      "id": "7f355c96-fd9e-47b1-86b1-65ff7a283d5a",
+      "request_started_at": "2026-09-08T20:07:00.094+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1620,
+      "output_tokens": 87,
+      "source_family": "usap",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:07:03.278+00:00"
+    },
+    {
+      "id": "7ad6c42c-2259-4d2b-811c-5686d7e1595d",
+      "request_started_at": "2026-09-08T20:07:06.131+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1587,
+      "output_tokens": 47,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "saturday"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "0e426c80-8b81-480f-8970-e2b149e164c3",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "066178be-452b-4866-ba3a-d5d000d95c87",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "9c3dcc55-85e0-4cd0-a69c-d8fd43972fb9",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "60ef7e04-695c-4a52-b05f-776b487947d8",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 73,
+          "applicability": "SELECTED",
+          "correlationId": "7ad6c42c-2259-4d2b-811c-5686d7e1595d",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:07:08.119+00:00"
+    },
+    {
+      "id": "5f394bc6-fa04-4829-a599-c8be09266b6c",
+      "request_started_at": "2026-09-08T20:07:35.232+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1570,
+      "output_tokens": 42,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "primetime"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "03674b99-bc4a-4668-8994-8da95031fdd9",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "9c3dcc55-85e0-4cd0-a69c-d8fd43972fb9",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "ee133944-bdb5-41ab-994f-d19440b45ddb",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 83,
+          "applicability": "SELECTED",
+          "correlationId": "5f394bc6-fa04-4829-a599-c8be09266b6c",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:07:37.243+00:00"
+    },
+    {
+      "id": "b2c3af0f-404a-4142-9ba8-822f22174376",
+      "request_started_at": "2026-09-08T20:07:59.77+00:00",
+      "origin": "player_interface",
+      "final_kind": "insufficient_evidence",
+      "model": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "source_family": "none",
+      "stage3_invoked": true,
+      "model_call_skipped": true,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 0,
+      "reason_code": "stage4_no_applicable_evidence",
+      "completed_at": "2026-09-08T20:08:00.684+00:00"
+    },
+    {
+      "id": "b3dbad82-a881-43c9-b280-02f97f883ae4",
+      "request_started_at": "2026-09-08T20:08:01.691+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1573,
+      "output_tokens": 46,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "weekday"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "87baef4e-08f9-4571-a0b5-85747a8ebf66",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "846a9a9a-89c3-4769-99fb-c931a9ee2feb",
+              "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5b432210-b886-44b6-a6e4-5b2312b07dee",
+              "versionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 112,
+          "applicability": "SELECTED",
+          "correlationId": "b3dbad82-a881-43c9-b280-02f97f883ae4",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:08:07.567+00:00"
+    },
+    {
+      "id": "a2a981c2-ce99-4c77-a37a-bbb893018086",
+      "request_started_at": "2026-09-08T20:08:30.39+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1579,
+      "output_tokens": 49,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "saturday"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5b432210-b886-44b6-a6e4-5b2312b07dee",
+              "versionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "624ab4fa-b48c-4ce5-9acb-ef0423e1269e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 126,
+          "applicability": "SELECTED",
+          "correlationId": "a2a981c2-ce99-4c77-a37a-bbb893018086",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:08:32.881+00:00"
+    },
+    {
+      "id": "22780387-27d2-42f1-9f2b-70a13e77af30",
+      "request_started_at": "2026-09-08T20:09:15.984+00:00",
+      "origin": "player_interface",
+      "final_kind": "answer",
+      "model": "gpt-5.5-2026-04-23",
+      "input_tokens": 1572,
+      "output_tokens": 44,
+      "source_family": "lwr",
+      "stage3_invoked": true,
+      "model_call_skipped": false,
+      "assistant_version": "LMS-0725",
+      "diagnostic_snapshot": {
+        "policy": {
+          "scope": [
+            "primetime"
+          ],
+          "intent": "policy_date",
+          "object": "league_date",
+          "origin": "player_interface",
+          "zeroStage": null,
+          "candidates": [
+            {
+              "reason": "SELECTED",
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+              "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "03674b99-bc4a-4668-8994-8da95031fdd9",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "78cab232-56b4-454f-aa08-76151dab4bf5",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+              "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+            },
+            {
+              "reason": "NOT_SELECTED",
+              "chunkId": "5b432210-b886-44b6-a6e4-5b2312b07dee",
+              "versionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+            }
+          ],
+          "completion": "complete",
+          "finalCount": 1,
+          "validation": "VALIDATED",
+          "completionMs": 107,
+          "applicability": "SELECTED",
+          "correlationId": "22780387-27d2-42f1-9f2b-70a13e77af30",
+          "selectedCount": 1,
+          "candidateCount": 32,
+          "completionCount": 3,
+          "completionStage": null,
+          "completionReason": null,
+          "referencesTruncated": true
+        },
+        "candidateCount": 32,
+        "embeddingModel": "text-embedding-3-small",
+        "retrievalLimit": 8,
+        "stage3Sufficient": true,
+        "evidenceThreshold": 0.35,
+        "authorityReviewLimit": 12,
+        "configurationVersion": "LMS-0725",
+        "equipmentProbeInvoked": false,
+        "equipmentProbeRetrieved": false
+      },
+      "selected_evidence_count": 1,
+      "reason_code": "validated_structured_output",
+      "completed_at": "2026-09-08T20:09:17.859+00:00"
+    }
+  ]
+}

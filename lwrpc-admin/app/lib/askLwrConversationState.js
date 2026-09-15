@@ -26,7 +26,7 @@ export function createConversationContext(storage) {
     startOperation() { operations++; notify(); let ended = false; return () => { if (!ended) { ended = true; operations--; notify(); } }; },
     history() {
       if (history === undefined) {
-        try { const saved = JSON.parse(storage?.getItem(SESSION_EXCHANGES_KEY) || "[]"); history = Array.isArray(saved) ? saved.filter(e => e && !e.liveSensitive && !e.result?.live && !e.pending && (e.result || e.requestError)).slice(0, 8).map(resetFeedbackPending) : []; } catch { history = []; }
+        try { const saved = JSON.parse(storage?.getItem(SESSION_EXCHANGES_KEY) || "[]"); history = Array.isArray(saved) ? saved.filter(e => e && !e.liveSensitive && !e.result?.live && !e.result?.privateContext && !e.pending && (e.result || e.requestError)).slice(0, 8).map(resetFeedbackPending) : []; } catch { history = []; }
       }
       return history;
     },
@@ -34,7 +34,7 @@ export function createConversationContext(storage) {
       if (expectedGeneration !== generation) return false;
       history = value;
       try {
-        const completed = value.filter(e => !e.liveSensitive && !e.result?.live && !e.pending && (e.result || e.requestError)).slice(0, 8);
+        const completed = value.filter(e => !e.liveSensitive && !e.result?.live && !e.result?.privateContext && !e.pending && (e.result || e.requestError)).slice(0, 8);
         if (completed.length) storage?.setItem(SESSION_EXCHANGES_KEY, JSON.stringify(completed));
         else storage?.removeItem(SESSION_EXCHANGES_KEY);
       } catch { /* In-memory history remains usable when storage refuses writes. */ }

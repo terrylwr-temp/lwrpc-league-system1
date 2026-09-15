@@ -1603,6 +1603,12 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
     }
   }
 
+  function closeStatsWithoutResults() {
+    setSendResultsOnStatsOk(false);
+    setStatsOpen(false);
+    onExit?.();
+  }
+
   return (
     <section className="sticky top-0 z-30 rounded-lg border border-teal-200 bg-teal-50/95 p-2 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] backdrop-blur sm:top-2 sm:p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -1660,6 +1666,8 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
             setSendResultsOnStatsOk(false);
           }}
           onConfirm={sendResultsOnStatsOk ? sendResultsAndCloseStats : null}
+          onSkipResults={sendResultsOnStatsOk ? closeStatsWithoutResults : null}
+          busy={actionLoading === "sendSessionResultsText"}
           confirmLabel={sendResultsOnStatsOk ? "OK - Send Results" : "Close"}
         />
       )}
@@ -1747,7 +1755,7 @@ function ScoreErrorModal({ message, onClose }) {
   );
 }
 
-function SessionStatsModal({ session, state, onClose, onConfirm = null, confirmLabel = "Close" }) {
+function SessionStatsModal({ session, state, onClose, onConfirm = null, onSkipResults = null, busy = false, confirmLabel = "Close" }) {
   const [showMobileStatsDetail, setShowMobileStatsDetail] = useState(false);
   const matches = state?.matches || [];
   const latestRoundNumber = Math.max(0, ...matches.map((match) => Number(match.round_number || 0)));
@@ -1790,9 +1798,16 @@ function SessionStatsModal({ session, state, onClose, onConfirm = null, confirmL
             <div className={MODAL_EYEBROW_CHROME}>Current Game Stats</div>
             <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
           </div>
-          <button type="button" onClick={onConfirm || onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
-            {confirmLabel}
-          </button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
+            <button type="button" disabled={busy} onClick={onConfirm || onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 disabled:opacity-50 sm:w-auto">
+              {busy ? "Sending..." : confirmLabel}
+            </button>
+            {onSkipResults && (
+              <button type="button" disabled={busy} onClick={onSkipResults} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 disabled:opacity-50 sm:w-auto">
+                Don&apos;t send text
+              </button>
+            )}
+          </div>
         </div>
         <div className="max-h-[calc(100vh-6.5rem)] overflow-y-auto p-3 sm:max-h-[70vh] sm:p-4">
           {rows.length > 0 ? (

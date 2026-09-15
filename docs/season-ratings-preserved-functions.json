@@ -1,0 +1,57 @@
+[
+  {
+    "name": "deleteRatingsForSelectedSeason",
+    "unchanged": true,
+    "sha256": "7d3f7716030c09052f005207ea4c5098f91c53bc6dc52696420322fd27bb0c1f"
+  },
+  {
+    "name": "copyRatingsBetweenSeasons",
+    "unchanged": true,
+    "sha256": "958a53f2666c21038c8ab7755c54c0f4666e8c8e8853cd479c0d6402e2aaad0a"
+  },
+  {
+    "name": "cleanRatingsForSelectedSeason",
+    "unchanged": true,
+    "sha256": "875c303addb4eb5d7ac855ecae0102783157a465dbdc0dddf1ff2bdbe3ed7c6e"
+  },
+  {
+    "name": "buildRatingCleanupChanges",
+    "unchanged": true,
+    "sha256": "ce2518ff0915f9a5766c0d29b9d490d7359f80c68fcbeefa5a079103ca555dfb"
+  },
+  {
+    "name": "applyRatingCleanupChanges",
+    "unchanged": true,
+    "sha256": "09a29f27f996cb9bb23f70b76e14490f9151eb477c23c14fe2fa3842336aa08b"
+  },
+  {
+    "name": "continueCleanRatings",
+    "unchanged": true,
+    "sha256": "fbe9fb7161bed01c73b0c07bf94ea05cebd1a406c11052e4fc85a27daada0f73"
+  },
+  {
+    "name": "applyReviewedRatingChanges",
+    "unchanged": true,
+    "sha256": "c6f0bc58008e223f5a96b8499484ded9a001fae53b19bc4a94f06786135620bb"
+  },
+  {
+    "name": "parseReliabilityThreshold",
+    "unchanged": true,
+    "sha256": "3318fc79a506e7e5d79d0fd5481c5ec1395afbf1d596be2e02403f1276c4d1e7"
+  },
+  {
+    "name": "isReliabilityNrAdjustment",
+    "unchanged": true,
+    "sha256": "2ba7946acbf679a465d2564e57cf49f7d73be02cd3a0896b541f4b1d56c01c5e"
+  },
+  {
+    "name": "cleanedSeasonDuprRating",
+    "unchanged": true,
+    "sha256": "3b11516486a7ad6979acae45bb184c34b4eb8143a60d38c3ebd54304abb1e59a"
+  },
+  {
+    "name": "cleanedAgeBasedRating",
+    "unchanged": true,
+    "sha256": "033062c82c9dd6f4fd3cd7c829db16a15d044c0ed8699951160016995de90c59"
+  }
+]

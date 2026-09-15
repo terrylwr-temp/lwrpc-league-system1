@@ -1,0 +1,10 @@
+{
+  "acceptedFirst": true,
+  "acceptedFirstEvidence": "lms-0726-member-accepted-api.json plus direct member-list/search/edit observations",
+  "candidateAndRestoredAcceptedApiIdentical": true,
+  "cases": 12,
+  "normalMemberEdit": "accepted and candidate synthetic note saves passed; persisted after rollback",
+  "approvedPresentationDifference": "View As User in normal Member Detail action group",
+  "candidateMigrationBusinessRowsUnchanged": true,
+  "applicationRollbackBusinessRowsUnchanged": true
+}

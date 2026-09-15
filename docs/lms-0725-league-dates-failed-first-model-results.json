@@ -1,0 +1,236 @@
+{
+  "recordedAt": "2026-09-08T16:10:58.694Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 2,
+  "cases": [
+    {
+      "id": "Q64",
+      "question": "when does the women weekday dupr league start",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 54,
+              "sha256": "66b59cb33ee1f1a583c78cfed446b9176598512fad76060f34abe1cdb3e60e8a"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1298,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "The Women Weekday DUPR League season starts Oct. 14, 2026, for the 2026 Fall League season.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3135,
+        "sourceResolutionMs": 4,
+        "totalMs": 3178,
+        "inputTokens": 1520,
+        "outputTokens": 45,
+        "totalTokens": 1565,
+        "estimatedGenerationCostUsd": 0.00895
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q65",
+      "question": "What is the starting date for the women's weekday dupr league",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 54,
+              "sha256": "66b59cb33ee1f1a583c78cfed446b9176598512fad76060f34abe1cdb3e60e8a"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1314,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "The women’s Weekday DUPR League starts on Oct. 14, 2026, for the 2026 Fall League season.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1552,
+        "sourceResolutionMs": 1,
+        "totalMs": 1560,
+        "inputTokens": 1523,
+        "outputTokens": 46,
+        "totalTokens": 1569,
+        "estimatedGenerationCostUsd": 0.008995
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

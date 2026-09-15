@@ -1,0 +1,65 @@
+(node:19264) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0717 final recording dates use one exact original bullet with separate source heading metadata, without calendar siblings (19.4703ms)
+✔ 0717 final signed Season DUPR continuation: Weekday (35.6755ms)
+✔ 0717 final signed Season DUPR continuation: Saturday (16.0621ms)
+✔ 0717 final signed Season DUPR continuation: PrimeTime (11.0219ms)
+✔ 0717 final plural timing continuation cannot inherit ambiguous, absent, invalid, expired or clarification context (11.711ms)
+✔ 0717 final inheritance uses only immediate signed subject; standalone questions supersede (2.124ms)
+✔ 0717 final date scope cannot be borrowed from a different or unrelated heading (2.81ms)
+✔ 0717 final general eligibility through player path: Can I join a team in another community? (6.8934ms)
+✔ 0717 final general eligibility through player path: Can I play on a team from a different community? (4.3266ms)
+✔ 0717 final general eligibility through player path: Can I play for another community's team? (6.317ms)
+✔ 0717 final general eligibility through player path: Do I have to play for the community where I live? (6.0851ms)
+✔ 0717 final general eligibility through player path: Can players from different communities form a team? (2.6091ms)
+✔ 0717 final general eligibility through player path: Can I play for another community if my community already has a team in my division? (5.7392ms)
+✔ 0717 final general eligibility through player path: Can I play for another community if my community does not have a team in my division? (4.5314ms)
+✔ 0717 final general eligibility through player path: What are the eligibility rules for joining another community's team? (5.3281ms)
+✔ 0717 final general eligibility through player path: Can I play for another community? (2.4983ms)
+✔ 0717 final live affiliation through player path: What community am I registered with? (0.4659ms)
+✔ 0717 final live affiliation through player path: Which community am I registered with? (0.1834ms)
+✔ 0717 final live affiliation through player path: What team am I on? (0.1616ms)
+✔ 0717 final live affiliation through player path: Am I currently eligible for Team X? (0.1578ms)
+✔ 0717 final live affiliation through player path: Am I personally eligible for Team X right now? (0.153ms)
+✔ 0717 final live affiliation through player path: Is John Smith eligible for this team? (0.1683ms)
+✔ 0717 final live affiliation through player path: Does my community currently have a team in my division? (0.1705ms)
+✔ 0717 final Rule 3.5 wins over high-ranked real procedural/host/server distractors; no sentence or rule-id hardcoding (9.6163ms)
+✔ 0717 final accepted roster obligation is not blocked by affiliation guard (5.155ms)
+✔ 0717 final real model transport preserves community condition and referee scope instructions (15.3471ms)
+(node:6608) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0727 policy routing and exact evidence: Can I play on a team in a different community? (19.2462ms)
+✔ 0727 policy routing and exact evidence: Can I play in a different community? (4.1571ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community? (3.2507ms)
+✔ 0727 policy routing and exact evidence: Can I join another community's team? (3.5486ms)
+✔ 0727 policy routing and exact evidence: Can players from different communities be on the same team? (1.266ms)
+✔ 0727 policy routing and exact evidence: Do I have to play for my own community? (0.5651ms)
+✔ 0727 policy routing and exact evidence: Are cross-community teams allowed? (1.7379ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a team in my division. Can I play for another community? (3.2251ms)
+✔ 0727 policy routing and exact evidence: My community has a team but it's full. Can I play for another community? (2.6606ms)
+✔ 0727 policy routing and exact evidence: My community has a team in my division and has room. Can I play for another community? (3.3314ms)
+✔ 0727 policy routing and exact evidence: My community has a team in another division. Can I play elsewhere in my division? (3.2296ms)
+✔ 0727 policy routing and exact evidence: What are the rules for cross-community teams? (1.328ms)
+✔ 0727 policy routing and exact evidence: Can I play on another community's team? (1.6806ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a DUPR7 team. Can I play for another community? (1.4475ms)
+✔ 0727 policy routing and exact evidence: Can players play on teams in other communities? (0.7867ms)
+✔ 0727 policy routing and exact evidence: Do you have to play for your own community? (0.4031ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community if mine has a team? (0.9521ms)
+✔ 0727 policy routing and exact evidence: What if my community's team is full? (0.5868ms)
+✔ 0727 policy routing and exact evidence: My community has a Saturday DUPR7 team. Can I play for another community in Weekday DUPR8? (1.1031ms)
+✔ 0727 separate live and division eligibility remain separate (4.2901ms)
+✔ 0727 missing conjunction, conflicting candidates, changed exact source fail closed (13.3754ms)
+✔ 0727 completion reads only active ready searchable document corpus (2.2394ms)
+✔ 0727 generated request contains only exact policy/question, with conditional fact instructions (8.4488ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2695.8193

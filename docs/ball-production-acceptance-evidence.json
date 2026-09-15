@@ -1,0 +1,232 @@
+{
+  "status": "FAST FIX — PRODUCTION ACCEPTED",
+  "commit": "d1e28714145289f6320b55ff76f7f588a0fbb158",
+  "deployment": {
+    "id": "dpl_EPJYR5Nz4DZmmkr8eXDpyf5Vg987",
+    "name": "lwrpc-admin",
+    "url": "lwrpc-admin-8jamxe2q8-terry-lwrpc.vercel.app",
+    "type": "LAMBDAS",
+    "state": "READY",
+    "createdAt": 1789343104727,
+    "creator": {
+      "uid": "JUuQDjLgrTx95yrq0IbiBdU6",
+      "username": "terrylwr-temp"
+    },
+    "project": {
+      "id": "prj_IBm5EKA3B2hciTmhvz0kIrPhZAX3",
+      "name": "lwrpc-admin",
+      "framework": "nextjs"
+    },
+    "meta": {
+      "gitCommitAuthorName": "terrylwrpickleballclub",
+      "gitCommitAuthorEmail": "terry.adelman@gmail.com",
+      "gitCommitMessage": "Lifetime-ball-FAST-FIX",
+      "gitCommitRef": "codex/lifetime-ball-fast-fix",
+      "gitCommitSha": "d1e28714145289f6320b55ff76f7f588a0fbb158",
+      "gitDirty": "0",
+      "reviewedCommit": "d1e28714145289f6320b55ff76f7f588a0fbb158",
+      "actor": "codex",
+      "lambdaRuntimeStats": "{\"nodejs\":3}"
+    },
+    "alias": [
+      "lwrpc-admin.vercel.app",
+      "league.lwrpickleballclub.com",
+      "view-as.lwrpickleballclub.com",
+      "lwrpc-admin-terry-lwrpc.vercel.app"
+    ],
+    "target": "production",
+    "regions": [
+      "iad1"
+    ],
+    "buildingAt": 1789343105643,
+    "ready": 1789343156539,
+    "readyState": "READY",
+    "source": "cli",
+    "aliasError": null
+  },
+  "source": [
+    {
+      "title": "LWR Pickleball Club DUPR Captains Guide",
+      "status": "active",
+      "active_version_id": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+      "processing_status": "ready",
+      "id": "2ab86486-e9d5-4ae9-970d-097472b0e32b",
+      "page_number": 10,
+      "heading": "LEAGUE FEES AND WAIVER",
+      "content": "LEAGUE FEES AND WAIVER\no The registration fee is per team, per division, per season, as announced before the season\nbegins. No refunds will be issued starting one week before the season starts, unless a division\nis canceled due to having fewer than the four-team minimum or other league-initiated\ncancelations.\no The League shall provide:\n Match Balls: Franklin Outdoor X-40 optic yellow balls for all regular season and playoƯ\nmatches.\n DUPR Uploads: All match results logged to DUPR for rating updates (excluding mixed\nand individual Picklebreaker™ games and some tournament games).\n Administration: All scheduling, website management, and administrative support.\n Championship Prize: Free entry into the following season for the Gold Medal/1st place\nteam in each division based on Championship Day/PlayoƯ results.\no Waiver: As an LWR PC member, you acknowledge the risks of participation and release\nLWR PC, match sites, communities/clubs, and all officers/volunteers from any claims,\nliability, and costs. See the full detailed Waiver here: https://tinyurl.com/LWRPC-ClubWaiver",
+      "is_searchable": true
+    }
+  ],
+  "businessBefore": [
+    {
+      "evidence": {
+        "teams": {
+          "hash": "8742788dd2658ad0e1d8ccddad1eb0f4",
+          "count": 110
+        },
+        "leagues": {
+          "hash": "516fdfc3b512fddb90f6ef5f7ea8f3cf",
+          "count": 3
+        },
+        "matches": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "members": {
+          "hash": "b52f75aae6f10786fae19ea396b0a08a",
+          "count": 1986
+        },
+        "seasons": {
+          "hash": "10ebd51367920b6986da08dd1fe60cda",
+          "count": 2
+        },
+        "divisions": {
+          "hash": "74b34587e6d8634431b750ab68bc04e2",
+          "count": 18
+        },
+        "team_byes": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "line_games": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "user_roles": {
+          "hash": "6f3a427851e08194e344f6aef9b48c78",
+          "count": 195
+        },
+        "match_lines": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "team_members": {
+          "hash": "3336b7fd028062d34ff4a9fc4c391f7e",
+          "count": 15
+        },
+        "match_lineups": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "team_standings": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "member_season_ratings": {
+          "hash": "2af92b380888cb2b0024f3bf5c410b47",
+          "count": 1683
+        }
+      }
+    }
+  ],
+  "businessAfter": [
+    {
+      "evidence": {
+        "teams": {
+          "hash": "8742788dd2658ad0e1d8ccddad1eb0f4",
+          "count": 110
+        },
+        "leagues": {
+          "hash": "516fdfc3b512fddb90f6ef5f7ea8f3cf",
+          "count": 3
+        },
+        "matches": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "members": {
+          "hash": "b52f75aae6f10786fae19ea396b0a08a",
+          "count": 1986
+        },
+        "seasons": {
+          "hash": "10ebd51367920b6986da08dd1fe60cda",
+          "count": 2
+        },
+        "divisions": {
+          "hash": "74b34587e6d8634431b750ab68bc04e2",
+          "count": 18
+        },
+        "team_byes": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "line_games": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "user_roles": {
+          "hash": "6f3a427851e08194e344f6aef9b48c78",
+          "count": 195
+        },
+        "match_lines": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "team_members": {
+          "hash": "3336b7fd028062d34ff4a9fc4c391f7e",
+          "count": 15
+        },
+        "match_lineups": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "team_standings": {
+          "hash": "d41d8cd98f00b204e9800998ecf8427e",
+          "count": 0
+        },
+        "member_season_ratings": {
+          "hash": "2af92b380888cb2b0024f3bf5c410b47",
+          "count": 1683
+        }
+      }
+    }
+  ],
+  "telemetry": [
+    {
+      "request_started_at": "2026-09-13 23:46:43.993+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 1437,
+      "output_tokens": 47
+    },
+    {
+      "request_started_at": "2026-09-13 23:47:16.218+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 1435,
+      "output_tokens": 44
+    },
+    {
+      "request_started_at": "2026-09-13 23:47:37.35+00",
+      "final_kind": "answer",
+      "reason_code": "validated_structured_output",
+      "model": "gpt-5.5-2026-04-23",
+      "model_call_skipped": false,
+      "input_tokens": 2402,
+      "output_tokens": 141
+    }
+  ],
+  "estimatedGenerationUsd": 0.03333,
+  "estimateNote": "Existing app estimator, uncached token estimate excluding embeddings; not invoice cost.",
+  "replays": [
+    {
+      "question": "Are we going to use the Lifetime ball",
+      "answer": "No. The supplied official evidence says league-provided match balls are Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.",
+      "source": "DUPR Captains Guide — LEAGUE FEES AND WAIVER — Page 10"
+    },
+    {
+      "question": "Will we use the Lifetime ball?",
+      "answer": "No. The supplied official evidence says the league provides Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.",
+      "source": "DUPR Captains Guide — LEAGUE FEES AND WAIVER — Page 10"
+    },
+    {
+      "question": "What happens if the ball is damaged during play?",
+      "result": "Correct damaged-ball handling, source USAP 10.G/10.G.1/10.G.2 p29 and referee 20.F.1 p54; no equipment-brand answer."
+    }
+  ],
+  "normalLms": "Actual Commissioner session; Teams 83 of110 pre/post. No View-As or business writes."
+}

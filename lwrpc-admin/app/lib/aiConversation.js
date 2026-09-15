@@ -1,3 +1,9 @@
+import {isCommunityParticipationQuestion} from './aiCommunityIntent.js';
+import {questionIntent} from './aiRequestIntent.js';
+import {registrationReleaseIntent} from './aiRegistrationReleaseIntent.js';
+import {scheduleReleaseSelection} from './aiLeagueDateEvidence.js';
+import {excerptReferences} from './aiEvidenceExcerpts.js';
+import {rosterLeagueChoices} from './aiPolicyEvidence.js';
 import {approvedSourceIdentity} from "./aiApprovedAnswersShared.js";
 import { apparelQuestion, officialQuestionConcept } from './aiQuestionConcepts.js';
 import { interpretQuestion, matchingQuestion, medicalScoreContext } from "./aiQuestionInterpretation.js";
@@ -39,8 +45,31 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
   if (receipt) {
     try { prior = readConversationReceipt(receipt, userId, { now }); } catch (error) { receiptError = error; }
   }
-  const rawMatch = matchingQuestion(rawQuestion, { leagueChoice: prior?.purpose === "clarification" && prior.category === "roster_league" });
+  if(!prior && /^(?:option )?\d{1,2}[?.!]*$/i.test(rawQuestion))return {kind:'clarification',classification:'unresolved_selection',rawQuestion,effectiveQuestion:'',clarification:{category:'full_question',message:'Please ask the full question again.'}};
+  const rawMatch = matchingQuestion(rawQuestion, { leagueChoice: prior?.purpose === "clarification" && ["roster_league","league_date"].includes(prior.category) });
   const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false };
+  const bounded=registrationReleaseIntent(rawMatch);
+  if(bounded?.contextConflict)return {...diagnostics,kind:'clarification',rawQuestion,effectiveQuestion:'',clarification:{category:'full_question',message:'Please clarify the conflicting league or season in your question.'}};
+  if(/^how do i register it[?.!]*$/i.test(rawMatch)){
+   const previous=registrationReleaseIntent(prior?.effectiveQuestion);
+   if(prior?.purpose==='follow_up'&&previous?.object==='team_registration')return {...diagnostics,kind:'resolved',rawQuestion,effectiveQuestion:prior.effectiveQuestion,clarification:null};
+   return {...diagnostics,kind:'clarification',rawQuestion,effectiveQuestion:'',clarification:{category:'full_question',message:'What would you like to register? Please include the team or league.'}};
+  }
+  if(prior?.purpose==='clarification'&&prior.category.startsWith('schedule_release-')){
+   const allowed=prior.category.slice('schedule_release-'.length).split('-');
+   const reply=rawMatch.trim().replace(/[?.!]+$/,'').toLowerCase();
+   if(allowed.includes(reply))return {...diagnostics,clarificationConsumed:true,kind:'resolved',rawQuestion,effectiveQuestion:`${prior.originalQuestion.replace(/[?.!]+$/,'')} for the ${reply} League?`,clarification:null};
+   if(/^(?:weekday|saturday|primetime|[1-5])$/i.test(reply))return {...diagnostics,kind:'clarification',rawQuestion,effectiveQuestion:'',clarification:{category:prior.category,message:'Please choose one of the applicable leagues.',options:allowed}};
+  }
+
+  if(prior?.purpose==='clarification'&&prior.category==='scoring_method'&&/^(?:standard|rally)(?: scoring)?[?.!]*$/i.test(rawMatch))return {...diagnostics,clarificationConsumed:true,kind:'resolved',classification:'clarification_response',rawQuestion,effectiveQuestion:`${prior.originalQuestion.replace(/[?.!]+$/,'')} using ${/rally/i.test(rawMatch)?'Rally':'Standard'} Scoring?`,clarification:null};
+  const priorScoring=prior?.purpose==='follow_up'&&/rally scoring/i.test(prior.effectiveQuestion);
+  if(!/rally|standard scoring/i.test(rawMatch)&&/\b(?:\d{1,2}[- ]all|tied (?:at )?\d{1,2})\b/i.test(rawMatch)&&/\b(?:game|score|points?)\b/i.test(rawMatch)) {
+   if(priorScoring)return {...diagnostics,kind:'resolved',classification:'follow_up',rawQuestion,effectiveQuestion:`${rawQuestion} using Rally Scoring?`,clarification:null};
+   return {...diagnostics,kind:'clarification',classification:'missing_scoring_method',rawQuestion,effectiveQuestion:'',clarification:{category:'scoring_method',message:'Which scoring method do you mean?',options:['Standard Scoring','Rally Scoring']}};
+  }
+  if(priorScoring&&/\bscores? freeze again\b/i.test(rawMatch))return {...diagnostics,kind:'resolved',classification:'follow_up',rawQuestion,effectiveQuestion:`${rawQuestion} using Rally Scoring?`,clarification:null};
+  if(/\bscores? freeze again\b/i.test(rawMatch)&&!priorScoring)return {...diagnostics,kind:'clarification',classification:'unresolved_follow_up',rawQuestion,effectiveQuestion:'',clarification:{category:'full_question',message:'Please ask the full question, including the scoring method and game format.'}};
 
   // Only this complete timing continuation has a known plural subject. The
   // signed immediately previous question must contain that subject alone.
@@ -57,7 +86,7 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
     return { ...diagnostics, kind: "clarification", classification: receiptError ? "expired_context" : "unresolved_follow_up", rawQuestion, effectiveQuestion: "", priorContextAvailable: Boolean(prior), contextSuperseded: false, clarification: { category: "full_question", message: "Please ask the full question again so I can check the official rules." } };
   }
 
-  if (prior?.purpose === "clarification" && prior.category === "roster_league") {
+  if (prior?.purpose === "clarification" && ["roster_league","league_date"].includes(prior.category)) {
     const reply = rawMatch.trim().replace(/[?.!]+$/, "");
     if (/^(?:(?:the|for the)\s+)?(?:weekday|saturday|primetime|weekend)(?:\s+league)?$/i.test(reply)) {
       const league = /weekend/i.test(reply) ? "Saturday" : rawQuestion.trim().replace(/^(?:(?:the|for the)\s+)/i, "").replace(/(?:\s+league)?[?.!]*$/i, "");
@@ -69,7 +98,7 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
     if (object) return { ...diagnostics, clarificationConsumed: true, kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: `${prior.originalQuestion.replace(/[?.!]+$/, "")} to my ${object}?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
   }
   if (missingPlayerObject(rawMatch)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_PLAYER_OBJECT, "missing_player_entry_object", Boolean(prior)), contextSuperseded: Boolean(prior) };
-  if (isRosterParticipationQuestion(rawMatch) || ballDamageKind(rawMatch) || isCompleteStandaloneQuestion(rawMatch)) {
+  if (isCommunityParticipationQuestion(rawMatch) || isRosterParticipationQuestion(rawMatch) || ballDamageKind(rawMatch) || isCompleteStandaloneQuestion(rawMatch)) {
     return {
       ...diagnostics, kind: "resolved", classification: prior ? "standalone_supersedes_context" : "standalone", rawQuestion, effectiveQuestion: rawQuestion,
       priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior), clarification: null,
@@ -112,6 +141,13 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
 // the presence of active candidates. It never turns candidates into an answer.
 export function clarificationFromRetrieval(resolution, retrieval) {
   if (resolution?.kind !== "resolved") return null;
+  const dateIntent=questionIntent(resolution.effectiveQuestion);
+  if(dateIntent.object==='schedule_release'){
+   const selection=retrieval.policyEvidence?.status==='complete'?scheduleReleaseSelection(retrieval.policyEvidence.candidates,dateIntent):{choices:[]};
+   if(selection.choices.length)return {...resolution,kind:'clarification',clarificationQuestion:resolution.effectiveQuestion,clarification:{category:'schedule_release-'+selection.choices.join('-'),message:'The published schedule dates differ. Which league do you mean?',options:selection.choices.map(l=>({weekday:'Weekday',saturday:'Saturday',primetime:'PrimeTime'})[l])}};
+   return null;
+  }
+  if(dateIntent.object==='league_date'&&!dateIntent.leagues.length)return {...resolution,kind:'clarification',classification:'missing_policy_date_league',clarificationQuestion:resolution.effectiveQuestion,clarification:{category:'league_date',message:'Which league do you mean: Weekday, Saturday, or PrimeTime?',options:['Weekday','Saturday','PrimeTime']}};
   const concept=officialQuestionConcept(resolution.effectiveQuestion);
   if(retrieval.documentNavigation?.status==='clarification')return {...resolution,kind:'clarification',clarificationQuestion:resolution.effectiveQuestion,clarification:{category:'full_question',reason:'ambiguous_official_document',message:retrieval.documentNavigation.message}};
   if(concept?.kind==='composition' && !concept.leagues.length && (concept.division||['fielded','courts'].includes(concept.operation)))return {
@@ -119,11 +155,11 @@ export function clarificationFromRetrieval(resolution, retrieval) {
     clarification:{category:'roster_league',reason:'missing_composition_league',message:'Which league do you mean: Weekday, Saturday, or PrimeTime? Player counts and division formats can differ.'},
   };
   const candidates = [...(retrieval?.authorityReviewCandidates || []), ...(retrieval?.candidates || []), ...(retrieval?.suppliedEvidence || [])];
-  const leagues = plausibleRosterTimingLeagues(matchingQuestion(resolution.effectiveQuestion), candidates);
+  const leagues = retrieval.policyEvidence?.status==='complete' ? rosterLeagueChoices(resolution.effectiveQuestion,retrieval.policyEvidence.candidates) : plausibleRosterTimingLeagues(matchingQuestion(resolution.effectiveQuestion), candidates);
   if (!questionLeague(matchingQuestion(resolution.effectiveQuestion)).length && leagues.length > 1) return {
     ...resolution, ...clarificationResolution(resolution.rawQuestion, "roster_league", "missing_roster_timing_league", resolution.priorContextAvailable),
     clarificationQuestion: resolution.effectiveQuestion,
-    clarification: { category: "roster_league", reason: "missing_roster_timing_league", message: `Which league do you mean: ${leagues.map(league => ({ weekday: "Weekday", saturday: "Saturday", primetime: "PrimeTime" })[league]).join(", ")}?` },
+    clarification: { category: "roster_league", reason: "missing_roster_timing_league", options:leagues.map(league=>({weekday:"Weekday",saturday:"Saturday",primetime:"PrimeTime"})[league]), message: `Which league do you mean: ${leagues.map(league => ({ weekday: "Weekday", saturday: "Saturday", primetime: "PrimeTime" })[league]).join(", ")}?` },
   };
   if (!requiresColorSubjectClarification(resolution.effectiveQuestion)) return null;
   const hasCandidates = Array.isArray(retrieval?.candidates) && retrieval.candidates.length > 0;
@@ -206,7 +242,7 @@ function isCompleteStandaloneQuestion(question) {
 
 function safeSources(sources) {
   return (sources || []).slice(0, 4).map((source) => ({
-    ...approvedSourceIdentity(source),
+    ...approvedSourceIdentity(source), ...excerptReferences(source),
     documentId: cleanId(source?.documentId), documentVersionId: cleanId(source?.documentVersionId), chunkId: cleanId(source?.chunkId),
     documentTitle: String(source?.documentTitle || "").slice(0, 300), pageNumber: positiveNumber(source?.pageNumber), ruleNumber: String(source?.ruleNumber || "").slice(0, 120),
     sectionLabel: String(source?.sectionLabel || "").slice(0, 300), heading: String(source?.heading || "").slice(0, 300), citation: String(source?.citation || "").slice(0, 600),
@@ -215,7 +251,7 @@ function safeSources(sources) {
 
 function safeEvidence(evidence) {
   return (evidence || []).slice(0, 4).map((item) => ({
-    ...approvedSourceIdentity(item),
+    ...approvedSourceIdentity(item), ...excerptReferences(item),
     documentId: cleanId(item?.documentId), documentVersionId: cleanId(item?.documentVersionId), chunkId: cleanId(item?.chunkId), ruleNumber: String(item?.ruleNumber || "").slice(0, 120),
     pageNumber: positiveNumber(item?.pageNumber), sourceClassification: String(item?.sourceClassification || "").slice(0, 80), evidenceRole: String(item?.evidenceRole || "").slice(0, 160),
     evidenceSelectionReason: String(item?.evidenceSelectionReason || "").slice(0, 500),

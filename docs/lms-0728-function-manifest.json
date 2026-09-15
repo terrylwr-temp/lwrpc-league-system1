@@ -1,0 +1,26 @@
+[
+  {
+    "signature": "view_as_private.member_role(uuid)",
+    "oldMd5": "0929cadc3946616a91615b2574401984",
+    "newMd5": "8ffcd39ccac0b130699a103caefedcd0",
+    "owner": "postgres",
+    "security": "INVOKER",
+    "searchPath": "",
+    "execute": [
+      "postgres",
+      "lms_view_as_executor"
+    ]
+  },
+  {
+    "signature": "view_as_private.lookup(uuid,uuid,uuid,uuid,jsonb)",
+    "oldMd5": "302293b776d734e1573238116c01ec4d",
+    "newMd5": "3d8ce5f61c83215561784840ff7ee551",
+    "owner": "postgres",
+    "security": "INVOKER",
+    "searchPath": "",
+    "execute": [
+      "postgres",
+      "lms_view_as_executor"
+    ]
+  }
+]

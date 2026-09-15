@@ -1,0 +1,18 @@
+[
+  {
+    "width": 390,
+    "liveExamples": 4,
+    "effectiveContextHeaderOnly": true,
+    "noActorOverride": true,
+    "inputInitiallyVisible": true,
+    "errors": []
+  },
+  {
+    "width": 320,
+    "liveExamples": 4,
+    "effectiveContextHeaderOnly": true,
+    "noActorOverride": true,
+    "inputInitiallyVisible": true,
+    "errors": []
+  }
+]

@@ -1,0 +1,499 @@
+{
+  "applicationCommit": "6d86e113ba1d40cc623f435bfd68753ea7535d5b",
+  "method": "Deterministic production-code calls with fresh read-only active production document passages; no generation or production question submission.",
+  "rows": [
+    {
+      "question": "When do the Season DUPR ratings record?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when do the season dupr ratings record?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "When are the Season ratings done?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when are the season ratings done?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "Regarding Season DUPR rating date, when is that actual date?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "regarding season dupr rating date, when is that actual date?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "Season DUPR rating date",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "season dupr rating date"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "When are Season DUPR ratings recorded?",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when are season dupr ratings recorded?"
+      },
+      "live": null,
+      "boundedRead": true,
+      "legacyDateMatcher": true,
+      "selected": [
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Weekday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Saturday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        }
+      ],
+      "dateSelected": true
+    },
+    {
+      "question": "What date is my Season DUPR established?",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what date is my season dupr established?"
+      },
+      "live": null,
+      "boundedRead": true,
+      "legacyDateMatcher": false,
+      "selected": [
+        {
+          "title": "LWR Pickleball Club DUPR League Rules",
+          "page": 3,
+          "heading": "DUPR RATINGS/DIVISIONS",
+          "content": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season."
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Weekday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Saturday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        }
+      ],
+      "dateSelected": true
+    },
+    {
+      "question": "When does my Season DUPR lock in?",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when does my season dupr lock in?"
+      },
+      "live": null,
+      "boundedRead": true,
+      "legacyDateMatcher": false,
+      "selected": [
+        {
+          "title": "LWR Pickleball Club DUPR League Rules",
+          "page": 3,
+          "heading": "DUPR RATINGS/DIVISIONS",
+          "content": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season."
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Weekday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Saturday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        }
+      ],
+      "dateSelected": true
+    },
+    {
+      "question": "When is the Weekday Season DUPR rating date?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "weekday"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when is the weekday season dupr rating date?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "What is my Season DUPR?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is my season dupr?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "season"
+      },
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "Has my Season DUPR been recorded?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "has my season dupr been recorded?"
+      },
+      "live": {
+        "intent": "SELF_RATING",
+        "subjectKind": "SELF",
+        "rating": "season"
+      },
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "When will my Season DUPR be recorded?",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when will my season dupr be recorded?"
+      },
+      "live": null,
+      "boundedRead": true,
+      "legacyDateMatcher": true,
+      "selected": [
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Weekday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Saturday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        }
+      ],
+      "dateSelected": true
+    },
+    {
+      "question": "When is the 2026 Fall PrimeTime Season DUPR rating date?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [
+          "primetime"
+        ],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when is the 2026 fall primetime season dupr rating date?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "What determines when Season DUPR is established?",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what determines when season dupr is established?"
+      },
+      "live": null,
+      "boundedRead": true,
+      "legacyDateMatcher": false,
+      "selected": [
+        {
+          "title": "LWR Pickleball Club DUPR League Rules",
+          "page": 3,
+          "heading": "DUPR RATINGS/DIVISIONS",
+          "content": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season."
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Weekday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Saturday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        }
+      ],
+      "dateSelected": true
+    },
+    {
+      "question": "When do you record the Season DUPR?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when do you record the season dupr?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "What is the actual Season DUPR date?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "what is the actual season dupr date?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "When does Season DUPR become official?",
+      "intent": {
+        "kind": "unresolved",
+        "object": null,
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when does season dupr become official?"
+      },
+      "live": null,
+      "boundedRead": false,
+      "legacyDateMatcher": false,
+      "selected": [],
+      "dateSelected": false
+    },
+    {
+      "question": "When is Season DUPR set?",
+      "intent": {
+        "kind": "policy_date",
+        "object": "rating",
+        "leagues": [],
+        "division": null,
+        "event": "opening",
+        "phase": "unspecified",
+        "currentDate": false,
+        "matchingQuestion": "when is season dupr set?"
+      },
+      "live": null,
+      "boundedRead": true,
+      "legacyDateMatcher": false,
+      "selected": [
+        {
+          "title": "LWR Pickleball Club DUPR League Rules",
+          "page": 3,
+          "heading": "DUPR RATINGS/DIVISIONS",
+          "content": "4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season."
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Weekday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Saturday DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "content": "• Sept. 27, Sunday – Season DUPR ratings recorded"
+        }
+      ],
+      "dateSelected": true
+    },
+    {
+      "question": "When will schedules be sent?",
+      "intent": {
+        "kind": "policy_date",
+        "object": "schedule_release",
+        "leagues": [],
+        "season": null,
+        "policyYear": null,
+        "contextConflict": false,
+        "event": "schedule_release",
+        "matchingQuestion": "when will schedules be sent?"
+      },
+      "live": null,
+      "boundedRead": true,
+      "legacyDateMatcher": false,
+      "selected": [
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Weekday DUPR League Key Dates",
+          "content": "• Oct. 7, Wednesday – Schedules completed and sent"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 1,
+          "heading": "Saturday DUPR League Key Dates",
+          "content": "• Oct. 7, Wednesday – Schedules completed and sent"
+        },
+        {
+          "title": "2026 Fall League Important Dates",
+          "page": 2,
+          "heading": "PrimeTime DUPR League Key Dates",
+          "content": "• Oct. 7, Wednesday – Schedules completed and sent"
+        }
+      ],
+      "dateSelected": false
+    }
+  ]
+}

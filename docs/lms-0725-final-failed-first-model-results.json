@@ -1,0 +1,3685 @@
+{
+  "recordedAt": "2026-09-08T15:18:57.376Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 16,
+  "cases": [
+    {
+      "id": "Q07",
+      "question": "What date can I start entering my roster for weekday league",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 3161,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall Weekday DUPR League, you can start updating/entering rosters on Monday, Sept. 28, 2026.\n\nRoster entry is available once League Management has unlocked team rosters and notified you that they are available for adding and managing players.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2655,
+        "sourceResolutionMs": 16,
+        "totalMs": 2755,
+        "inputTokens": 1799,
+        "outputTokens": 78,
+        "totalTokens": 1877,
+        "estimatedGenerationCostUsd": 0.011335
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q09",
+      "question": "When can I start entering my roster?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5253,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall League, Weekday, Saturday, and PrimeTime DUPR league rosters can start being updated on Monday, Sept. 28, 2026.\n\nYou can begin adding/managing players once your team registration/setup is complete and League Management has activated the team and notified you that rosters for your league are unlocked and available.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 4975,
+        "sourceResolutionMs": 2,
+        "totalMs": 5015,
+        "inputTokens": 2447,
+        "outputTokens": 161,
+        "totalTokens": 2608,
+        "estimatedGenerationCostUsd": 0.017065
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "question": "What date can I start entering my roster for weekday league?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 3162,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall weekday DUPR league, roster updating can start Monday, Sept. 28, 2026. You can begin adding/managing players once League Management has unlocked rosters for your league and notified you they are available.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 8987,
+        "sourceResolutionMs": 2,
+        "totalMs": 9005,
+        "inputTokens": 1799,
+        "outputTokens": 68,
+        "totalTokens": 1867,
+        "estimatedGenerationCostUsd": 0.011035
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q11",
+      "question": "When can I add players?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5240,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall League, roster updates can start on Monday, Sept. 28, 2026, for Weekday DUPR, Saturday DUPR, and PrimeTime DUPR leagues.\n\nYou can begin adding and managing players after League Management has activated your team, assigned the captain/co-captain roles, and notified you that rosters for your league have been unlocked.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2762,
+        "sourceResolutionMs": 2,
+        "totalMs": 2770,
+        "inputTokens": 2445,
+        "outputTokens": 98,
+        "totalTokens": 2543,
+        "estimatedGenerationCostUsd": 0.015165
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q12",
+      "question": "When does roster entry open?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5245,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall League, roster updating opens Monday, Sept. 28, 2026, for Weekday DUPR, Saturday DUPR, and PrimeTime DUPR leagues.\n\nThe Captains Guide also says League Management must activate/setup the team and will notify captains when rosters are unlocked and available to begin adding/managing players.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2495,
+        "sourceResolutionMs": 1,
+        "totalMs": 2507,
+        "inputTokens": 2445,
+        "outputTokens": 113,
+        "totalTokens": 2558,
+        "estimatedGenerationCostUsd": 0.015615
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q13",
+      "question": "When can I start entering my PrimeTime players?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 3155,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall PrimeTime DUPR League, you can start updating/entering rosters on Monday, Sept. 28, 2026, once League Management has activated your team and notified you that rosters for your league are unlocked and available.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1541,
+        "sourceResolutionMs": 4,
+        "totalMs": 1554,
+        "inputTokens": 1796,
+        "outputTokens": 72,
+        "totalTokens": 1868,
+        "estimatedGenerationCostUsd": 0.01114
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q14",
+      "question": "When can I start entering my Saturday roster?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 3150,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall Saturday DUPR League, rosters can start being updated on Monday, Sept. 28, 2026.\n\nYou still need League Management to activate your team and notify you that rosters for your league have been unlocked before you can begin adding and managing players.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1810,
+        "sourceResolutionMs": 8,
+        "totalMs": 1881,
+        "inputTokens": 1799,
+        "outputTokens": 79,
+        "totalTokens": 1878,
+        "estimatedGenerationCostUsd": 0.011365
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q17",
+      "question": "When can I fill my roster?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5243,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall League Important Dates, rosters can start being updated on Monday, Sept. 28, 2026, for Weekday DUPR, Saturday DUPR, and PrimeTime DUPR leagues.\n\nYou can begin adding/managing players after League Management activates your team, assigns the captain/co-captain roles, and notifies you that rosters for your league have been unlocked.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2912,
+        "sourceResolutionMs": 3,
+        "totalMs": 2922,
+        "inputTokens": 2446,
+        "outputTokens": 102,
+        "totalTokens": 2548,
+        "estimatedGenerationCostUsd": 0.01529
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q18",
+      "question": "When can I start my roster?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5244,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall League, rosters can start being updated on Monday, Sept. 28, 2026, for Weekday, Saturday, and PrimeTime DUPR leagues.\n\nYou can begin adding/managing players once League Management has activated your team and notified you that rosters for your league are unlocked.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3785,
+        "sourceResolutionMs": 3,
+        "totalMs": 3793,
+        "inputTokens": 2446,
+        "outputTokens": 155,
+        "totalTokens": 2601,
+        "estimatedGenerationCostUsd": 0.01688
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 119,
+              "end": 166,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 120,
+              "end": 167,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q21",
+      "question": "What date does player entry open for Weekday?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 3147,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall Weekday DUPR League, player/roster entry can start on Monday, Sept. 28, 2026, once League Management has unlocked team rosters and notified captains that they are available for adding and managing players.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2795,
+        "sourceResolutionMs": 2,
+        "totalMs": 2804,
+        "inputTokens": 1797,
+        "outputTokens": 71,
+        "totalTokens": 1868,
+        "estimatedGenerationCostUsd": 0.011115
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q29",
+      "question": "How do I enter match scores?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWRPC-Captains Guide to the LMS",
+          "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+          "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+          "pageNumber": 13,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 0,
+              "end": 328,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 329,
+              "end": 480,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 481,
+              "end": 704,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 705,
+              "end": 968,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 328,
+              "sha256": "ef1cb6e1e0006c7ec2a236877739cb47e93be0876f101d0972c19eaa452a1ae5"
+            },
+            {
+              "characters": 151,
+              "sha256": "a47b2f02ecc7c10f280912a2c37b54cb59bdd791c4da58c8bf176d9451551eeb"
+            },
+            {
+              "characters": 223,
+              "sha256": "8b29994ab6be98185576cedb8868f2fbb0086259d4aadf102bc09ed402239997"
+            },
+            {
+              "characters": 263,
+              "sha256": "da9cd427939e9d3e0927e4a6223c87930a6b7b0548d1a66df1043f01d21262f1"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+          "pageNumber": 9,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 180,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 181,
+              "end": 373,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 374,
+              "end": 626,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 627,
+              "end": 1068,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 1069,
+              "end": 1243,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 180,
+              "sha256": "2f0d00a1963efa4e0f4abc92550ef5a35680d415ac04b1ccf27bba41fd4d6dec"
+            },
+            {
+              "characters": 192,
+              "sha256": "4e032c5c58c988739491ee14e73719b727d76ca192956c9341b53bb5be1dc7d0"
+            },
+            {
+              "characters": 252,
+              "sha256": "f41823eacf12b7f41edfc12048860c3667038bc1ece4d7170b74d723c1f80046"
+            },
+            {
+              "characters": 441,
+              "sha256": "b05cdcd3c5c91f1a51945e7747771d52f3bea3a764afbc416b4c7daa5ba8e1ee"
+            },
+            {
+              "characters": 174,
+              "sha256": "350e13b4ce762ab6b81730fa15773415128391bd14abbbcc91beb97a7441077d"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 6043,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "To enter match scores:\n\n1. Open the match and click the red “Enter Match Scores” button. It is available only on or after the scheduled match date.\n2. Select the players for each game using the dropdowns. Normally use “Use this saved team” / the Match Setup players; if there were changes, select the correct individual players.\n3. Enter the scores in each game block.\n4. Click Submit. The system checks for errors before saving.\n5. The opposing captain then receives a verification request and must review, verify, or dispute the scores. Standings update after verification.\n\nImportant limits: ineligible players cannot be selected, and score fields are blocked if a line has an eligibility issue. For an entire match date forfeited/canceled due to weather or scheduling conflicts, do not enter it; contact League Management at info@lwrpickleballclub.com or notify League Management.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3446,
+        "sourceResolutionMs": 2,
+        "totalMs": 3459,
+        "inputTokens": 2795,
+        "outputTokens": 208,
+        "totalTokens": 3003,
+        "estimatedGenerationCostUsd": 0.020215
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWRPC-Captains Guide to the LMS — Page 13",
+          "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+          "pageNumber": 13,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 0,
+              "end": 328,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 329,
+              "end": 480,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 481,
+              "end": 704,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+              "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+              "start": 705,
+              "end": 968,
+              "pageNumber": 13,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — ENTER/VERIFY SCORES — Page 9",
+          "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+          "pageNumber": 9,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 180,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 181,
+              "end": 373,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 374,
+              "end": 626,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "procedure"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 627,
+              "end": 1068,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "59c3658b-3c3f-4ef2-90ee-f5c3fa114f79",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 1069,
+              "end": 1243,
+              "pageNumber": 9,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "requirement"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q46",
+      "question": "How does Rally Scoring work in a Picklebreaker?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 225,
+              "sha256": "fddd5b187e61ced7b680f85632d23523539f14b588ff0c8e6a96505a586cc1aa"
+            },
+            {
+              "characters": 139,
+              "sha256": "2fa6839edccf707fce09164e446cc6b2a1e2b934488567e245b4f7b4be3d4f1d"
+            },
+            {
+              "characters": 134,
+              "sha256": "034028161e234d3c936f33d95dc3bf76abba0a45c7f90cebd9d60cdcbefb2ee5"
+            },
+            {
+              "characters": 135,
+              "sha256": "0600a30d56219a3059c106354ac3b95ad4150bac7ec3e71a0fdbd3fbb3932685"
+            },
+            {
+              "characters": 621,
+              "sha256": "59acc1774321a4808d4155ce6af99915c82a4efa5aa6bff679f24ea0a99f2e46"
+            },
+            {
+              "characters": 395,
+              "sha256": "bdd78fa869c4b32644882e384474d021e2b05f2db43c3c45dc4163fdef1167a4"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "e0d311b0-18b3-46b1-8f23-008dbe41e569",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "e0d311b0-18b3-46b1-8f23-008dbe41e569",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 265,
+              "sha256": "104e9ba899fc8b03f5e3f6113f25d517bdce5fa9d771d10c246f24ade438305d"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5177,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "In a Picklebreaker using Rally Scoring:\n\n- A team can win a point whether it is serving or receiving, except for the game-winning point.\n- If the serving team loses a rally, it is a side out: the receiving team gets a point and takes over the serve.\n- After a side out, the server is based on that team’s score: right-side player serves if the score is even; left-side player serves if the score is odd.\n- Players switch sides only after winning a point on their own serve, and the same player keeps serving from the new side.\n- When a team reaches one point below the game-winning score, its score freezes. From that point, that team can score the game-winning point only while serving. The other team continues normal Rally Scoring until it also reaches its freeze point.\n- In a win-by-two format, if the score becomes tied at or beyond the initial freeze point, both teams become unfrozen and normal Rally Scoring resumes. Scores freeze again whenever a team reaches a score where its next point would win by two. This repeats as needed, and the game-winning point must always be scored while serving.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3987,
+        "sourceResolutionMs": 3,
+        "totalMs": 3995,
+        "inputTokens": 2542,
+        "outputTokens": 261,
+        "totalTokens": 2803,
+        "estimatedGenerationCostUsd": 0.02054
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "dd088f2f-6f6d-4deb-b4d9-66369e51f29b",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "e0d311b0-18b3-46b1-8f23-008dbe41e569",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "e0d311b0-18b3-46b1-8f23-008dbe41e569",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q54",
+      "question": "When is Season DUPR established?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 206,
+              "sha256": "19ba7cfe4dac94672e8ba6e40d1806e3aa5691d3afcb9f5dfab45990b0d8b287"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 68,
+              "end": 117,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 70,
+              "end": 119,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 4277,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "Season DUPR is established on the date communicated to all captains before the first scheduled league match, and it remains in effect for the duration of the season.\n\nFor the 2026 Fall League Important Dates, the Season DUPR ratings are recorded on Sunday, Sept. 27, 2026, for Weekday, Saturday, and PrimeTime DUPR leagues.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1895,
+        "sourceResolutionMs": 5,
+        "totalMs": 1918,
+        "inputTokens": 2265,
+        "outputTokens": 94,
+        "totalTokens": 2359,
+        "estimatedGenerationCostUsd": 0.014145
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 4.1 — DUPR RATINGS/DIVISIONS — Page 3",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4.1",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 68,
+              "end": 117,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 70,
+              "end": 119,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q55",
+      "question": "When is my Season DUPR established?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 206,
+              "sha256": "19ba7cfe4dac94672e8ba6e40d1806e3aa5691d3afcb9f5dfab45990b0d8b287"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 68,
+              "end": 117,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        },
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 70,
+              "end": 119,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 4280,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "Your Season DUPR Rating is established on the date communicated to all captains before the first scheduled league match, and it remains in effect for the duration of the season.\n\nFor the 2026 Fall League Important Dates, the Season DUPR ratings are recorded on Sunday, Sept. 27, 2026 for Weekday, Saturday, and PrimeTime DUPR leagues.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2619,
+        "sourceResolutionMs": 3,
+        "totalMs": 2630,
+        "inputTokens": 2266,
+        "outputTokens": 95,
+        "totalTokens": 2361,
+        "estimatedGenerationCostUsd": 0.01418
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 4.1 — DUPR RATINGS/DIVISIONS — Page 3",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4.1",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 68,
+              "end": 117,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "2026 Fall League Important Dates — PrimeTime DUPR League Key Dates — Page 2",
+          "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "pageNumber": 2,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 70,
+              "end": 119,
+              "pageNumber": 2,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "primetime"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 31,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q56",
+      "question": "How is my Season DUPR calculated?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 233,
+              "end": 1043,
+              "pageNumber": 3,
+              "ruleNumber": "4.1.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1044,
+              "end": 1229,
+              "pageNumber": 3,
+              "ruleNumber": "4.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1237,
+              "end": 1479,
+              "pageNumber": 3,
+              "ruleNumber": "4.3",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 206,
+              "sha256": "19ba7cfe4dac94672e8ba6e40d1806e3aa5691d3afcb9f5dfab45990b0d8b287"
+            },
+            {
+              "characters": 810,
+              "sha256": "159e3f327e09fad317fd6b85388c6539f96806c14558bc4d0ef1b2bf1a5b1050"
+            },
+            {
+              "characters": 185,
+              "sha256": "2f3805c97b325a03e8fc10a5751648717350b0191b3cb74a0cf932fb809a5636"
+            },
+            {
+              "characters": 242,
+              "sha256": "6a26dfda516ef9a5b12ae1c352d9f3956933d18f706125e992d0547dd8a1c8e7"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.1",
+          "excerptItems": [
+            {
+              "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 374,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 374,
+              "sha256": "5723bd95550ab8180555607bca19af1114e671f41628d6a021ad010535dbb123"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.2",
+          "excerptItems": [
+            {
+              "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 195,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 195,
+              "sha256": "629003c2d7516b330d263bd155577eac44734c85d4853e1ef735dbaa817f6119"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5462,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "Your Season DUPR Rating is set from your DUPR rating on the date communicated to all captains before the first scheduled league match, and it stays in effect for the entire season.\n\nIt is then truncated to the nearest tenth. Example given: 3.496 becomes 3.4.\n\nSpecial cases:\n- If your DUPR Reliability Factor is below 29, you are classified as Not Rated (NR) for league purposes.\n- For team aggregate rating calculations, an NR player is initially assigned the division’s maximum individual DUPR rating minus 0.5.\n- If you are rostered in multiple divisions as an NR/adjusted player, the highest adjusted Season DUPR Rating assigned to you is used consistently across all divisions.\n- Some leagues use the Age-based DUPR sub-rating; if you have not established a 65+ Age-based rating by the start of the season, your 50+ Age-based rating is used.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3146,
+        "sourceResolutionMs": 6,
+        "totalMs": 3162,
+        "inputTokens": 2596,
+        "outputTokens": 215,
+        "totalTokens": 2811,
+        "estimatedGenerationCostUsd": 0.01943
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rules 4.1, 4.2, 4.3 — DUPR RATINGS/DIVISIONS — Page 3",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4.1, 4.2, 4.3",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 233,
+              "end": 1043,
+              "pageNumber": 3,
+              "ruleNumber": "4.1.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1044,
+              "end": 1229,
+              "pageNumber": 3,
+              "ruleNumber": "4.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1237,
+              "end": 1479,
+              "pageNumber": 3,
+              "ruleNumber": "4.3",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 4.5.1 — Page 4",
+          "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.1",
+          "excerptItems": [
+            {
+              "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 374,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 4.5.2 — Page 4",
+          "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.2",
+          "excerptItems": [
+            {
+              "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 195,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q57",
+      "question": "When are Season DUPR ratings recorded for Saturday?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 49,
+              "sha256": "3fe9a945ab8d489d454a87dcb9f239bda85d172218ffcd5ad986ffb2b33eddfe"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1160,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall League Saturday DUPR League, Season DUPR ratings are recorded on Sept. 27, Sunday, 2026.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1463,
+        "sourceResolutionMs": 0,
+        "totalMs": 1473,
+        "inputTokens": 1326,
+        "outputTokens": 48,
+        "totalTokens": 1374,
+        "estimatedGenerationCostUsd": 0.00807
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Saturday DUPR League Key Dates — Page 1",
+          "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 69,
+              "end": 118,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "recording_date",
+                "league": "saturday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 30,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

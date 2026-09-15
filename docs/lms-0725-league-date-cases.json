@@ -1,0 +1,292 @@
+{
+  "purpose": "Additional current official Important Dates controls; appended to all existing 63 cases. Dates are assertions only, never application answer constants.",
+  "cases": [
+    {
+      "id": "Q64",
+      "question": "when does the women weekday dupr league start",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        14
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q65",
+      "question": "What is the starting date for the women's weekday dupr league",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        14
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q66",
+      "question": "When does the women's weekday league start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        14
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q67",
+      "question": "When is the first women's weekday match?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        14
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q68",
+      "question": "When does women's weekday begin?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        14
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q69",
+      "question": "What day does the women's league start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "clarification",
+      "expectedMonth": null,
+      "expectedDays": [],
+      "expectedYear": null
+    },
+    {
+      "id": "Q70",
+      "question": "When does the men's weekday league start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        15
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q71",
+      "question": "When does the Weekday league start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        14,
+        15
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q72",
+      "question": "When does Weekday 9.1 start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        14,
+        15
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q73",
+      "question": "When does PrimeTime league start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        16
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q74",
+      "question": "When does the Saturday season begin?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        17,
+        24
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q75",
+      "question": "When does Saturday DUPR7 start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        17
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q76",
+      "question": "When does Saturday DUPR6 start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        24
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q77",
+      "question": "When does Saturday DUPR8 begin?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        24
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q78",
+      "question": "When does registration open for Weekday?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Sept",
+      "expectedDays": [
+        7
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q79",
+      "question": "When does registration open for Saturday?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Sept",
+      "expectedDays": [
+        7
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q80",
+      "question": "When does registration close for PrimeTime?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        4
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q81",
+      "question": "When is the Weekday championship?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Dec",
+      "expectedDays": [
+        9,
+        10
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q82",
+      "question": "When are the Saturday playoffs?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Mar",
+      "expectedDays": [
+        6,
+        13
+      ],
+      "expectedYear": 2027
+    },
+    {
+      "id": "Q83",
+      "question": "When is the PrimeTime championship?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Dec",
+      "expectedDays": [
+        11
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q84",
+      "question": "When does the Weekday season end?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Dec",
+      "expectedDays": [
+        2,
+        3
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q85",
+      "question": "When does the Saturday season end?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Feb",
+      "expectedDays": [
+        20,
+        27
+      ],
+      "expectedYear": 2027
+    },
+    {
+      "id": "Q86",
+      "question": "When does the PrimeTime season end?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Dec",
+      "expectedDays": [
+        4
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q87",
+      "question": "When does the league start?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "clarification",
+      "expectedMonth": null,
+      "expectedDays": [],
+      "expectedYear": null
+    },
+    {
+      "id": "Q88",
+      "question": "When is the first Saturday DUPR7 match?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "answer",
+      "expectedMonth": "Oct",
+      "expectedDays": [
+        17
+      ],
+      "expectedYear": 2026
+    },
+    {
+      "id": "Q89",
+      "question": "When does the Women's Weekday league start in 2027?",
+      "expectedRoute": "DOCUMENT",
+      "expectedKind": "insufficient_evidence",
+      "expectedMonth": null,
+      "expectedDays": [],
+      "expectedYear": null
+    }
+  ]
+}

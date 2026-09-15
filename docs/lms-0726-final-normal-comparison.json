@@ -1,0 +1,7 @@
+{
+  "status": "INCOMPLETE_NOT_READY",
+  "commissionerCount": "accepted first and candidate passed",
+  "supersedesEarlierMatrixPass": true,
+  "blocker": "Accepted member-directory read RPC unsupported by synthetic fixture; earlier page-presence checks miss Notice",
+  "report": "lms-0726-fixture-final-gates.md"
+}

@@ -1,0 +1,68 @@
+{
+  "modelCalls": 0,
+  "scenarioControls": [
+    {
+      "id": "RF01",
+      "status": "PASS",
+      "note": "Rated individual pass; overall partial."
+    },
+    {
+      "id": "RF02",
+      "status": "PASS",
+      "note": "RF below threshold takes precedence."
+    },
+    {
+      "id": "RF03",
+      "status": "PASS",
+      "note": "Numeric adjusted rating plus NR is not a conflict."
+    },
+    {
+      "id": "RF04",
+      "status": "PASS",
+      "note": "Missing RF cannot imply Rated."
+    },
+    {
+      "id": "RF05",
+      "status": "PASS",
+      "note": "Rated below range."
+    },
+    {
+      "id": "RF06",
+      "status": "PASS",
+      "note": "Rated in range."
+    },
+    {
+      "id": "RF07",
+      "status": "PASS",
+      "note": "Rated above range."
+    },
+    {
+      "id": "RF08",
+      "status": "PASS",
+      "note": "Rule 4.5 placement permission, overall partial."
+    },
+    {
+      "id": "RF09",
+      "status": "PASS",
+      "note": "Negative guard: current minimum inputs establish no independent failed NR condition. No invented NR failure from an out-of-range adjusted rating. A positive independent-condition failure is outside this bounded projection."
+    },
+    {
+      "id": "RF10",
+      "status": "PASS",
+      "note": "No invented partner or highest adjusted rating."
+    },
+    {
+      "id": "RF11",
+      "status": "PASS",
+      "note": "PT9 conflict blocks determination."
+    },
+    {
+      "id": "RF12",
+      "status": "PASS",
+      "note": "Real PostgreSQL companion matrix includes effective-user NR answer with contrasting real-actor RF."
+    }
+  ],
+  "boundary28_999": "PASS",
+  "boundary29": "PASS",
+  "scopeNote": "RF09 is a no-false-failure guard, not certification of an unavailable participation/pair failure capability."
+}

@@ -1,0 +1,57 @@
+{
+  "season": "2026 Fall Season",
+  "file": "members-list-lakewoodranchpickleballclub-091026223019.csv",
+  "counts": {
+    "matched": 706,
+    "ready": 667,
+    "skipped": 214,
+    "ambiguous": 13,
+    "invalid": 0,
+    "unchangedWorkingInputs": 667
+  },
+  "observedRows": [
+    {
+      "duprId": "1R9LNE",
+      "doubles": "4.077 → 4.0",
+      "rf": "100 → 100",
+      "age": "over_50: 4.311 → 4.3",
+      "action": "REVIEW Ambiguous DUPR identity",
+      "lmsRows": 2
+    },
+    {
+      "duprId": "89OW47",
+      "doubles": "3.675 → 3.6",
+      "rf": 90,
+      "age": "over_50: 3.904 → 3.9",
+      "action": "RECORD; inputs unchanged"
+    },
+    {
+      "duprId": "3YZWZD",
+      "doubles": "3.030 → 3.0",
+      "rf": 100,
+      "age": "over_65: 3.518 → 3.5",
+      "action": "RECORD; inputs unchanged"
+    },
+    {
+      "duprId": "8DOXEM",
+      "doubles": "3.679 → 3.6",
+      "rf": 30,
+      "age": "over_50: 3.926 → 3.9",
+      "action": "SKIP Inactive or unverified activity"
+    },
+    {
+      "duprId": "3YZEPG",
+      "doubles": "3.384 → 3.3",
+      "rf": 100,
+      "age": null,
+      "action": "RECORD; inputs unchanged"
+    }
+  ],
+  "actionsTaken": [
+    "Choose CSV File",
+    "Preview Ratings",
+    "preview pagination only"
+  ],
+  "commitActions": 0,
+  "cleanActions": 0
+}

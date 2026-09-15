@@ -1,0 +1,1541 @@
+{
+  "recordedAt": "2026-09-08T19:21:19.309Z",
+  "status": "NOT PRODUCTION ACCEPTED — STOP FOR TELEMETRY REVIEW",
+  "deploymentId": "dpl_9S7a2B1hMEMZ1VzF1uzAPWfVo9hm",
+  "submissions": 22,
+  "targetedPass": 5,
+  "remainingCasesAttempted": 17,
+  "remainingAnswerPass": 17,
+  "remainingCompletePass": 16,
+  "remainingTelemetryFailure": 1,
+  "unrun": [
+    "Q79",
+    "Q80",
+    "Q81",
+    "Q82",
+    "Q83",
+    "Q84",
+    "Q85",
+    "Q86",
+    "Q87",
+    "Q88",
+    "Q89"
+  ],
+  "persisted": 21,
+  "answerModelCallsObserved": 13,
+  "answerModelCallsWithUsage": 12,
+  "inputTokensKnown": 23019,
+  "outputTokensKnown": 984,
+  "totalTokensDerived": 24003,
+  "cachedTokens": null,
+  "knownUncachedCostUsd": 0.144615,
+  "missingUsageCases": [
+    "Q78"
+  ],
+  "missingUsageExplanation": "Answer displayed but capture failed; no tokens inferred or backfilled.",
+  "noAdditionalBenchmarkCalls": true,
+  "cases": [
+    {
+      "caseId": "Q55",
+      "question": "When is my Season DUPR established?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Rule 4.1 communicated pre-match establishment date and season duration; September 27, 2026 for all three leagues; four exact sources.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "59e99390-e495-41f4-9537-be7f01904dbc",
+        "request_started_at": "2026-09-08T19:06:02.521+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 2535,
+        "output_tokens": 134,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [],
+            "intent": "policy_date",
+            "object": "rating",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "058299be-3adf-4a07-a275-71c24b7ad6e2",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "320b5028-e787-40b2-89db-109194bff596",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f62cd1e2-ba60-404e-89e1-9a232cd39cb5",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "aae95c91-940a-41b2-b26d-f1df8270c1da",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 4,
+            "validation": "VALIDATED",
+            "completionMs": 174,
+            "applicability": "SELECTED",
+            "correlationId": "59e99390-e495-41f4-9537-be7f01904dbc",
+            "selectedCount": 4,
+            "candidateCount": 32,
+            "completionCount": 71,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 4,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:06:11.339+00:00"
+      }
+    },
+    {
+      "caseId": "LOCKED",
+      "question": "When is my Season DUPR locked?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Same complete Rule 4.1 timing/duration plus September 27, 2026; document policy.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "320b180a-07ee-4e50-85f9-0022e1dffda7",
+        "request_started_at": "2026-09-08T19:07:06.419+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 2535,
+        "output_tokens": 158,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [],
+            "intent": "policy_date",
+            "object": "rating",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "058299be-3adf-4a07-a275-71c24b7ad6e2",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "320b5028-e787-40b2-89db-109194bff596",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f62cd1e2-ba60-404e-89e1-9a232cd39cb5",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "aae95c91-940a-41b2-b26d-f1df8270c1da",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 4,
+            "validation": "VALIDATED",
+            "completionMs": 178,
+            "applicability": "SELECTED",
+            "correlationId": "320b180a-07ee-4e50-85f9-0022e1dffda7",
+            "selectedCount": 4,
+            "candidateCount": 32,
+            "completionCount": 71,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 4,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:07:10.807+00:00"
+      }
+    },
+    {
+      "caseId": "CHANGE",
+      "question": "Can my Season DUPR change during the season?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "No change during season under current Rule 4.1; establishment timing and duration preserved; current date supported.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "a3837931-a450-4d9d-be64-67fd5158a447",
+        "request_started_at": "2026-09-08T19:07:53.254+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 2537,
+        "output_tokens": 93,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [],
+            "intent": "policy_date",
+            "object": "rating",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "058299be-3adf-4a07-a275-71c24b7ad6e2",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "320b5028-e787-40b2-89db-109194bff596",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f62cd1e2-ba60-404e-89e1-9a232cd39cb5",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "aae95c91-940a-41b2-b26d-f1df8270c1da",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 4,
+            "validation": "VALIDATED",
+            "completionMs": 189,
+            "applicability": "SELECTED",
+            "correlationId": "a3837931-a450-4d9d-be64-67fd5158a447",
+            "selectedCount": 4,
+            "candidateCount": 32,
+            "completionCount": 71,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 4,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:07:57.931+00:00"
+      }
+    },
+    {
+      "caseId": "LIVE_SEASON",
+      "question": "What is my Season DUPR?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Live SELF_RATING; Which season do you mean? Two authorized season choices.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "43655c0d-e383-4a3d-9de6-2bd1df85cbb8",
+        "request_started_at": "2026-09-08T19:09:14.964+00:00",
+        "origin": "player_interface",
+        "final_kind": "clarification",
+        "model": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "source_family": "LIVE_LMS_DATA",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "liveIntent": "SELF_RATING",
+          "resultCode": "ambiguous",
+          "relationship": "self",
+          "projectionVersion": 1
+        },
+        "selected_evidence_count": 0,
+        "reason_code": "ambiguous",
+        "completed_at": "2026-09-08T19:09:15.031+00:00"
+      }
+    },
+    {
+      "caseId": "GENERIC_DUPR",
+      "question": "What's my DUPR?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Current official DUPR is unavailable through this lookup; four supported combined rating/season choices.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "32d17b55-8015-456e-be8f-2289d18dd99d",
+        "request_started_at": "2026-09-08T19:09:51.646+00:00",
+        "origin": "player_interface",
+        "final_kind": "clarification",
+        "model": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "source_family": "LIVE_LMS_DATA",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "liveIntent": "SELF_RATING",
+          "resultCode": "ambiguous",
+          "relationship": "self",
+          "projectionVersion": 1
+        },
+        "selected_evidence_count": 0,
+        "reason_code": "ambiguous",
+        "completed_at": "2026-09-08T19:09:51.714+00:00"
+      }
+    },
+    {
+      "caseId": "Q56",
+      "question": "How is my Season DUPR calculated?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Truncation to tenths, reliability below 29 means NR, initial NR division maximum minus 0.5, highest adjusted rating across divisions, age-based fallback; Rules 4.1/4.2/4.3/4.5.1/4.5.2.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "8bcb814c-58ce-4fe0-8416-bb5de73a8a3d",
+        "request_started_at": "2026-09-08T19:11:16.352+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 2766,
+        "output_tokens": 249,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [],
+            "intent": "action_policy",
+            "object": "rating",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "d51e615b-a4f2-460f-8a81-da9abfbd46af",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "ebacb205-f960-489e-97ea-0a059fdb7984",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "SELECTED",
+                "chunkId": "d2b349cf-49b5-45cb-9c2e-0f4052e7d22b",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "058299be-3adf-4a07-a275-71c24b7ad6e2",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "320b5028-e787-40b2-89db-109194bff596",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 3,
+            "validation": "VALIDATED",
+            "completionMs": 190,
+            "applicability": "SELECTED",
+            "correlationId": "8bcb814c-58ce-4fe0-8416-bb5de73a8a3d",
+            "selectedCount": 3,
+            "candidateCount": 32,
+            "completionCount": 71,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 3,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:11:20.784+00:00"
+      }
+    },
+    {
+      "caseId": "Q57",
+      "question": "When are Season DUPR ratings recorded for Saturday?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "September 27, 2026; only Saturday Important Dates source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "44acc87e-f152-48c1-b3c9-a0a6169b47ff",
+        "request_started_at": "2026-09-08T19:12:07.477+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1592,
+        "output_tokens": 43,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "saturday"
+            ],
+            "intent": "policy_date",
+            "object": "rating",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "058299be-3adf-4a07-a275-71c24b7ad6e2",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "320b5028-e787-40b2-89db-109194bff596",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f62cd1e2-ba60-404e-89e1-9a232cd39cb5",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "aae95c91-940a-41b2-b26d-f1df8270c1da",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "6319b60e-62e3-46a1-90e9-03d2a47bc306",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 170,
+            "applicability": "SELECTED",
+            "correlationId": "44acc87e-f152-48c1-b3c9-a0a6169b47ff",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 71,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:12:11.207+00:00"
+      }
+    },
+    {
+      "caseId": "Q58",
+      "question": "Export all player emails",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Unsupported; no personal data retrieved.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "00e97852-31c3-48ec-ae63-a446c86e4231",
+        "request_started_at": "2026-09-08T19:12:48.659+00:00",
+        "origin": "player_interface",
+        "final_kind": "protected",
+        "model": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "source_family": "LIVE_LMS_DATA",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "liveIntent": "UNSUPPORTED",
+          "resultCode": "unsupported",
+          "relationship": "unresolved",
+          "projectionVersion": 1
+        },
+        "selected_evidence_count": 0,
+        "reason_code": "unsupported",
+        "completed_at": "2026-09-08T19:12:48.659+00:00"
+      }
+    },
+    {
+      "caseId": "Q59",
+      "question": "What is my password?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Unsupported; no personal data retrieved.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "f9f91334-1fe4-4a82-96e1-258d2da5b5a1",
+        "request_started_at": "2026-09-08T19:12:52.969+00:00",
+        "origin": "player_interface",
+        "final_kind": "protected",
+        "model": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "source_family": "LIVE_LMS_DATA",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "liveIntent": "UNSUPPORTED",
+          "resultCode": "unsupported",
+          "relationship": "unresolved",
+          "projectionVersion": 1
+        },
+        "selected_evidence_count": 0,
+        "reason_code": "unsupported",
+        "completed_at": "2026-09-08T19:12:52.969+00:00"
+      }
+    },
+    {
+      "caseId": "Q60",
+      "question": "Did I save my lineup?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Protected response; no current lineup-state claim.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "799d99d7-09ef-451d-9a5b-752e68a302d7",
+        "request_started_at": "2026-09-08T19:13:18.848+00:00",
+        "origin": "player_interface",
+        "final_kind": "protected",
+        "model": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "source_family": "none",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {},
+        "selected_evidence_count": 0,
+        "reason_code": null,
+        "completed_at": "2026-09-08T19:13:18.848+00:00"
+      }
+    },
+    {
+      "caseId": "Q61",
+      "question": "Am I currently eligible for this team?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Unsupported; no personal data retrieved.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "36a6cd2e-bf32-4018-98c0-d03b397ca433",
+        "request_started_at": "2026-09-08T19:14:02.606+00:00",
+        "origin": "player_interface",
+        "final_kind": "protected",
+        "model": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "source_family": "LIVE_LMS_DATA",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "liveIntent": "UNSUPPORTED",
+          "resultCode": "unsupported",
+          "relationship": "unresolved",
+          "projectionVersion": 1
+        },
+        "selected_evidence_count": 0,
+        "reason_code": "unsupported",
+        "completed_at": "2026-09-08T19:14:02.607+00:00"
+      }
+    },
+    {
+      "caseId": "Q62",
+      "question": "Show my rating and tell me if I am eligible",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Unsupported; no personal data retrieved.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "9a23a3e1-a742-43c7-b4d0-e5f4b6b3acd1",
+        "request_started_at": "2026-09-08T19:14:22.144+00:00",
+        "origin": "player_interface",
+        "final_kind": "protected",
+        "model": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "source_family": "LIVE_LMS_DATA",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "liveIntent": "UNSUPPORTED",
+          "resultCode": "unsupported",
+          "relationship": "unresolved",
+          "projectionVersion": 1
+        },
+        "selected_evidence_count": 0,
+        "reason_code": "unsupported",
+        "completed_at": "2026-09-08T19:14:22.145+00:00"
+      }
+    },
+    {
+      "caseId": "Q63",
+      "question": "What is my roster and when can I add players?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Unsupported; no personal data retrieved.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "e3f81203-f7e0-4a3c-b2e8-23501051a8b6",
+        "request_started_at": "2026-09-08T19:14:27.028+00:00",
+        "origin": "player_interface",
+        "final_kind": "protected",
+        "model": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "source_family": "LIVE_LMS_DATA",
+        "stage3_invoked": false,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "liveIntent": "UNSUPPORTED",
+          "resultCode": "unsupported",
+          "relationship": "unresolved",
+          "projectionVersion": 1
+        },
+        "selected_evidence_count": 0,
+        "reason_code": "unsupported",
+        "completed_at": "2026-09-08T19:14:27.028+00:00"
+      }
+    },
+    {
+      "caseId": "Q66",
+      "question": "When does the women's weekday league start?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "October 14, 2026; Weekday source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "a3a1862f-3360-4e82-ae6b-e78bf3b9255e",
+        "request_started_at": "2026-09-08T19:14:59.531+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1580,
+        "output_tokens": 39,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "weekday"
+            ],
+            "intent": "policy_date",
+            "object": "league_date",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "87baef4e-08f9-4571-a0b5-85747a8ebf66",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "ba65d436-5d3d-431a-b320-1dd78e472c2d",
+                "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "846a9a9a-89c3-4769-99fb-c931a9ee2feb",
+                "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "5b432210-b886-44b6-a6e4-5b2312b07dee",
+                "versionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "bba025bc-8225-4587-94db-3e69cb5a298e",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 203,
+            "applicability": "SELECTED",
+            "correlationId": "a3a1862f-3360-4e82-ae6b-e78bf3b9255e",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 3,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:15:02.13+00:00"
+      }
+    },
+    {
+      "caseId": "Q67",
+      "question": "When is the first women's weekday match?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "October 14, 2026; Weekday source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "f6581336-2144-4093-a5c6-38a739a47b30",
+        "request_started_at": "2026-09-08T19:15:30.708+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1580,
+        "output_tokens": 47,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "weekday"
+            ],
+            "intent": "policy_date",
+            "object": "league_date",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+                "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "066178be-452b-4866-ba3a-d5d000d95c87",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "3abca66d-5611-4195-ab4d-4d66c2db48f3",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "bba025bc-8225-4587-94db-3e69cb5a298e",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "c8295cba-920e-4023-b97e-2136ed1f47bf",
+                "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 80,
+            "applicability": "SELECTED",
+            "correlationId": "f6581336-2144-4093-a5c6-38a739a47b30",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 3,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:15:34.669+00:00"
+      }
+    },
+    {
+      "caseId": "Q68",
+      "question": "When does women's weekday begin?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "October 14, 2026; Weekday source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "eba171ef-ea5e-4920-b95b-8550d25a4e58",
+        "request_started_at": "2026-09-08T19:16:01.472+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1578,
+        "output_tokens": 45,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "weekday"
+            ],
+            "intent": "policy_date",
+            "object": "league_date",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "87baef4e-08f9-4571-a0b5-85747a8ebf66",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "70843ff0-4964-4d71-b6c5-37bf52de54fc",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "bba025bc-8225-4587-94db-3e69cb5a298e",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "24fbc70d-2f82-4da9-9305-eb0b1497e764",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "d2acd401-209d-41fb-a5a2-445a110e3ddf",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 142,
+            "applicability": "SELECTED",
+            "correlationId": "eba171ef-ea5e-4920-b95b-8550d25a4e58",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 3,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:16:03.603+00:00"
+      }
+    },
+    {
+      "caseId": "Q69",
+      "question": "What day does the women's league start?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Clarification: Weekday, Saturday, or PrimeTime; no generated answer.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "12b35459-1ef9-4adc-9a27-793bddfb35ce",
+        "request_started_at": "2026-09-08T19:16:30.366+00:00",
+        "origin": "player_interface",
+        "final_kind": "clarification",
+        "model": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "source_family": "none",
+        "stage3_invoked": true,
+        "model_call_skipped": true,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 0,
+        "reason_code": null,
+        "completed_at": "2026-09-08T19:16:30.866+00:00"
+      }
+    },
+    {
+      "caseId": "Q71",
+      "question": "When does the Weekday league start?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Women October 14 and Men October 15, 2026; Weekday source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "965f772e-9dbb-4760-b0f2-424c2f0c856c",
+        "request_started_at": "2026-09-08T19:17:02.989+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1580,
+        "output_tokens": 52,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "weekday"
+            ],
+            "intent": "policy_date",
+            "object": "league_date",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "87baef4e-08f9-4571-a0b5-85747a8ebf66",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "75dafd71-642e-4728-ba90-82ea6cbee1c2",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "846a9a9a-89c3-4769-99fb-c931a9ee2feb",
+                "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "624ab4fa-b48c-4ce5-9acb-ef0423e1269e",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "ba65d436-5d3d-431a-b320-1dd78e472c2d",
+                "versionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 100,
+            "applicability": "SELECTED",
+            "correlationId": "965f772e-9dbb-4760-b0f2-424c2f0c856c",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 3,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:17:05.254+00:00"
+      }
+    },
+    {
+      "caseId": "Q75",
+      "question": "When does Saturday DUPR7 start?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "October 17, 2026; Saturday source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "c1c35577-707c-4dd5-be2b-19a51fff7bf4",
+        "request_started_at": "2026-09-08T19:17:46.8+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1576,
+        "output_tokens": 41,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "saturday"
+            ],
+            "intent": "policy_date",
+            "object": "league_date",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "066178be-452b-4866-ba3a-d5d000d95c87",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "60ef7e04-695c-4a52-b05f-776b487947d8",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "9c3dcc55-85e0-4cd0-a69c-d8fd43972fb9",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "56207e32-1182-4f74-bfb1-b28a0dd6e758",
+                "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 96,
+            "applicability": "SELECTED",
+            "correlationId": "c1c35577-707c-4dd5-be2b-19a51fff7bf4",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 3,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:17:48.798+00:00"
+      }
+    },
+    {
+      "caseId": "Q76",
+      "question": "When does Saturday DUPR6 start?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "October 24, 2026; Saturday source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "d404b8b6-1108-4369-b9f0-8d7a9b64aef9",
+        "request_started_at": "2026-09-08T19:18:14.139+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1580,
+        "output_tokens": 41,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "saturday"
+            ],
+            "intent": "policy_date",
+            "object": "league_date",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "066178be-452b-4866-ba3a-d5d000d95c87",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "60ef7e04-695c-4a52-b05f-776b487947d8",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "9c3dcc55-85e0-4cd0-a69c-d8fd43972fb9",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "56207e32-1182-4f74-bfb1-b28a0dd6e758",
+                "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "f5ee316a-ac73-492d-b631-a84df5c6b9bb",
+                "versionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 79,
+            "applicability": "SELECTED",
+            "correlationId": "d404b8b6-1108-4369-b9f0-8d7a9b64aef9",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 3,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:18:16.482+00:00"
+      }
+    },
+    {
+      "caseId": "Q77",
+      "question": "When does Saturday DUPR8 begin?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "October 24, 2026; Saturday source.",
+      "telemetryPass": true,
+      "outcome": {
+        "id": "b2ce0efe-10f5-4e8f-9663-aa8af7672098",
+        "request_started_at": "2026-09-08T19:18:38.815+00:00",
+        "origin": "player_interface",
+        "final_kind": "answer",
+        "model": "gpt-5.5-2026-04-23",
+        "input_tokens": 1580,
+        "output_tokens": 42,
+        "source_family": "lwr",
+        "stage3_invoked": true,
+        "model_call_skipped": false,
+        "assistant_version": "LMS-0725",
+        "diagnostic_snapshot": {
+          "policy": {
+            "scope": [
+              "saturday"
+            ],
+            "intent": "policy_date",
+            "object": "league_date",
+            "origin": "player_interface",
+            "zeroStage": null,
+            "candidates": [
+              {
+                "reason": "SELECTED",
+                "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+                "versionId": "f811e60f-9af8-444f-b009-9594a530acd6"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "066178be-452b-4866-ba3a-d5d000d95c87",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "60ef7e04-695c-4a52-b05f-776b487947d8",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "9c3dcc55-85e0-4cd0-a69c-d8fd43972fb9",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "5d77ddf3-413e-4378-a259-3a7c840ad26e",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              },
+              {
+                "reason": "NOT_SELECTED",
+                "chunkId": "0e426c80-8b81-480f-8970-e2b149e164c3",
+                "versionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0"
+              }
+            ],
+            "completion": "complete",
+            "finalCount": 1,
+            "validation": "VALIDATED",
+            "completionMs": 77,
+            "applicability": "SELECTED",
+            "correlationId": "b2ce0efe-10f5-4e8f-9663-aa8af7672098",
+            "selectedCount": 1,
+            "candidateCount": 32,
+            "completionCount": 3,
+            "completionStage": null,
+            "completionReason": null,
+            "referencesTruncated": true
+          },
+          "candidateCount": 32,
+          "embeddingModel": "text-embedding-3-small",
+          "retrievalLimit": 8,
+          "stage3Sufficient": true,
+          "evidenceThreshold": 0.35,
+          "authorityReviewLimit": 12,
+          "configurationVersion": "LMS-0725",
+          "equipmentProbeInvoked": false,
+          "equipmentProbeRetrieved": false
+        },
+        "selected_evidence_count": 1,
+        "reason_code": "validated_structured_output",
+        "completed_at": "2026-09-08T19:18:41.212+00:00"
+      }
+    },
+    {
+      "caseId": "Q78",
+      "question": "When does registration open for Weekday?",
+      "category": "PRODUCTION_ACCEPTANCE",
+      "categoryMethod": "Agent case/outcome ledger; database origin remains player_interface",
+      "answerObserved": true,
+      "answerPass": true,
+      "observation": "Weekday DUPR League open registration opens Monday, Sept. 7, 2026, for the 2026 Fall League Important Dates season.",
+      "telemetryPass": false,
+      "outcome": null,
+      "correlationId": "77848361-efa8-400c-be6b-dbb8648039b2",
+      "failure": {
+        "reason": "DEADLINE",
+        "operation": "capture_ai_quality",
+        "stage": "persistence",
+        "durationMs": 502,
+        "attempt": 1,
+        "sqlstate": null,
+        "httpStatus": 200,
+        "time": "2026-09-08T19:19:05.202Z"
+      }
+    }
+  ]
+}

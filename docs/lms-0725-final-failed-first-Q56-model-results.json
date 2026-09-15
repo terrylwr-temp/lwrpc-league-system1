@@ -1,0 +1,273 @@
+{
+  "recordedAt": "2026-09-08T15:22:54.257Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 1,
+  "cases": [
+    {
+      "id": "Q56",
+      "question": "How is my Season DUPR calculated?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 233,
+              "end": 1043,
+              "pageNumber": 3,
+              "ruleNumber": "4.1.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1044,
+              "end": 1229,
+              "pageNumber": 3,
+              "ruleNumber": "4.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1237,
+              "end": 1479,
+              "pageNumber": 3,
+              "ruleNumber": "4.3",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 206,
+              "sha256": "19ba7cfe4dac94672e8ba6e40d1806e3aa5691d3afcb9f5dfab45990b0d8b287"
+            },
+            {
+              "characters": 810,
+              "sha256": "159e3f327e09fad317fd6b85388c6539f96806c14558bc4d0ef1b2bf1a5b1050"
+            },
+            {
+              "characters": 185,
+              "sha256": "2f3805c97b325a03e8fc10a5751648717350b0191b3cb74a0cf932fb809a5636"
+            },
+            {
+              "characters": 242,
+              "sha256": "6a26dfda516ef9a5b12ae1c352d9f3956933d18f706125e992d0547dd8a1c8e7"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.1",
+          "excerptItems": [
+            {
+              "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 374,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 374,
+              "sha256": "5723bd95550ab8180555607bca19af1114e671f41628d6a021ad010535dbb123"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+          "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.2",
+          "excerptItems": [
+            {
+              "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 195,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 195,
+              "sha256": "629003c2d7516b330d263bd155577eac44734c85d4853e1ef735dbaa817f6119"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5462,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "Your Season DUPR Rating is established on the date communicated to all captains before the first scheduled league match, and it stays in effect for the entire season.\n\nIt is calculated by truncating your DUPR rating to the nearest tenth. For example, 3.496 becomes 3.4.\n\nAdditional rules:\n- If your DUPR Reliability Factor is below 29, you are classified as “Not Rated” for league purposes.\n- For team aggregate rating calculations, an NR player is initially assigned the division’s maximum individual DUPR rating minus 0.5.\n- If you are rostered in multiple divisions, the highest adjusted Season DUPR Rating assigned to you is used across all divisions.\n- Some leagues use the Age-based DUPR sub-rating; if you have not established a 65+ Age-based rating at the start of the season, your 50+ Age-based rating is used.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3359,
+        "sourceResolutionMs": 4,
+        "totalMs": 3386,
+        "inputTokens": 2620,
+        "outputTokens": 207,
+        "totalTokens": 2827,
+        "estimatedGenerationCostUsd": 0.01931
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rules 4.1, 4.2, 4.3 — DUPR RATINGS/DIVISIONS — Page 3",
+          "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+          "pageNumber": 3,
+          "ruleNumber": "4.1, 4.2, 4.3",
+          "excerptItems": [
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 26,
+              "end": 232,
+              "pageNumber": 3,
+              "ruleNumber": "4.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 233,
+              "end": 1043,
+              "pageNumber": 3,
+              "ruleNumber": "4.1.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1044,
+              "end": 1229,
+              "pageNumber": 3,
+              "ruleNumber": "4.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "14555428-8ebb-4129-afc8-dbcad79572d5",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 1237,
+              "end": 1479,
+              "pageNumber": 3,
+              "ruleNumber": "4.3",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 4.5.1 — Page 4",
+          "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.1",
+          "excerptItems": [
+            {
+              "chunkId": "91cb2c3c-32f1-4f3b-8275-a044f5587e94",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 374,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.1",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 4.5.2 — Page 4",
+          "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+          "pageNumber": 4,
+          "ruleNumber": "4.5.2",
+          "excerptItems": [
+            {
+              "chunkId": "f1e95ae9-e513-4e4a-972d-7b5378d1deb1",
+              "documentVersionId": "5e8efa91-4f6c-47eb-9747-b122f0ebf656",
+              "start": 0,
+              "end": 195,
+              "pageNumber": 4,
+              "ruleNumber": "4.5.2",
+              "applicability": {
+                "role": "rating_policy"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

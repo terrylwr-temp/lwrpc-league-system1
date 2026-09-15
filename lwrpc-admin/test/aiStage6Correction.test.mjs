@@ -130,8 +130,11 @@ test("LMS-0712 mobile layout and feedback rendering contracts", async () => {
   assert.ok(ui.indexOf('{result.answer}</p>') < ui.indexOf('{feedbackEligible && <FeedbackControls'));
   assert.ok(ui.indexOf('{feedbackEligible && <FeedbackControls') < ui.indexOf('Official Source{'));
 });
-test("LMS-0712 welcome copy and balanced suggestions use normal submit", async () => {
-  assert.equal(ASK_LWR_INITIAL_COPY, "Ask me about LWR Pickleball Club leagues, DUPR requirements, scoring, Match Setup, Captain procedures, league formats, and more. You also have access to the complete USA Pickleball Rulebook, so you can ask me about pickleball rules, faults, serving, the kitchen (NVZ), equipment, and other rules of play.");
+test("LMS-0725 compact welcome and help examples use normal submit", async () => {
+  assert.equal(ASK_LWR_INITIAL_COPY, "Ask me about LWR leagues, rules, important dates, scoring, DUPR, Match Setup, or your authorized LMS information.");
   for (const path of ["/player-dashboard", "/captain-dashboard", "/match-setup", "/standings"]) assert.deepEqual(assistantPageContext(path).suggestions, [setup, "What kind of ball are we using?", kitchen, "What are the rules for a legal serve?"]);
-  const ui = await readFile(new URL("../app/components/AskLwrAssistant.js", import.meta.url), "utf8"); assert.match(ui, /onClick=\{\(\) => submit\(null, suggestion\)\}/); assert.match(ui, /min-h-11 max-w-full/);
+  const ui = await readFile(new URL("../app/components/AskLwrAssistant.js", import.meta.url), "utf8");
+  assert.ok(ui.includes('<AskLwrWelcome onChoose={q=>submit(null,q)}'));
+  const help=await readFile(new URL("../app/components/AskLwrWelcome.js", import.meta.url), "utf8");
+  assert.ok(help.includes('close();onChoose(q);'));assert.match(help,/min-h-11/);
 });

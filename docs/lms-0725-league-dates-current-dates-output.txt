@@ -1,0 +1,25 @@
+{"id":"Q64","status":"generated","calls":1,"answer":"The Women’s Weekday DUPR League season starts Oct. 14, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q65","status":"generated","calls":1,"answer":"The women’s Weekday DUPR League season starts on Oct. 14, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q66","status":"generated","calls":1,"answer":"The women’s Weekday DUPR League season starts on Oct. 14, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q67","status":"generated","calls":1,"answer":"The first women’s weekday DUPR match/season start is October 14, 2026, for the 2026 Fall League Important Dates.","materialPass":true}
+{"id":"Q68","status":"generated","calls":1,"answer":"Women’s Weekday DUPR season starts on Oct. 14, 2026, for the 2026 Fall League Important Dates.","materialPass":true}
+{"id":"Q70","status":"generated","calls":1,"answer":"The men’s Weekday DUPR League starts on Oct. 15, 2026, for the 2026 Fall League season.","materialPass":true}
+{"id":"Q71","status":"generated","calls":1,"answer":"The 2026 Fall Weekday DUPR League season starts Oct. 14, 2026 for Women and Oct. 15, 2026 for Men.","materialPass":true}
+{"id":"Q72","status":"generated","calls":1,"answer":"Weekday 9.1 is covered by the Weekday DUPR league-wide season start: Women start Oct. 14, 2026; Men start Oct. 15, 2026.","materialPass":true}
+{"id":"Q73","status":"generated","calls":1,"answer":"PrimeTime League starts on Oct. 16, 2026, for the 2026 Fall League Important Dates season.","materialPass":true}
+{"id":"Q74","status":"generated","calls":1,"answer":"For the 2026 Fall Saturday DUPR season: DUPR7 starts Oct. 17, 2026; DUPR6 and DUPR8 start Oct. 24, 2026.","materialPass":true}
+{"id":"Q75","status":"generated","calls":1,"answer":"Saturday DUPR7 starts on Oct. 17, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q76","status":"generated","calls":1,"answer":"Saturday DUPR6 starts Oct. 24, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q77","status":"generated","calls":1,"answer":"Saturday DUPR8 begins Oct. 24, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q78","status":"generated","calls":1,"answer":"Weekday DUPR League open registration is Monday, Sept. 7, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q79","status":"generated","calls":1,"answer":"Saturday DUPR League open registration is Monday, Sept. 7, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q80","status":"generated","calls":1,"answer":"PrimeTime registration closes on Sunday, Oct. 4, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q81","status":"generated","calls":1,"answer":"The Weekday DUPR League championship days are Dec. 9/10, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q82","status":"generated","calls":1,"answer":"The Saturday DUPR League playoffs are Championship Days on Mar. 6 / 13, 2027, for the 2026 Fall League Important Dates season.","materialPass":true}
+{"id":"Q83","status":"generated","calls":1,"answer":"The PrimeTime League Championship Day is Dec. 11, 2026, for the 2026 Fall League Important Dates.","materialPass":true}
+{"id":"Q84","status":"generated","calls":1,"answer":"The Weekday DUPR League regular season ends Dec. 2/3, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q85","status":"generated","calls":1,"answer":"For the Saturday DUPR League, the regular season ends Feb. 20 / 27, 2027, for the 2026 Fall League Important Dates season.","materialPass":true}
+{"id":"Q86","status":"generated","calls":1,"answer":"The PrimeTime League regular season ends on Dec. 4, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q88","status":"generated","calls":1,"answer":"The first Saturday DUPR7 match/season start is Oct. 17, 2026, for the 2026 Fall League.","materialPass":true}
+{"id":"Q89","status":"no_selected_evidence","calls":0,"answer":"I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.","materialPass":true}
+{"calls":23,"statuses":{"generated":23,"clarification_no_model":2,"no_selected_evidence":1}}

@@ -1,0 +1,22 @@
+{
+  "postgres": "17.11",
+  "productionCompatibleNonSuperuser": true,
+  "grantsColumnsPoliciesMembershipsSchemasUnchanged": true,
+  "rollback": true,
+  "reapply": true,
+  "roles": [
+    "player",
+    "captain",
+    "captain",
+    "captain",
+    "club_pro"
+  ],
+  "replay": true,
+  "businessRowsUnchangedByMigration": true,
+  "dashboardUnchanged": true,
+  "activeTeams": true,
+  "noPrivateFields": true,
+  "arbitraryScopeDenied": true,
+  "endedContextDenied": true,
+  "modelCalls": 0
+}

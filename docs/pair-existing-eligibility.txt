@@ -1,0 +1,59 @@
+(node:24212) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF01 below (1.2702ms)
+✔ RF02 fraction (0.1605ms)
+✔ RF03 boundary (0.1337ms)
+✔ RF04 above (0.169ms)
+✔ RF05 missing (0.2305ms)
+✔ RF06 numeric NR (0.1544ms)
+✔ RF07 rated below (0.1753ms)
+✔ RF08 rated inside (0.0962ms)
+✔ RF09 rated above (0.1281ms)
+✔ RF10 independent NR (0.2228ms)
+✔ RF11 independent unknown (0.1338ms)
+✔ RF12 pair unknown (0.1226ms)
+✔ Exact official source gate + NR precedence + sanitized single telemetry outcome (13.3816ms)
+✔ Policy only never reads SELF (5.8366ms)
+✔ PT9 conflict blocks personal lookup; no crossing to Weekday rules (5.0623ms)
+✔ PrimeTime age policy includes exact 6.3.2 source; no live lookup (0.6891ms)
+✔ Clarification binds subject session, exact choice and current source (5.2071ms)
+✔ Inactive or unavailable SDUPR5 does not substitute another division (1.0353ms)
+✔ Missing RF stays unknown and denied subject remains protected (5.2478ms)
+✔ Telemetry exceptions fail open with exactly one logical attempt (4.0484ms)
+✔ Standalone other-player RF is protected before catalog or provider (0.4067ms)
+✖ Changed policy version, future season and missing continuation fail closed (1.5862ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 21
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1473.8607
+
+✖ failing tests:
+
+test at test\lms0725Eligibility.test.mjs:35:1
+✖ Changed policy version, future season and missing continuation fail closed (1.5862ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'READY'
+  - 'POLICY_SCOPE_UNKNOWN'
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/lms0725Eligibility.test.mjs:35:95)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'READY',
+    expected: 'POLICY_SCOPE_UNKNOWN',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,8 +1,8 @@
 // Matcher-only annotations. Never use this view for persistence, embeddings or display.
 export const INTERPRETATION_POLICY = "lms0720-v1";
-const TERMS = ['using','playing','volley','damaged','cracked','broken','roster','lineup','community','season','medical','saturday','weekday','primetime'];
+const TERMS = ['using','playing','volley','damaged','cracked','broken','roster','lineup','community','season','medical','saturday','weekday','primetime','players','rally'];
 const COMPETITORS = [...TERMS, 'placing'];
-const EXACT = new Set([...COMPETITORS, 'step','stop','play','rose','nr','dupr','rooster','roaster','foster','medial','valley','broker','damages','cranked','weekdays','seasons']);
+const EXACT = new Set([...COMPETITORS, 'player','step','stop','play','rose','nr','dupr','rooster','roaster','foster','medial','valley','broker','damages','cranked','weekdays','seasons']);
 const LEAGUES = new Set(['saturday','weekday','primetime']);
 
 function distance(a,b) {
@@ -20,7 +20,9 @@ function support(term,text,leagueChoice) {
   if(term==='volley') return /\b(?:kitchen|nvz|non.volley zone)\b/i.test(text) ? 'nvz_context' : '';
   if(['damaged','cracked','broken'].includes(term)) return /\bball\b/i.test(text)&&/\b(?:if|happens|during|rally|point)\b/i.test(text) ? 'ball_condition' : '';
   if(term==='community') return /\b(?:join|play|team|registered|assigned|affiliated)\b/i.test(text) ? 'community_rule_or_affiliation' : '';
-  if(term==='roster') return /\b(?:add|enter|update|remove)\b/i.test(text) ? 'roster_action' : '';
+  if(term==='roster') return /\b(?:add(?:ing)?|enter(?:ing)?|update|remove|build|fill)\b/i.test(text) ? 'roster_action' : '';
+  if(term==='players') return /\b(?:add|enter|adding|entering)\b/i.test(text) ? 'player_entry' : '';
+  if(term==='rally') return /\b(?:scoring|league)\b/i.test(text) ? 'scoring' : '';
   if(term==='lineup') return /\b(?:submit|enter|setup|exchange)\b/i.test(text) ? 'lineup_action' : '';
   if(term==='season') return /\bdupr\b/i.test(text) ? 'season_dupr' : '';
   if(term==='medical') return /\bissue\b/i.test(text)&&/\b(?:match|game|play)\b/i.test(text) ? 'medical_match' : '';

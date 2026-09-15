@@ -1,0 +1,2465 @@
+{
+  "roles": [
+    {
+      "name": "lms_view_as_executor",
+      "login": false,
+      "inherit": false,
+      "createDb": false,
+      "bypassRls": false,
+      "superuser": false,
+      "createRole": false,
+      "replication": false
+    },
+    {
+      "name": "lms_view_as_reader",
+      "login": false,
+      "inherit": false,
+      "createDb": false,
+      "bypassRls": false,
+      "superuser": false,
+      "createRole": false,
+      "replication": false
+    }
+  ],
+  "tables": [
+    {
+      "role": "lms_view_as_executor",
+      "table": "contexts",
+      "schema": "view_as_private",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "contexts",
+      "schema": "view_as_private",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "contexts",
+      "schema": "view_as_private",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "audit_events",
+      "schema": "view_as_private",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "audit_events",
+      "schema": "view_as_private",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "diagnostic_outcomes",
+      "schema": "view_as_private",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "diagnostic_outcomes",
+      "schema": "view_as_private",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "attempts",
+      "schema": "view_as_private",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "attempts",
+      "schema": "view_as_private",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "audit_events_id_seq",
+      "schema": "view_as_private",
+      "privilege": "USAGE"
+    }
+  ],
+  "columns": [
+    {
+      "role": "lms_view_as_executor",
+      "table": "divisions",
+      "column": "league_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "league_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "divisions",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "skill_level",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "min_dupr",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "sort_order",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "leagues",
+      "column": "season_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "season_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "rosters_locked",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "address",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "city",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "state",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "match_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "division_line_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "league_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "division_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "home_team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "home_team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "away_team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "away_team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "home_score",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "away_score",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "member_season_ratings",
+      "column": "dupr_reliability_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "full_name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "phone",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "club_location",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "self_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "dupr_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "members",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "notification_templates",
+      "column": "template_key",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "notification_templates",
+      "column": "body",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "seasons",
+      "column": "start_date",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "seasons",
+      "column": "end_date",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "seasons",
+      "column": "abbreviation",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_byes",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_byes",
+      "column": "league_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_byes",
+      "column": "division_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "matches_played",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_standings",
+      "column": "match_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "match_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_standings",
+      "column": "match_losses",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "match_losses",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "match_ties",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "team_number",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "notes",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "abbreviation",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "home_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "home_losses",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "away_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "user_roles",
+      "column": "user_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "user_roles",
+      "column": "member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "user_roles",
+      "column": "member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "user_roles",
+      "column": "role",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "user_roles",
+      "column": "role",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "seasons",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "seasons",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "seasons",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "seasons",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "seasons",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "seasons",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "leagues",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "leagues",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "leagues",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "description",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "league_document_bucket",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "code_of_conduct_pdf_path",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "captains_guide_pdf_path",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "league_rules_pdf_path",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "score_sheet_pdf_path",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "league_waiver_pdf_path",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "match_setup_reminder_days_before",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "abbreviation",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "flex_league",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "leagues",
+      "column": "only_home_community_players",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "divisions",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "divisions",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "max_dupr",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "number_of_lines",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "default_game_format",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "games_per_line",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "points_to_win",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "win_by",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "third_game_format",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "picklebreaker_enabled",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "picklebreaker_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "line_notes",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "rating_type",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "standings_win_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "standings_tie_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "standings_loss_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "standings_tiebreak_1",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "standings_tiebreak_2",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "standings_tiebreak_3",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "picklebreaker_win_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "picklebreaker_loss_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "default_lines_config",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "team_dupr_max",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "playoff_team_count",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "score_sheet_template_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "primary_team_type",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "secondary_number_of_lines",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "secondary_team_type",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "divisions",
+      "column": "flex_league",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "division_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "line_number",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "line_name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "posted_to_dupr",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "game_format",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "games_per_line",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "points_to_win",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "win_by",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "picklebreaker_enabled",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "picklebreaker_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "line_type",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "sort_order",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "picklebreaker_win_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "picklebreaker_loss_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "team_win_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "uses_saved_match_lineups",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "standings_points_mode",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "score_type",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "score_required",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "picklebreaker_not_played_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "picklebreaker_not_played_award_rule",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "division_lines",
+      "column": "picklebreaker_play_rule",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "locations",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "locations",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "zip_code",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "number_of_courts",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "court_notes",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "club_pros",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "locations",
+      "column": "club_pro_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "club_pro_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "locations",
+      "column": "club_pro_2_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "locations",
+      "column": "club_pro_2_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "description",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "sheet_title",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "template_html",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "rules_text",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "is_default",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "score_sheet_templates",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "division_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "division_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "captain_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "captain_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "co_captain_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "co_captain_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "home_location_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "home_location_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "co_captain_2_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "co_captain_2_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "teams",
+      "column": "club_pro_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "teams",
+      "column": "club_pro_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "location_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "location_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "scheduled_date",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "scheduled_date",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "scheduled_time",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "scheduled_time",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "week_number",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "status",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "status",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "published_at",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "matches",
+      "column": "is_published",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "is_published",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "schedule_setting_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "winning_team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "score_status",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "score_entered_at",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "score_verified_at",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "score_disputed",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "finalized_at",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "score_exported_at",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "result_type",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "matches",
+      "column": "result_notes",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "line_number",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_player_1_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_player_2_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_player_1_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_player_2_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "line_status",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "posted_to_dupr",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "winning_team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "verification_status",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "verified_by_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "verified_at",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_team_games_won",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_team_games_won",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_team_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_team_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "rating_type_at_play",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_player_1_rating_at_play",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_player_2_rating_at_play",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_player_1_rating_at_play",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_player_2_rating_at_play",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "home_team_rating_at_play",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "away_team_rating_at_play",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lines",
+      "column": "ratings_snapshotted_at",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "line_games",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "line_games",
+      "column": "match_line_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "line_games",
+      "column": "game_number",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "line_games",
+      "column": "home_score",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "line_games",
+      "column": "away_score",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "line_games",
+      "column": "is_picklebreaker",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "line_games",
+      "column": "game_status",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lineups",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lineups",
+      "column": "match_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lineups",
+      "column": "team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lineups",
+      "column": "line_number",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lineups",
+      "column": "player_1_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "match_lineups",
+      "column": "player_2_member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_byes",
+      "column": "team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_byes",
+      "column": "week_number",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_byes",
+      "column": "bye_date",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "league_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "division_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_standings",
+      "column": "team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "line_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "line_losses",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "line_ties",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "game_wins",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "game_losses",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "points_for",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "points_against",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "point_differential",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_standings",
+      "column": "standings_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "standings_points",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_standings",
+      "column": "rank",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "rank",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "away_losses",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "current_streak",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "recent_form",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_standings",
+      "column": "finalized",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_members",
+      "column": "id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_members",
+      "column": "team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_members",
+      "column": "team_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_members",
+      "column": "member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_members",
+      "column": "member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_members",
+      "column": "role",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "team_members",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "team_members",
+      "column": "is_active",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "members",
+      "column": "first_name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "first_name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "members",
+      "column": "last_name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "last_name",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "members",
+      "column": "email",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "email",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "profile_image_urls",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "renewal_date",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "location_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "membership_status",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "members",
+      "column": "is_active_member",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "is_active_member",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "members",
+      "column": "notification_preference",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "member_season_ratings",
+      "column": "member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "member_season_ratings",
+      "column": "member_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "member_season_ratings",
+      "column": "season_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "member_season_ratings",
+      "column": "season_id",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "member_season_ratings",
+      "column": "season_dupr_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "member_season_ratings",
+      "column": "season_dupr_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "member_season_ratings",
+      "column": "season_primetime_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "member_season_ratings",
+      "column": "season_primetime_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "member_season_ratings",
+      "column": "dupr_doubles_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "member_season_ratings",
+      "column": "dupr_doubles_rating",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "system_settings",
+      "column": "setting_key",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "system_settings",
+      "column": "setting_key",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_executor",
+      "table": "system_settings",
+      "column": "setting_value",
+      "schema": "public",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "lms_view_as_reader",
+      "table": "system_settings",
+      "column": "setting_value",
+      "schema": "public",
+      "privilege": "SELECT"
+    }
+  ],
+  "schemas": [
+    {
+      "acl": [
+        "postgres=UC/postgres",
+        "lms_view_as_reader=U/postgres"
+      ],
+      "name": "lms_read_private",
+      "anonUsage": false,
+      "readerUsage": true,
+      "serviceUsage": false,
+      "executorUsage": false,
+      "authenticatedUsage": false
+    },
+    {
+      "acl": [
+        "postgres=UC/postgres",
+        "service_role=U/postgres",
+        "ai_live_retention=U/postgres"
+      ],
+      "name": "ai_live_private",
+      "anonUsage": false,
+      "readerUsage": false,
+      "serviceUsage": true,
+      "executorUsage": false,
+      "authenticatedUsage": false
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "seasons",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "leagues",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "divisions",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "division_lines",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "locations",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "score_sheet_templates",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "teams",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "matches",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "match_lines",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "line_games",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "match_lineups",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "team_byes",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "team_standings",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "team_members",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "members",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "member_season_ratings",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "user_roles",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "system_settings",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "true",
+      "roles": [
+        "lms_view_as_reader"
+      ],
+      "tablename": "notification_templates",
+      "permissive": "PERMISSIVE",
+      "policyname": "lms0726_internal_page_read",
+      "schemaname": "public",
+      "with_check": null
+    }
+  ],
+  "functions": [
+    {
+      "acl": [
+        "lms_view_as_reader=X/lms_view_as_reader"
+      ],
+      "owner": "lms_view_as_reader",
+      "definer": false,
+      "signature": "lms_read_private.competition(jsonb,text,jsonb)"
+    },
+    {
+      "acl": [
+        "lms_view_as_reader=X/lms_view_as_reader"
+      ],
+      "owner": "lms_view_as_reader",
+      "definer": false,
+      "signature": "lms_read_private.people(jsonb,text,jsonb)"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "lms_view_as_reader=X/postgres"
+      ],
+      "owner": "postgres",
+      "definer": true,
+      "signature": "lms_read_private.lock_viewer(jsonb,text,jsonb)"
+    },
+    {
+      "acl": [
+        "lms_view_as_reader=X/lms_view_as_reader",
+        "lms_view_as_executor=X/lms_view_as_reader"
+      ],
+      "owner": "lms_view_as_reader",
+      "definer": true,
+      "signature": "view_as_private.page_read(jsonb,text,jsonb)"
+    }
+  ],
+  "memberships": [
+    {
+      "set": false,
+      "role": "lms_view_as_executor",
+      "admin": true,
+      "member": "postgres",
+      "grantor": "supabase_admin",
+      "inherit": false
+    },
+    {
+      "set": true,
+      "role": "lms_view_as_executor",
+      "admin": false,
+      "member": "postgres",
+      "grantor": "postgres",
+      "inherit": false
+    },
+    {
+      "set": false,
+      "role": "lms_view_as_reader",
+      "admin": true,
+      "member": "postgres",
+      "grantor": "supabase_admin",
+      "inherit": false
+    }
+  ]
+}

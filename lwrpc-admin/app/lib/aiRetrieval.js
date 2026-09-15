@@ -1,3 +1,4 @@
+import {completePolicyEvidence} from './aiPolicyEvidence.js';
 import { passageScope } from './aiOfficialApplicability.js';
 import { retainPassageReader } from './aiPassageContinuations.js';
 import { interpretQuestion } from "./aiQuestionInterpretation.js";
@@ -128,6 +129,7 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     if(managedError)throw managedError;
     return managed || [];
   });
+  await completePolicyEvidence(supabase,result);
   return result;
 }
 

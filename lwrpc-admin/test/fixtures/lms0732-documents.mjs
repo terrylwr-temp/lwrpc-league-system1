@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const source=JSON.parse(fs.readFileSync(new URL('../../../docs/lms-0732-current-source-verification.json',import.meta.url)));
+export const candidates=source.passages.filter(c=>c.is_searchable).map(c=>({chunkId:c.chunk_id,documentId:c.document_id,documentVersionId:c.version_id,documentTitle:c.title,documentType:c.title.includes('Dates')?'league_supplement':'captain_guide',documentAuthorityRank:c.authority_rank,pageNumber:c.page_number,heading:c.heading,sectionLabel:c.section_label,chunkOrdinal:c.chunk_ordinal,content:c.content,structuralCompletion:true,combinedScore:.8}));
+export const retrieval=question=>({request:{question,askAbout:'all',context:{}},candidates,suppliedEvidence:candidates,authorityReviewCandidates:candidates,policyEvidence:{status:'complete',candidates},evidence:{sufficient:true,threshold:.35},metrics:{retrievalMs:0,totalMs:0}});
+export function database(){
+ const docs=source.catalog.map(d=>({...d,active_version:{id:d.active_version_id,processing_status:d.processing_status}}));
+ const versions=docs.map(d=>({id:d.active_version_id,document_id:d.id,processing_status:'ready',document:d,storage_bucket:'official-fixture',storage_path:d.active_version_id+'.pdf'}));
+ const chunks=source.passages.map(c=>({id:c.chunk_id,document_version_id:c.version_id,chunk_ordinal:c.chunk_ordinal,page_number:c.page_number,heading:c.heading,section_label:c.section_label,content:c.content,is_searchable:c.is_searchable}));
+ return {from(table){assert.ok(['ai_documents','ai_document_versions','ai_document_chunks'].includes(table));let rows=table==='ai_documents'?docs:table==='ai_document_versions'?versions:chunks;return {select(){return this;},eq(key,v){rows=rows.filter(r=>key==='active_version.processing_status'?r.active_version?.processing_status===v:r[key]===v);return this;},in(key,v){rows=rows.filter(r=>v.includes(r[key]));return this;},order(){return this;},limit(n){rows=rows.slice(0,n);return this;},abortSignal(){return this;},then(resolve,reject){return Promise.resolve({data:rows,error:null}).then(resolve,reject);}};},storage:{from(){return {async createSignedUrl(path){return {data:{signedUrl:'https://example.invalid/'+path},error:null};}};}}};
+}

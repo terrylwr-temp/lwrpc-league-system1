@@ -1,0 +1,21 @@
+{"id":"Q07","status":"preflight_pass","calls":0}
+{"id":"Q09","status":"preflight_pass","calls":0}
+{"id":"Q10","status":"preflight_pass","calls":0}
+{"id":"Q11","status":"preflight_pass","calls":0}
+{"id":"Q12","status":"preflight_pass","calls":0}
+{"id":"Q13","status":"preflight_pass","calls":0}
+{"id":"Q14","status":"preflight_pass","calls":0}
+{"id":"Q17","status":"preflight_pass","calls":0}
+{"id":"Q18","status":"preflight_pass","calls":0}
+{"id":"Q21","status":"preflight_pass","calls":0}
+{"id":"Q29","status":"preflight_pass","calls":0}
+{"id":"Q46","status":"preflight_pass","calls":0}
+{"id":"Q54","status":"preflight_pass","calls":0}
+{"id":"Q55","status":"preflight_pass","calls":0}
+{"id":"Q56","status":"preflight_pass","calls":0}
+{"id":"Q57","status":"preflight_pass","calls":0}
+{"calls":0,"statuses":{"preflight_pass":16}}
+(node:26588) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

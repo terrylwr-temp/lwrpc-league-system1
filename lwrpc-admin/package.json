@@ -1,6 +1,6 @@
 {
   "name": "lwrpc-admin",
-  "version": "0.1.546",
+  "version": "0.1.554",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",

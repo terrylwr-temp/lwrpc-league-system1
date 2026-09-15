@@ -1,0 +1,136 @@
+(node:13840) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/app/lib/aiEquipmentIntents.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\fast-fix-ratings-success\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"e":{"sufficient":false,"threshold":0.35,"topScore":null,"stage4Fallback":"I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification."},"selected":[],"probe":[{"chunkId":"2ab86486-e9d5-4ae9-970d-097472b0e32b","documentId":"20000000-0000-4000-8000-000000000001","documentVersionId":"816a2cd7-d0c9-4c27-b41a-90eccc39cc9b","documentTitle":"LWR Pickleball Club DUPR Captains Guide","documentType":"captain_guide","sourceClassification":"lwr_supporting_guide","documentAuthorityRank":3,"documentScopeKind":"all","pageNumber":10,"sectionLabel":"","heading":"LEAGUE FEES AND WAIVER","ruleNumber":"","content":"o The League shall provide:\n Match Balls: Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.","semanticScore":0.8,"keywordScore":0.7,"exactScore":0,"authorityScore":0,"contextScore":0,"combinedScore":0.65,"vectorRank":null,"keywordRank":null,"exactMatch":false,"exactMatchReason":"None","terminologyDiagnostic":"None","leagueTextDiagnostic":"None","ftsDiagnostic":{"normalizedTerms":["balls"],"retrievalExpansion":[],"typoNormalization":[],"matched":false,"candidateRank":null},"intentDiagnostic":{"detectedIntent":"Club-selected match equipment","evidenceMatch":"Direct LWR-selected match equipment"},"probeRank":1,"stage3Rank":null,"lwrMatchEquipmentProbe":{"intent":"Club-selected match equipment","retrieved":true,"query":"match balls","probeRank":1,"normalStage3Rank":null,"normalStage3CandidateLimit":0,"deduplicatedAgainstNormal":false,"presentInNormalPool":false,"diagnostic":"Bounded LWR match-equipment probe; not a normal Stage 3 ranking."}}]}
+{"e":{"sufficient":false,"threshold":0.35,"topScore":null,"stage4Fallback":"I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification."},"selected":[],"probe":[{"chunkId":"2ab86486-e9d5-4ae9-970d-097472b0e32b","documentId":"20000000-0000-4000-8000-000000000001","documentVersionId":"816a2cd7-d0c9-4c27-b41a-90eccc39cc9b","documentTitle":"LWR Pickleball Club DUPR Captains Guide","documentType":"captain_guide","sourceClassification":"lwr_supporting_guide","documentAuthorityRank":3,"documentScopeKind":"all","pageNumber":10,"sectionLabel":"","heading":"LEAGUE FEES AND WAIVER","ruleNumber":"","content":"o The League shall provide:\n Match Balls: Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.","semanticScore":0.8,"keywordScore":0.7,"exactScore":0,"authorityScore":0,"contextScore":0,"combinedScore":0.65,"vectorRank":null,"keywordRank":null,"exactMatch":false,"exactMatchReason":"None","terminologyDiagnostic":"None","leagueTextDiagnostic":"None","ftsDiagnostic":{"normalizedTerms":["balls"],"retrievalExpansion":[],"typoNormalization":[],"matched":false,"candidateRank":null},"intentDiagnostic":{"detectedIntent":"Club-selected match equipment","evidenceMatch":"Direct LWR-selected match equipment"},"probeRank":1,"stage3Rank":null,"lwrMatchEquipmentProbe":{"intent":"Club-selected match equipment","retrieved":true,"query":"match balls","probeRank":1,"normalStage3Rank":null,"normalStage3CandidateLimit":0,"deduplicatedAgainstNormal":false,"presentInNormalPool":false,"diagnostic":"Bounded LWR match-equipment probe; not a normal Stage 3 ranking."}}]}
+{"e":{"sufficient":false,"threshold":0.35,"topScore":null,"stage4Fallback":"I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification."},"selected":[],"probe":[{"chunkId":"2ab86486-e9d5-4ae9-970d-097472b0e32b","documentId":"20000000-0000-4000-8000-000000000001","documentVersionId":"816a2cd7-d0c9-4c27-b41a-90eccc39cc9b","documentTitle":"LWR Pickleball Club DUPR Captains Guide","documentType":"captain_guide","sourceClassification":"lwr_supporting_guide","documentAuthorityRank":3,"documentScopeKind":"all","pageNumber":10,"sectionLabel":"","heading":"LEAGUE FEES AND WAIVER","ruleNumber":"","content":"o The League shall provide:\n Match Balls: Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.","semanticScore":0.8,"keywordScore":0.7,"exactScore":0,"authorityScore":0,"contextScore":0,"combinedScore":0.65,"vectorRank":null,"keywordRank":null,"exactMatch":false,"exactMatchReason":"None","terminologyDiagnostic":"None","leagueTextDiagnostic":"None","ftsDiagnostic":{"normalizedTerms":["balls"],"retrievalExpansion":[],"typoNormalization":[],"matched":false,"candidateRank":null},"intentDiagnostic":{"detectedIntent":"Club-selected match equipment","evidenceMatch":"Direct LWR-selected match equipment"},"probeRank":1,"stage3Rank":null,"lwrMatchEquipmentProbe":{"intent":"Club-selected match equipment","retrieved":true,"query":"match balls","probeRank":1,"normalStage3Rank":null,"normalStage3CandidateLimit":0,"deduplicatedAgainstNormal":false,"presentInNormalPool":false,"diagnostic":"Bounded LWR match-equipment probe; not a normal Stage 3 ranking."}}]}
+{"e":{"sufficient":false,"threshold":0.35,"topScore":null,"stage4Fallback":"I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification."},"selected":[],"probe":[{"chunkId":"2ab86486-e9d5-4ae9-970d-097472b0e32b","documentId":"20000000-0000-4000-8000-000000000001","documentVersionId":"816a2cd7-d0c9-4c27-b41a-90eccc39cc9b","documentTitle":"LWR Pickleball Club DUPR Captains Guide","documentType":"captain_guide","sourceClassification":"lwr_supporting_guide","documentAuthorityRank":3,"documentScopeKind":"all","pageNumber":10,"sectionLabel":"","heading":"LEAGUE FEES AND WAIVER","ruleNumber":"","content":"o The League shall provide:\n Match Balls: Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.","semanticScore":0.8,"keywordScore":0.7,"exactScore":0,"authorityScore":0,"contextScore":0,"combinedScore":0.65,"vectorRank":null,"keywordRank":null,"exactMatch":false,"exactMatchReason":"None","terminologyDiagnostic":"None","leagueTextDiagnostic":"None","ftsDiagnostic":{"normalizedTerms":["balls"],"retrievalExpansion":[],"typoNormalization":[],"matched":false,"candidateRank":null},"intentDiagnostic":{"detectedIntent":"Club-selected match equipment","evidenceMatch":"Direct LWR-selected match equipment"},"probeRank":1,"stage3Rank":null,"lwrMatchEquipmentProbe":{"intent":"Club-selected match equipment","retrieved":true,"query":"match balls","probeRank":1,"normalStage3Rank":null,"normalStage3CandidateLimit":0,"deduplicatedAgainstNormal":false,"presentInNormalPool":false,"diagnostic":"Bounded LWR match-equipment probe; not a normal Stage 3 ranking."}}]}
+{"e":{"sufficient":false,"threshold":0.35,"topScore":null,"stage4Fallback":"I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification."},"selected":[],"probe":[{"chunkId":"2ab86486-e9d5-4ae9-970d-097472b0e32b","documentId":"20000000-0000-4000-8000-000000000001","documentVersionId":"816a2cd7-d0c9-4c27-b41a-90eccc39cc9b","documentTitle":"LWR Pickleball Club DUPR Captains Guide","documentType":"captain_guide","sourceClassification":"lwr_supporting_guide","documentAuthorityRank":3,"documentScopeKind":"all","pageNumber":10,"sectionLabel":"","heading":"LEAGUE FEES AND WAIVER","ruleNumber":"","content":"o The League shall provide:\n Match Balls: Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.","semanticScore":0.8,"keywordScore":0.7,"exactScore":0,"authorityScore":0,"contextScore":0,"combinedScore":0.65,"vectorRank":null,"keywordRank":null,"exactMatch":false,"exactMatchReason":"None","terminologyDiagnostic":"None","leagueTextDiagnostic":"None","ftsDiagnostic":{"normalizedTerms":["balls"],"retrievalExpansion":[],"typoNormalization":[],"matched":false,"candidateRank":null},"intentDiagnostic":{"detectedIntent":"Club-selected match equipment","evidenceMatch":"Direct LWR-selected match equipment"},"probeRank":1,"stage3Rank":null,"lwrMatchEquipmentProbe":{"intent":"Club-selected match equipment","retrieved":true,"query":"match balls","probeRank":1,"normalStage3Rank":null,"normalStage3CandidateLimit":0,"deduplicatedAgainstNormal":false,"presentInNormalPool":false,"diagnostic":"Bounded LWR match-equipment probe; not a normal Stage 3 ranking."}}]}
+{"e":{"sufficient":false,"threshold":0.35,"topScore":null,"stage4Fallback":"I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification."},"selected":[],"probe":[{"chunkId":"2ab86486-e9d5-4ae9-970d-097472b0e32b","documentId":"20000000-0000-4000-8000-000000000001","documentVersionId":"816a2cd7-d0c9-4c27-b41a-90eccc39cc9b","documentTitle":"LWR Pickleball Club DUPR Captains Guide","documentType":"captain_guide","sourceClassification":"lwr_supporting_guide","documentAuthorityRank":3,"documentScopeKind":"all","pageNumber":10,"sectionLabel":"","heading":"LEAGUE FEES AND WAIVER","ruleNumber":"","content":"o The League shall provide:\n Match Balls: Franklin Outdoor X-40 optic yellow balls for all regular season and playoff matches.","semanticScore":0.8,"keywordScore":0.7,"exactScore":0,"authorityScore":0,"contextScore":0,"combinedScore":0.65,"vectorRank":null,"keywordRank":null,"exactMatch":false,"exactMatchReason":"None","terminologyDiagnostic":"None","leagueTextDiagnostic":"None","ftsDiagnostic":{"normalizedTerms":["balls"],"retrievalExpansion":[],"typoNormalization":[],"matched":false,"candidateRank":null},"intentDiagnostic":{"detectedIntent":"Club-selected match equipment","evidenceMatch":"Direct LWR-selected match equipment"},"probeRank":1,"stage3Rank":null,"lwrMatchEquipmentProbe":{"intent":"Club-selected match equipment","retrieved":true,"query":"match balls","probeRank":1,"normalStage3Rank":null,"normalStage3CandidateLimit":0,"deduplicatedAgainstNormal":false,"presentInNormalPool":false,"diagnostic":"Bounded LWR match-equipment probe; not a normal Stage 3 ranking."}}]}
+✖ Are we going to use the Lifetime ball (28.0993ms)
+✖ Will we use the Lifetime ball? (6.0608ms)
+✖ Are we using the Lifetime ball? (2.7565ms)
+✖ Is the league going to use the Lifetime ball? (6.3574ms)
+✖ Will we be using a different ball? (3.901ms)
+✖ Are we going to use the ExampleBrand pickleball? (2.2538ms)
+✔ legal specifications, damage and personal equipment permission retain boundaries (0.4509ms)
+✔ no source means no invented brand answer (2.2477ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 2
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1439.5021
+
+✖ failing tests:
+
+test at lwrpc-admin\test\lifetimeBall.test.mjs:9:33
+✖ Are we going to use the Lifetime ball (28.0993ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(selected.some(c=>c.chunkId===source.chunk_id&&c.pageNumber===10&&/Franklin Outdoor X-40/.test(c.content)))
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/lifetimeBall.test.mjs:15:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at lwrpc-admin\test\lifetimeBall.test.mjs:9:33
+✖ Will we use the Lifetime ball? (6.0608ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(selected.some(c=>c.chunkId===source.chunk_id&&c.pageNumber===10&&/Franklin Outdoor X-40/.test(c.content)))
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/lifetimeBall.test.mjs:15:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at lwrpc-admin\test\lifetimeBall.test.mjs:9:33
+✖ Are we using the Lifetime ball? (2.7565ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(selected.some(c=>c.chunkId===source.chunk_id&&c.pageNumber===10&&/Franklin Outdoor X-40/.test(c.content)))
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/lifetimeBall.test.mjs:15:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at lwrpc-admin\test\lifetimeBall.test.mjs:9:33
+✖ Is the league going to use the Lifetime ball? (6.3574ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(selected.some(c=>c.chunkId===source.chunk_id&&c.pageNumber===10&&/Franklin Outdoor X-40/.test(c.content)))
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/lifetimeBall.test.mjs:15:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at lwrpc-admin\test\lifetimeBall.test.mjs:9:33
+✖ Will we be using a different ball? (3.901ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(selected.some(c=>c.chunkId===source.chunk_id&&c.pageNumber===10&&/Franklin Outdoor X-40/.test(c.content)))
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/lifetimeBall.test.mjs:15:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at lwrpc-admin\test\lifetimeBall.test.mjs:9:33
+✖ Are we going to use the ExampleBrand pickleball? (2.2538ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(selected.some(c=>c.chunkId===source.chunk_id&&c.pageNumber===10&&/Franklin Outdoor X-40/.test(c.content)))
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/.local-validation/fast-fix-ratings-success/lwrpc-admin/test/lifetimeBall.test.mjs:15:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

@@ -1,0 +1,8 @@
+select jsonb_build_object(
+'roles',(select jsonb_agg(to_jsonb(x) order by rolname) from(select rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls from pg_roles where rolname in('lms_view_as_reader','lms_view_as_executor'))x),
+'memberships',(select jsonb_agg(to_jsonb(x) order by roleid,member,grantor) from(select roleid,member,grantor,admin_option,inherit_option,set_option from pg_auth_members where roleid in('lms_view_as_reader'::regrole,'lms_view_as_executor'::regrole) or member in('lms_view_as_reader'::regrole,'lms_view_as_executor'::regrole))x),
+'tables',(select jsonb_agg(to_jsonb(x) order by oid) from(select oid,relname,relowner,relacl,relrowsecurity,relforcerowsecurity from pg_class where relnamespace='public'::regnamespace and relkind in('r','p','v','m'))x),
+'columns',(select jsonb_agg(to_jsonb(x) order by attrelid,attnum) from(select attrelid,attnum,attacl from pg_attribute where attrelid in(select oid from pg_class where relnamespace='public'::regnamespace) and attnum>0 and not attisdropped)x),
+'policies',(select jsonb_agg(to_jsonb(p) order by oid) from pg_policy p),
+'functions',(select jsonb_agg(to_jsonb(x) order by signature) from(select oid::regprocedure::text signature,pg_get_userbyid(proowner) owner,prosecdef,proconfig,proacl,md5(prosrc) body_md5 from pg_proc where pronamespace in('view_as_private'::regnamespace,'lms_read_private'::regnamespace,'ai_live_private'::regnamespace,'identity_repair_private'::regnamespace) or oid='public.ai_live_feedback(uuid,uuid,boolean,jsonb)'::regprocedure)x),
+'schemas',(select jsonb_agg(to_jsonb(x) order by nspname) from(select nspname,nspowner,nspacl from pg_namespace where nspname in('lms_read_private','ai_live_private','view_as_private'))x)) snapshot

@@ -1,0 +1,114 @@
+- main
+  - complementary "League Management navigation; hover to expand when collapsed"
+    - link "Lakewood Ranch Pickleball Club Lakewood Ranch Pickleball Club" [ref=e27]
+      - image "Lakewood Ranch Pickleball Club"
+      - strong
+        - StaticText "Lakewood Ranch Pickleball Club"
+    - navigation "League Management navigation" [ref=e28]
+      - button "Dashboard ›" [expanded=false, ref=e34]
+        - StaticText "Dashboard"
+        - StaticText "›"
+      - button "People & Teams ›" [expanded=true, ref=e35]
+        - StaticText "People & Teams"
+        - StaticText "›"
+      - button "Members" [ref=e36]
+        - StaticText "Members"
+      - button "Season Ratings" [ref=e37]
+        - StaticText "Season Ratings"
+      - button "Teams & Rosters" [ref=e38]
+        - StaticText "Teams & Rosters"
+      - button "Division Standings" [ref=e39]
+        - StaticText "Division Standings"
+      - button "Division Schedules" [ref=e40]
+        - StaticText "Division Schedules"
+      - button "Match Operations ›" [expanded=false, ref=e41]
+        - StaticText "Match Operations"
+        - StaticText "›"
+      - button "League Structure ›" [expanded=false, ref=e42]
+        - StaticText "League Structure"
+        - StaticText "›"
+      - button "System Setup ›" [expanded=false, ref=e43]
+        - StaticText "System Setup"
+        - StaticText "›"
+      - button "Modules ›" [expanded=false, ref=e44]
+        - StaticText "Modules"
+        - StaticText "›"
+    - StaticText "SELECTED SCOPE"
+    - strong
+      - StaticText "Active Seasons"
+    - StaticText "Admin operations"
+    - paragraph
+      - StaticText "© 2026 Lakewood Ranch Pickleball Club"
+  - sectionheader
+    - StaticText "PEOPLE & TEAMS"
+    - heading "Welcome Synthetic" [level=1, ref=e29]
+      - StaticText "Welcome Synthetic"
+    - button "Ask LWR Pickleball Club AI" [ref=e30]
+    - link "Email League Management" [ref=e31]
+    - strong
+      - StaticText "Synthetic Person8"
+    - StaticText "Commissioner"
+    - button "Open profile" [ref=e32]
+      - StaticText "SP"
+  - heading "Teams & Rosters" [level=2, ref=e33]
+  - paragraph
+    - StaticText "Create teams, edit team information, assign captains, and manage rosters."
+  - heading "Teams" [level=2, ref=e1]
+  - textbox "Filter teams, leagues, divisions, captains, club pros..." [ref=e2]
+  - button "Include Inactive Teams" [ref=e3]
+  - button "Add Team" [ref=e4]
+  - button "Copy Division Teams" [ref=e5]
+  - button "Expand All" [ref=e6]
+  - button "Collapse All" [ref=e7]
+  - StaticText "TEAMS"
+  - generic
+    - StaticText "3 of 3"
+  - button "SYNTHETIC LEAGUE Synthetic Division 3 teams Hide" [expanded=true, ref=e8]
+    - StaticText "SYNTHETIC LEAGUE"
+    - StaticText "Synthetic Division"
+    - generic
+      - StaticText "3 teams"
+    - StaticText "Hide"
+  - generic
+    - StaticText "Other Team (SYN)"
+  - StaticText "ACTIVE"
+  - generic
+    - StaticText "Location: Synthetic Courts"
+  - StaticText "Team Captains:"
+  - button "Schedule" [ref=e9]
+  - button "Roster (1)" [ref=e10]
+    - StaticText "Roster (1)"
+  - button "Edit" [ref=e11]
+  - button "Copy" [ref=e12]
+  - button "Inactivate" [ref=e13]
+  - button "Delete" [ref=e14]
+  - StaticText "Synthetic Regression Team"
+  - StaticText "ACTIVE"
+  - generic
+    - StaticText "Location: Synthetic Courts"
+  - generic
+    - StaticText "Team Captains: Synthetic Person2, Synthetic Person3"
+  - button "Schedule" [ref=e15]
+  - button "Roster (0)" [ref=e16]
+    - StaticText "Roster (0)"
+  - button "Edit" [ref=e17]
+  - button "Copy" [ref=e18]
+  - button "Inactivate" [ref=e19]
+  - button "Delete" [ref=e20]
+  - generic
+    - StaticText "Synthetic Team (SYN)"
+  - StaticText "ACTIVE"
+  - generic
+    - StaticText "Location: Synthetic Courts"
+  - generic
+    - StaticText "Team Captains: Synthetic Person2, Synthetic Person3, Synthetic Person4, Synthetic Person5 (Pro)"
+  - button "Schedule" [ref=e21]
+  - button "Roster (2)" [ref=e22]
+    - StaticText "Roster (2)"
+  - button "Edit" [ref=e23]
+  - button "Copy" [ref=e24]
+  - button "Inactivate" [ref=e25]
+  - button "Delete" [ref=e26]
+- contentinfo
+  - StaticText "© 2026 Lakewood Ranch Pickleball Club · Version LMS-0726"
+- alert

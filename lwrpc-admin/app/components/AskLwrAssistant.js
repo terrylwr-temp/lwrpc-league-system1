@@ -1,4 +1,11 @@
 "use client";
+import {viewAsLeagueDocument} from "../lib/viewAsPageState.js";
+import {isViewAsMode,getViewAsPageState,viewAsAsk,openViewAsSource} from "../lib/viewAsPageState.js";
+import {resultSourcePresentation} from '../lib/aiResultSource.js';
+import {eligibilityIntent} from '../lib/aiEligibilityIntent.js';
+
+import AskLwrWelcome from './AskLwrWelcome.js';
+import AskLwrChoices from './AskLwrChoices.js';
 import {liveIntent} from '../lib/liveLmsIntent.js';
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +17,7 @@ import { usePathname } from "next/navigation";
 import { getCurrentUserRole, getRequestAuthorizationHeaders, supabase } from "../lib/auth";
 import { GUIDE_DOCUMENT_TYPES, openGuideDocument } from "../lib/dashboardGuides";
 import { LEAGUE_DOCUMENT_TYPES, leagueDocumentPath, normalizeLeagueDocumentBucket } from "../lib/leagueDocuments";
-import { ASK_LWR_INITIAL_COPY, assistantPageContext, canBrowseLeagueDocument, visibleDashboardGuideKeys } from "../lib/askLwrAssistantConfig";
+import { assistantPageContext, canBrowseLeagueDocument, visibleDashboardGuideKeys } from "../lib/askLwrAssistantConfig";
 
 const TECHNICAL_ERROR = "Sorry, I couldn't complete that request right now. Please try again.";
 const MAX_SESSION_EXCHANGES = 8;
@@ -61,7 +68,7 @@ export function AskLwrAssistantDrawer({ open, onClose, role }) {
     const onKeyDown = (event) => {
       if (event.key === "Escape") { onClose(); return; }
       if (event.key !== "Tab") return;
-      const focusable = [...(drawerRef.current?.querySelectorAll("a[href], button:not([disabled]), textarea:not([disabled])") || [])];
+      const focusable = [...(drawerRef.current?.querySelectorAll("a[href], button:not([disabled]), textarea:not([disabled])") || [])].filter(node=>node.getClientRects().length>0);
       if (focusable.length === 0) return;
       const first = focusable[0]; const last = focusable[focusable.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
@@ -102,7 +109,7 @@ export function AskLwrAssistantPage({ role }) {
 function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, drawer = false }) {
   const fallbackInputRef = useRef(null);
   const composerRef = inputRef || fallbackInputRef;
-  const [context] = useState(()=>currentConversationContext(supabase));
+  const [context] = useState(()=>isViewAsMode()?getViewAsPageState().conversation:currentConversationContext(supabase));
   const observedGeneration = useRef(context.generation());
   const [busy, setBusy] = useState(() => context.busy());
   const [announcement, setAnnouncement] = useState("");
@@ -149,17 +156,18 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     const contextRequest = context.begin();
     const conversationReceipt = contextRequest.receipt;
     setQuestion(""); setWorking(true);
-    setExchanges((current) => [{ id: exchangeId, question: nextQuestion, pending: true }, ...current].map(entry=>entry.id===exchangeId?{...entry,liveSensitive:Boolean(liveIntent(nextQuestion))||Boolean(conversationReceipt?.startsWith('live1.'))}:entry).slice(0, MAX_SESSION_EXCHANGES));
+    setExchanges((current) => [{ id: exchangeId, question: nextQuestion, pending: true }, ...current].map(entry=>entry.id===exchangeId?{...entry,liveSensitive:Boolean(eligibilityIntent(nextQuestion))||Boolean(liveIntent(nextQuestion))||Boolean(conversationReceipt?.startsWith('live1.'))}:entry).slice(0, MAX_SESSION_EXCHANGES));
     try {
-      const response = await fetch("/api/ask-lwr", {
+      const response = await (isViewAsMode() ? viewAsAsk(nextQuestion,conversationReceipt) : fetch("/api/ask-lwr", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await getRequestAuthorizationHeaders()) },
         body: JSON.stringify({ question: nextQuestion, conversationReceipt, context: { currentPath: pageContext.currentPath, featureModule: pageContext.featureModule } }),
-      });
+      }));
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload?.success || !payload?.result?.answer) throw new Error("player_request_failed");
       if (requestGeneration !== context.generation()) return;
       context.complete(contextRequest, payload.result.conversationReceipt);
+      setAnnouncement(payload.result.kind==='clarification'?payload.result.answer:'Answer ready');
       setExchanges((current) => current.map((entry) => entry.id === exchangeId ? { ...entry, pending: false, result: payload.result } : entry));
     } catch {
       if (requestGeneration !== context.generation()) return;
@@ -192,23 +200,24 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     <div className={bodyClass}>
       <p className="mb-2 shrink-0 px-1 text-center text-xs leading-4 text-slate-500">Ask LWR PC AI may make mistakes. Check Official Sources for important information.</p>
       <form onSubmit={submit} className={`${styles.composer} flex shrink-0 gap-2`}><label className="sr-only" htmlFor="ask-lwr-question">Ask a question</label><textarea id="ask-lwr-question" ref={composerRef} value={question} maxLength={1000} rows={3} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(event); } }} placeholder="Ask a question" className="min-h-[74px] min-w-0 flex-1 resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"/><div className={styles.actions}><button type="button" onClick={newQuestion} disabled={busy} title={busy ? "Wait for the current request or feedback to finish" : "Start a new question"} className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-wait disabled:opacity-50">New Question</button><button type="submit" disabled={busy || working || !question.trim()} className="min-h-11 rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-[#104ab7] disabled:cursor-not-allowed disabled:bg-slate-300">Ask</button></div></form><p role="status" aria-live="polite" className="sr-only">{announcement}</p>
-      {exchanges.length === 0 && <section className="mt-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm"><h3 className="text-base font-black text-[#102e64]">How can I help?</h3><p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{ASK_LWR_INITIAL_COPY}</p><div className="mt-4 flex flex-wrap gap-2">{pageContext.suggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => submit(null, suggestion)} disabled={working} className="min-h-11 max-w-full rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-left text-xs font-bold leading-4 text-blue-800 transition hover:border-blue-400 hover:bg-blue-100 disabled:cursor-wait disabled:opacity-60">{suggestion}</button>)}</div></section>}
-      <div className="mt-4 space-y-4">{exchanges.map((entry) => <Exchange key={entry.id} entry={entry} onFeedback={submitFeedback}/>)}</div>
+      {exchanges.length === 0 && <AskLwrWelcome onChoose={q=>submit(null,q)} disabled={working||busy}/>}
+      <div className="mt-4 space-y-4">{exchanges.map((entry) => <Exchange key={entry.id} entry={entry} onFeedback={submitFeedback} onChoose={key=>submit(null,key)} choicesDisabled={working||busy||entry!==exchanges[0]}/>)}</div>
       <div className="mt-5 rounded-xl border border-slate-200 bg-white"><button type="button" onClick={toggleGuides} aria-expanded={guidesOpen} className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left text-sm font-black text-[#102e64]"><span>Browse Guides &amp; Rules</span><span aria-hidden="true">{guidesOpen ? "−" : "+"}</span></button>{guidesOpen && <div className="border-t border-slate-200 p-3"><p className="mb-3 text-xs font-semibold leading-5 text-slate-600">Open the official user guides and league documents already available in the LMS.</p><div className="grid gap-2">{guides.map((guide) => <button key={guide.key} type="button" onClick={() => openGuideDocument(supabase, guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{leagueGuides.map((guide) => <button key={guide.key} type="button" onClick={() => openLeagueGuide(guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{guidesLoading && <p className="text-sm font-semibold text-slate-500" role="status">Loading league documents...</p>}{!guidesLoading && guides.length + leagueGuides.length === 0 && <p className="text-sm font-semibold text-slate-500">No user-facing guides are configured yet.</p>}</div></div>}</div>
     </div>
   </>;
 }
 
-function Exchange({ entry, onFeedback }) {
+function Exchange({ entry, onFeedback, onChoose, choicesDisabled }) {
   if (entry.pending) return <article className="rounded-2xl border border-blue-200 bg-blue-50/70 p-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Question</h3><p className="mt-2 text-sm font-bold text-slate-800">{entry.question}</p><p className="mt-3 flex items-center gap-2 text-sm font-bold text-blue-900" role="status" aria-live="polite"><span className="h-3 w-3 animate-pulse rounded-full bg-blue-600" aria-hidden="true"/>Finding the official answer...</p></article>;
   if (entry.requestError) return <article className="rounded-2xl border border-red-200 bg-red-50 p-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Question</h3><p className="mt-2 text-sm font-bold text-slate-800">{entry.question}</p><p className="mt-3 text-sm font-semibold text-red-800">{TECHNICAL_ERROR}</p></article>;
   const result = entry.result;
+  const sourcePresentation=resultSourcePresentation(result);
   const clarification = result.kind === "clarification";
   const feedbackEligible = result.kind === "answer" && Boolean(result.feedbackReceipt);
   return <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-    {result.live && <div className="border-b border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950"><strong>LIVE LMS DATA</strong><span className="block">{result.live.operation}</span><span className="block text-xs">Current as of {new Date(result.live.checkedAt).toLocaleString()}</span></div>}
-    <div className="border-b border-blue-200 bg-blue-100/70 px-4 py-3"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Question</h3><p className="mt-2 text-sm font-bold text-slate-800">{entry.question}</p></div>
-    <div className="bg-emerald-50/70 p-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">{clarification ? "Clarification" : "Answer"}</h3><p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-800">{result.answer}</p>{feedbackEligible && <FeedbackControls entry={entry} onFeedback={onFeedback}/>} {result.sources?.length > 0 && <div className="mt-4 border-t border-emerald-100 pt-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Official Source{result.sources.length > 1 ? "s" : ""}</h3><div className="mt-2 grid gap-2">{result.sources.map((source, index) => <a key={`${source.officialDocumentUrl}-${index}`} href={source.officialDocumentUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900 transition hover:border-blue-300 hover:bg-blue-100"><strong className="block">{source.documentTitle}</strong><span className="mt-0.5 block font-semibold">{source.citation}</span><span className="mt-2 inline-block font-black text-blue-700">View Official Document ↗</span></a>)}</div></div>}</div>
+    {sourcePresentation && <div className="border-b border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950"><strong>{sourcePresentation.label}</strong><span className="block">{sourcePresentation.operation}</span>{sourcePresentation.checkedAt&&<span className="block text-xs">Current as of {new Date(sourcePresentation.checkedAt).toLocaleString()}</span>}</div>}
+    <div className="border-b border-blue-200 bg-blue-100/70 px-4 py-3"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Question</h3><p className="mt-2 text-sm font-bold text-slate-800">{result.resolvedQuestion || entry.question}</p></div>
+    <div className="bg-emerald-50/70 p-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">{clarification ? "Clarification" : "Answer"}</h3><p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-800">{result.answer}</p><AskLwrChoices clarification={result.clarification} onChoose={onChoose} disabled={choicesDisabled}/>{feedbackEligible && <FeedbackControls entry={entry} onFeedback={onFeedback}/>} {result.sources?.length > 0 && <div className="mt-4 border-t border-emerald-100 pt-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Official Source{result.sources.length > 1 ? "s" : ""}</h3><div className="mt-2 grid gap-2">{result.sources.map((source, index) => <a key={`${source.officialDocumentUrl}-${index}`} href={source.officialDocumentUrl} onClick={event=>openViewAsSource(event,source.officialDocumentUrl)} target="_blank" rel="noreferrer" className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900 transition hover:border-blue-300 hover:bg-blue-100"><strong className="block">{source.documentTitle}</strong><span className="mt-0.5 block font-semibold">{source.citation}</span><span className="mt-2 inline-block font-black text-blue-700">View Official Document ↗</span></a>)}</div></div>}</div>
   </article>;
 }
 
@@ -229,15 +238,16 @@ async function loadLeagueGuides(role) {
       const path = leagueDocumentPath(league, type);
       if (!path) return null;
       const bucket = normalizeLeagueDocumentBucket(league?.league_document_bucket);
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+      const { data: urlData } = isViewAsMode()?{data:{publicUrl:`view-as-league:${league.id}:${type.key}`}}:supabase.storage.from(bucket).getPublicUrl(path);
       const url = urlData?.publicUrl || ""; const key = `${league?.id || "league"}:${type.key}:${url}`;
       if (!url || seen.has(key)) return null; seen.add(key);
-      return { key, label: `${league?.name || team?.name || "League"} — ${type.label}`, url };
+      return { key, label: `${league?.name || team?.name || "League"} — ${type.label}`, url, leagueId:league.id, documentKey:type.key };
     }).filter(Boolean);
   });
 }
 
-function openLeagueGuide(guide) {
-  const guideWindow = window.open(guide.url, "_blank", "noopener");
+async function openLeagueGuide(guide) {
+  const guideWindow = window.open(isViewAsMode()?"":guide.url, "_blank", isViewAsMode()?undefined:"noopener");
+  if(isViewAsMode()&&guideWindow){try{guideWindow.location.replace(await viewAsLeagueDocument(guide.leagueId,guide.documentKey));}catch{guideWindow.close();return;}}
   if (guideWindow) guideWindow.opener = null;
 }

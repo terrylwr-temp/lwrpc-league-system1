@@ -1,0 +1,304 @@
+{
+  "baselineFiles": 258,
+  "changedExistingFiles": 25,
+  "changes": [
+    {
+      "file": "app/api/view-as/read/route.js",
+      "baseline": "441b65407efdb50cbba6a1d31b4c66edd53266037f42049b70db7a0cf0dcbd95",
+      "current": "0167057e7c07ebed29d8cd6b346543ed2ba81384b05015b9024972a6c83e640f",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Fixed page and vetted document/image operations; remove mini snapshot HTTP operation. Normal APIs untouched."
+    },
+    {
+      "file": "app/approved-answer/[citation]/page.js",
+      "baseline": "17b4e50477d580145ec45ad35f58610c77e00daf5739a23ed09beeddbd64efec",
+      "current": "67884a17a84a93b03b6d86cd7983aae9cc36b21fb414a02d9074aba7d4579e9c",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Use bound source receipt in View-As; preserve normal approved-answer retrieval."
+    },
+    {
+      "file": "app/captain-dashboard/page.js",
+      "baseline": "a3f79d586e58887e55f5bc2b42986bbc72814affe2e1e3e976f72c7f5f607a83",
+      "current": "3b4c31e700bd9ee28fdfcd72e324c7ca6d0c51e40699264abc84b0ef23143978",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Durable effective identity and projected reads; View-As early exits on writes, same normal handler bodies."
+    },
+    {
+      "file": "app/components/AppHeader.js",
+      "baseline": "417d825700856ea563e1bc6ba28325f07b757d6cd66741c310c9ab3fa82730e5",
+      "current": "ac14e32d873fcdc82a7ca76d382c39eaa0414d3f3127420275fa144eeacae0ed",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Shared header uses effective identity/projected settings only on isolated origin; normal auth/settings path retained."
+    },
+    {
+      "file": "app/components/AskLwrAssistant.js",
+      "baseline": "da46e840a9dd572eb7a41290c12cb05688f8c647862aa60b20c36488e813cae6",
+      "current": "7062cc0d2f2ec5a8b16fb8153947df5980c0a7f65ce97ef0557b977486a75fb5",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Reuse same Ask UI with View-As transport, memory-only conversation, source receipts and no feedback; normal transport retained."
+    },
+    {
+      "file": "app/components/AskLwrAssistant.module.css",
+      "baseline": "9c1fd714d71dcadc6b77510fbbc82410399a1ae69811a02a7b2251a195f80be9",
+      "current": "92b6787c630dd39c590ef0fa695a323921bbe3163409d9117b2a16c4fa1183ed",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "View-As-only overlay height reserves persistent banner space."
+    },
+    {
+      "file": "app/components/DashboardProfileDialog.js",
+      "baseline": "375823eaeacb62ae1fe77d91c7a1fa42352f0962efc73a4bc9f27a5360b2b296",
+      "current": "fda0c9695f36832ecacb36497cc4ff7b20303aa0c0439421ad6dd1d92719905c",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Disable account/profile mutations only in View-As."
+    },
+    {
+      "file": "app/components/OfficialDocumentViewer.js",
+      "baseline": "754152186f3edb631f45a1dfb74c82ecde9c54e41ca1dfef7e773d58ab60a9fc",
+      "current": "8646d6757a88c5741423ab4ea25829ba69b3c93c31ba5210cc5dc13caed167c9",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Use context-bound PDF read only in View-As; original normal fetch retained."
+    },
+    {
+      "file": "app/components/SystemFooter.js",
+      "baseline": "52851094c0c990a9e4205609561bcc7f46d4fb15cbc3660077224c5d334115ab",
+      "current": "aa5c91967e7cbf4b626ed709cb3e715dc28f9310d5f152e65174bd5e1f3426f8",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Settings adapter preserves normal fetch and exposes projected display settings in View-As."
+    },
+    {
+      "file": "app/components/ViewAsStartButton.js",
+      "baseline": "baf243a6899460c4e2ddd7812a3eddf036888b7a3f031dabd7bef9091d0ca8eb",
+      "current": "37ccf703956c9325a4054832edb1e8652ac56feadf569738be980e92c602d0d9",
+      "status": "ADAPTED",
+      "classification": "NORMAL + VIEW-AS SHARED EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Approved real-actor/target-qualified entry in normal Member Detail action style; accepted handoff retained."
+    },
+    {
+      "file": "app/design-preview/captain/CaptainDesignPreviewView.js",
+      "baseline": "867a239468a602131f10a928c41814da601293e288f09dacd53f1bf79e4a7aeb",
+      "current": "b59b1c63f2918bc459d4979ffc81bb23a0df1834d473760552db8ec0e355b0ad",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Actual Captain renderer receives read-only state; View-As controls/Match Setup focus and banner spacing adapted."
+    },
+    {
+      "file": "app/layout.tsx",
+      "baseline": "4d607f4f46921c38c1c1f0fbd49613b8b5073ecc459fdc4e9e22e2e9e7eb0b8d",
+      "current": "2dbbce12efc943f88f23ef11b2d75cf71a380e28073ea14380d21233a75bb426",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Host-derived isolated provider branch; normal layout branch retained."
+    },
+    {
+      "file": "app/lib/auth.js",
+      "baseline": "f61355cba36df159f5667edae0e3cdf5ce8d1aee19163bb16d2ac6b9f204e5b7",
+      "current": "51ff620ff1deaba36d9d241e523b14d9c7ebdccc17d64644555300d2f2d140b0",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "View-As projection facade and durable member identity; normal Supabase factory/auth retained."
+    },
+    {
+      "file": "app/lib/dashboardGuides.js",
+      "baseline": "3d8a75fe4bc9ff5322599b3e5a33e9a5dbadf777fea2be4e6e838bf1cf759939",
+      "current": "0e580016c71473a0563036de330e29ae83fc1599f683f09baf1d0b17a81d98e8",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Fixed-role context-bound guide/league-document reads only in View-As."
+    },
+    {
+      "file": "app/lib/lmsViewer.js",
+      "baseline": "75ef31f0ec9584c9dfa29cc94cd853b6ad454da3cb573ba1643536b2e4f5ee6f",
+      "current": null,
+      "status": "REMOVED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Unused broad-hardening helper moved outside application into deferred archive."
+    },
+    {
+      "file": "app/lib/version.js",
+      "baseline": "8f01aafc0bc16f9170e82d3eb5ef08af11b88d976c97f9ea2e14fef067b1c5dc",
+      "current": "a0a9c5f46445437aacba2f54ee9ffc04c305e42fdbb7c0c328a174b89e8f221a",
+      "status": "ADAPTED",
+      "classification": "NORMAL + VIEW-AS SHARED EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Approved release label LMS-0726 / 0.1.548."
+    },
+    {
+      "file": "app/live-match/[id]/page.js",
+      "baseline": "6c3513b35d90a730642942ad733c621cbf5c161144bf232fb0465431f5ed86e5",
+      "current": "b3b6da0d9031dfbf7888fb4575d32380f2e640a40bbd610b6021a62223b3fbdf",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Disable score-entry mutation in View-As; shared published match renderer retained."
+    },
+    {
+      "file": "app/members/[id]/page.js",
+      "baseline": "d78876873a8d8a5c493d7dd3834c233ffb9cc6994fc19c23b8a4c905b4a1bf78",
+      "current": "49d30927af19ee32ebe5d426d21059359c2f116e7fc12c86fe1ebfe66384c6f1",
+      "status": "ADAPTED",
+      "classification": "NORMAL + VIEW-AS SHARED EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Place existing qualified View As User control in normal action row."
+    },
+    {
+      "file": "app/player-dashboard/page.js",
+      "baseline": "3a913b0ff90813516a2e7ed2d8ca5f48f9c3f1f6a0fb4e354b942417337ef758",
+      "current": "8f1e4dc4b88d1ce9296a1a1701bd16647b9f33235d1b468060fd6db7153d706d",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Durable effective self bootstrap and same actual Player renderer; normal identity path retained."
+    },
+    {
+      "file": "app/standings/page.js",
+      "baseline": "9b23af68d6c298c080a0fcb06690d258bdc2e4194e15f9d8c006238960cff442",
+      "current": "b8f4f3eccd8ee29ec6a0fac5f585536dcf16d5a94daef6f411b06661ddcf510d",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Disable rebuild only in View-As; normal standings renderer and rebuild path retained."
+    },
+    {
+      "file": "app/teams/[id]/page.js",
+      "baseline": "03cb2110afd42edd5f711fbc166fd153c4d890bbe448b4a13b98e5f191a461c3",
+      "current": "2adf172c04799a8d3d92ce1f8682f4ce52feb9f58789c4903bdd73726b2e5455",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Same roster renderer; View-As disables Add/Remove and hides leadership change; normal handlers retained."
+    },
+    {
+      "file": "app/view-as/page.js",
+      "baseline": "45e5dd350c068c40f0d2c37ecc7551f588ebba4e6aa68058af70a717cd2230b1",
+      "current": "ad777fd6f44ab083e589abfdc23e7321d9ab73b4cb35d0de021bf4bb850a5663",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Remove duplicate mini presentation; only null handoff landing entry remains."
+    },
+    {
+      "file": "package-lock.json",
+      "baseline": "5e6a1ed6dbfe59b40a4c182223aec3007fb85ea1d675a74e0cb0f742b96398bb",
+      "current": "4bbdebc59e6db4f19c2ef71332c9719d0ed905dc5d371686e509a05f70d308ae",
+      "status": "ADAPTED",
+      "classification": "NORMAL + VIEW-AS SHARED EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Release version metadata only."
+    },
+    {
+      "file": "package.json",
+      "baseline": "d658ac4c1b868ed1af086ff98c3bf676e4536880efffd7d82ef128f4c058192d",
+      "current": "bcc055075702477fad0aa4799b0a85f924d2d0b6b3fabd8ba3b1cfa1fab6fc0a",
+      "status": "ADAPTED",
+      "classification": "NORMAL + VIEW-AS SHARED EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Release version metadata only."
+    },
+    {
+      "file": "proxy.js",
+      "baseline": "78fa77e4568eff261e083deddcbed68e10376a1002cc45b3d7f1de7914e2d247",
+      "current": "476dee7dbdb8a79a4ec729ac50e2f9612244a89a1af5299ba1a202d49a8c6940",
+      "status": "ADAPTED",
+      "classification": "VIEW-AS-ONLY EFFECT",
+      "normalRegressionEvidence": "lms-0726-rescoped-tests.txt (1003/1003), lms-0726-rescoped-build.txt; normal boundary/auth/settings controls; paired synthetic Player/Captain/Club Pro browser evidence and unchanged normal handler comparison where applicable. Does not claim each file has an independent end-to-end workflow test.",
+      "reason": "Route isolated requests to approved actual pages; preserve normal pass-through and server mutation denial."
+    }
+  ],
+  "limits": "Compares existing source bytes only; not a behavioral regression test, deployed-source proof or business-data integrity check. New files must also be included in the final release inventory.",
+  "newScopedFiles": [
+    {
+      "file": "app/components/ViewAsSharedPages.js",
+      "sha256": "c47ad9d5d2aa65e0d91dff7f8bfff3a9b5d328155d32babedb92fe5696e633ef"
+    },
+    {
+      "file": "app/lib/viewAsPageState.js",
+      "sha256": "e047018f7de090c71a6e715dbe1069dbad1bf7772f4a054ed4ce79a16241a9d7"
+    },
+    {
+      "file": "app/lib/viewAsProjectionClient.js",
+      "sha256": "11e20d4bb98b81d2cb654efdcbede73f305daec4556a0ea5c23deaae9796016a"
+    },
+    {
+      "file": "app/lib/viewAsPageAssets.js",
+      "sha256": "e827facc9ee2ce17b3e9c72382ed3a7be9d11c3ee4b91df0d067a433bc03aefd"
+    },
+    {
+      "file": "scripts/lms0726-build-page-reads.mjs",
+      "sha256": "d1fc1f859eed32cda77cabc763fb54b7a3df4d246cfc42ce443b6b2118072379"
+    },
+    {
+      "file": "scripts/lms0726-local-browser.mjs",
+      "sha256": "b26093adf5a29985f7482d812c1be62f24125d95a29a8d506c8dfaa3d742c4d1"
+    },
+    {
+      "file": "scripts/lms0726-normal-source-diff.mjs",
+      "sha256": "dba690e25532c96e2e16fda6cb6bd10c83df298d95982b132808102f50455f88"
+    },
+    {
+      "file": "scripts/lms0726-page-postgres.mjs",
+      "sha256": "d2431956d900ac06ef318356bc4073664c38b64d0a259b2365d68d29440aafef"
+    },
+    {
+      "file": "supabase/migrations/20260909014356_lms0726_view_as_real_ui_reads.sql",
+      "sha256": "690f3c2777f760b84fee2b756ef64060c844924ded304d7ae22344e015d28125"
+    },
+    {
+      "file": "test/lms0726NormalBoundary.test.mjs",
+      "sha256": "5f18708c50559a183923d8ee38c7c50a36b2f6125fc7551484402e093b39bee7"
+    },
+    {
+      "file": "test/lms0726PageAdapter.test.mjs",
+      "sha256": "92bf6708a7f8cd1def78b8a392c19527f6d97c11bff403ab49096880610e97e3"
+    },
+    {
+      "file": "test/lms0726PageAssets.test.mjs",
+      "sha256": "c8ad94249df5f8f8cc71d18dcc2640333c2c599cb223b61326a74bf9a0854add"
+    },
+    {
+      "file": "test/lms0726PageReads.test.mjs",
+      "sha256": "30a0d311951afc1afb33e778494428e3e1f83e37dfb1c8e774b05ca382974a4e"
+    },
+    {
+      "file": "test/helpers/viewAsPageFixture.mjs",
+      "sha256": "1d8c1d64e8fff3291a78b2f44e1ea5178cc60255e682f8728c1b55c69a2f7790"
+    },
+    {
+      "file": "test/fixtures/lms0726-entry.jsx",
+      "sha256": "6a8348b9968d0f85eb3371eef3c987ecf5c61a32d2fee62510197959b3365bff"
+    },
+    {
+      "file": "test/fixtures/lms0726-normal-auth-baseline.txt",
+      "sha256": "f61355cba36df159f5667edae0e3cdf5ce8d1aee19163bb16d2ac6b9f204e5b7"
+    }
+  ],
+  "existingTestAdaptations": [
+    "test/viewAsBoundary.test.mjs",
+    "test/lms0725SourceClassification.test.mjs"
+  ],
+  "unchangedBaselineFiles": 233,
+  "scopeNote": "Working tree also contains previously accepted LMS-0724/0725 changes; git status is not the LMS-0726 release diff. This register compares the preserved 258-file local baseline. Broader deferred artifacts remain outside active app/migration paths."
+}

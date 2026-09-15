@@ -1,0 +1,41 @@
+captain [
+  '',
+  '',
+  'SP',
+  'Match Details',
+  'Email Opposing Captains',
+  'Match Score Sheet',
+  'Enter Match Scores',
+  'Match Setup',
+  'Division rank#77 of 1Synthetic League | Synthetic Division',
+  'Pending Match Score Entry/Validations0Nothing awaiting action',
+  'View Team2 rostered players',
+  'Manage RosterPlayers and leadership',
+  'Division SchedulesView all division team schedules',
+  'Division CaptainsCaptain contact list',
+  '11SEPSynthetic Team vs Other TeamFri, Sep 11 - 12:00 PMHome',
+  'Full view',
+  'Dashboard',
+  'Tools',
+  'Matches',
+  'Standings'
+]
+confirmation 1
+player [
+  '',
+  '',
+  'SP',
+  'Match details',
+  'Match Lineup ',
+  'Division rank#77 of 1Synthetic League | Synthetic Division',
+  '11SEPSynthetic Team vs Other TeamFri, Sep 11 - 12:00 PM - Synthetic CourtsHome',
+  'View team',
+  'Dashboard',
+  'Play History',
+  'Schedule',
+  'Standings',
+  'Results'
+]
+confirmation 1
+club_pro []
+confirmation 1

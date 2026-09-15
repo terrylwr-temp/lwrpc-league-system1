@@ -1,0 +1,76 @@
+(node:22668) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ distinct numeric fields and reordered headers map only named Doubles, RF and age paths (3.332ms)
+✔ valid over_65 takes precedence over different over_50 and careerHigh (0.7968ms)
+✔ absent or invalid over_65 uses valid over_50: undefined (0.3685ms)
+✔ absent or invalid over_65 uses valid over_50: null (0.2055ms)
+✔ absent or invalid over_65 uses valid over_50: "" (0.3387ms)
+✔ absent or invalid over_65 uses valid over_50: "NR" (0.274ms)
+✔ absent or invalid over_65 uses valid over_50: "bad" (0.257ms)
+✔ absent or invalid over_65 uses valid over_50: "-1" (0.2047ms)
+✔ absent or invalid over_65 uses valid over_50: "8.1" (0.2133ms)
+✔ absent or invalid over_65 uses valid over_50: {} (0.3212ms)
+✔ absent or invalid over_65 uses valid over_50: [] (0.302ms)
+✔ absent or invalid over_65 uses valid over_50: [4.487] (0.2072ms)
+✔ no valid age remains blank; normal doubles and careerHigh never substitute: {} (0.4192ms)
+✔ no valid age remains blank; normal doubles and careerHigh never substitute: {"over_65":"NR","over_50":"bad"} (0.2553ms)
+✔ current RF header wins over legacy alias, including invalid or conflicting alias (0.3997ms)
+✔ legacy RF alias is used only when current RF header is absent (0.4915ms)
+✔ present current RF header with empty row never falls back to legacy or singles (0.4245ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: bad (1.3771ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: 87.5 (0.4087ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: 101 (0.282ms)
+✔ invalid or fractional current working RF is rejected without numeric fallback: -1 (0.1813ms)
+✔ real preview transaction truncates distinct named values and exposes source mapping without writes (4425.2355ms)
+(node:608) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 879-row scrubbed actual export reconciles source fields and recorded identity categories (44.7417ms)
+✔ DUPR only, normalized exact match, missing/unmatched and all duplicate rows rejected (0.9501ms)
+✔ missing age preserves existing source age without touching locked inputs; unchanged repeat is no-op (1.7203ms)
+✔ invalid values do not become ratings: {"doubles":"3abc"} (1.6162ms)
+✔ invalid values do not become ratings: {"doubles":"-3"} (0.2852ms)
+✔ invalid values do not become ratings: {"doubles":"Infinity"} (0.1965ms)
+✔ invalid values do not become ratings: {"doubles":"8.1"} (0.1664ms)
+✔ invalid values do not become ratings: {"doubles":"3.2345"} (0.1987ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29%"} (0.3204ms)
+✔ invalid values do not become ratings: {"doublesReliability":"-1"} (0.3158ms)
+✔ invalid values do not become ratings: {"doublesReliability":"101"} (0.1825ms)
+✔ invalid values do not become ratings: {"doublesReliability":"1e1"} (0.1917ms)
+✔ invalid values do not become ratings: {"metrics":"{broken"} (0.234ms)
+✔ invalid values do not become ratings: {"metrics":"[]"} (0.1798ms)
+✔ full RF header is primary; short alias works only when primary absent (0.2239ms)
+✔ strict CSV multiline, escaping, duplicate headers, width and row bound (1.6535ms)
+✔ signed exact preview rejects tampering, wrong session, expiration and wrong purpose (1.9854ms)
+✔ preview calls only read RPC; commit requires explicit confirmation and same season (4.3456ms)
+✔ current-policy RF 28 (0.5816ms)
+✔ current-policy RF 29 (0.1074ms)
+✔ current-policy RF 30 (0.0977ms)
+✔ current-policy RF 29.0 (0.0747ms)
+✔ current-policy RF 29.01 (0.0743ms)
+✔ Ask LWR supplied RF: My Reliability Factor is 29. Am I NR? (8.4701ms)
+✔ Ask LWR supplied RF: Is a Reliability Factor of 30 considered NR? (2.3312ms)
+✔ Ask LWR supplied RF: What happens if my RF is 28? (1.7309ms)
+✔ unchanged substitute Approved Answer applies current NR rules at RF29 (3.3199ms)
+✔ import rejects View-As credentials before authentication or database access (48.6267ms)
+✔ RF cutoff comes from evidence, with no implicit fallback or importer classification (0.502ms)
+(node:2692) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/season-ratings-header-mapping/lwrpc-admin/app/lib/seasonRatingsClean.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\season-ratings-header-mapping\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Upload: selection/preview/reselect/cancel retain file; summary action precedes table; success resets (29.6567ms)
+✔ Upload: zero ready rows explain and cannot import; a new file invalidates the old preview (7.7134ms)
+✔ Clean: Rules default, summary action, full combined confirmation, cancel retains preview, cutoff re-previews (10.3445ms)
+✔ Clean: confirmation pending disables cutoff and generation change rejects outdated confirmation (10.4064ms)
+✔ Upload preview labels current CSV fields and age path, including excluded identities (22.729ms)
+ℹ tests 56
+ℹ suites 0
+ℹ pass 56
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6505.4624

@@ -1,0 +1,44 @@
+--- before
+
++++ owner-active
+
+@@ -1,3 +1,26 @@
+
++Lakewood Ranch Pickleball Club
++DUPR League Mission and
++League Rules
++DUPR League Rules Content
++MISSION STATEMENT................................................................................................................ 2
++CLUB LEAGUE FORMAT ............................................................................................................ 2
++CAPTAIN/CO-CAPTAINS............................................................................................................ 2
++PLAYER REQUIREMENTS........................................................................................................... 2
++DUPR RATINGS/DIVISIONS ....................................................................................................... 3
++TEAM/GAME RULES .................................................................................................................. 4
++LEAGUES ................................................................................................................................. 7
++Weekday DUPR League ......................................................................................................... 7
++Saturday DUPR League ......................................................................................................... 9
++PrimeTime DUPR League ..................................................................................................... 12
++DUPR League Summary ...................................................................................................... 13
++End of Season PlayoƯs/Championship Day (All Leagues)...................................................... 14
++LEAGUE WAIVER .................................................................................................................... 14
++DUPR LEAGUE MANAGERS ..................................................................................................... 14
++Rally Scoring Rules ................................................................................................................. 15
++Picklebreaker™ Rules and Setup .............................................................................................. 16
++PICKLEBREAKER™ GAME OVERVIEW.................................................................................... 16
++TEAM ORDER & ROTATION................................................................................................... 16
++SCORING & RECORDING .................................................................................................... 17
+ MISSION STATEMENT
+ • Lakewood Ranch Pickleball Club (LWR PC) mission aims to be the premier club in
+ Lakewood Ranch (LWR) and Southwest Florida.
+@@ -369,6 +392,10 @@
+
+ format. PrimeTime emphasizes spirited competition, sportsmanship, and the opportunity
+ for experienced players to continue enjoying high-quality league play in a community-
+ focused environment.
++Player Age Eligibility: A player’s age for league eligibility shall be determined by the age
++they will attain as of December 31 of the current calendar year. A player is considered
++age-eligible for the entire season even if they have not yet reached the required age by the
++season’s start date.
+ PrimeTime DUPR League Divisions
+ Division Name
+ (Men and Women)

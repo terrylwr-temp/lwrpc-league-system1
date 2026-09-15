@@ -3,9 +3,10 @@ import {useEffect,useRef,useState} from 'react';
 import {getRequestAuthorizationHeaders} from '../lib/auth';
 import {appConfirm} from '../lib/appDialog';
 export default function ViewAsStartButton({memberId}){
- const [origin,setOrigin]=useState(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const [available,setAvailable]=useState(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const origin=available?.memberId===memberId?available.origin:null;
  const cleanup=useRef(()=>{});
- useEffect(()=>{let disposed=false;getRequestAuthorizationHeaders().then(headers=>fetch('/api/view-as/start',{headers,cache:'no-store'})).then(r=>r.ok?r.json():null).then(data=>{if(!disposed)setOrigin(data?.origin||null);}).catch(()=>{});return()=>{disposed=true;cleanup.current();};},[]);
+ useEffect(()=>{let disposed=false;getRequestAuthorizationHeaders().then(headers=>fetch('/api/view-as/start?target='+encodeURIComponent(memberId),{headers,cache:'no-store'})).then(r=>r.ok?r.json():null).then(data=>{if(!disposed)setAvailable(data?.name&&data?.origin?{memberId,origin:data.origin}:null);}).catch(()=>{});return()=>{disposed=true;cleanup.current();};},[memberId]);
  async function start(){
   if(!origin||busy)return;
   setBusy(true);setError('');let target;
@@ -30,5 +31,5 @@ export default function ViewAsStartButton({memberId}){
   window.addEventListener('message',ready);cleanup.current=finish;
  }
  if(!origin)return null;
- return <div><button type="button" onClick={start} disabled={busy} className="min-h-11 rounded border border-blue-700 px-4 py-2 text-blue-800 focus-visible:outline-2">{busy?'Opening…':'View As User'}</button>{error&&<p role="alert" className="text-red-700">{error}</p>}</div>;
+ return <><button type="button" onClick={start} disabled={busy} className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-blue-800 disabled:opacity-50">{busy?'Opening…':'View As User'}</button>{error&&<p role="alert" className="basis-full text-red-700">{error}</p>}</>;
 }

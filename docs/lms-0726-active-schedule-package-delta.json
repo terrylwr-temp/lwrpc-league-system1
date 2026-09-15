@@ -1,0 +1,12 @@
+[
+  {
+    "file": "app/captain-dashboard/page.js",
+    "before": "3b4c31e700bd9ee28fdfcd72e324c7ca6d0c51e40699264abc84b0ef23143978",
+    "after": "e9b841887bb6e64958543f81b2014c9892ce52b56874dc9ab56d2c79781e6af2"
+  },
+  {
+    "file": "app/player-dashboard/page.js",
+    "before": "8f1e4dc4b88d1ce9296a1a1701bd16647b9f33235d1b468060fd6db7153d706d",
+    "after": "568d7483f56f155f6763cd9969ee70dfa340562254b5a00974c1899646115f9c"
+  }
+]

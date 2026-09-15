@@ -1,0 +1,60 @@
+(node:12404) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 879-row scrubbed actual export reconciles source fields and recorded identity categories (27.9105ms)
+✔ DUPR only, normalized exact match, missing/unmatched and all duplicate rows rejected (1.0651ms)
+✔ missing age preserves existing source age without touching locked inputs; unchanged repeat is no-op (1.0867ms)
+✔ invalid values do not become ratings: {"doubles":"3abc"} (0.2489ms)
+✔ invalid values do not become ratings: {"doubles":"-3"} (0.154ms)
+✔ invalid values do not become ratings: {"doubles":"Infinity"} (0.1246ms)
+✔ invalid values do not become ratings: {"doubles":"8.1"} (0.1193ms)
+✔ invalid values do not become ratings: {"doubles":"3.2345"} (0.1417ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29%"} (0.2019ms)
+✔ invalid values do not become ratings: {"doublesReliability":"-1"} (0.2237ms)
+✔ invalid values do not become ratings: {"doublesReliability":"101"} (0.1261ms)
+✔ invalid values do not become ratings: {"doublesReliability":"1e1"} (0.1814ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29","doublesRe":"30"} (0.1363ms)
+✔ invalid values do not become ratings: {"metrics":"{broken"} (0.1404ms)
+✔ invalid values do not become ratings: {"metrics":"[]"} (0.0927ms)
+✔ invalid values do not become ratings: {"metrics":"{\"subscores\":{\"doubles\":{\"over_65\":\"bad\",\"over_50\":\"3.4\"}}}"} (0.1145ms)
+✔ full RF header is primary; short alias works only when primary absent (0.1546ms)
+✔ strict CSV multiline, escaping, duplicate headers, width and row bound (1.1662ms)
+✔ signed exact preview rejects tampering, wrong session, expiration and wrong purpose (1.1648ms)
+✔ preview calls only read RPC; commit requires explicit confirmation and same season (2.6687ms)
+✔ current-policy RF 28 (0.112ms)
+✔ current-policy RF 29 (0.0519ms)
+✔ current-policy RF 30 (0.0573ms)
+✔ current-policy RF 29.0 (0.0429ms)
+✔ current-policy RF 29.01 (0.0541ms)
+✔ Ask LWR supplied RF: My Reliability Factor is 29. Am I NR? (6.4204ms)
+✔ Ask LWR supplied RF: Is a Reliability Factor of 30 considered NR? (1.309ms)
+✔ Ask LWR supplied RF: What happens if my RF is 28? (0.9705ms)
+✖ source-only transaction, rollback, identity revalidation, role boundary and idempotency (2195.3655ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 28
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4597.2855
+
+✖ failing tests:
+
+test at test\seasonRatingsImportDatabase.test.mjs:6:1
+✖ source-only transaction, rollback, identity revalidation, role boundary and idempotency (2195.3655ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '2' !== 2
+  
+      at TestContext.<anonymous> (file:///C:/lwrpc-league-system/lwrpc-admin/test/seasonRatingsImportDatabase.test.mjs:33:12)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '2',
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

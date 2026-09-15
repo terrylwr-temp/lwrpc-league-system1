@@ -1,0 +1,74 @@
+{
+  "status": "DEPLOYED_NOT_PRODUCTION_ACCEPTED",
+  "stopReason": "POLICY_ONLY answer rendered with LIVE LMS DATA / ELIGIBILITY badge; state-versus-policy presentation gate failed",
+  "migration": {
+    "filename": "20260908203904_lms0725_eligibility_self.sql",
+    "sha256": "fb7fb27fbb6b460739eaacecc9e3916e9f4e272280611d368293cbad1b83712f",
+    "productionVersion": "20260908211419",
+    "appliedCount": 1
+  },
+  "deployment": {
+    "id": "dpl_4ciHHSLqWSaqh3Dop3aowMKH9F7J",
+    "url": "https://lwrpc-admin-rlc7z354f-terry-lwrpc.vercel.app",
+    "state": "READY"
+  },
+  "gates": [
+    {
+      "question": "Can I play on a DUPR5 team?",
+      "outcomeId": "1f190c05-28f6-48a8-a129-cf4144f5a4a4",
+      "result": "CANNOT_DETERMINE",
+      "gate": "PASS",
+      "selfBinding": true,
+      "accessAuditCount": 1,
+      "writeAttempt": 1,
+      "writeMs": 33,
+      "modelCalls": 0
+    },
+    {
+      "question": "What are the requirements for DUPR5?",
+      "outcomeId": "f0b3a05d-840c-421a-83d9-86a5148a21f5",
+      "result": "POLICY_ONLY",
+      "gate": "FAIL_PRESENTATION_LABEL",
+      "sourceFamily": "lwr",
+      "accessAuditCount": 0,
+      "writeAttempt": 1,
+      "writeMs": 48,
+      "modelCalls": 0
+    }
+  ],
+  "quality": {
+    "newOutcomes": 2,
+    "duplicateLogicalOutcomes": 0,
+    "reviewOccurrences": 0,
+    "modelCalls": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "estimatedGenerationCostUsd": 0
+  },
+  "finalIntegrity": {
+    "at": "2026-09-08T21:22:04.239879+00:00",
+    "businessUnchanged": true,
+    "corpusUnchanged": true,
+    "rlsUnchanged": true,
+    "policiesUnchanged": true,
+    "functionsUnchanged": true,
+    "columnGrantsUnchanged": true
+  },
+  "maintenance": {
+    "active": true,
+    "schedule": "* * * * *",
+    "succeededLastHour": 60,
+    "failedLastHour": 0
+  },
+  "deferred": [
+    "Other-player RF production denial replay",
+    "View-As effective-user production replay",
+    "Live SELF_RATING contrast",
+    "Remaining division matching and PT9 controls",
+    "Q87",
+    "Q88",
+    "Q89"
+  ],
+  "correctionPerformed": false,
+  "rollbackPerformed": false
+}

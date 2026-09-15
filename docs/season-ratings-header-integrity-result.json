@@ -1,0 +1,19 @@
+{
+  "before": "2026-09-11T15:42:29.422Z",
+  "after": "2026-09-11T15:47:39.701Z",
+  "tablesVerified": 19,
+  "changedTables": [
+    "locations"
+  ],
+  "unchangedTables": 18,
+  "locationException": {
+    "location": "Esplanade at Artisan Lakes",
+    "updatedAt": "2026-09-11T15:46:59.609",
+    "ownerConfirmedConcurrentEdit": true
+  },
+  "sourcesAndLastImportUnchanged": true,
+  "productionDeployment": "dpl_7TPb3ZXyPMpPrgMy35CEpDH4cvSd",
+  "commit": "d8b55475a5377b6c6c05ead4e72a63236f681dab",
+  "importExecuted": false,
+  "cleanExecuted": false
+}

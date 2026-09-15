@@ -1,3 +1,4 @@
+import {questionIntent} from './aiRequestIntent.js';
 import { officialQuestionConcept, conceptText } from './aiQuestionConcepts.js';
 import { evidencePassages } from './aiQuestionApplicability.js';
 
@@ -76,6 +77,7 @@ function applies(candidate, text, plan, scope) {
 }
 
 export function selectConceptEvidence(retrieval) {
+  if(questionIntent(retrieval.request?.question).kind==='scoring_applicability')return []; // Requires complete default/format obligations.
   const plan=officialQuestionConcept(retrieval.request?.question);
   if(!plan||plan.kind==='document_navigation')return null;
   if(plan.kind==='scoring' && ![...(retrieval.candidates||[]),...(retrieval.suppliedEvidence||[])].some(c=>/rally scoring rules|picklebreaker/i.test(c.content)))return null;
@@ -87,7 +89,7 @@ export function selectConceptEvidence(retrieval) {
     const passages=evidencePassages(candidate).filter(p=>applies(candidate,p,plan,passageScope(candidate,p)));
     if(!passages.length)continue;
     const content=passages.join('\n\n');
-    if(selected.some(x=>x.content===content))continue;
+    if(selected.some(x=>x.chunkId===candidate.chunkId&&x.documentVersionId===candidate.documentVersionId&&x.content===content))continue;
     selected.push({...candidate,content,selectedPassages:passages,passageScopes:passages.map(p=>passageScope(candidate,p)),sourceClassification:candidate.documentType==='league_rules'?'lwr_controlling':candidate.documentType==='usap_rulebook'?'usap_governing_fallback':'lwr_supporting_guide',evidenceRole:'Direct',evidenceSelectionReason:`Direct ${plan.kind} proposition with trusted object and scope`});
   }
   return selected.sort((a,b)=>Number(a.documentAuthorityRank)-Number(b.documentAuthorityRank)||b.combinedScore-a.combinedScore).slice(0,4);

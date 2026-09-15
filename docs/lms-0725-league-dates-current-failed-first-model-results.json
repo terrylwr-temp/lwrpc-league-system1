@@ -1,0 +1,1187 @@
+{
+  "recordedAt": "2026-09-08T16:34:38.054Z",
+  "mode": "authorized-provider",
+  "method": "Saved official snapshot; actual selectors, source gate and configured generation integration. Fixture ranking/metadata/signing, not production retrieval or HTTP replay. No Live data, production endpoints, embeddings or telemetry calls.",
+  "calls": 6,
+  "cases": [
+    {
+      "id": "Q21",
+      "question": "What date does player entry open for Weekday?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 47,
+              "sha256": "1a2e750e78cdd6e17dc4f6c4ad71b3d0e0e895e1a995789f512e5c7ef84ad6b2"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 1084,
+              "sha256": "ffac09568542306dcccabd1cecc66ded46f67f17ceff5d0a859be959fcdfaa30"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 3147,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "For the 2026 Fall Weekday DUPR League, player/roster entry can start on Monday, Sept. 28, 2026—but only after the required setup steps are completed:\n\n- The captain completes the team registration form and clicks “Register My Team!”\n- Payment information is entered or an available payment method on file is selected.\n- A confirmation email is received after registration.\n- League Management activates the team and assigns the Captain and/or Co-Captain(s).\n- League Management notifies the captain that rosters for the league have been unlocked and are available for adding/managing players.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 11112,
+        "sourceResolutionMs": 2,
+        "totalMs": 11134,
+        "inputTokens": 2029,
+        "outputTokens": 222,
+        "totalTokens": 2251,
+        "estimatedGenerationCostUsd": 0.016805
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 118,
+              "end": 165,
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "opening_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 5",
+          "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+          "pageNumber": 5,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "a951f671-8566-4b6a-b630-8474e5b302e9",
+              "documentVersionId": "816a2cd7-d0c9-4c27-b41a-90eccc39cc9b",
+              "start": 0,
+              "end": 1084,
+              "pageNumber": 5,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "unlock_qualification"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q45",
+      "question": "How does Rally Scoring work?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 225,
+              "sha256": "fddd5b187e61ced7b680f85632d23523539f14b588ff0c8e6a96505a586cc1aa"
+            },
+            {
+              "characters": 139,
+              "sha256": "2fa6839edccf707fce09164e446cc6b2a1e2b934488567e245b4f7b4be3d4f1d"
+            },
+            {
+              "characters": 134,
+              "sha256": "034028161e234d3c936f33d95dc3bf76abba0a45c7f90cebd9d60cdcbefb2ee5"
+            },
+            {
+              "characters": 135,
+              "sha256": "0600a30d56219a3059c106354ac3b95ad4150bac7ec3e71a0fdbd3fbb3932685"
+            },
+            {
+              "characters": 621,
+              "sha256": "59acc1774321a4808d4155ce6af99915c82a4efa5aa6bff679f24ea0a99f2e46"
+            },
+            {
+              "characters": 395,
+              "sha256": "bdd78fa869c4b32644882e384474d021e2b05f2db43c3c45dc4163fdef1167a4"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 265,
+              "sha256": "104e9ba899fc8b03f5e3f6113f25d517bdce5fa9d771d10c246f24ade438305d"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5158,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "Rally Scoring means a team can win a point whether it is serving or receiving, except the game-winning point must be scored while serving.\n\nKey mechanics:\n- If the serving team loses a rally, it is a side out: the other team gets a point and takes the serve.\n- After a side out, the first server is based on that team’s score: right side serves if the score is even; left side serves if odd.\n- Players switch sides only after winning a point on their own serve, and the same player keeps serving from the new side.\n- A scoring freeze starts when a team reaches one point below the game-winning score. That team can score the winning point only while serving; the other team keeps normal rally scoring until it also reaches its freeze point.\n- In win-by-two games, if the score ties at or beyond the initial freeze point, both teams become unfrozen and normal rally scoring resumes. The freeze/unfreeze process continues as needed, and the game-winning point must always be scored while serving.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3590,
+        "sourceResolutionMs": 2,
+        "totalMs": 3599,
+        "inputTokens": 2687,
+        "outputTokens": 234,
+        "totalTokens": 2921,
+        "estimatedGenerationCostUsd": 0.020455
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q46",
+      "question": "How does Rally Scoring work in a Picklebreaker?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 225,
+              "sha256": "fddd5b187e61ced7b680f85632d23523539f14b588ff0c8e6a96505a586cc1aa"
+            },
+            {
+              "characters": 139,
+              "sha256": "2fa6839edccf707fce09164e446cc6b2a1e2b934488567e245b4f7b4be3d4f1d"
+            },
+            {
+              "characters": 134,
+              "sha256": "034028161e234d3c936f33d95dc3bf76abba0a45c7f90cebd9d60cdcbefb2ee5"
+            },
+            {
+              "characters": 135,
+              "sha256": "0600a30d56219a3059c106354ac3b95ad4150bac7ec3e71a0fdbd3fbb3932685"
+            },
+            {
+              "characters": 621,
+              "sha256": "59acc1774321a4808d4155ce6af99915c82a4efa5aa6bff679f24ea0a99f2e46"
+            },
+            {
+              "characters": 395,
+              "sha256": "bdd78fa869c4b32644882e384474d021e2b05f2db43c3c45dc4163fdef1167a4"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 265,
+              "sha256": "104e9ba899fc8b03f5e3f6113f25d517bdce5fa9d771d10c246f24ade438305d"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5177,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "In a Picklebreaker using Rally Scoring:\n\n- A team can win a point whether it is serving or receiving, except for the game-winning point.\n- If the serving team loses a rally, it is a side out: the receiving team gets a point and takes over serve.\n- After a side out, the first server is based on that team’s score: right side serves on an even score, left side serves on an odd score.\n- Players switch sides only after winning a point on their own serve; the same player continues serving from the new side.\n- Scoring freezes when a team reaches one point below the game-winning score. Once frozen, that team can score the game-winning point only while serving.\n- The freeze applies only to the team that reached the freeze point; the other team continues normal Rally Scoring until it also reaches its freeze point.\n- In a win-by-two format, if the score becomes tied at or beyond the initial freeze point, both teams become unfrozen and normal Rally Scoring resumes. Scores freeze again whenever a team reaches a score where its next point would win by two. This freeze/unfreeze process continues until one team wins by two.\n\nThe game-winning point must always be scored while serving.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 4263,
+        "sourceResolutionMs": 1,
+        "totalMs": 4268,
+        "inputTokens": 2692,
+        "outputTokens": 278,
+        "totalTokens": 2970,
+        "estimatedGenerationCostUsd": 0.0218
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q47",
+      "question": "Do I have to be serving to win with Rally Scoring?",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 225,
+              "sha256": "fddd5b187e61ced7b680f85632d23523539f14b588ff0c8e6a96505a586cc1aa"
+            },
+            {
+              "characters": 139,
+              "sha256": "2fa6839edccf707fce09164e446cc6b2a1e2b934488567e245b4f7b4be3d4f1d"
+            },
+            {
+              "characters": 134,
+              "sha256": "034028161e234d3c936f33d95dc3bf76abba0a45c7f90cebd9d60cdcbefb2ee5"
+            },
+            {
+              "characters": 135,
+              "sha256": "0600a30d56219a3059c106354ac3b95ad4150bac7ec3e71a0fdbd3fbb3932685"
+            },
+            {
+              "characters": 621,
+              "sha256": "59acc1774321a4808d4155ce6af99915c82a4efa5aa6bff679f24ea0a99f2e46"
+            },
+            {
+              "characters": 395,
+              "sha256": "bdd78fa869c4b32644882e384474d021e2b05f2db43c3c45dc4163fdef1167a4"
+            }
+          ]
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+          "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+          "pageNumber": 15,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ],
+          "passages": [
+            {
+              "characters": 265,
+              "sha256": "104e9ba899fc8b03f5e3f6113f25d517bdce5fa9d771d10c246f24ade438305d"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 5180,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "Yes. Under the LWR DUPR League rally-scoring rules, a team may score ordinary points whether serving or receiving, but the game-winning point must always be scored while serving. In win-by-two games, the freeze/unfreeze process continues as needed, but the winning point still must be scored while serving.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1887,
+        "sourceResolutionMs": 1,
+        "totalMs": 1891,
+        "inputTokens": 2693,
+        "outputTokens": 81,
+        "totalTokens": 2774,
+        "estimatedGenerationCostUsd": 0.015895
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "sources": [
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 145,
+              "end": 370,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 371,
+              "end": 510,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 511,
+              "end": 645,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 646,
+              "end": 781,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 782,
+              "end": 1403,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            },
+            {
+              "chunkId": "0c45b48b-a174-4d04-9ab7-9c7121ad7346",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 1404,
+              "end": 1799,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        },
+        {
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15",
+          "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "8a4273e8-5f24-4ea5-9d05-e9120a212cce",
+              "documentVersionId": "f0aad5ad-cf08-46c2-94fd-686ceb1271c0",
+              "start": 0,
+              "end": 265,
+              "pageNumber": 15,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "mechanics"
+              },
+              "scopeBindings": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q64",
+      "question": "when does the women weekday dupr league start",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 54,
+              "sha256": "66b59cb33ee1f1a583c78cfed446b9176598512fad76060f34abe1cdb3e60e8a"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1298,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "The Women Weekday DUPR League season starts on Oct. 14, 2026, for the 2026 Fall League.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1279,
+        "sourceResolutionMs": 1,
+        "totalMs": 1283,
+        "inputTokens": 1520,
+        "outputTokens": 45,
+        "totalTokens": 1565,
+        "estimatedGenerationCostUsd": 0.00895
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q65",
+      "question": "What is the starting date for the women's weekday dupr league",
+      "route": "DOCUMENT",
+      "routePass": true,
+      "calls": 1,
+      "evidence": [
+        {
+          "documentTitle": "2026 Fall League Important Dates",
+          "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": null,
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ],
+          "passages": [
+            {
+              "characters": 54,
+              "sha256": "66b59cb33ee1f1a583c78cfed446b9176598512fad76060f34abe1cdb3e60e8a"
+            }
+          ]
+        }
+      ],
+      "literalSourceFidelity": true,
+      "payloadCharacters": 1314,
+      "configuredModel": "gpt-5.5",
+      "status": "generated",
+      "answer": "The women’s Weekday DUPR Season starts on Oct. 14, 2026, for the 2026 Fall League.",
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1595,
+        "sourceResolutionMs": 1,
+        "totalMs": 1602,
+        "inputTokens": 1523,
+        "outputTokens": 45,
+        "totalTokens": 1568,
+        "estimatedGenerationCostUsd": 0.008965
+      },
+      "conflict": {
+        "potentialConflict": false,
+        "requiresClarification": false,
+        "competingSources": []
+      },
+      "requiredChecks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "materialPass": true,
+      "sources": [
+        {
+          "citation": "2026 Fall League Important Dates — Weekday DUPR League Key Dates — Page 1",
+          "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "pageNumber": 1,
+          "ruleNumber": "",
+          "excerptItems": [
+            {
+              "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+              "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+              "start": 267,
+              "end": 321,
+              "officialDatePeriod": {
+                "seasonLabel": "2026 Fall League Important Dates",
+                "calendarYear": "2026",
+                "derivation": "revalidated_active_document_title"
+              },
+              "pageNumber": 1,
+              "ruleNumber": "",
+              "applicability": {
+                "role": "official_date",
+                "league": "weekday"
+              },
+              "scopeBindings": [
+                {
+                  "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+                  "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+                  "start": 0,
+                  "end": 29,
+                  "kind": "league"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

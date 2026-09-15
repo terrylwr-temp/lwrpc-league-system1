@@ -1,0 +1,31 @@
+Retrieving project…
+Deploying terry-lwrpc/lwrpc-admin
+Uploading [--------------------] (0.0B/272.7KB)
+Uploading [=====---------------] (80.0KB/272.7KB)
+Uploading [==========----------] (144.0KB/272.7KB)
+Uploading [===============-----] (208.0KB/272.7KB)
+Uploading [====================] (272.7KB/272.7KB)
+  Inspect     https://vercel.com/terry-lwrpc/lwrpc-admin/5hYSN6eZN7SVJUQi7Uch7s5D2Nwd
+▲ Production  https://lwrpc-admin-4y9slx45e-terry-lwrpc.vercel.app
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_5hYSN6eZN7SVJUQi7Uch7s5D2Nwd",
+    "url": "https://lwrpc-admin-4y9slx45e-terry-lwrpc.vercel.app",
+    "inspectorUrl": "https://vercel.com/terry-lwrpc/lwrpc-admin/5hYSN6eZN7SVJUQi7Uch7s5D2Nwd",
+    "readyState": "INITIALIZING",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_5hYSN6eZN7SVJUQi7Uch7s5D2Nwd"
+  },
+  "message": "Deployment lwrpc-admin-4y9slx45e-terry-lwrpc.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect lwrpc-admin-4y9slx45e-terry-lwrpc.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}

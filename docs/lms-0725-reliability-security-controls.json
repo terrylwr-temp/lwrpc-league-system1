@@ -1,0 +1,97 @@
+{
+  "status": "DESIGN_ONLY_NOT_IMPLEMENTED",
+  "questionBenchmarkCount": 120,
+  "scenarioControlCount": 12,
+  "modelCalls": 0,
+  "controls": [
+    {
+      "id": "RF01",
+      "scenario": "RF above threshold + rating in range",
+      "expected": "PARTIALLY_CONFIRMED",
+      "condition": "Ordinary rated provenance established; individual passes; pair/participation unresolved."
+    },
+    {
+      "id": "RF02",
+      "scenario": "RF below threshold",
+      "expected": "NR_RULES",
+      "condition": "Apply verified NR policy before ordinary rating bounds."
+    },
+    {
+      "id": "RF03",
+      "scenario": "NR with numeric DUPR still present",
+      "expected": "NR_RULES",
+      "condition": "Numeric adjusted Season DUPR alone is not a data conflict or proof of rated status."
+    },
+    {
+      "id": "RF04",
+      "scenario": "Missing RF",
+      "expected": "CANNOT_DETERMINE_NR",
+      "condition": "Do not infer ordinarily rated from numeric Season DUPR."
+    },
+    {
+      "id": "RF05",
+      "scenario": "Rated player below range",
+      "expected": "INDIVIDUAL_FAIL",
+      "condition": "Only after rated status and non-conflicting applicable policy are established."
+    },
+    {
+      "id": "RF06",
+      "scenario": "Rated player in range",
+      "expected": "INDIVIDUAL_PASS_PARTIAL",
+      "condition": "No overall ELIGIBLE from one condition."
+    },
+    {
+      "id": "RF07",
+      "scenario": "Rated player above range",
+      "expected": "INDIVIDUAL_FAIL",
+      "condition": "Preserve scope; do not bypass conflict or missing classification."
+    },
+    {
+      "id": "RF08",
+      "scenario": "NR eligibility pass",
+      "expected": "NR_PLACEMENT_CONDITION_PASS",
+      "condition": "Rule 4.5 permission is not overall eligibility; captain/pair/participation remain."
+    },
+    {
+      "id": "RF09",
+      "scenario": "NR eligibility fail",
+      "expected": "PROVEN_NECESSARY_CONDITION_FAIL",
+      "condition": "Fixture must establish an independent applicable necessary condition; NR itself never fails."
+    },
+    {
+      "id": "RF10",
+      "scenario": "Pair aggregate unresolved",
+      "expected": "PARTIALLY_CONFIRMED",
+      "condition": "No invented partner rating or highest-across-divisions assignment."
+    },
+    {
+      "id": "RF11",
+      "scenario": "Rules/config conflict",
+      "expected": "POLICY_CONFIGURATION_CONFLICT",
+      "condition": "PT9 blocks conclusive eligibility regardless of numerical comparison."
+    },
+    {
+      "id": "RF12",
+      "scenario": "View-As effective-user NR",
+      "expected": "EFFECTIVE_SELF_NR",
+      "condition": "Use effective target's RF; real actor's contrasting RF has no effect."
+    }
+  ],
+  "securityAssertions": [
+    "RF exactly 29 does not trigger below-29 rule; use verified policy comparator",
+    "missing/non-finite RF fails classification safely",
+    "independent imported NR boolean is reviewed projection, not whole raw DUPR",
+    "future season lacks binding: no automatic policy inheritance",
+    "player other-member UUID/name denied",
+    "captain and club-pro non-self denied",
+    "existing manager/commissioner administration unchanged",
+    "View-As revocation, expiry, effective-role downgrade and season race fail closed",
+    "no anon/authenticated RPC EXECUTE grants",
+    "no notes, DOB, contact, participation or whole-row projection",
+    "single snapshot for RF and applicable Season DUPR",
+    "no model/embedding fetch for personal path",
+    "no raw RF/rating/NR status in general model telemetry or durable browser history",
+    "single audit/outcome identity and applicable retention",
+    "no implementation/production changes until security design reviewed"
+  ]
+}

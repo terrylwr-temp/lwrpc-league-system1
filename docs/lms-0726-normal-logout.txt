@@ -1,0 +1,25 @@
+- main
+  - link "Lakewood Ranch Pickleball Club" [ref=e1]
+    - image "Lakewood Ranch Pickleball Club"
+  - heading "Lakewood Ranch Pickleball Club League Management System" [level=1, ref=e2]
+    - StaticText "Lakewood Ranch Pickleball Club"
+    - StaticText "League Management System"
+  - form
+    - generic
+      - LabelText
+        - StaticText "Email Address"
+      - textbox [required, ref=e6]
+    - LabelText
+      - StaticText "Password"
+    - generic
+      - textbox [required, ref=e7]
+      - button "Show password" [ref=e8]
+    - button "Forgot Password?" [ref=e3]
+    - button "Sign In" [ref=e4]
+    - paragraph
+      - StaticText "First time logging in? Enter your email and click Forgot Password."
+    - button "Sign in with passkey or fingerprint" [ref=e5]
+      - StaticText "Sign In with Passkey / Fingerprint"
+- contentinfo
+  - StaticText "© 2026 Lakewood Ranch Pickleball Club · Version LMS-0726"
+- alert

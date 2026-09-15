@@ -1,0 +1,123 @@
+
+> lwrpc-admin@0.1.547 build
+> next build
+
+▲ Next.js 16.2.4 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 22.5s
+  Running TypeScript ...
+  Finished TypeScript in 4.2s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/80) ...
+  Generating static pages using 11 workers (20/80) 
+  Generating static pages using 11 workers (40/80) 
+  Generating static pages using 11 workers (60/80) 
+✓ Generating static pages using 11 workers (80/80) in 966ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /ai-assistant
+├ ƒ /ai-assistant/console
+├ ƒ /ai-assistant/review
+├ ƒ /ai-insights
+├ ƒ /api/account-identity
+├ ƒ /api/admin/delete-member
+├ ƒ /api/admin/member-directory
+├ ƒ /api/admin/member-last-login
+├ ƒ /api/ai-assistant/answer
+├ ƒ /api/ai-assistant/approved-answers
+├ ƒ /api/ai-assistant/capture-health
+├ ƒ /api/ai-assistant/documents
+├ ƒ /api/ai-assistant/live-review
+├ ƒ /api/ai-assistant/retrieval
+├ ƒ /api/ai-assistant/review
+├ ƒ /api/ai-insights
+├ ƒ /api/app-notifications/public-key
+├ ƒ /api/app-notifications/subscribe
+├ ƒ /api/approved-answer-viewer
+├ ƒ /api/ask-lwr
+├ ƒ /api/ask-lwr/feedback
+├ ƒ /api/brevo-diagnostics
+├ ƒ /api/league-communications
+├ ƒ /api/master-reset
+├ ƒ /api/match-lineups
+├ ƒ /api/match-setup-reminders
+├ ƒ /api/member-password-reset-check
+├ ƒ /api/notification-template-history
+├ ƒ /api/notification-templates
+├ ƒ /api/notifications
+├ ƒ /api/official-document-viewer
+├ ƒ /api/official-document-viewer/pdf
+├ ƒ /api/pbcc/reminders
+├ ƒ /api/round-robin/action
+├ ƒ /api/round-robin/admin
+├ ƒ /api/round-robin/player
+├ ƒ /api/score-notification
+├ ƒ /api/season-reset
+├ ƒ /api/season-rollover
+├ ƒ /api/system-settings
+├ ƒ /api/teams/delete
+├ ƒ /api/tournaments/action
+├ ƒ /api/tournaments/admin
+├ ƒ /api/tournaments/sms
+├ ƒ /api/user-last-logins
+├ ƒ /api/view-as/bootstrap
+├ ƒ /api/view-as/exchange
+├ ƒ /api/view-as/read
+├ ƒ /api/view-as/start
+├ ƒ /approved-answer/[citation]
+├ ƒ /ask-lwr
+├ ƒ /captain-dashboard
+├ ƒ /design-preview
+├ ƒ /design-preview/admin
+├ ƒ /design-preview/captain
+├ ƒ /divisions
+├ ƒ /divisions/[id]
+├ ƒ /email-options
+├ ƒ /help/[role]
+├ ƒ /league-communications
+├ ƒ /leagues
+├ ƒ /live-match/[id]
+├ ƒ /locations
+├ ƒ /login
+├ ƒ /matches
+├ ƒ /matches/[id]
+├ ƒ /member-import
+├ ƒ /members
+├ ƒ /members/[id]
+├ ƒ /official-document/[citation]
+├ ƒ /player-dashboard
+├ ƒ /print
+├ ƒ /ratings
+├ ƒ /reset-password
+├ ƒ /round-robin
+├ ƒ /round-robin/[id]
+├ ƒ /round-robin/[id]/admin
+├ ƒ /round-robin/[id]/player
+├ ƒ /schedule-editor
+├ ƒ /scheduling
+├ ƒ /score-entry/[id]
+├ ƒ /score-sheets
+├ ƒ /scoring
+├ ƒ /seasons
+├ ƒ /standings
+├ ƒ /system-setup
+├ ƒ /teams
+├ ƒ /teams/[id]
+├ ƒ /tournaments
+├ ƒ /tournaments/[id]
+├ ƒ /tournaments/[id]/admin
+├ ƒ /tournaments/[id]/display
+├ ƒ /tournaments/[id]/player
+├ ƒ /tournaments/[id]/standings
+└ ƒ /view-as
+
+
+ƒ Proxy (Middleware)
+
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -23,7 +23,7 @@ test('0724 strict origins and server credential confidentiality',()=>{
 async function routes(dir){let files=[];for(const ent of await readdir(dir,{withFileTypes:true})){const p=new URL(ent.name+(ent.isDirectory()?'/':''),dir);if(ent.isDirectory())files.push(...await routes(p));else if(ent.name==='route.js')files.push(p);}return files;}
 test('0724 complete legacy handler guard registry and isolated renderer dependency boundary',async()=>{
  for(const file of await routes(new URL('../app/api/',import.meta.url))){if(file.pathname.includes('/view-as/'))continue;const text=await readFile(file,'utf8');assert.match(text,/rejectViewAsMutation\((req|request)\)/,file.pathname);}
- const page=await readFile(new URL('../app/view-as/page.js',import.meta.url),'utf8');for(const forbidden of ['lib/auth','createClient','getSession','getUser','NEXT_PUBLIC_SUPABASE','feedbackReceipt','localStorage'])assert.ok(!page.includes(forbidden),forbidden);
+ const page=await readFile(new URL('../app/components/ViewAsSharedPages.js',import.meta.url),'utf8');for(const forbidden of ['lib/auth','createClient','getSession','getUser','NEXT_PUBLIC_SUPABASE','feedbackReceipt','localStorage'])assert.ok(!page.includes(forbidden),forbidden);
  const proxy=await readFile(new URL('../proxy.js',import.meta.url),'utf8');for(const protection of ["connect-src 'self'","frame-ancestors 'none'",'no-referrer','private, no-store','x-view-as-nonce'])assert.ok(proxy.includes(protection));
  const read=await readFile(new URL('../app/api/view-as/read/route.js',import.meta.url),'utf8');assert.ok(!read.includes('observeQualityRequest'));assert.match(read,/delete result.feedbackReceipt/);assert.match(read,/persist:async\(\)=>\{\}/);
 });

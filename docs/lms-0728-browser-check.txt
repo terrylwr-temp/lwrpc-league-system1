@@ -1,0 +1,188 @@
+browser-console http://localhost:3086/view-as-test?target=1 info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://localhost:3086/view-as-test?target=1 log [HMR] connected
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 info Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 error Failed to load resource: net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 log [HMR] connected
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 error Failed to load resource: net::ERR_FAILED
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 error Failed to load resource: net::ERR_FAILED
+browser-console http://127.0.0.1:3086/ info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://127.0.0.1:3086/ log [HMR] connected
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 log fixture-message http://127.0.0.1:3086 lwr-view-ready
+browser-console http://127.0.0.1:3086/ log fixture-message http://localhost:3086 lwr-view-handoff
+browser-console http://127.0.0.1:3086/ error Failed to load resource: the server responded with a status of 503 (Service Unavailable)
+browser-console http://127.0.0.1:3086/ error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/ error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/ error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/ error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/ warning Image with src "https://lwrpickleballclub.com/lwrpc-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+browser-console http://127.0.0.1:3086/ warning Image with src "http://127.0.0.1:3086/website-emblem.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+browser-console http://127.0.0.1:3086/ error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/ info Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+browser-console http://127.0.0.1:3086/ error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/player-dashboard error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/player-dashboard error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/player-dashboard error Loading the image 'https://lwrpickleballclub.com/lwrpc-logo.png' violates the following Content Security Policy directive: "img-src 'self' data: blob:". The action has been blocked.
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png csp
+browser-console http://127.0.0.1:3086/player-dashboard error Failed to load resource: the server responded with a status of 403 (Forbidden)
+popup-state VIEWING AS: Synthetic Person1 · READ-ONLY
+
+Player · Signed in as Synthetic Person7 (league manager)
+
+Exit View As User
+Lakewood Ranch Pickleball Club
+Dashboard
+My Team
+My Play History
+Division Schedule
+Division Standings
+League Documents
+Synthetic League
+SELECTED SEASON
+Synthetic Current
+Synthetic League
+
+© 2026 Lakewood Ranch Pickleball Club
+
+PLAYER DASHBOARD
+Welcome Synthetic
+Synthetic Person1
+Player
+SP
+NEXT MATCH
+HOME MATCH
+Fri, Sep 11 - 12:00 PM
+Synthetic Team vs Other Team
+Synthetic Courts
+Match details
+Match Lineup
+TEAM RECORD
+3-0
+Synthetic Team · 12 Team Points
+DIVISION RANK
+#1 OF 2
+Synthetic League | Synthetic Division
+SEASON RATING
+3.7
+My Season DUPR
+STAY ON TOP OF IT
+Upcoming schedule
+MATCHES
+1
+11
+SEP
+
+Synthetic Team vs Other Team
+Fri, Sep 11 - 12:00 PM - Synthetic Courts
+
+Home
+THE SQUAD
+My team
+PLAYERS
+2
+View team
+Synthetic Team
+SP
+
+Synthetic Person2
+Captain
+
+THE SCORELINE
+Recent results
+
+Click Match for Score Details
+
+TOTAL MATCHES
+0
+TOTAL TEAM POINTS
+12
+
+No completed matches are published for this team.
+
+LIVE DASHBOARD · CURRENT PLAYER DATA AND PERMISSIONS
+normal-state ☰
+Member Detail
+People & Teams
+SP
+Member Detail
+
+Review and edit member information, season ratings, and current team assignments.
+
+← Members
+Edit Member
+Edit Ratings
+Show Player History
+View As User
+Synthetic Person1
+Email:
+synthetic1@example.invalid
+Phone:
+DO NOT READ
+League Notifications: Email
+Club / Home Community: Synthetic Courts
+DUPR ID: —
+Last Login: Never
+User Role: Player
+Status: ACTIVE
+Renewal: -
+Notes: —
+CURRENT DUPR RATING
+3.720
+Season Ratings
+SEASONS
+1
+SEASON	DUPR RATING	PRIMETIME RATING	NOTES
+Synthetic Current	3.72	4.100	—
+Current Teams
+TEAMS
+1
+TEAM	SEASON	LEAGUE	DIVISION	ROLE
+Synthetic Team	Synthetic Current	Synthetic League	Synthetic Division	Player
+© 2026 Lakewood Ranch Pickleball Club · Version LMS-0728
+browser-console http://127.0.0.1:3086/player-dashboard error Failed to load resource: the server responded with a status of 403 (Forbidden)
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 info Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 error Failed to load resource: net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 log [HMR] connected
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 error Failed to load resource: net::ERR_FAILED
+browser-console http://localhost:3086/view-as-test?member=1&target=1 info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://localhost:3086/view-as-test?member=1&target=1 log [HMR] connected
+browser-console http://localhost:3086/view-as-test?member=1&target=1 error Failed to load resource: the server responded with a status of 403 (Forbidden)
+browser-console http://localhost:3086/view-as-test?member=1&target=1 error Failed to load resource: the server responded with a status of 403 (Forbidden)
+browser-console http://localhost:3086/player-dashboard info Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/player-dashboard error Failed to load resource: net::ERR_FAILED
+browser-console http://localhost:3086/player-dashboard info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://localhost:3086/player-dashboard log [HMR] connected
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/player-dashboard error Failed to load resource: net::ERR_FAILED
+browser-console http://localhost:3086/view-as-test?member=2&target=1 info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://localhost:3086/view-as-test?member=2&target=1 log [HMR] connected
+browser-console http://localhost:3086/view-as-test?member=2&target=1 error Failed to load resource: the server responded with a status of 403 (Forbidden)
+browser-console http://localhost:3086/view-as-test?member=2&target=1 error Failed to load resource: the server responded with a status of 403 (Forbidden)
+browser-console http://localhost:3086/view-as-test?member=2&target=1 log [Fast Refresh] rebuilding
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 log [Fast Refresh] rebuilding
+browser-console http://localhost:3086/captain-dashboard info Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/captain-dashboard error Failed to load resource: net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 log [Fast Refresh] done in 1760ms
+browser-console http://localhost:3086/captain-dashboard info %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+browser-console http://localhost:3086/captain-dashboard log [HMR] connected
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/captain-dashboard error Failed to load resource: net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 info Images loaded lazily and replaced with placeholders. Load events are deferred. See https://go.microsoft.com/fwlink/?linkid=2048113
+request-failed https://lwrpickleballclub.com/lwrpc-logo.png net::ERR_FAILED
+browser-console http://localhost:3086/members/10000000-0000-4000-8000-000000000001 error Failed to load resource: net::ERR_FAILED

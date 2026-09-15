@@ -1,4 +1,3 @@
-import { evidencePassages } from "./aiQuestionApplicability.js";
 // Presentation only: never used to retrieve, select, or authorize evidence.
 const compact = value => String(value || "").replace(/\s+/g, " ").trim();
 const valid = value => /^(?:\d{1,2}(?:\.\d{1,2})*|\d{1,2}(?:\.(?:[A-Z]|\d{1,2}|[a-z])){1,6})$/.test(value);
@@ -9,10 +8,9 @@ export function trustedSelectedRuleIdentity(selected, stored) {
   const fallback = valid(parent) ? parent : "";
   const passages = Array.isArray(selected.selectedPassages) && selected.selectedPassages.length ? selected.selectedPassages : [selected.content];
   if (selected.content !== undefined && compact(selected.content) !== compact(passages.join("\n"))) throw new Error("Selected model text does not match its selected passages.");
-  const content = compact(stored.content);
+  const content = String(stored.content || "");
   // Reject altered evidence before either prompting or attaching sources.
-  const units = evidencePassages({ content: stored.content, heading: stored.heading }).map(compact);
-  if (!content || passages.some(p => !compact(p) || !(content.includes(compact(p)) || units.includes(compact(p))))) throw new Error("Selected passage is not present in the revalidated official chunk.");
+  if (!content || passages.some(p => !compact(p) || !content.includes(p))) throw new Error("Selected passage is not present in the revalidated official chunk.");
   if (!fallback) return "";
   const usap = /[A-Za-z]/.test(parent);
   const start = usap ? /^(\d{1,2}(?:\.(?:[A-Z]|\d{1,2}|[a-z])){1,6})\.?\s+/ : /^(\d{1,2}(?:\.\d{1,2})*)\.\s+/;

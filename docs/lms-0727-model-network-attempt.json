@@ -1,0 +1,8 @@
+{
+  "category": "LOCAL_BENCHMARK",
+  "mode": "provider",
+  "method": "Verified active official snapshot; actual selection and citation resolver; fixture DB/signing. No production HTTP or ranking replay.",
+  "calls": 1,
+  "usage": [],
+  "cases": []
+}

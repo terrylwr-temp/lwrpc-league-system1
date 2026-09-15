@@ -1,0 +1,14 @@
+{
+  "postgresVersion": "17.11",
+  "loopbackOnly": true,
+  "productionAccess": false,
+  "modelCalls": 0,
+  "cleanApply": true,
+  "replay": true,
+  "secondReplay": true,
+  "concurrentRemoveReplay": true,
+  "authorityRevocationRace": true,
+  "futureLineupInsertionRace": true,
+  "oneCommittedReceipt": true,
+  "scope": "Partial foundation; remaining release checks not yet run"
+}

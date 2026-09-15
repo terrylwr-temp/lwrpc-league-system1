@@ -1,4 +1,5 @@
 "use client";
+import {isViewAsMode} from "../lib/viewAsPageState.js";
 
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -181,6 +182,7 @@ export default function StandingsPage() {
     currentUserRole === "league_manager" || currentUserRole === "commissioner";
 
   async function rebuildLeagueStatistics() {
+    if (isViewAsMode()) return;
     if (!selectedDivision) {
       alert("Select a division before rebuilding statistics.");
       return;

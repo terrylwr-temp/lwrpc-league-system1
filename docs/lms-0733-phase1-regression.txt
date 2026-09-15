@@ -1,0 +1,1639 @@
+
+> lwrpc-admin@0.1.555 test
+> node --test
+
+(node:10072) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ skips the answer model and returns the exact fallback when Stage 3 evidence is insufficient (10.6203ms)
+✔ selects direct high-quality evidence, grounds the Responses request, and attaches only trusted sources (16.8348ms)
+✔ returns a conservative clarification instead of a definitive model answer when supplied evidence conflicts (4.9017ms)
+✔ prunes merely related deadline material while retaining same-rule and explicitly requested procedural support (7.3372ms)
+✔ marks a selected rule as controlling when a more relevant guide also supplies procedural support (1.6913ms)
+✔ preserves compact primary evidence for the five production Stage 4 evaluation cases (11.0355ms)
+✔ preserves direct evidence for both roster management and Match Setup while pruning score entry (10.4347ms)
+✔ uses the raw LMS-0703 production compound candidates to select only the direct roster-date and Match Setup deadline passages (13.9067ms)
+✔ keeps roster-only and Match Setup-only source selections independent (3.4188ms)
+✔ recognizes bounded roster-management and calendar wording variations in direct evidence (4.5936ms)
+✔ reserves bounded evidence space for every detected compound intent (2.6278ms)
+✔ builds concise trusted citation labels without duplicated rule metadata (0.5903ms)
+✔ adds a browser-only PDF page fragment only for a valid cited chunk page (0.1505ms)
+✔ classifies a native Responses API refusal without exposing its text (4.6584ms)
+✔ classifies an incomplete max-output-token Responses result (4.2458ms)
+✔ classifies missing, malformed, and schema-invalid native structured output (13.0693ms)
+✔ classifies an API failure separately from structured-output failures (4.0722ms)
+✔ classifies an unparsable successful API payload as response extraction failure (5.1383ms)
+✔ rejects citations that are not from supplied exact active-version evidence (1.8001ms)
+✔ uses the explicit ownership FK in the production dual-relationship schema and revalidates the cited searchable chunk (4.0046ms)
+✔ protects the answer route and preserves the required Stage 4 evaluation prompts (10.721ms)
+(node:5012) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiApprovedAnswersShared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0721 draft validation preserves complete Unicode and rejects invalid dates/scopes (6.4861ms)
+✔ 0721 structured public links exclude executable/private/signed destinations (1.4541ms)
+✔ 0721 eligibility is lifecycle, date, scope, season and authority bound (0.5235ms)
+✔ 0721 warning metadata is bounded and excludes free text/actors (0.4666ms)
+▶ 0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision history
+  ✔ audit exists for every lifecycle transition (6.1444ms)
+  ✔ existing evidence category decision atomically audits, retries once and preserves occurrence/group/open state (29.1714ms)
+  ✔ passage binding survives save, activation, replacement and history; invalid binding fails (89.4222ms)
+  ✔ manager origin: nullable uniqueness, roles, retry safety and lifecycle without Stage 7 writes (163.4282ms)
+✔ 0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision history (3400.2768ms)
+(node:26940) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0727 Rule 3.5 policy bypasses Approved Answers; standalone conflict controls remain (125.574ms)
+✔ 0721 managed answer has exact feedback/viewer provenance, one query embedding and one model call (18.7298ms)
+✔ 0721 safe managed fallback: unsupported (8.273ms)
+✔ 0721 safe managed fallback: retired-during-generation (9.3835ms)
+✔ 0721 website existing-authority review independently identifies Rule 1.1 (2.7585ms)
+✔ 0721 scope, competing policies and complementary evidence remain distinct (2.7376ms)
+(node:29076) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiApprovedAnswersService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0721 activation HTTP retry returns the recorded revision without embedding or RPC mutation (3.8094ms)
+✔ 0721 unresolved authority warning is manager-visible; retirement clears current visibility only (35.4162ms)
+✔ 0721 managed knowledge cannot invent a playing-rule exception when formal recall is empty (4.0255ms)
+✔ 0721 measured embedding calibration preserves paraphrases and excludes nearby different questions (3.9203ms)
+✔ 0721 manager creation retains content, source review, dynamic guard and exact retry identity (24.7777ms)
+✔ 0721 detail skips NULL case lookup; genuine case navigation is retained (0.6099ms)
+✔ 0721 activation checks overlapping Drafts as well as Active managed policy (1.6776ms)
+(node:19224) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiApprovedSourceBinding.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ managed and ordinary citations share trusted production sibling identities (4.6665ms)
+✔ cross references never become selected identities; a complete parent family stays at its parent (0.5264ms)
+✔ production LWR and USAP provision controls retain supported identities (12.3196ms)
+✔ server binds saved and historical revisions to their exact container; changed, stale and forged selections fail (1.5833ms)
+✔ Draft binding participates in content hash and server save rejects browser label forgery before mutation (16.6604ms)
+✔ binding is byte bounded and is not silently truncated (0.4068ms)
+(node:24820) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiAssistantConfig.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ uses safe Ask LWR Pickleball AI defaults (0.7553ms)
+✔ uses valid server configuration and rejects invalid numeric values (0.1611ms)
+(node:10084) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiConversation.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0712 clarifies a missing color subject and resolves Paddle or Ball without asserting a rule (9.0205ms)
+✔ LMS-0712 follows only a signed immediate question and supersedes it for a standalone question (3.8103ms)
+✔ LMS-0712 runs normal insufficient-evidence handling after a clarification response (11.809ms)
+✔ LMS-0712 protects a personal follow-up before it can inherit document context (0.4644ms)
+✔ LMS-0712 sends only the resolved effective question into normal retrieval and issues player-safe receipts (4.5246ms)
+✔ LMS-0712 feedback receipt is user-bound and feedback transitions are idempotent by current state (0.539ms)
+✔ LMS-0712 feedback migration and player UI retain server-only feedback writes (8.7763ms)
+(node:29392) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiDocumentActivation.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0722 activation transaction, effective ACLs, replay, rollback and superseded history (2441.6922ms)
+✔ 0722 activation display is local, historical Unknown is truthful, actor IDs stripped (22.0796ms)
+(node:10596) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiDocumentMetadata.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ normalizes safe parent-document metadata without touching version fields (3.6154ms)
+✔ rejects invalid metadata types, ranks, UUIDs, and scope combinations (3.1676ms)
+✔ rejects missing and mismatched catalog references (1.2466ms)
+✔ maps selected document metadata into an editable form (0.2695ms)
+✔ the management route preserves immutable versions for metadata-only edits (13.7709ms)
+✔ the Add Official PDF form resets only after a successful activation (4.6735ms)
+(node:17444) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiDocumentProcessing.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ sanitizes PDF filenames without losing the extension (1.2058ms)
+✔ keeps detected rule context and page metadata with each chunk (1.3883ms)
+✔ rejects non-PDF file signatures (0.5657ms)
+✔ normalizes structural bullets and PDF whitespace while preserving meaningful Unicode (1.3685ms)
+✔ repairs only the verified broken ff ligature context and safely dehyphenates soft line breaks (0.3838ms)
+✔ warns rather than guessing about unrecoverable replacement, private-use, and unusual embedded glyphs (0.2682ms)
+✔ extracts text from an actual PDF on the server without browser DOM globals (843.0509ms)
+✔ creates logical rule chunks, preserves page association, and excludes a table of contents (6.8485ms)
+✔ passes normalized searchable content, not raw glyph artifacts, into logical chunks and embeddings (0.6315ms)
+✔ keeps USAP rule identities and cross-page outcomes together while excluding structural navigation (2.8361ms)
+(node:17292) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiExistingEvidenceDecision.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ existing-evidence decision role commissioner (24.0694ms)
+✔ existing-evidence decision role league_manager (7.0598ms)
+✔ existing-evidence decision role club_pro (0.5203ms)
+✔ existing-evidence decision role captain (0.1877ms)
+✔ existing-evidence decision role player (0.2131ms)
+✔ existing-evidence decision role anonymous (0.1684ms)
+✔ forged, duplicate, stale and unbounded references fail before category mutation (19.4852ms)
+✔ two distinct provisions remain individually identified and a Reviewing case stays Reviewing (3.7456ms)
+✔ decision UI requires explicit choice, keeps authority block after No, and retains safe retest (8.0439ms)
+(node:9848) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0717 final recording dates use one exact original bullet with separate source heading metadata, without calendar siblings (18.6733ms)
+✔ 0717 final signed Season DUPR continuation: Weekday (27.3306ms)
+✔ 0717 final signed Season DUPR continuation: Saturday (11.5235ms)
+✔ 0717 final signed Season DUPR continuation: PrimeTime (9.6939ms)
+✔ 0717 final plural timing continuation cannot inherit ambiguous, absent, invalid, expired or clarification context (9.8759ms)
+✔ 0717 final inheritance uses only immediate signed subject; standalone questions supersede (1.3311ms)
+✔ 0717 final date scope cannot be borrowed from a different or unrelated heading (2.6933ms)
+✔ 0717 final general eligibility through player path: Can I join a team in another community? (7.3895ms)
+✔ 0717 final general eligibility through player path: Can I play on a team from a different community? (2.6461ms)
+✔ 0717 final general eligibility through player path: Can I play for another community's team? (3.9593ms)
+✔ 0717 final general eligibility through player path: Do I have to play for the community where I live? (4.3811ms)
+✔ 0717 final general eligibility through player path: Can players from different communities form a team? (2.4787ms)
+✔ 0717 final general eligibility through player path: Can I play for another community if my community already has a team in my division? (5.9926ms)
+✔ 0717 final general eligibility through player path: Can I play for another community if my community does not have a team in my division? (4.4443ms)
+✔ 0717 final general eligibility through player path: What are the eligibility rules for joining another community's team? (5.7925ms)
+✔ 0717 final general eligibility through player path: Can I play for another community? (2.7881ms)
+✔ 0717 final live affiliation through player path: What community am I registered with? (0.4714ms)
+✔ 0717 final live affiliation through player path: Which community am I registered with? (0.1815ms)
+✔ 0717 final live affiliation through player path: What team am I on? (0.1592ms)
+✔ 0717 final live affiliation through player path: Am I currently eligible for Team X? (0.1627ms)
+✔ 0717 final live affiliation through player path: Am I personally eligible for Team X right now? (0.1511ms)
+✔ 0717 final live affiliation through player path: Is John Smith eligible for this team? (0.1762ms)
+✔ 0717 final live affiliation through player path: Does my community currently have a team in my division? (0.164ms)
+✔ 0717 final Rule 3.5 wins over high-ranked real procedural/host/server distractors; no sentence or rule-id hardcoding (9.2458ms)
+✔ 0717 final accepted roster obligation is not blocked by affiliation guard (5.4326ms)
+✔ 0717 final real model transport preserves community condition and referee scope instructions (15.3743ms)
+(node:19640) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiDocumentMetadata.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0706 catalog type, default rank, edit roundtrip and exact fallback (6.8095ms)
+✔ LMS-0706 medical retirement: direct LWR conflict excludes USAP before model and citations (29.0169ms)
+✔ LMS-0706 scoring freeze: direct LWR conflict excludes USAP before model and citations (5.7516ms)
+✔ LMS-0711 production-shaped LWR match-equipment probe controls only club-selected equipment (11.9623ms)
+✔ LMS-0711 keeps USAP governing for legal-ball specifications and damaged-ball questions (6.6867ms)
+✔ LMS-0706 Match Setup stays under Rule 5.4 despite higher USAP score (3.4121ms)
+✔ LMS-0706 ordinary uploaded USAP fallback: Can I volley in the kitchen? (3.7765ms)
+✔ LMS-0706 ordinary uploaded USAP fallback: Can a serve touch the baseline? (3.7713ms)
+✔ LMS-0706 ordinary uploaded USAP fallback: Must the ball bounce twice? (3.2936ms)
+✔ LMS-0706 general LWR material, title-only matches and scattered terms do not suppress USAP (7.1843ms)
+✔ LMS-0706 a general serving rule does not override a specific baseline issue (1.6531ms)
+✔ LMS-0706 a guide cannot independently override a USAP playing rule, even at rank 1 (0.9615ms)
+✔ LMS-0708 authority review keeps an unrelated LWR rule from suppressing USAP fallback (1.0642ms)
+✔ LMS-0708 production-shaped medical density fixture selects the rank-11 LWR rule before model generation (4.9925ms)
+✔ LMS-0708 preserves the explicit medical continuation control question (3.8504ms)
+✔ LMS-0709 selects the production USAP NVZ rule by player-question scope (24.5995ms)
+✔ LMS-0710 keeps coaching access distinct from a server foot-contact rule (14.1149ms)
+✔ LMS-0706 mixed intents retain LWR lineup and USAP volley rules independently (4.3165ms)
+✔ LMS-0706 mixed USAP chunk cannot leak an overridden sibling passage (4.1851ms)
+✔ LMS-0706 insufficient, below-threshold and unrelated USAP evidence still skip generation (4.5217ms)
+✔ LMS-0706 does not select an unfinished USAP condition as governing evidence (1.5203ms)
+(node:25868) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiSelectedRuleIdentity.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0721 ordinary post-retirement selection resolves sibling 5.11 without managed records (25.5854ms)
+✔ 0721 actual sibling selection retains 5.10 and its own heading (0.6899ms)
+✔ 0721 prose references and forged selected labels cannot establish sibling identity (0.9001ms)
+✔ 0721 ordinary production identity remains 3.5 (3.2045ms)
+✔ 0721 ordinary production identity remains 4.5 (1.6647ms)
+✔ 0721 ordinary production identity remains 5.5 (1.3427ms)
+✔ 0721 ordinary production identity remains 5.7 (1.581ms)
+✔ 0721 ordinary production identity remains 11.A.2 (1.4854ms)
+✔ 0721 ordinary production identity remains 7.A.2.a (1.8182ms)
+✔ 0721 ordinary production identity remains 10.G.1 (1.8833ms)
+✔ 0721 combined selected siblings remain bounded and exclude unselected neighbors (0.3672ms)
+(node:29496) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/askLwrPlayerAnswer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ protected: What is my DUPR? (3.3369ms)
+✔ protected: What's my DUPR? (0.7815ms)
+✔ protected: What is my current DUPR? (0.1469ms)
+✔ protected: Do you know my DUPR? (0.1277ms)
+✔ protected: What's my rating? (0.1615ms)
+✔ protected: What is my player rating? (0.1679ms)
+✔ protected: Can you tell me my DUPR? (0.1245ms)
+✔ protected: Did I already submit my lineup? (0.1872ms)
+✔ protected: Did I already submit my match scores? (0.1604ms)
+✔ protected: Have I entered my scores yet? (0.2472ms)
+✔ protected: Who am I playing Friday? (0.12ms)
+✔ protected: Who do we play Friday? (0.1008ms)
+✔ protected: Who is my next opponent? (0.0966ms)
+✔ protected: When is my next match? (0.6606ms)
+✔ protected: Where do I play next? (0.0849ms)
+✔ protected: Who is on my roster? (4.125ms)
+✔ protected: Who is on my team? (3.0374ms)
+✔ protected: Is John Smith on my roster? (0.6217ms)
+✔ protected: Show me my roster. (0.3843ms)
+✔ official guidance: What does NR mean? (6.8593ms)
+✔ official guidance: What is the DUPR Reliability Factor rule? (3.1772ms)
+✔ official guidance: How is Season DUPR determined? (0.9082ms)
+✔ official guidance: What DUPR is allowed in this division? (4.6063ms)
+✔ official guidance: What DUPR range can play in Weekday DUPR 7? (1.1727ms)
+✔ official guidance: How do I submit my lineup? (1.6473ms)
+✔ official guidance: When do I submit my lineup? (1.7069ms)
+✔ official guidance: How do I enter match scores? (2.4065ms)
+✔ official guidance: When does Match Setup need to be completed? (2.3391ms)
+✔ official guidance: What day does DUPR 9 normally play? (1.897ms)
+✔ official guidance: Can captains change the scheduled DUPR 9 match time? (4.3421ms)
+✔ official guidance: What are the Saturday league dates? (1.7721ms)
+✔ official guidance: I'm changing my roster but I can't find a player in the list, why? (1.9757ms)
+✔ official guidance: Why can't I find a player when changing my roster? (1.4614ms)
+✔ official guidance: Why won't a player show up when I try to add them? (1.0081ms)
+✔ official guidance: What should I check if a player isn't available to add to my roster? (2.0826ms)
+✔ kitchen receipt boundaries: What if I step in after I hit it? (4.6118ms)
+✔ kitchen receipt boundaries: What if I step in the kitchen after I hit it? (5.454ms)
+✔ manager diagnostics whitelist evidence IDs and omit receipt/history (0.5245ms)
+(node:20772) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiApprovedAnswersShared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0721 shared public contact preserves exact policy and display casing (6.1499ms)
+✔ 0721 shared email exception rejects complete unapproved addresses including club-domain and spoof variants (0.8313ms)
+✔ 0721 public email cannot exempt secrets phone or signed links (0.4346ms)
+✔ 0721 public email leaves structured URL policy unchanged (0.4731ms)
+(node:14988) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiQualityGrouping.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ai_quality_capture {
+  event: 'capture_failed',
+  stage: 'observer',
+  assistant_version: 'LMS-0733'
+}
+✔ 0716 Unicode expansion retained; byte boundary and boundary+1 (2.636ms)
+✔ 0716 conservative versioned fingerprints preserve material distinctions (1.2028ms)
+✔ 0716 unvoted grounded metadata only; correlated receipt and unchanged result keys (21.3779ms)
+✔ 0716 automatic insufficient_evidence detail without vote (2.113ms)
+✔ 0716 automatic conflict detail without vote (0.2891ms)
+✔ 0716 candidate conflict hint alone creates no occurrence (0.2101ms)
+✔ 0716 protected no text, group or feedback (0.2162ms)
+✔ 0716 clarification no text, group or feedback (0.1517ms)
+✔ 0716 clarification ending in no source retains bounded resolver only (0.3728ms)
+✔ 0716 manager tests separate and ineligible (0.2057ms)
+✔ 0716 legacy receipt and four-click append-only transition unchanged (0.6669ms)
+✔ 0716 privacy redaction isolates group and excludes chunks/URLs/vectors (0.3207ms)
+✔ 0716 build/oversize/write/logger/timeout failures fail open (20.4528ms)
+✔ 0716 technical failure operational only and original error preserved (0.5374ms)
+✔ 0716 static migration and player payload boundaries (4.1821ms)
+(node:1112) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiQualitySnapshots.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ 0716 real PostgreSQL migration, transactions, constraints and browser denial (isolated PGlite)
+  ✔ effective operations and replay under production-like default grants (97.1481ms)
+  ✔ repeat capture one occurrence/group/case/audit; mismatched same ID rejected (35.9574ms)
+  ✔ forced digest collision retains exact full text, separate slots and groups (15.933ms)
+  ✔ final conflict creates high-priority case without feedback (20.8031ms)
+  ✔ legacy feedback remains parentless, two transitions and one occurrence/case (14.562ms)
+  ✔ Unicode expansion and exact 32KiB accepted, one-byte-over rolls back safely (13.9713ms)
+  ✔ RLS enabled, browser grants and RPC denied, audit update denied (37.9106ms)
+  ✔ nullable parent reference preserves occurrence on outcome deletion (4.8077ms)
+✔ 0716 real PostgreSQL migration, transactions, constraints and browser denial (isolated PGlite) (2676.363ms)
+(node:25664) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0717 no applicable policy: What is the official LWR Pickleball Club policy for reimbursement of lost prescription sunglasses? (43.5209ms)
+✔ 0717 no applicable policy: Does LWR PC reimburse me for lost prescription sunglasses? (6.0196ms)
+✔ 0717 no applicable policy: Does LWR PC reimburse members for lost personal property? (12.8638ms)
+✔ 0717 explicit document scope preserved: What does the LWR waiver say about personal property? (9.4072ms)
+✔ 0717 explicit document scope preserved: What does the waiver release the club from liability for? (5.4095ms)
+✔ 0717 league roster timing: When can I start adding players to my roster for the weekend league (11.4696ms)
+✔ 0717 league roster timing: When can I start adding players to my roster for the Saturday League? (6.6391ms)
+✔ 0717 league roster timing: When do I start adding players to my roster for the Weekday League? (3.6963ms)
+✔ 0717 league roster timing: When do I start adding players to my roster for the PrimeTime League? (4.7727ms)
+✔ 0717 bounded alias and all-league scope (5.4703ms)
+✔ 0717 morphology stays within roster context (34.1968ms)
+✔ 0717 production how-to excludes calendar-only and enforcement passages (5.5759ms)
+✔ 0717 requested enforcement retains actual Rule 5.5 (6.8471ms)
+✔ 0717 actual Match Setup, score entry and accepted compound stay separate (14.1491ms)
+✔ 0717 an unsupported independent issue prevents partial grounded generation (7.8276ms)
+✔ 0717 missing-object clarification bypasses retrieval; signed replies resolve and standalone supersedes (23.973ms)
+✔ 0717 corrected results retain observational 0716 capture semantics (30.1583ms)
+✔ 0717 disclaimer occurs once immediately above composer with responsive accessible text (9.5578ms)
+(node:27920) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0717 correction actual list parent survives without unrelated sibling bullets (18.2655ms)
+✔ 0717 correction medical: What happens if a player has a medical issue and cannot finish the game? (24.6278ms)
+✔ 0717 correction medical: Medical issue during match (10.0359ms)
+✔ 0717 correction medical: Someone got hurt halfway through the game and can't finish. What do we do? (9.1364ms)
+✔ 0717 correction rating method: How is Season DUPR calculated? (7.8246ms)
+✔ 0717 correction rating method: What is Season DUPR? (3.8974ms)
+✔ 0717 correction rating method: How is my Season DUPR determined? (3.5193ms)
+✔ 0717 correction NR and Reliability Factor retain only material definition (3.7571ms)
+✔ 0717 correction guard through selector: Can I use a player that's not on my roster? (4.009ms)
+✔ 0717 correction guard through selector: Does a player have to be on the roster before playing? (4.5177ms)
+✔ 0717 correction guard through selector: What happens if a player wasn't on the roster? (4.0891ms)
+✔ 0717 correction protected: Who is on my roster? (2.3542ms)
+✔ 0717 correction protected: Show me my roster. (0.2527ms)
+✔ 0717 correction protected: Is John Smith on my roster? (0.1957ms)
+✔ 0717 correction protected: Did I already add John Smith to my roster? (0.2684ms)
+✔ 0717 correction protected: What is my DUPR? (2.0097ms)
+✔ 0717 correction protected: What is my Season DUPR? (0.2202ms)
+✔ 0717 correction two-stage object and league clarification preserves signed context (42.0761ms)
+✔ 0717 correction named league and accepted roster/Friday-lineup compound do not ask another question (19.8223ms)
+✔ 0717 correction production damaged ball: What happens if we have a cracked ball when playing a point? (8.3797ms)
+✔ 0717 correction production damaged ball: What happens if the ball cracks during a rally? (6.4136ms)
+✔ 0717 correction production damaged ball: What if the ball breaks while we're playing the point? (4.9121ms)
+✔ 0717 correction production damaged ball: What happens if we discover the ball is cracked after the rally? (7.6886ms)
+✔ 0717 correction production damaged ball: Can we replay a point if the ball breaks? (5.0457ms)
+✔ 0717 correction damage morphology is bounded to the ball, separate from specifications/other objects (5.4567ms)
+✔ 0717 correction preserved real production equipment and USAP controls (42.1057ms)
+✔ 0717 correction actual model transport receives qualified replay evidence, not universal replay text (9.5211ms)
+✔ 0717 correction manager route uses shared clarification before generation and retains manager origin (11.2371ms)
+✔ 0717 correction desktop disclaimer has eight-pixel top/bottom gaps; existing mobile owner remains (10.2507ms)
+✔ 0717 correction manager clarification executes without model and retains actual retrieval diagnostics (9.7527ms)
+(node:25412) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiQualitySnapshots.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0721 structural possessives require context and preserve apostrophe spelling (4.3134ms)
+✔ 0721 structural terms never exempt identity or mixed private content (0.2254ms)
+(node:27632) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ validates bounded manager retrieval requests and supported context (2.7269ms)
+✔ uses one compatible embedding and the protected hybrid RPC without chat generation (10.8825ms)
+✔ keeps authority subject-relevant and evidence fallback conservative (0.2581ms)
+✔ retrieval SQL locks out inactive, historical, failed, and excluded content while retaining catalog authority (26.2304ms)
+✔ generic exact matching recognizes unseen official phrases without boosting generic words (5.1093ms)
+✔ FTS removes generic question framing while retaining meaningful content terms (0.9904ms)
+✔ uses generic deadline and procedural compatibility without changing hybrid weights (6.9098ms)
+✔ grounds lineup terminology in official Match Setup evidence without expanding unrelated lineups (1.2217ms)
+✔ derives bounded typo normalizations from official candidate vocabulary (2.2584ms)
+✔ 0720 preserves the original RPC query and exposes corpus suggestion separately from interpretation (2.0922ms)
+✔ uses a generic interpersonal-conduct signal without targeting a document (1.8891ms)
+✔ uses a generic interruption expansion without injecting an official outcome term (4.0936ms)
+✔ LMS-0709 adds kitchen/NVZ terminology only for a document-grounded pickleball-rule context (3.2861ms)
+✔ LMS-0708 keeps the singular and plural match detector identical in Stage 3 SQL (1.8717ms)
+✔ LMS-0711 adds a bounded, deduplicated LWR match-equipment probe without changing normal candidates (6.075ms)
+✔ retrieval route is League Manager protected and has no answer-model path (1.7476ms)
+✔ includes the approved multi-document, paired-intent, conduct, natural-language, typo, and unsupported-question evaluation prompts (0.2633ms)
+(node:5568) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiQualitySnapshots.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ 0718 function-only migration and real PostgreSQL reporting/workflow
+  ✔ metrics use latest state, eligibility, player denominator and legacy separation (23.3613ms)
+  ✔ confirmed conflict priority, grouping, literal search, source and version filters (36.8189ms)
+  ✔ keyset pagination preserves priority/time/id without duplicates (8.4492ms)
+  ✔ New → Reviewing, exact retry and mismatched retry/stale revision (14.1228ms)
+  ✔ category, priority and append-only notes, invalid enums and Other reason (9.5666ms)
+  ✔ historical defect Resolve preserves occurrence, Dismiss requires reopening (14.3888ms)
+  ✔ new captured activity brings closed case to queue without silent reopen (12.8931ms)
+  ✔ mark reviewed acknowledges cutoff; competing revisions permit one edit (5.4128ms)
+  ✔ service operations remain bounded, audit immutable and no deletes (3.5282ms)
+  ✔ audit insert failure rolls back case change (8.4553ms)
+  ✔ production-like default EXECUTE grants removed, replay unchanged, browser denial (19.1254ms)
+  ✔ conflicting simultaneous latest votes stay ambiguous (13.3392ms)
+✔ 0718 function-only migration and real PostgreSQL reporting/workflow (3321.0376ms)
+(node:18516) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiReviewHttp.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0718 server authorization commissioner (84.6263ms)
+✔ 0718 server authorization league_manager (1.9918ms)
+✔ 0718 server authorization club_pro (3.9053ms)
+✔ 0718 server authorization captain (6.63ms)
+✔ 0718 server authorization player (8.8408ms)
+✔ 0718 server authorization anonymous (1.9263ms)
+✔ 0718 each manager navigation leaf highlights alone (1.0326ms)
+✔ 0718 bounded filters, literal search and zero denominators (2.5051ms)
+✔ 0718 actor-bound signed review tokens and server-derived mutation identity (8.9728ms)
+✔ 0718 cursor is bound to actor, filter and reporting cutoff (2.123ms)
+✔ 0718 prefill consumes once, expires, retains effective text and never executes (0.4301ms)
+✔ 0718 detail joins retained answer snapshot, hides actor IDs, does not acknowledge unseen wall time (21.7147ms)
+✔ 0718 historical source preserves cited version and rejects mismatched chunk/guessed source (1.6202ms)
+✔ 0718 UI has bounded modal, honest health, history and manual retest without player edits (21.3782ms)
+✔ 0718 superseded source endpoint authorization commissioner (4.7467ms)
+✔ 0718 superseded source endpoint authorization league_manager (0.891ms)
+✔ 0718 superseded source endpoint authorization club_pro (0.3547ms)
+✔ 0718 superseded source endpoint authorization captain (0.3039ms)
+✔ 0718 superseded source endpoint authorization player (0.3179ms)
+✔ 0718 superseded source endpoint authorization anonymous (0.3749ms)
+✔ 0718 historical lifecycle is bounded and exact identities are required before signing (2.9807ms)
+(node:8564) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0713 roster evidence and scoped confidence: I'm changing my roster but I can't find a player in the list, why? (35.7756ms)
+✔ LMS-0713 roster evidence and scoped confidence: Why can't I find a player when changing my roster? (19.2957ms)
+✔ LMS-0713 roster evidence and scoped confidence: Why won't a player show up when I try to add them? (10.3137ms)
+✔ LMS-0713 roster evidence and scoped confidence: What should I check if a player isn't available to add to my roster? (11.2297ms)
+✔ LMS-0713 tangential-only or below-threshold roster evidence skips generation (6.2084ms)
+✔ LMS-0713 confidence instruction is absent from direct rule questions (4.5984ms)
+(node:23316) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiSchedulingApplicability.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0721 scheduling production matrix: As a captain, can I change our scheduled match date or time? (16.7781ms)
+✔ 0721 scheduling production matrix: Can we move our match to another day? (7.9709ms)
+✔ 0721 scheduling production matrix: Can both captains agree to play earlier? (1.9971ms)
+✔ 0721 scheduling production matrix: Can we play our match earlier in the week? (1.2073ms)
+✔ 0721 scheduling production matrix: Can we change our scheduled match time? (1.9768ms)
+✔ 0721 scheduling production matrix: Can we reschedule our match? (2.5787ms)
+✔ 0721 scheduling production matrix: Can we change the date of our match? (2.2105ms)
+✔ 0721 scheduling negative even with high managed score: When is my next match? (1.8402ms)
+✔ 0721 scheduling negative even with high managed score: Who do we play next? (1.1313ms)
+✔ 0721 scheduling negative even with high managed score: What time is my match? (2.1838ms)
+✔ 0721 scheduling negative even with high managed score: Can I change my lineup? (0.2683ms)
+✔ 0721 scheduling negative even with high managed score: Can I change teams? (0.1604ms)
+✔ 0721 scheduling negative even with high managed score: When do scores have to be entered? (0.1396ms)
+✔ 0721 scheduling negative even with high managed score: Can playoffs be rescheduled? (0.2151ms)
+✔ 0721 scheduling inflections do not admit forfeiture, sibling video or generic play (4.6732ms)
+✔ 0721 scheduling preserves makeup deadline and flex editing scope (0.4296ms)
+✔ 0721 related source fails safely: sibling (19.8409ms)
+✔ 0721 related source fails safely: identity (0.7014ms)
+✔ 0721 related source fails safely: stale (0.8117ms)
+✔ 0721 related source fails safely: scope (0.5154ms)
+✔ 0721 related source fails safely: unsearchable (0.626ms)
+✔ 0721 related source fails safely: timeout (11.1783ms)
+✔ 0721 source identity revalidated at citation resolution selects sibling 5.11 exactly (2.9286ms)
+✔ 0721 normal handoff uses one embedding/model, both sources, private diagnostics and provenance (13.3125ms)
+✔ 0721 independent eligibility prevents source reads for stale, Draft, retired, expired or wrong scope (0.5452ms)
+✔ 0721 binding uses structure, not Rule 5.11 or item IDs; genuine conflict is not suppressed (1.9745ms)
+(node:24980) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/askLwrConversationState.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0712 standalone precedence: Can I volley in the kitchen? (29.1761ms)
+✔ LMS-0712 standalone precedence: what kind of ball are we using (3.8084ms)
+✔ LMS-0712 standalone precedence: What are the USA Pickleball requirements for a legal ball? (4.8495ms)
+✔ LMS-0712 standalone precedence: What happens if the ball is damaged during play? (11.033ms)
+✔ LMS-0712 bounded subject fragment: Ball (1.988ms)
+✔ LMS-0712 bounded subject fragment: Paddle (1.8848ms)
+✔ LMS-0712 bounded subject fragment: Ball. (1.0668ms)
+✔ LMS-0712 bounded subject fragment: the outdoor ball (2.2585ms)
+✔ LMS-0712 bounded subject fragment: our team clothing (2.2062ms)
+✔ LMS-0712 bounded subject fragment: the paddle surface (4.2396ms)
+✔ LMS-0712 bounded subject fragment: Shoes (2.6627ms)
+✔ LMS-0712 unrelated ambiguity never repeats color or overwrites actual raw diagnostics (3.885ms)
+✔ LMS-0712 guards raw personal follow-ups and composed effective questions (1.8381ms)
+✔ LMS-0712 ordinary and kitchen follow-up context remains usable (3.8216ms)
+✔ LMS-0712 explicit null survives restoration and never reads display receipts (0.3824ms)
+✔ LMS-0712 late completion cannot replace a newer request context (0.21ms)
+✔ LMS-0712 bounded color evidence: Are there any color considerations for Ball? (8.7024ms)
+✔ LMS-0712 bounded color evidence: Are there any color restrictions for the ball? (1.7435ms)
+✔ LMS-0712 bounded color evidence: What color requirements are there for a ball? (1.5332ms)
+✔ LMS-0712 color negative control: Are there any color considerations for Paddle? (2.4859ms)
+✔ LMS-0712 color negative control: Are there any red color considerations for Ball? (1.2613ms)
+✔ LMS-0712 color negative control: Are there any color considerations for Ball at night? (1.9517ms)
+✔ LMS-0712 color negative control: What pressure must the ball have? (2.0688ms)
+✔ LMS-0712 color negative control: What happens if the ball is damaged during play? (3.2631ms)
+✔ LMS-0712 color negative control: What are the USA Pickleball requirements for a legal ball? (1.9286ms)
+✔ LMS-0712 integrated Color -> Ball -> standalone with authoritative receipt (18.0188ms)
+✔ LMS-0712 integrated Color -> Paddle -> standalone with authoritative receipt (10.0115ms)
+✔ LMS-0712 integrated standalone source paths and kitchen momentum (41.2097ms)
+✔ LMS-0712 mobile layout and feedback rendering contracts (14.2162ms)
+✔ LMS-0725 compact welcome and help examples use normal submit (1.7884ms)
+(node:23952) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiApprovedAnswersSelection.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0731 equivalent policy: Do subs have to meet the DUPR rating range? (4.7705ms)
+✔ 0731 equivalent policy: Can my sub be outside the DUPR range? (0.4111ms)
+✔ 0731 equivalent policy: Does a substitute have to be within the division DUPR range? (0.1888ms)
+✔ 0731 equivalent policy: Can a substitute be above the DUPR limit? (0.1439ms)
+✔ 0731 equivalent policy: Can a substitute be below the minimum DUPR? (0.1787ms)
+✔ 0731 equivalent policy: Do substitute players have to qualify for the division? (0.1641ms)
+✔ 0731 equivalent policy: Are the DUPR requirements different for subs? (0.1434ms)
+✔ 0731 equivalent policy: Does being a sub waive the DUPR requirement? (0.1316ms)
+✔ 0731 equivalent policy: Do NR rules apply to substitute players? (0.2643ms)
+✔ 0731 equivalent policy: Must replacement players meet division requirements? (0.2556ms)
+✔ 0731 equivalent policy: Is a substitute required to meet the DUPR range? (0.1374ms)
+✔ 0731 equivalent policy: Can a substitute exceed the DUPR maximum? (0.1032ms)
+✔ 0731 equivalent policy: Can a substitute not in range play in the division? (0.0818ms)
+✔ 0731 equivalent policy: Does the range apply to a substitute in the DUPR league? (0.0955ms)
+✔ 0731 equivalent policy: Can an NR player sub? (0.1955ms)
+✔ 0731 unrelated rejected even at high similarity: Can my regular roster player be outside the DUPR range? (0.1068ms)
+✔ 0731 unrelated rejected even at high similarity: What is my Season DUPR? (0.0625ms)
+✔ 0731 unrelated rejected even at high similarity: Can I play in another community? (0.0489ms)
+✔ 0731 unrelated rejected even at high similarity: What ball do we use? (0.0612ms)
+✔ 0731 unrelated rejected even at high similarity: When are schedules released? (0.046ms)
+✔ 0731 unrelated rejected even at high similarity: What is my substitute’s DUPR rating? (0.1923ms)
+✔ 0731 unrelated rejected even at high similarity: What ball does my substitute use? (0.083ms)
+✔ 0731 unrelated rejected even at high similarity: Can a substitute register a team? (0.0732ms)
+✔ 0731 unrelated rejected even at high similarity: What is a submarine range? (0.0758ms)
+✔ 0731 unrelated rejected even at high similarity: Can my sub sandwich be outside the range? (0.0972ms)
+✔ 0731 unrelated rejected even at high similarity: Can my substitute serve outside the box? (0.0946ms)
+✔ 0731 lifecycle/scope: {"status":"draft"} (0.1023ms)
+✔ 0731 lifecycle/scope: {"status":"retired"} (0.0531ms)
+✔ 0731 lifecycle/scope: {"activated_at":null} (0.0671ms)
+✔ 0731 lifecycle/scope: {"effective_on":"2026-09-11"} (0.1135ms)
+✔ 0731 lifecycle/scope: {"expires_on":"2026-09-10"} (0.0925ms)
+✔ 0731 lifecycle/scope: {"league_scope":"weekday"} (0.1151ms)
+✔ 0731 lifecycle/scope: {"authority_manifest_hash":"stale"} (0.0774ms)
+✔ 0731 lifecycle/scope: {"temporal_scope":"season","season_id":"season-other"} (0.1103ms)
+✔ 0731 scoped eligibility and immutable source identity; formal priority and unsupported facet (1.5214ms)
+✔ 0731 integration: one search, no extra embedding, polarity instruction, source revalidation and bounded diagnostics (75.7003ms)
+(node:20068) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiApprovedAnswersSelection.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ material flag is established only by complementary selection, not retrieval or managed-only fallback (33.0494ms)
+✔ conflicting supplement remains excluded and warns; redundant consistent text need not repeat (1.5693ms)
+✔ future bounded selected supplements share contract; current selector still selects at most one (0.7711ms)
+✔ generation handoff and structured output: combined (28.4323ms)
+✔ generation handoff and structured output: formal-only (6.86ms)
+✔ generation handoff and structured output: approved-only (6.5507ms)
+✔ generation handoff and structured output: redundant (7.2081ms)
+✔ generation handoff and structured output: conflict (7.6521ms)
+✔ truthful trusted citation heading: 5.10 (1.6467ms)
+✔ truthful trusted citation heading: 5.11 (0.7684ms)
+✔ truthful trusted citation heading: 3.5 (1.6362ms)
+✔ truthful trusted citation heading: 4.5 (1.4562ms)
+✔ truthful trusted citation heading: 5.5 (1.972ms)
+✔ truthful trusted citation heading: 5.7 (1.567ms)
+✔ unheaded sibling uses truthful parent, never neighboring title; forged heading is ignored (0.6546ms)
+(node:21648) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/ai-assistant/review/approvedDraftFeedback.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ draft failures preserve useful validation and replace opaque failures (0.9601ms)
+✔ a saved draft is excluded while an eligible active revision can govern (0.2254ms)
+✔ shared field validation preserves required title and policy-key restrictions (3.4104ms)
+(node:21420) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/askLwrAssistantConfig.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ centralizes page-aware suggestions without fabricating LMS scope IDs (1.2075ms)
+✔ player response is deliberately limited to plain answer and trusted citations (3.2096ms)
+✔ player-safe sources preserve the validated page-aware URL without rebuilding it (1.7112ms)
+✔ personal or live LMS questions do not enter document RAG without a future data tool (16.3914ms)
+✔ normalizes generic question framing so FTS keeps the substantive Balls term (6.7228ms)
+✔ player route passes realistic unrelated-page context to the shared Stage 3/4 pipeline without scope filtering (22.137ms)
+✔ unsupported and insufficient paths do not manufacture an operational or aggressive-serve answer (1.572ms)
+✔ guide browsing mirrors existing role entry points without changing RAG scope (0.1796ms)
+✔ the shared AI trigger covers every authenticated header shell without changing guide access (8.0399ms)
+✔ the standard authenticated route shell retains the shared AI trigger (3.3163ms)
+(node:16824) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/askLwrFeedbackState.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0714 four-click sequence sends two requests and leaves confirmed controls usable (2.5861ms)
+✔ LMS-0714 synchronous lock blocks rapid opposite clicks before rerender (0.2728ms)
+✔ LMS-0714 unchanged server response clears pending and uses server-confirmed value (0.1805ms)
+✔ LMS-0714 http error clears pending, preserves confirmed vote and permits retry (0.4451ms)
+✔ LMS-0714 network error clears pending, preserves confirmed vote and permits retry (0.2892ms)
+✔ LMS-0714 malformed error clears pending, preserves confirmed vote and permits retry (0.2451ms)
+✔ LMS-0714 invalid error clears pending, preserves confirmed vote and permits retry (0.2844ms)
+✔ LMS-0714 authorization error clears pending, preserves confirmed vote and permits retry (0.1907ms)
+✔ LMS-0714 restored feedback never restores an abandoned pending flag (0.2998ms)
+✔ LMS-0714 selected controls remain enabled with accessible pressed state (8.725ms)
+(node:18732) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/viewAsProjectionClient.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ captain-dashboard/page.js: division schedule selects only active teams in the selected division (10.9899ms)
+✔ player-dashboard/page.js: division schedule selects only active teams in the selected division (3.9094ms)
+✔ AdminDashboardClient.js: division schedule selects only active teams in the selected division (5.5074ms)
+✔ test\fixtures\lms0731-substitute.mjs (7271.2258ms)
+✔ test\fixtures\lms0732-documents.mjs (7292.5443ms)
+(node:26456) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ test\helpers\eligibilityDatabase.mjs (7263.9914ms)
+✔ test\helpers\eligibilityFixture.mjs (7175.9904ms)
+✔ test\helpers\fixtureRpcManifest.mjs (6889.603ms)
+(node:28176) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ test\helpers\implicitPlayerFixture.mjs (12532.1796ms)
+(node:12936) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ test\helpers\implicitPlayerMatrix.mjs (12734.8493ms)
+(node:15796) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ test\helpers\liveRecordFixture.mjs (13042.6273ms)
+(node:1692) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ test\helpers\liveRecordMatrix.mjs (13230.7181ms)
+✔ test\helpers\normalDashboardFixtureQuery.mjs (13707.6033ms)
+✔ test\helpers\ratingsSourceDatabase.mjs (14481.3018ms)
+(node:5804) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ test\helpers\scheduleNamesMatrix.mjs (14898.9205ms)
+✔ test\helpers\sourceReviewFixture.mjs (15222.8619ms)
+✔ test\helpers\viewAsFixture.mjs (15513.0309ms)
+✔ test\helpers\viewAsPageFixture.mjs (15759.2688ms)
+(node:29644) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/accountIdentity.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 identity manifest pins existing roles, repair/audit/replay/committed rollback (2678.603ms)
+✔ 0723 expected-state refuses role change, preserves non-material phone and auth activity (8836.3273ms)
+✔ 0723 identical split preserves Commissioner, rejects new references and distinct roles (7021.0071ms)
+✔ 0723 default grants, private support, browser denial and native Auth hook boundary (3159.7601ms)
+✔ 0723 prospective linking never provisions roles or repairs old backlog; both orderings (2738.9119ms)
+✔ 0723 account endpoint binds only server-verified subject, errors expose no identity (55.6661ms)
+✔ 0723 ordinary role writers report busy/stale rows and never downgrade or overwrite identity (0.892ms)
+✔ 0723 exact manifest checksum admits 16 approved entries, rejects substitution, and isolates stale peers (3589.6032ms)
+(node:27384) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 exact six capabilities and document routing controls (28.3616ms)
+✔ 0723 six live executions cannot invoke a model and retain metadata only (16.8733ms)
+✔ 0723 receipt subject reauthorization, expiry, cross-user/session and New Question (2.6933ms)
+✔ 0723 unsupported queries never touch data and audit/query errors do not fall through (1.3035ms)
+✔ 0723 independent document question supersedes a live reference and capture failure is fail-open (2.9574ms)
+✔ 0723 semantic subject matrix: recipient is not subject; competing subjects fail closed (18.5022ms)
+✔ 0723 stale, forged and cleared references cannot become self or override a new subject (4.9157ms)
+(node:29164) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/serverSupabase.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 online identity, forged requester, six routes use only trusted actor; zero model calls (45.8509ms)
+✔ 0723 invalid and provider-rejected identities fail before protected lookup (3.6511ms)
+✔ 0723 auth timeout, thrown/malformed/unavailable responses fail closed and sanitized (33.8188ms)
+✔ 0723 opaque receipts preserve refreshed-session and cross-user/session rejection (3.7146ms)
+✔ 0723 real SDK Auth rejection and timeout never reach live RPC or model transport (8.4615ms)
+(node:16796) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/liveLmsService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ 0723 effective permissions, server auth boundary and six capability projections
+  ✔ six deterministic capabilities (73.5469ms)
+  ✔ field ACL proves minimal projections instead of response filtering (57.6915ms)
+✔ 0723 effective permissions, server auth boundary and six capability projections (3886.8124ms)
+✔ 0723 role matrix, stale relationships, browser denial, replay and feedback transitions (2352.2652ms)
+✔ 0723 real Stage 7 live outcomes retain no facts or unanswered occurrences (2009.4999ms)
+✔ 0723 audit fail-closed, budgets, duplicate resolution, freshness, retention and review authorization (2032.0628ms)
+✔ 0723 current-season ambiguity, self continuation, roster pagination, schedule and team isolation (3372.0297ms)
+✔ 0723 synthetic six-capability timing benchmark (no external auth/model) (3390.7221ms)
+ℹ {"capability":"SELF RATING","authMs":null,"lookupMs":81,"personResolutionMs":28,"databaseQueryMs":12,"formattingMs":4,"totalMs":85,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"PLAYER RATING","authMs":null,"lookupMs":43,"personResolutionMs":10,"databaseQueryMs":13,"formattingMs":1,"totalMs":44,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"PLAYER CONTACT","authMs":null,"lookupMs":24,"personResolutionMs":7,"databaseQueryMs":1,"formattingMs":3,"totalMs":27,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"SELF TEAM","authMs":null,"lookupMs":14,"personResolutionMs":3,"databaseQueryMs":6,"formattingMs":1,"totalMs":15,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"TEAM ROSTER","authMs":null,"lookupMs":12,"personResolutionMs":3,"databaseQueryMs":3,"formattingMs":1,"totalMs":13,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"NEXT MATCH","authMs":null,"lookupMs":19,"personResolutionMs":5,"databaseQueryMs":8,"formattingMs":0,"totalMs":19,"auth":"injected synthetic principal; production verification pending"}
+✔ 0723 permanent named rating blocker: protected resolution never reads requester rating (2939.1067ms)
+✔ 0723 six-capability subject invariant, authorized population, ambiguity and effective projections (3941.4654ms)
+✔ 0723 named team follow-up reauthorizes; reset and new self query discard prior subject (1891.7235ms)
+✔ 0723 final migration security state survives production-default grants and replay (1809.5668ms)
+(node:20264) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiSelectedRuleIdentity.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0719 LWR selected production provision 3.5 (7.7422ms)
+✔ 0719 LWR selected production provision 5.5 (1.0378ms)
+✔ 0719 LWR selected production provision 5.7 (0.7534ms)
+✔ 0719 LWR selected production provision 4.1 (0.3952ms)
+✔ 0719 LWR selected production provision 4.2 (0.3758ms)
+✔ 0719 two independent propositions remain one bounded combined source (1.1946ms)
+✔ 0719 USAP production identity 3.C.3 (0.7528ms)
+✔ 0719 USAP production identity 7.A.2 (0.9983ms)
+✔ 0719 USAP production identity 7.A.2.a (0.328ms)
+✔ 0719 USAP production identity 10.G (0.4891ms)
+✔ 0719 USAP production identity 10.G.1 (0.2499ms)
+✔ 0719 USAP production identity 11.A (0.1803ms)
+✔ 0719 USAP production identity 11.A.2 (0.1591ms)
+✔ 0719 USAP production identity 11.A.3 (0.189ms)
+✔ 0719 USAP production identity 20.F (0.2398ms)
+✔ 0719 USAP production identity 20.F.1 (0.1727ms)
+✔ 0719 rejects mismatched selected evidence and ignores forged identity (0.8386ms)
+✔ 0719 cross references, continuation fragments, arbitrary dates, and unrelated deeper rules do not govern (0.3594ms)
+✔ 0719 every existing production replay selection binds to its original chunk, including assembled date units (428.0428ms)
+✔ 0719 reset removes follow-up, history, errors and local votes without I/O (2.5051ms)
+✔ 0719 reset removes clarification, history, errors and local votes without I/O (0.2738ms)
+✔ 0719 pending Ask blocks reset across remount and synchronous rapid clicks (0.2893ms)
+✔ 0719 pending feedback blocks reset across remount and synchronous rapid clicks (0.1685ms)
+✔ 0719 obsolete completions cannot repopulate context, memory, or storage after reset (0.2183ms)
+✔ 0719 unavailable storage still resets in memory (0.3595ms)
+✔ 0719 reset clears real signed follow-up and clarification dependencies (10.2454ms)
+✔ 0719 reset UI has standalone focus, announcement and bounded responsive actions (31.3213ms)
+✔ 0719 revalidated identity reaches model metadata and both existing snapshot serializers (43.5092ms)
+✔ 0719 heading cleanup removes only exact parent or selected prefixes (0.8764ms)
+(node:24652) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiQuestionInterpretation.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0720 production-format paired recovery: What kind of balls will we be usin (37.4709ms)
+✔ 0720 production-format paired recovery: What kind of ball are we useing (14.0333ms)
+✔ 0720 production-format paired recovery: What ball are we playng with? (7.9418ms)
+✔ 0720 production-format paired recovery: Can I volly in the kitchen? (15.9282ms)
+✔ 0720 production-format paired recovery: What if I volly and step into the kitchen? (9.0278ms)
+✔ 0720 production-format paired recovery: What happens if the ball is damged? (8.0091ms)
+✔ 0720 production-format paired recovery: What happens if the ball is craked during a rally? (10.8847ms)
+✔ 0720 production-format paired recovery: How do I add someone to my roser? (19.5604ms)
+✔ 0720 production-format paired recovery: When do I submit my linep? (9.6043ms)
+✔ 0720 production-format paired recovery: How is Seson DUPR determined? (26.1407ms)
+✔ 0720 production-format paired recovery: What happens with a medcal issue during a match? (18.7709ms)
+✔ 0720 production-format paired recovery: When can I add players for Satrday league? (14.3374ms)
+✔ 0720 community typo retains qualified specific Rule 3.5 (9.0423ms)
+✔ 0720 abstains: Can I step into the kitchen? (0.451ms)
+✔ 0720 abstains: Can I play a point? (0.1777ms)
+✔ 0720 abstains: What if I am plaing the ball? (0.2714ms)
+✔ 0720 abstains: Is Rose eligible for this team? (0.37ms)
+✔ 0720 abstains: Can I join the team named Roster? (0.1695ms)
+✔ 0720 abstains: Can I play for the community named Satrday? (0.0992ms)
+✔ 0720 abstains: Can I join Satrday team? (0.3099ms)
+✔ 0720 abstains: NR DUPR 3.50 09/28 Rule 5.7.2 (0.1388ms)
+✔ 0720 abstains: https://example.com/comunity user@medcal.org ID-roser-123 (0.1346ms)
+✔ 0720 abstains: How do I add someone to my rooster? (0.2558ms)
+✔ 0720 abstains: How do I add ID-roser to my team? (0.1099ms)
+✔ 0720 abstains: Is Comunity eligible for this team? (0.2682ms)
+✔ 0720 abstains: Can I volley in a valley? (0.1041ms)
+✔ 0720 bounded edits, no chaining, and signed league slot (15.3068ms)
+✔ 0720 guards original and interpreted wording before any retrieval (4.5145ms)
+✔ 0720 signed medical score condition 0 (12.0202ms)
+✔ 0720 signed medical score condition 5 (9.426ms)
+✔ 0720 signed medical score condition 6 (10.1326ms)
+✔ 0720 signed medical score condition 7 (10.4319ms)
+✔ 0720 signed medical score condition 8 (14.5161ms)
+✔ 0720 signed medical score condition 11 (14.3228ms)
+✔ 0720 medical boundaries reject missing, expired, wrong-user and unrelated context (10.1871ms)
+✔ 0720 Season continuation preserves signed typo spelling in its effective question (7.8317ms)
+0720 interpretation benchmark: 1000 calls 198.91ms; mean 0.199ms
+0720 equipment budget (typo and correct): [[2,3],[2,3]]
+✔ 0720 manager diagnostics are separate from unchanged player/telemetry presentation (52.8371ms)
+✔ 0720 interpretation overhead is bounded and measurable (202.3575ms)
+✔ 0720 equipment typo and correct spelling use the same existing probe budget (33.5625ms)
+✔ 0720 Stage 7 keeps original typo wording and protected diagnostics empty (14.8691ms)
+(node:29376) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0720 actual original/assisted sequence: Can I volly in the kitchen? (71.2502ms)
+✔ 0720 actual original/assisted sequence: Can I join a team in another comunity? (27.4673ms)
+✔ 0720 actual original/assisted sequence: What happens with a medcal issue during a match? (46.197ms)
+✔ 0720 actual original/assisted sequence: How do I add someone to my roser? (44.0757ms)
+✔ 0720 actual original/assisted sequence: When do I submit my linep? (20.7201ms)
+✔ 0720 actual original/assisted sequence: How is Seson DUPR determined? (20.9591ms)
+✔ 0720 actual original/assisted sequence: What happens if the ball is damged? (19.5607ms)
+✔ 0720 actual original/assisted sequence: What happens if the ball is craked during a rally? (26.4097ms)
+✔ 0720 actual original/assisted sequence: When can I add players for Satrday league? (21.5616ms)
+✔ 0720 actual original/assisted sequence: Can I volley in the kitchen? (26.0608ms)
+✔ 0720 exhausted/failed assistance stays bounded false (14.7571ms)
+✔ 0720 exhausted/failed assistance stays bounded true (7.2508ms)
+✔ 0720 no assisted RPC for veto/entity/precision: What if I am plaing the ball? (3.8703ms)
+✔ 0720 no assisted RPC for veto/entity/precision: Can I join the team named Roster? (0.807ms)
+✔ 0720 no assisted RPC for veto/entity/precision: Can I play for the community named Satrday? (0.8576ms)
+✔ 0720 no assisted RPC for veto/entity/precision: NR DUPR 3.50 Rule 5.7.2 user@medcal.org ID-roser (1.0619ms)
+✔ 0720 generation follows completed retry 0 (13.8597ms)
+✔ 0720 generation follows completed retry 1 (20.7045ms)
+✔ 0720 generation follows completed retry 2 (30.2988ms)
+(node:27900) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0720 equipment handoff rank 1: What kind of balls will we be usin (36.3285ms)
+✔ 0720 equipment handoff rank 8: What kind of balls will we be usin (10.6821ms)
+✔ 0720 equipment handoff rank 12: What kind of balls will we be usin (11.4173ms)
+✔ 0720 equipment handoff rank 13: What kind of balls will we be usin (10.9759ms)
+✔ 0720 equipment handoff rank 32: What kind of balls will we be usin (8.1695ms)
+✔ 0720 equipment handoff rank 42: What kind of balls will we be usin (8.5802ms)
+✔ 0720 equipment handoff rank 1: What kind of ball are we useing (7.2123ms)
+✔ 0720 equipment handoff rank 8: What kind of ball are we useing (8.5756ms)
+✔ 0720 equipment handoff rank 12: What kind of ball are we useing (7.5786ms)
+✔ 0720 equipment handoff rank 13: What kind of ball are we useing (8.4183ms)
+✔ 0720 equipment handoff rank 32: What kind of ball are we useing (8.6709ms)
+✔ 0720 equipment handoff rank 42: What kind of ball are we useing (10.5913ms)
+✔ 0720 equipment handoff rank 1: What ball are we playng with? (10.9392ms)
+✔ 0720 equipment handoff rank 8: What ball are we playng with? (7.4035ms)
+✔ 0720 equipment handoff rank 12: What ball are we playng with? (11.3044ms)
+✔ 0720 equipment handoff rank 13: What ball are we playng with? (12.6881ms)
+✔ 0720 equipment handoff rank 32: What ball are we playng with? (14.201ms)
+✔ 0720 equipment handoff rank 42: What ball are we playng with? (10.5872ms)
+✔ 0720 equipment handoff rank 1: What kind of balls will we be using (6.9586ms)
+✔ 0720 equipment handoff rank 8: What kind of balls will we be using (6.8306ms)
+✔ 0720 equipment handoff rank 12: What kind of balls will we be using (4.8904ms)
+✔ 0720 equipment handoff rank 13: What kind of balls will we be using (4.7517ms)
+✔ 0720 equipment handoff rank 32: What kind of balls will we be using (5.6402ms)
+✔ 0720 equipment handoff rank 42: What kind of balls will we be using (5.1518ms)
+✔ 0720 ineligible normal occurrence does not suppress threshold-qualified probe (2.8142ms)
+(node:26940) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiMaterialQualifications.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ material exception restricts the same proposition (3.3863ms)
+✔ non-material related detail is not a qualification (0.3081ms)
+✔ unrelated terminology does not establish a relationship (0.3226ms)
+✔ contradiction is retained for conflict assessment, not treated as automatic override (1.9793ms)
+✔ foreign scope cannot qualify a broad proposition (0.2933ms)
+✔ production candidate already in review preserves material scoring qualification (29.8323ms)
+✔ scoring qualification control: How does rally scoring work? (23.4566ms)
+✔ scoring qualification control: Do you score when receiving in rally scoring? (14.5655ms)
+✔ scoring qualification control: Do I have to be serving to win in rally scoring? (11.8328ms)
+✔ scoring qualification control: What happens at game point in rally scoring? (12.9388ms)
+✔ scoring qualification control: How does the scoring freeze work? (11.5801ms)
+✔ scoring qualification control: What are the Weekday rally scoring rules? (12.7699ms)
+✔ scoring qualification control: What are the Saturday rally scoring rules? (14.9346ms)
+✔ scoring qualification control: What are the PrimeTime rally scoring rules? (11.5428ms)
+(node:19744) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0722 production-format original/vector-reuse replay: I could use some clarification on the Saturday league mixed doubles. Is it permissible to use players other than the 12 that played in the single gender matches? (95.6773ms)
+✔ 0722 production-format original/vector-reuse replay: What is the website for the club (9.4963ms)
+✔ 0722 production-format original/vector-reuse replay: what are your rally scoring rules (14.631ms)
+✔ 0722 production-format original/vector-reuse replay: Is the kitchen the same as the NVZ (12.8399ms)
+✔ 0722 production-format original/vector-reuse replay: clothing (2.7987ms)
+✔ 0722 production-format original/vector-reuse replay: I am unable to log into my account. How do I reset my password (23.9281ms)
+✔ 0722 production-format original/vector-reuse replay: Where do I find the info on what Pickleball’s we will be using with weekday league? I thought I read that we were using Joola HC-40. (47.8288ms)
+✔ 0722 production-format original/vector-reuse replay: So one more clarification... do we need a min of 2 men and 2 women, all under 9.1 combined, to play best of 3 men's games, 3 women's games, and 3 mixed games? And since that's a lot in the heat, you suggest a roster of 6 people total? (58.8638ms)
+✔ 0722 production-format original/vector-reuse replay: Interested in putting together a team from LWRCC but need to understand better how many players we need for each team and assume that any two need a combined dupr of 9.1 or less? (23.9394ms)
+✔ 0722 production-format original/vector-reuse replay: How many players do i need for the primetime league (18.6885ms)
+✔ 0722 production-format original/vector-reuse replay: Can I stand in the kitchen when I am not volleying? (19.5136ms)
+✔ 0722 production-format original/vector-reuse replay: What is the PrimeTime Picklebreaker format? (12.032ms)
+✔ 0722 production-format original/vector-reuse replay: How many players play in a Weekday 9.1 match? (48.6613ms)
+✔ 0722 production-format original/vector-reuse replay: Does the weekday 9.1 league have a different format? (112.1625ms)
+✔ 0722 production-format original/vector-reuse replay: We are currently trying to order a blouse for our team. Are there any color restrictions? (23.6626ms)
+✔ 0722 production-format original/vector-reuse replay: How many players do I need for the PrimeTime League? (18.0398ms)
+✔ 0722 production-format original/vector-reuse replay: How many players do I need for the Saturday League? (20.222ms)
+✔ 0722 production-format original/vector-reuse replay: How many players do I need for Weekday? (8.5149ms)
+✔ 0722 production-format original/vector-reuse replay: How many players do I need for Weekday 9.1? (34.5106ms)
+✔ 0722 production-format original/vector-reuse replay: What kind of games will be played in the Saturday League? (23.8969ms)
+✔ 0722 production-format original/vector-reuse replay: What is the PrimeTime match format? (10.5795ms)
+✔ 0722 production-format original/vector-reuse replay: What is the Saturday match format? (16.8119ms)
+✔ 0722 production-format original/vector-reuse replay: How many players do I need for PrimeTime? (12.283ms)
+✔ 0722 production-format original/vector-reuse replay: How many players do I need for Saturday? (13.2035ms)
+✔ 0722 production-format original/vector-reuse replay: How does the PrimeTime Picklebreaker work? (14.5706ms)
+✔ 0722 production-format original/vector-reuse replay: How does the Saturday Picklebreaker work? (19.9492ms)
+✔ 0722 production-format original/vector-reuse replay: What kind of games will be played in the primetime league (27.818ms)
+✔ 0722 apparel object is explicit: We are currently trying to order a blouse for our team. Are there any color restrictions? (4.3379ms)
+✔ 0722 apparel object is explicit: Are there color restrictions for our team shirts? (1.4381ms)
+✔ 0722 apparel object is explicit: Can our team wear any color jersey? (0.5137ms)
+✔ 0722 apparel object is explicit: We're ordering blouses for the team. Are there color restrictions? (0.8487ms)
+✔ 0722 unbound color clarifies: What color can our team wear? (0.5647ms)
+✔ 0722 unbound color clarifies: Are there color restrictions? (0.1892ms)
+✔ 0722 protected intent: What email address is my account under? (0.3676ms)
+✔ 0722 protected intent: What is my DUPR? (0.2369ms)
+✔ 0722 protected intent: What team am I on? (0.0649ms)
+✔ 0722 protected intent: Did I enter my match scores? (0.0713ms)
+✔ 0722 documented procedure remains public: How do I reset my password? (0.7184ms)
+✔ 0722 documented procedure remains public: Where do I enter match scores? (0.5325ms)
+✔ 0722 documented procedure remains public: How do I update my roster? (0.2243ms)
+✔ 0722 generic equal-authority target conflict is order-independent and skips generation (13.2475ms)
+✔ 0722 document navigation uses active catalog/anchor without scores, embeddings or model (2.2878ms)
+✔ 0722 scoped rally evidence cannot leak another league: Saturday (228.5601ms)
+✔ 0722 scoped rally evidence cannot leak another league: Weekday (181.1613ms)
+✔ 0722 scoped rally evidence cannot leak another league: PrimeTime (155.4828ms)
+✔ 0722 current-rule scope and division applicability: How many players do I need for the PrimeTime League? (68.8826ms)
+✔ 0722 current-rule scope and division applicability: How many players play in a Weekday 9.1 match? (247.4406ms)
+✔ 0722 current-rule scope and division applicability: How many players do I need for Saturday? (49.7854ms)
+✔ 0722 current-rule scope and division applicability: How is Weekday 9.1 different? (406.375ms)
+✔ 0722 current-rule scope and division applicability: Is Weekday 9.1 a flex league? (329.9148ms)
+✔ 0722 current-rule scope and division applicability: When does Weekday 9.1 normally play? (242.0874ms)
+✔ 0722 current-rule scope and division applicability: Can Weekday 9.1 captains change the match time? (310.2817ms)
+✔ 0722 current-rule scope and division applicability: What is the Saturday 9.1 format? (720.6128ms)
+✔ 0722 current-rule scope and division applicability: What is the Weekday format? (120.5474ms)
+✔ 0722 overall roster question cannot use fielded-player rule (25.7089ms)
+✔ 0722 document identity: Show me the Captains Guide (1.1119ms)
+✔ 0722 document identity: Where are the Important Dates? (0.3236ms)
+✔ 0722 document identity: Where is the Players Guide? (0.3341ms)
+✔ 0722 document identity: Where is the USAP rulebook? (0.4391ms)
+✔ 0722 account identity embedded in how-to remains protected (0.4418ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How many players do I need for the PrimeTime League? (23.1406ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How many players do I need for the Saturday League? (25.7585ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How many players do I need for Weekday? (12.0789ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How many players do I need for Weekday 9.1? (55.7289ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: What kind of games will be played in the primetime league (25.3494ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: What kind of games will be played in the Saturday League? (16.3163ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: What is the PrimeTime match format? (7.1455ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: What is the Saturday match format? (15.2657ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How many players do I need for PrimeTime? (9.5519ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How many players do I need for Saturday? (24.2362ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How does the PrimeTime Picklebreaker work? (17.1415ms)
+✔ 0722 MUST PASS named-league evidence and absence of foreign scope: How does the Saturday Picklebreaker work? (16.9502ms)
+✔ 0722 adjoining numbered league passages override an ambiguous containing heading (1.5001ms)
+(node:4504) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 benchmark Q01: Who is on my roster? (12.1714ms)
+✔ 0725 benchmark Q02: Show me my roster. (4.4256ms)
+✔ 0725 benchmark Q03: How many players are currently on my roster? (0.9796ms)
+✔ 0725 benchmark Q04: Who is on the Artisan Lakes roster? (1.2891ms)
+✔ 0725 benchmark Q05: Show the Artisan Lakes roster. (0.9584ms)
+✔ 0725 benchmark Q06: Which players are on our roster? (0.4106ms)
+✔ 0725 benchmark Q07: What date can I start entering my roster for weekday league (21.2071ms)
+✔ 0725 benchmark Q08: when can I start entering my players for my team (4.5646ms)
+✔ 0725 benchmark Q09: When can I start entering my roster? (4.6357ms)
+✔ 0725 benchmark Q10: What date can I start entering my roster for weekday league? (4.9857ms)
+✔ 0725 benchmark Q11: When can I add players? (1.2004ms)
+✔ 0725 benchmark Q12: When does roster entry open? (2.1856ms)
+✔ 0725 benchmark Q13: When can I start entering my PrimeTime players? (3.8775ms)
+✔ 0725 benchmark Q14: When can I start entering my Saturday roster? (1.5881ms)
+✔ 0725 benchmark Q15: When may I begin entering team players? (1.9028ms)
+✔ 0725 benchmark Q16: When can I build my roster? (0.6871ms)
+✔ 0725 benchmark Q17: When can I fill my roster? (0.5217ms)
+✔ 0725 benchmark Q18: When can I start my roster? (0.6161ms)
+✔ 0725 benchmark Q19: Can I add players to my roster yet? (0.3141ms)
+✔ 0725 benchmark Q20: When do we begin adding players to our team? (1.6486ms)
+✔ 0725 benchmark Q21: What date does player entry open for Weekday? (0.9701ms)
+✔ 0725 benchmark Q22: When can I start entering my rosterr for weekdy league? (5.1107ms)
+✔ 0725 benchmark Q23: when can i add plyers to my team (1.3738ms)
+✔ 0725 benchmark Q24: When can I enter players in the match lineup? (1.4871ms)
+✔ 0725 benchmark Q25: How do I enter players on my roster? (1.0169ms)
+✔ 0725 benchmark Q26: How do I add a player to my roster? (0.6353ms)
+✔ 0725 benchmark Q27: How can I update my roster? (1.018ms)
+✔ 0725 benchmark Q28: Where do I go to build my team roster? (1.2602ms)
+✔ 0725 benchmark Q29: How do I enter match scores? (1.9029ms)
+✔ 0725 benchmark Q30: Does the weekday dupr league use rally scoring (2.8961ms)
+✔ 0725 benchmark Q31: Does the Weekday DUPR League use Rally Scoring? (2.6921ms)
+✔ 0725 benchmark Q32: What scoring method does the Weekday League use? (2.7723ms)
+✔ 0725 benchmark Q33: Do regular Weekday games use Rally Scoring? (3.0755ms)
+✔ 0725 benchmark Q34: Does Weekday 9.1 use Rally Scoring? (3.0275ms)
+✔ 0725 benchmark Q35: Does the Weekday 9.1 Picklebreaker use Rally Scoring? (2.9468ms)
+✔ 0725 benchmark Q36: Is Weekday all rally? (0.707ms)
+✔ 0725 benchmark Q37: Does the weekdy league use raly scoring? (5.5874ms)
+✔ 0725 benchmark Q38: Does Saturday use Rally Scoring? (2.658ms)
+✔ 0725 benchmark Q39: Do regular Saturday games use Rally Scoring? (6.8706ms)
+✔ 0725 benchmark Q40: Does the Saturday Picklebreaker use Rally Scoring? (4.0875ms)
+✔ 0725 benchmark Q41: Does PrimeTime use Rally Scoring? (5.5633ms)
+✔ 0725 benchmark Q42: Do regular PrimeTime games use Rally Scoring? (4.7481ms)
+✔ 0725 benchmark Q43: Does the PrimeTime Picklebreaker use Rally Scoring? (2.415ms)
+✔ 0725 benchmark Q44: Does Weekday 8.1 use Rally Scoring? (2.6592ms)
+✔ 0725 benchmark Q45: How does Rally Scoring work? (2.8893ms)
+✔ 0725 benchmark Q46: How does Rally Scoring work in a Picklebreaker? (2.6797ms)
+✔ 0725 benchmark Q47: Do I have to be serving to win with Rally Scoring? (5.0703ms)
+✔ 0725 benchmark Q48: What happens at 24 all in a game to 25 by 2? (12.9534ms)
+✔ 0725 benchmark Q49: When do scores freeze again? (6.1807ms)
+✔ 0725 benchmark Q50: What's my DUPR (0.8504ms)
+✔ 0725 benchmark Q51: What is my Season DUPR? (0.584ms)
+✔ 0725 benchmark Q52: What is my PrimeTime Season DUPR? (0.5699ms)
+✔ 0725 benchmark Q53: What is my current official DUPR? (0.6548ms)
+✔ 0725 benchmark Q54: When is Season DUPR established? (1.2865ms)
+✔ 0725 benchmark Q55: When is my Season DUPR established? (2.2749ms)
+✔ 0725 benchmark Q56: How is my Season DUPR calculated? (1.4278ms)
+✔ 0725 benchmark Q57: When are Season DUPR ratings recorded for Saturday? (4.436ms)
+✔ 0725 benchmark Q58: Export all player emails (0.3594ms)
+✔ 0725 benchmark Q59: What is my password? (0.2269ms)
+✔ 0725 benchmark Q60: Did I save my lineup? (0.18ms)
+✔ 0725 benchmark Q61: Am I currently eligible for this team? (0.3557ms)
+✔ 0725 benchmark Q62: Show my rating and tell me if I am eligible (0.601ms)
+✔ 0725 benchmark Q63: What is my roster and when can I add players? (0.5731ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: Weekday (30.3751ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: Weekday regular games (8.009ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: Weekday Picklebreaker (3.1285ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: Saturday (2.7639ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: Saturday regular games (13.276ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: Saturday Picklebreaker (2.177ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: PrimeTime (1.7724ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: PrimeTime regular games (2.1898ms)
+✔ 0725 complete scoring obligation and no cross-league leakage: PrimeTime Picklebreaker (1.3436ms)
+✔ 0725 scoped division, mechanics-only denial, incomplete default and current dates (12.4778ms)
+✔ 0725 semantics preserve current date, procedure, names and personal privacy (0.9408ms)
+✔ 0725 opaque choices requery, resolved display, missing vs NR, no model and target binding (5.965ms)
+✔ 0725 current-date comparison is deterministic and never certifies unlock/eligibility (13.251ms)
+✔ 0725 unbound tied-score and freeze followups clarify before retrieval (1.7391ms)
+(node:8424) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 age Q90: What is the date for the primetime league for basing the age on (64.5875ms)
+✔ 0725 age Q91: What date is my age based on for PrimeTime? (6.1244ms)
+✔ 0725 age Q92: What is the PrimeTime age cutoff date? (3.113ms)
+✔ 0725 age Q93: When do I have to turn 65 to play PrimeTime? (2.9707ms)
+✔ 0725 age Q94: Do I have to be 65 when the PrimeTime season starts? (4.9463ms)
+✔ 0725 age Q95: If I turn 65 later this year can I play PrimeTime? (2.5265ms)
+✔ 0725 age Q96: I turn 65 in December. Can I play PrimeTime? (2.9188ms)
+✔ 0725 age Q97: What date do you use to determine age for the 65+ league? (3.9396ms)
+✔ 0725 age Q98: When does PrimeTime start? (8.2268ms)
+✔ 0725 age Q99: What date do you use to determine age for PrimeTime? (1.7692ms)
+✔ 0725 four temporal meanings stay distinct (4.6768ms)
+✔ 0725 stored personal age, DOB and mixed rating/contact requests remain protected (4.3046ms)
+✔ 0725 age reference scope does not transfer PrimeTime policy to other leagues (6.3441ms)
+✔ 0725 age cutoff policy comes only from source; no fixed date or year in selector (1.121ms)
+✔ 0725 benchmark preserves all 89 earlier questions and appends the 10 requested age/event controls (123.135ms)
+✔ 0725 isolated migration replay, authorized combined choices, missing/denial/count and View-As target isolation (4817.0395ms)
+(node:24836) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ generic rating limitation and combined choices: What's my DUPR? (34.5927ms)
+✔ generic rating limitation and combined choices: What is my DUPR rating? (7.3714ms)
+✔ generic rating limitation and combined choices: What is my rating on DUPR? (3.3193ms)
+✔ generic rating limitation and combined choices: Can you tell me my DUPR? (1.8816ms)
+✔ official rating unavailable without lookup: What's my current DUPR? (1.5762ms)
+✔ official rating unavailable without lookup: What's my current official DUPR? (1.1438ms)
+✔ explicit supported rating stays uncluttered: What's my Season DUPR? (2.3499ms)
+✔ explicit supported rating stays uncluttered: What's my PrimeTime Season DUPR? (1.3146ms)
+✔ explicit supported rating stays uncluttered: What is my Season DUPR for 2026 Fall? (1.5899ms)
+✔ combined selection reauthorizes and refetches; missing, denial and target binding remain separate (8.2338ms)
+(node:24540) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ RF01 below (3.7841ms)
+✔ RF02 fraction (0.5685ms)
+✔ RF03 boundary (0.2305ms)
+✔ RF04 above (0.2524ms)
+✔ RF05 missing (0.3516ms)
+✔ RF06 numeric NR (0.3725ms)
+✔ RF07 rated below (0.28ms)
+✔ RF08 rated inside (0.1718ms)
+✔ RF09 rated above (0.217ms)
+✔ RF10 independent NR (0.3618ms)
+✔ RF11 independent unknown (0.4034ms)
+✔ RF12 pair unknown (0.1325ms)
+✔ Exact official source gate + NR precedence + sanitized single telemetry outcome (31.7401ms)
+✔ Policy only never reads SELF (7.3436ms)
+✔ PT9 conflict blocks personal lookup; no crossing to Weekday rules (8.1937ms)
+✔ PrimeTime age policy includes exact 6.3.2 source; no live lookup (0.9915ms)
+✔ Clarification binds subject session, exact choice and current source (7.7192ms)
+✔ Inactive or unavailable SDUPR5 does not substitute another division (0.8468ms)
+✔ Missing RF stays unknown and denied subject remains protected (6.9458ms)
+✔ Telemetry exceptions fail open with exactly one logical attempt (6.8915ms)
+✔ Standalone other-player RF is protected before catalog or provider (0.7599ms)
+✔ Changed policy version, future season and missing continuation fail closed (0.6145ms)
+(node:28904) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0725 SELF-only RF migration, replay, roles, projection and effective target (4426.1507ms)
+(node:7808) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ai_policy_evidence {
+  event: 'policy_evidence_failed',
+  time: '2026-09-10T19:21:02.542Z',
+  correlationId: null,
+  origin: null,
+  intent: 'policy_date',
+  object: 'roster',
+  scope: [ 'weekday' ],
+  candidateCount: 108,
+  completionCount: 108,
+  candidates: [
+    {
+      chunkId: 'c4ab8544-decb-4ea1-b856-2df4a2d196f1',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'a951f671-8566-4b6a-b630-8474e5b302e9',
+      versionId: '816a2cd7-d0c9-4c27-b41a-90eccc39cc9b',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'aebb549b-aabe-42bf-a326-e0a121dcee1e',
+      versionId: '5e8efa91-4f6c-47eb-9747-b122f0ebf656',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '1b82f518-665d-4bf7-b61f-5b4e34bb57ab',
+      versionId: '5e8efa91-4f6c-47eb-9747-b122f0ebf656',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '8ba4c26d-937f-497c-82c2-a3dc2d6e46f8',
+      versionId: '5e8efa91-4f6c-47eb-9747-b122f0ebf656',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '12bd9837-b95f-489c-a4d7-675c7b59f516',
+      versionId: '5e8efa91-4f6c-47eb-9747-b122f0ebf656',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '9a898525-cfcb-4003-94d3-32c1c7168369',
+      versionId: '5e8efa91-4f6c-47eb-9747-b122f0ebf656',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '9ab12cbe-4155-42a9-bf23-88f4c5f423ca',
+      versionId: '5e8efa91-4f6c-47eb-9747-b122f0ebf656',
+      reason: 'NOT_SELECTED'
+    }
+  ],
+  referencesTruncated: true,
+  selectedCount: 2,
+  applicability: 'SELECTED',
+  validation: 'SOURCE_REVALIDATION_FAILED',
+  finalCount: 0,
+  zeroStage: 'validation',
+  completion: 'complete',
+  completionStage: null,
+  completionReason: null,
+  completionMs: 0
+}
+✔ 0725 exact blocker: real source gate before model, citations, result, Stage 7 and feedback serialize (242.5522ms)
+✔ 0725 fidelity A/B/C/D/E/F: exact ranges separate, altered text and scope rejected without model (119.0143ms)
+✔ 0725 integrated benchmark Q01: routing plus real source validation (17.8447ms)
+✔ 0725 integrated benchmark Q02: routing plus real source validation (2.7432ms)
+✔ 0725 integrated benchmark Q03: routing plus real source validation (0.9635ms)
+✔ 0725 integrated benchmark Q04: routing plus real source validation (1.906ms)
+✔ 0725 integrated benchmark Q05: routing plus real source validation (1.967ms)
+✔ 0725 integrated benchmark Q06: routing plus real source validation (0.5528ms)
+✔ 0725 integrated benchmark Q07: routing plus real source validation (55.8007ms)
+✔ 0725 integrated benchmark Q08: routing plus real source validation (26.7626ms)
+✔ 0725 integrated benchmark Q09: routing plus real source validation (10.8978ms)
+✔ 0725 integrated benchmark Q10: routing plus real source validation (15.0645ms)
+✔ 0725 integrated benchmark Q11: routing plus real source validation (5.7422ms)
+✔ 0725 integrated benchmark Q12: routing plus real source validation (5.6053ms)
+✔ 0725 integrated benchmark Q13: routing plus real source validation (8.4755ms)
+✔ 0725 integrated benchmark Q14: routing plus real source validation (7.2841ms)
+✔ 0725 integrated benchmark Q15: routing plus real source validation (8.3537ms)
+✔ 0725 integrated benchmark Q16: routing plus real source validation (8.8498ms)
+✔ 0725 integrated benchmark Q17: routing plus real source validation (3.344ms)
+✔ 0725 integrated benchmark Q18: routing plus real source validation (3.799ms)
+✔ 0725 integrated benchmark Q19: routing plus real source validation (5.6159ms)
+✔ 0725 integrated benchmark Q20: routing plus real source validation (7.9699ms)
+✔ 0725 integrated benchmark Q21: routing plus real source validation (6.0231ms)
+✔ 0725 integrated benchmark Q22: routing plus real source validation (13.137ms)
+✔ 0725 integrated benchmark Q23: routing plus real source validation (6.2118ms)
+✔ 0725 integrated benchmark Q24: routing plus real source validation (23.7209ms)
+✔ 0725 integrated benchmark Q25: routing plus real source validation (5.4321ms)
+✔ 0725 integrated benchmark Q26: routing plus real source validation (3.1697ms)
+✔ 0725 integrated benchmark Q27: routing plus real source validation (5.1808ms)
+✔ 0725 integrated benchmark Q28: routing plus real source validation (3.2823ms)
+✔ 0725 integrated benchmark Q29: routing plus real source validation (9.4355ms)
+✔ 0725 integrated benchmark Q30: routing plus real source validation (9.7502ms)
+✔ 0725 integrated benchmark Q31: routing plus real source validation (15.7844ms)
+✔ 0725 integrated benchmark Q32: routing plus real source validation (17.162ms)
+✔ 0725 integrated benchmark Q33: routing plus real source validation (13.0781ms)
+✔ 0725 integrated benchmark Q34: routing plus real source validation (12.124ms)
+✔ 0725 integrated benchmark Q35: routing plus real source validation (11.3535ms)
+✔ 0725 integrated benchmark Q36: routing plus real source validation (6.8228ms)
+✔ 0725 integrated benchmark Q37: routing plus real source validation (19.9585ms)
+✔ 0725 integrated benchmark Q38: routing plus real source validation (13.1685ms)
+✔ 0725 integrated benchmark Q39: routing plus real source validation (15.1278ms)
+✔ 0725 integrated benchmark Q40: routing plus real source validation (16.3508ms)
+✔ 0725 integrated benchmark Q41: routing plus real source validation (10.1441ms)
+✔ 0725 integrated benchmark Q42: routing plus real source validation (14.194ms)
+✔ 0725 integrated benchmark Q43: routing plus real source validation (9.2602ms)
+✔ 0725 integrated benchmark Q44: routing plus real source validation (11.2938ms)
+✔ 0725 integrated benchmark Q45: routing plus real source validation (9.494ms)
+✔ 0725 integrated benchmark Q46: routing plus real source validation (10.0964ms)
+✔ 0725 integrated benchmark Q47: routing plus real source validation (10.9407ms)
+✔ 0725 integrated benchmark Q48: routing plus real source validation (25.4071ms)
+✔ 0725 integrated benchmark Q49: routing plus real source validation (20.9148ms)
+✔ 0725 integrated benchmark Q50: routing plus real source validation (0.4578ms)
+✔ 0725 integrated benchmark Q51: routing plus real source validation (0.3589ms)
+✔ 0725 integrated benchmark Q52: routing plus real source validation (0.208ms)
+✔ 0725 integrated benchmark Q53: routing plus real source validation (0.4202ms)
+✔ 0725 integrated benchmark Q54: routing plus real source validation (9.6536ms)
+✔ 0725 integrated benchmark Q55: routing plus real source validation (5.7241ms)
+✔ 0725 integrated benchmark Q56: routing plus real source validation (9.6268ms)
+✔ 0725 integrated benchmark Q57: routing plus real source validation (12.3382ms)
+✔ 0725 integrated benchmark Q58: routing plus real source validation (0.2052ms)
+✔ 0725 integrated benchmark Q59: routing plus real source validation (0.0858ms)
+✔ 0725 integrated benchmark Q60: routing plus real source validation (1.9345ms)
+✔ 0725 integrated benchmark Q61: routing plus real source validation (1.5009ms)
+✔ 0725 integrated benchmark Q62: routing plus real source validation (0.6985ms)
+✔ 0725 integrated benchmark Q63: routing plus real source validation (0.3723ms)
+✔ 0725 Weekday applicability: order-independent exact excerpts, scope, default and qualifications (30.4712ms)
+✔ 0725 Saturday applicability: order-independent exact excerpts, scope, default and qualifications (28.2783ms)
+✔ 0725 PrimeTime applicability: order-independent exact excerpts, scope, default and qualifications (21.8938ms)
+✔ 0725 historical metadata shape unchanged; excerpt references never persist source prose (5.0607ms)
+✔ 0725 exact cross-chunk parts bypass legacy continuation rewriting and retain conflicts (2.4439ms)
+(node:26244) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiQuestionApplicability.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 global extraction: every unit in current 108-chunk bounded official snapshot is literal source text (15.9011ms)
+✔ 0725 Q57 compatibility loophole closed: synthetic heading/date fails; separate exact items pass (40.9557ms)
+✔ 0725 nonadjacent list child gets exact separate governing parent, not siblings or synthetic prose (2.9319ms)
+✔ 0725 table text preserves original rows, columns, labels and CRLF; invented table sentence is rejected (0.7998ms)
+✔ 0725 year derivation preserves exact period labels and never collapses season ranges (12.5565ms)
+✔ 0725 formerly missing evidence is selected from current sources with all distinct rating requirements (10.2705ms)
+(node:16500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 date Q64: when does the women weekday dupr league start (36.9851ms)
+✔ 0725 date Q65: What is the starting date for the women's weekday dupr league (12.0852ms)
+✔ 0725 date Q66: When does the women's weekday league start? (3.0655ms)
+✔ 0725 date Q67: When is the first women's weekday match? (3.412ms)
+✔ 0725 date Q68: When does women's weekday begin? (3.2076ms)
+✔ 0725 date Q69: What day does the women's league start? (1.6475ms)
+✔ 0725 date Q70: When does the men's weekday league start? (2.467ms)
+✔ 0725 date Q71: When does the Weekday league start? (2.1227ms)
+✔ 0725 date Q72: When does Weekday 9.1 start? (1.9792ms)
+✔ 0725 date Q73: When does PrimeTime league start? (2.9219ms)
+✔ 0725 date Q74: When does the Saturday season begin? (2.0326ms)
+✔ 0725 date Q75: When does Saturday DUPR7 start? (1.3226ms)
+✔ 0725 date Q76: When does Saturday DUPR6 start? (1.3303ms)
+✔ 0725 date Q77: When does Saturday DUPR8 begin? (1.0834ms)
+✔ 0725 date Q78: When does registration open for Weekday? (0.9556ms)
+✔ 0725 date Q79: When does registration open for Saturday? (0.7571ms)
+✔ 0725 date Q80: When does registration close for PrimeTime? (1.085ms)
+✔ 0725 date Q81: When is the Weekday championship? (0.6213ms)
+✔ 0725 date Q82: When are the Saturday playoffs? (1.5741ms)
+✔ 0725 date Q83: When is the PrimeTime championship? (0.6529ms)
+✔ 0725 date Q84: When does the Weekday season end? (0.6553ms)
+✔ 0725 date Q85: When does the Saturday season end? (0.8627ms)
+✔ 0725 date Q86: When does the PrimeTime season end? (0.641ms)
+✔ 0725 date Q87: When does the league start? (0.7369ms)
+✔ 0725 date Q88: When is the first Saturday DUPR7 match? (1.7181ms)
+✔ 0725 date Q89: When does the Women's Weekday league start in 2027? (2.6715ms)
+✔ 0725 date metadata is revalidated, never accepted from caller; altered text or scope fails (1.0887ms)
+✔ 0725 ambiguous source period and unordered dates cannot manufacture a calendar year (0.1062ms)
+✔ 0725 signed league clarification preserves gender/date intent and rejects another user context (2.5017ms)
+✔ 0725 compact welcome advertises four implemented read intents and retains all existing benchmark cases (3.1559ms)
+✔ 0725 current Rules table of contents is not an operative Rally mechanics section (2.8687ms)
+(node:27948) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 policy operation: When is my Season DUPR established? (33.4243ms)
+✔ 0725 policy operation: When is Season DUPR established? (2.2631ms)
+✔ 0725 policy operation: When is my Season DUPR set? (2.0199ms)
+✔ 0725 policy operation: When is my Season DUPR locked? (3.4064ms)
+✔ 0725 policy operation: When does my Season DUPR lock? (1.7614ms)
+✔ 0725 policy operation: Can my Season DUPR change during the season? (3.0561ms)
+✔ 0725 policy operation: Does my Season DUPR stay the same all season? (1.1715ms)
+✔ 0725 policy operation: How long does my Season DUPR remain in effect? (3.1491ms)
+✔ 0725 policy operation: Can my rating be reset during the season? (3.0408ms)
+✔ 0725 policy operation: How is my Season DUPR determined? (2.954ms)
+✔ 0725 policy operation: When is my PrimeTime Season DUPR established? (2.647ms)
+✔ 0725 policy operation: When is my season rating updated? (2.795ms)
+✔ 0725 value contrast season (1.5278ms)
+✔ 0725 value contrast primetime (0.7862ms)
+✔ 0725 value contrast unsupported (0.3494ms)
+✔ 0725 completion failure and dedup conflict remain empty with safe reasons (2.3148ms)
+✔ 0725 duration selects separately documented reset qualification (1.8252ms)
+✔ 0725 bounded telemetry reason build (0.7135ms)
+✔ 0725 bounded telemetry reason rpc (0.5547ms)
+✔ 0725 bounded telemetry reason timeout (9.249ms)
+ai_policy_evidence {
+  event: 'policy_evidence_failed',
+  time: '2026-09-10T19:21:09.274Z',
+  correlationId: null,
+  origin: null,
+  intent: 'policy_date',
+  object: 'rating',
+  scope: [],
+  candidateCount: 109,
+  completionCount: 109,
+  candidates: [
+    {
+      chunkId: 'd51e615b-a4f2-460f-8a81-da9abfbd46af',
+      versionId: 'f0aad5ad-cf08-46c2-94fd-686ceb1271c0',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'c4ab8544-decb-4ea1-b856-2df4a2d196f1',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9f05921-2ee9-46fc-9b44-e5a861d7dd6f',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: '950a54ab-aa3b-4f43-9c51-88ce0ca803ae',
+      versionId: 'f811e60f-9af8-444f-b009-9594a530acd6',
+      reason: 'SELECTED'
+    },
+    {
+      chunkId: 'f9e04de7-e031-4446-b14d-ad4484157cd2',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: '6cab8beb-ccf1-4c30-b8ba-a032f3e582d6',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'af393e89-06b0-406c-99ab-eaffeb369c7c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    },
+    {
+      chunkId: 'ea519f19-a038-4eb5-b391-3868da7efe2c',
+      versionId: '7ec16cf5-7b9d-4b3b-a847-8dd5767396c7',
+      reason: 'NOT_SELECTED'
+    }
+  ],
+  referencesTruncated: true,
+  selectedCount: 4,
+  applicability: 'SELECTED',
+  validation: 'SOURCE_REVALIDATION_FAILED',
+  finalCount: 0,
+  zeroStage: 'validation',
+  completion: 'complete',
+  completionStage: null,
+  completionReason: null,
+  completionMs: 0
+}
+✔ 0725 diagnostic snapshot fits existing PostgreSQL and replay remains idempotent (2662.277ms)
+✔ 0725 no evidence or failed source validation never invokes model (50.0504ms)
+✔ 0725 private injected diagnostics are sanitized; View-As stays separate (1.9215ms)
+✔ 0725 View-As policy clears Live clarification without a lookup or provider call (130.8106ms)
+(node:20540) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Document-only What are the requirements for DUPR5? (14.8022ms)
+✔ Document-only What DUPR range is allowed in DUPR5? (4.5921ms)
+✔ Document-only How does NR work for DUPR5? (4.459ms)
+✔ Hybrid Can I play on a DUPR5 team? (5.3685ms)
+✔ Hybrid Am I eligible for DUPR5? (4.3398ms)
+✔ Existing document policy When is my Season DUPR established? (4.4393ms)
+✔ Existing document policy Can my Season DUPR change during the season? (2.5052ms)
+✔ Existing document policy How does NR eligibility work? (3.322ms)
+✔ Existing document policy What does the Reliability Factor rule say? (2.0228ms)
+✔ Existing Live SELF_RATING remains live-only (0.8212ms)
+✔ Authorized missing RF is consulted and hybrid but UNKNOWN (3.6196ms)
+✔ No successful personal inputs: denied (0.6679ms)
+✔ No successful personal inputs: not_found (0.5ms)
+✔ No successful personal inputs: rate_limited (0.3396ms)
+✔ No successful personal inputs: unsupported (0.337ms)
+✔ No successful personal inputs: ambiguous (0.6531ms)
+✔ No successful personal inputs: no_season (3.2736ms)
+✔ Planned personal access not performed Can I play PrimeTime 9? (6.7129ms)
+✔ Planned personal access not performed Can I play DUPR7? (0.3758ms)
+✔ Planned personal access not performed Can I play SDUPR5? (0.1025ms)
+✔ Failed source validation cannot claim successful personal comparison (0.53ms)
+✔ View-As uses identical trusted source classifications with no role inference (14.964ms)
+✔ Source metadata contains no private values or member identifiers (3.5722ms)
+✔ Privacy history is independent of document-only badge and stale result.live (3.3442ms)
+✔ Normal and View-As UI use shared presentation and avoid hardcoded eligibility LIVE banner (0.8602ms)
+✔ Actual player Exchange markup renders official/hybrid/live badges and timestamp truthfully (36.4169ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When is my Season DUPR established? (3.6661ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When is my Season DUPR locked? (1.2962ms)
+✔ Actual document adapter, serialization, render and telemetry parity: Can my Season DUPR change during the season? (1.4174ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When can I start entering my roster? (1.0831ms)
+✔ Actual document adapter, serialization, render and telemetry parity: When does the Women's Weekday DUPR League start? (1.5601ms)
+✔ Actual document adapter, serialization, render and telemetry parity: What date is age based on for PrimeTime? (1.2661ms)
+✔ Actual document adapter, serialization, render and telemetry parity: Does the Weekday DUPR League use Rally Scoring? (1.4917ms)
+✔ Actual document adapter, serialization, render and telemetry parity: How does Rally Scoring work? (1.0864ms)
+✔ Trusted document processing family league_rules (0.4472ms)
+✔ Trusted document processing family usap_rulebook (0.3399ms)
+✔ Trusted document processing family important_dates (0.2496ms)
+✔ Trusted document processing family approved_answer (0.2249ms)
+✔ Mixed official document families retain telemetry distinction and document badge (0.2967ms)
+✔ Non-success document processing has no successful source badge: insufficient_evidence (0.1837ms)
+✔ Non-success document processing has no successful source badge: conflict (0.1713ms)
+✔ Manager document response propagates identical trusted provenance (4.6386ms)
+✔ Live roster stays Live even with arbitrary prose or source citations (0.1635ms)
+✔ Actual manager renderer handles policy eligibility, hybrid and Live without legacy document fields (38.6156ms)
+(node:6596) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiQualityPersistence.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0725 Q78 450ms success (13.2598ms)
+✔ 0725 Q78 deadline then found (3.5221ms)
+✔ 0725 Q78 deadline absent then retry (2.7802ms)
+✔ 0725 Q78 late first commit races retry (2.6757ms)
+✔ 0725 Q78 reconciliation timeout (1.3177ms)
+✔ 0725 Q78 reconciliation failure (1.8322ms)
+✔ 0725 Q78 second deadline then found (1.2242ms)
+✔ 0725 Q78 second deadline absent (0.9412ms)
+✔ 0725 Q78 mismatch never retries (0.8363ms)
+✔ 0725 Q78 safe answer returns before recovery and no answer rerun (5.3696ms)
+✔ 0725 reconciliation cannot accept an older positive occurrence for missing negative review case (0.7775ms)
+✔ 0725 recovery scheduling failure is visible and never runs detached (0.9294ms)
+✔ 0725 recovery keeps origin and never introduces actor or effective member identifiers (2.1439ms)
+✔ 0725 recovery callback reentry cannot exceed one retry or terminal diagnostic (0.8473ms)
+✔ 0725 all ordinary capture route callers register framework-owned recovery (1.5595ms)
+✔ 0726 fixture nested inner count evaluates null/empty/zero, scope AND OR, and missing joins with PostgreSQL (2864.7206ms)
+✔ 0726 fixture rejects unknown operators/selections instead of guessing results (2.041ms)
+✔ 0726 read RPC manifest denies unknown, writes, View-As mutation and wrong credential (1.4807ms)
+✔ 0726 exact member directory SQL executes read-only with search, roles, roster filters and paging (3496.0956ms)
+(node:11684) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/proxy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0726 normal routing is independent of View-As context service, hostname availability and maintenance (24.0622ms)
+✔ 0726 unavailable context never converts isolated requests into normal mutation authority (14.4188ms)
+(node:19632) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/viewAsProjectionClient.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0726 normal member/role/auth headers preserve normal identity without View-As state (3.4079ms)
+✔ 0726 isolated identity creates no Supabase client or target Auth session (1.2708ms)
+✔ 0726 in-memory projection reuses joins and filters but cannot fetch or mutate (1.421ms)
+✔ 0726 normal authentication matches the recovered baseline for all five role levels (13.6713ms)
+✔ 0726 keeps one real LMS presentation and removes the mini snapshot transport (3.0066ms)
+✔ 0726 shared settings loader preserves normal fetch and uses only projected values in View-As (31.7773ms)
+(node:5936) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/viewAsPageAssets.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0726 profile image resolves only authorized self reference and fixed storage bucket (1.978ms)
+✔ 0726 scoped page reads clean apply and replay (4055.3647ms)
+✔ 0726 dashboard projection uses effective identity, no raw RF or unrelated contacts, proof/expiry denial (3818.1484ms)
+✔ 0726 additive migration preserves normal ACLs/business rows, rejects drift and recovers missing scoped function (7862.9552ms)
+✔ 0726 additive migration preserves accepted snapshot/context/maintenance for application-only rollback (4274.2876ms)
+(node:29272) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0727 policy routing and exact evidence: Can I play on a team in a different community? (51.4553ms)
+✔ 0727 policy routing and exact evidence: Can I play in a different community? (7.7179ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community? (9.7909ms)
+✔ 0727 policy routing and exact evidence: Can I join another community's team? (13.5228ms)
+✔ 0727 policy routing and exact evidence: Can players from different communities be on the same team? (8.6766ms)
+✔ 0727 policy routing and exact evidence: Do I have to play for my own community? (8.6537ms)
+✔ 0727 policy routing and exact evidence: Are cross-community teams allowed? (15.3719ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a team in my division. Can I play for another community? (11.9375ms)
+✔ 0727 policy routing and exact evidence: My community has a team but it's full. Can I play for another community? (7.9803ms)
+✔ 0727 policy routing and exact evidence: My community has a team in my division and has room. Can I play for another community? (17.1609ms)
+✔ 0727 policy routing and exact evidence: My community has a team in another division. Can I play elsewhere in my division? (18.1101ms)
+✔ 0727 policy routing and exact evidence: What are the rules for cross-community teams? (7.2648ms)
+✔ 0727 policy routing and exact evidence: Can I play on another community's team? (8.4232ms)
+✔ 0727 policy routing and exact evidence: My community doesn't have a DUPR7 team. Can I play for another community? (11.9054ms)
+✔ 0727 policy routing and exact evidence: Can players play on teams in other communities? (4.825ms)
+✔ 0727 policy routing and exact evidence: Do you have to play for your own community? (3.3042ms)
+✔ 0727 policy routing and exact evidence: Can I play for another community if mine has a team? (6.8297ms)
+✔ 0727 policy routing and exact evidence: What if my community's team is full? (3.5063ms)
+✔ 0727 policy routing and exact evidence: My community has a Saturday DUPR7 team. Can I play for another community in Weekday DUPR8? (7.0371ms)
+✔ 0727 separate live and division eligibility remain separate (9.7835ms)
+✔ 0727 missing conjunction, conflicting candidates, changed exact source fail closed (27.2247ms)
+✔ 0727 completion reads only active ready searchable document corpus (7.141ms)
+✔ 0727 generated request contains only exact policy/question, with conditional fact instructions (14.8698ms)
+✔ 0727 league-scoped distractor never becomes governing evidence for another league (2.0258ms)
+(node:23604) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0728 normal implicit Player and explicit role precedence remain unchanged (6.3184ms)
+✔ 0728 implicit Player role, page and Live privacy matrix (7230.9188ms)
+✔ 0728 rollback and partial recovery retain metadata and business data (6524.8732ms)
+(node:16752) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0729 record and deferred rank routing, no external calls (31.2567ms)
+✔ 0729 SQL identity, record, feedback and effective View-As (9134.4905ms)
+✔ 0729 signed clarification binds identity, named scope, pagination and rejects forged selection (25.3721ms)
+(node:22680) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0730 scoped SQL names: Captain/Co-Captains/Player/Club Pro, privacy and unchanged dashboard (11035.5964ms)
+✔ 0730 overlay cannot append teams, copy contact fields or retain email fallback (1.4493ms)
+(node:27144) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiRequestIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0732 document How do I register my PrimeTime team for 2026 Fall? (179.8919ms)
+✔ 0732 document I'm trying to sign up our team for the 2026 Fall PrimeTime DUPR league. Will you send me step-by-step instructions? (100.7573ms)
+✔ 0732 document What do I need to do to register a Weekday team for 2026 Fall? (30.9816ms)
+✔ 0732 document How do I sign up a Saturday team for the 26/27 Saturday Season? (2.9325ms)
+✔ 0732 document How does a Captain register a team? (10.0234ms)
+✔ 0732 document When will you send out the schedules? (10.3225ms)
+✔ 0732 document When will the schedules be done? (8.8185ms)
+✔ 0732 document When are schedules coming out? (4.0599ms)
+✔ 0732 document When will schedules be released? (8.3749ms)
+✔ 0732 document When will schedules be posted? (5.5661ms)
+✔ 0732 document When can we expect our schedule? (5.5645ms)
+✔ 0732 document When do Captains get schedules? (4.1289ms)
+✔ 0732 document What date will schedules be available? (3.0774ms)
+✔ 0732 document When will the 2026 Fall PrimeTime schedules be released? (6.3311ms)
+✔ 0732 document When will the Weekday schedules be released? (77.5651ms)
+✔ 0732 document When will the Saturday schedule be released? (57.2042ms)
+✔ 0732 exact original retains context (5.3687ms)
+✔ 0732 Captain needs-to-do form is procedural (4.2895ms)
+✔ 0732 live contrasts (85.4462ms)
+✔ 0732 incomplete procedure fails closed (3.5128ms)
+✔ 0732 source year and missing coverage fail closed (7.1569ms)
+✔ 0732 different future dates clarify only unresolved applicable league (26.6891ms)
+✔ 0732 procedure referent requires valid context (2.1674ms)
+✔ 0732 conflicting season league does not retrieve (1.6659ms)
+✔ 0732 active completion reads existing source rows and closes on missing versions (17.5274ms)
+✔ 0732 BY qualifiers survive selection and differing qualifiers require clarification (10.6121ms)
+(node:27488) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/adminNavigation.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0715 AI management is an exact leaf, console alone is active on its route (15.3893ms)
+✔ LMS-0715 other System Setup and existing descendant/alias matching remain unchanged (3.0262ms)
+✔ LMS-0715 shared desktop/mobile navigation wires exact matching and header action has content/contrast (48.2372ms)
+(node:8564) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/memberImportLocation.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ new imported member receives matching text and link together (2.1421ms)
+✔ missing link uses existing community, not conflicting import (0.1985ms)
+✔ non-null conflicting link remains unchanged and is flagged (0.1892ms)
+✔ duplicate or inactive matches never assign a link (1.2613ms)
+✔ aliases are not guessed and established alias links are preserved (0.2074ms)
+✔ blank input does not clear a community and exact matching ignores case/edge whitespace (0.2199ms)
+(node:8856) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiOfficialDocumentViewer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ uses encrypted, user-bound opaque viewer tokens rather than player-visible catalog identifiers (13.8942ms)
+✔ revalidates the current active searchable source before the LMS PDF proxy can use it (5.6294ms)
+✔ react-pdf viewer explicitly selects and safely clamps cited pages (0.3451ms)
+✔ viewer routes require player authorization and render the authenticated LMS PDF proxy through react-pdf (16.3438ms)
+(node:17076) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ A/B: empty trailing header and ordinary ten-column export preserve every field (4.5286ms)
+✔ C named extra header remains invalid (0.4966ms)
+✔ D short data row remains invalid (0.2135ms)
+✔ E populated extra data field remains invalid (0.2135ms)
+✔ F unnamed interior header remains invalid (0.2304ms)
+✔ punctuation-only named suffix is not padding remains invalid (0.2101ms)
+✔ duplicate normalized header remains invalid (0.2401ms)
+✔ trailing header padding does not allow extra populated data remains invalid (0.2396ms)
+✔ G/H: quotes, commas, escaped quotes, BOM and LF/CRLF retain positional empty cells (0.7042ms)
+✔ a trailing comma is a real empty data field, never stripped to repair width (0.7112ms)
+✔ 879-row export-shaped fixture reaches the complete preview service without writes (61.5093ms)
+(node:26612) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/seasonRatingsImport.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 879-row scrubbed actual export reconciles source fields and recorded identity categories (27.546ms)
+✔ DUPR only, normalized exact match, missing/unmatched and all duplicate rows rejected (0.8983ms)
+✔ missing age preserves existing source age without touching locked inputs; unchanged repeat is no-op (1.839ms)
+✔ invalid values do not become ratings: {"doubles":"3abc"} (0.2445ms)
+✔ invalid values do not become ratings: {"doubles":"-3"} (0.1448ms)
+✔ invalid values do not become ratings: {"doubles":"Infinity"} (0.1246ms)
+✔ invalid values do not become ratings: {"doubles":"8.1"} (0.1149ms)
+✔ invalid values do not become ratings: {"doubles":"3.2345"} (0.1442ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29%"} (0.19ms)
+✔ invalid values do not become ratings: {"doublesReliability":"-1"} (0.2302ms)
+✔ invalid values do not become ratings: {"doublesReliability":"101"} (0.144ms)
+✔ invalid values do not become ratings: {"doublesReliability":"1e1"} (0.1217ms)
+✔ invalid values do not become ratings: {"doublesReliability":"29","doublesRe":"30"} (0.1354ms)
+✔ invalid values do not become ratings: {"metrics":"{broken"} (0.1274ms)
+✔ invalid values do not become ratings: {"metrics":"[]"} (0.0892ms)
+✔ invalid values do not become ratings: {"metrics":"{\"subscores\":{\"doubles\":{\"over_65\":\"bad\",\"over_50\":\"3.4\"}}}"} (0.1215ms)
+✔ full RF header is primary; short alias works only when primary absent (0.1305ms)
+✔ strict CSV multiline, escaping, duplicate headers, width and row bound (1.0353ms)
+✔ signed exact preview rejects tampering, wrong session, expiration and wrong purpose (1.2716ms)
+✔ preview calls only read RPC; commit requires explicit confirmation and same season (4.2486ms)
+✔ current-policy RF 28 (0.445ms)
+✔ current-policy RF 29 (0.0918ms)
+✔ current-policy RF 30 (0.0536ms)
+✔ current-policy RF 29.0 (0.0711ms)
+✔ current-policy RF 29.01 (0.0534ms)
+✔ Ask LWR supplied RF: My Reliability Factor is 29. Am I NR? (5.7899ms)
+✔ Ask LWR supplied RF: Is a Reliability Factor of 30 considered NR? (1.1835ms)
+✔ Ask LWR supplied RF: What happens if my RF is 28? (0.9569ms)
+✔ unchanged substitute Approved Answer applies current NR rules at RF29 (2.3069ms)
+✔ import rejects View-As credentials before authentication or database access (24.7399ms)
+✔ RF cutoff comes from evidence, with no implicit fallback or importer classification (0.1821ms)
+✔ source-only transaction, rollback, identity revalidation, role boundary and idempotency (2957.9757ms)
+(node:25912) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/seasonRatingsInitialization.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Phase 1 boundaries, missing/invalid/conflicting input, independent protected value (3.123ms)
+✔ atomic success, source immutable, PrimeTime untouched, provenance retained and idempotency (3220.3202ms)
+✔ unexpected failure rolls back earlier writes, records failed audit, no provenance; stale inputs fail (3980.4951ms)
+✔ manual established rating and changed source/rules block stale preview (15404.6261ms)
+✔ server receipt tampering, origin actor/session binding and write-disabled gate (11.3332ms)
+✔ private grants, unauthorized actor denied and snapshot works read-only (3477.6699ms)
+(node:19568) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/aiEligibilityPolicy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ owner resolution synchronizes cleanup and Ask LWR at RF 29 (1.7944ms)
+✔ RF=29 retains actual cleanup rating result and existing eligibility result (1.0421ms)
+✔ owner resolution preserves cleanup threshold opt-out and missing RF behavior (0.4148ms)
+✔ current CSV import contains no cleanup or eligibility-classification calls (0.6871ms)
+(node:8792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/seasonRatingsImportServer.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ metadata migration: clean apply, existing 659 import, replay, scope, no-write, ACL and rollback (7381.9896ms)
+✔ review endpoint reads only and projects exact stored values, not RF classifications or audit internals (5.9968ms)
+✔ display preserves zero, NR, decimal precision and missing age without a derived classification (0.7149ms)
+✔ Clean Ratings and RF policy remain byte-identical to accepted release (1701.3825ms)
+(node:22152) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/.local-validation/lms0733-candidate/lwrpc-admin/app/lib/viewAsBoundary.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\.local-validation\lms0733-candidate\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0724 omit-context and legacy/event-code replay boundary; normal tab unchanged (14.8163ms)
+✔ 0724 strict origins and server credential confidentiality (4.0946ms)
+✔ 0724 complete legacy handler guard registry and isolated renderer dependency boundary (104.6545ms)
+✔ 0724 normalized Next URL uses Host boundary but keeps rewrite internal (10.6674ms)
+✔ 0724 ordinary and Live citation/conversation receipts cannot cross contexts or ordinary actor session (1.95ms)
+✔ 0724 Member Detail is the only entry; isolated target cannot nest (731.8618ms)
+✔ 0724 effective database privileges, one-use exchange, target scope and lifecycle (6309.1508ms)
+✔ 0724 roles, six Live projections, no Auth target, current relationships and immutable audit (6857.1928ms)
+✔ 0724 expiration, credential erasure, target invalidation, rate limits and diagnostic privacy (4475.1046ms)
+✔ 0724 table defaults revoked, effective column projections and audit failure close access (2554.8569ms)
+✔ 0724 preflight checks actor and target without creating context (2031.9392ms)
+✔ 0724 Club Pro home-location scope is target-effective and never inherited from actor/division (2062.2473ms)
+✔ 0724 production RLS reproduces denial; proof-bound lock correction restores SELF only (8537.7164ms)
+✔ 0724 corrected locks preserve team/captain scope and reject expiry/helper tampering (5761.9589ms)
+✔ 0724 corrected Captain contact remains team-scoped; location-only Club Pro grants no live contact (2924.6169ms)
+✔ 0724 correction refuses helper ACL drift and preserves policy/function footprint on replay (2275.0864ms)
+✔ 0724 review-only rollback restores prior function and privilege state without data changes (2106.7375ms)
+✔ reviewed maintenance: unattended expiry, active protection, repeat safety, retention and atomic failure (8438.9604ms)
+✔ 0724 independent production column contract, minimum effective grants and missing-column failure (9046.2129ms)
+ℹ tests 1176
+ℹ suites 0
+ℹ pass 1176
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 159666.1258

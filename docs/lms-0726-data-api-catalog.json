@@ -1,0 +1,3473 @@
+{
+  "roles": [
+    {
+      "name": "anon",
+      "inherit": true,
+      "bypassrls": false,
+      "superuser": false
+    },
+    {
+      "name": "authenticated",
+      "inherit": true,
+      "bypassrls": false,
+      "superuser": false
+    }
+  ],
+  "views": null,
+  "tables": [
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "division_lines",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "divisions",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "leagues",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "line_games",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "locations",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "match_lines",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "match_lineups",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "matches",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "member_season_ratings",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "members",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "score_sheet_templates",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "seasons",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "team_byes",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "team_members",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "team_standings",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "teams",
+      "owner": "postgres",
+      "force_rls": false
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres"
+      ],
+      "rls": true,
+      "kind": "r",
+      "name": "user_roles",
+      "owner": "postgres",
+      "force_rls": false
+    }
+  ],
+  "columns": [
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "division_lines",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "division_lines",
+      "column": "division_id"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "line_number"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "division_lines",
+      "column": "line_name"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "division_lines",
+      "column": "posted_to_dupr"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "division_lines",
+      "column": "game_format"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "games_per_line"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "points_to_win"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "win_by"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "division_lines",
+      "column": "picklebreaker_enabled"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "picklebreaker_points"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "division_lines",
+      "column": "line_type"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "sort_order"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "division_lines",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "division_lines",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "picklebreaker_win_points"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "picklebreaker_loss_points"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "team_win_points"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "division_lines",
+      "column": "uses_saved_match_lineups"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "division_lines",
+      "column": "standings_points_mode"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "division_lines",
+      "column": "score_type"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "division_lines",
+      "column": "score_required"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "division_lines",
+      "column": "picklebreaker_not_played_points"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "division_lines",
+      "column": "picklebreaker_not_played_award_rule"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "division_lines",
+      "column": "picklebreaker_play_rule"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "divisions",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "divisions",
+      "column": "league_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "divisions",
+      "column": "name"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "skill_level"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "sort_order"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "boolean",
+      "table": "divisions",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "divisions",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "divisions",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "numeric(3,2)",
+      "table": "divisions",
+      "column": "min_dupr"
+    },
+    {
+      "acl": null,
+      "type": "numeric(3,2)",
+      "table": "divisions",
+      "column": "max_dupr"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "number_of_lines"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "default_game_format"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "games_per_line"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "points_to_win"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "win_by"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "third_game_format"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "divisions",
+      "column": "picklebreaker_enabled"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "picklebreaker_points"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "line_notes"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "rating_type"
+    },
+    {
+      "acl": null,
+      "type": "numeric",
+      "table": "divisions",
+      "column": "standings_win_points"
+    },
+    {
+      "acl": null,
+      "type": "numeric",
+      "table": "divisions",
+      "column": "standings_tie_points"
+    },
+    {
+      "acl": null,
+      "type": "numeric",
+      "table": "divisions",
+      "column": "standings_loss_points"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "standings_tiebreak_1"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "standings_tiebreak_2"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "standings_tiebreak_3"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "picklebreaker_win_points"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "picklebreaker_loss_points"
+    },
+    {
+      "acl": null,
+      "type": "jsonb",
+      "table": "divisions",
+      "column": "default_lines_config"
+    },
+    {
+      "acl": null,
+      "type": "numeric",
+      "table": "divisions",
+      "column": "team_dupr_max"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "playoff_team_count"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "divisions",
+      "column": "score_sheet_template_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "primary_team_type"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "divisions",
+      "column": "secondary_number_of_lines"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "divisions",
+      "column": "secondary_team_type"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "divisions",
+      "column": "flex_league"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "leagues",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "leagues",
+      "column": "season_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "leagues",
+      "column": "name"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "description"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "boolean",
+      "table": "leagues",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "leagues",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "leagues",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "leagues",
+      "column": "rosters_locked"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "league_document_bucket"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "code_of_conduct_pdf_path"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "captains_guide_pdf_path"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "league_rules_pdf_path"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "score_sheet_pdf_path"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "league_waiver_pdf_path"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "leagues",
+      "column": "match_setup_reminder_days_before"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "leagues",
+      "column": "abbreviation"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "leagues",
+      "column": "flex_league"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "leagues",
+      "column": "only_home_community_players"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "line_games",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "line_games",
+      "column": "match_line_id"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "line_games",
+      "column": "game_number"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "line_games",
+      "column": "home_score"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "line_games",
+      "column": "away_score"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "line_games",
+      "column": "is_picklebreaker"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "line_games",
+      "column": "game_status"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "line_games",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "line_games",
+      "column": "updated_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "locations",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "locations",
+      "column": "name"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "locations",
+      "column": "address"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "locations",
+      "column": "city"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "locations",
+      "column": "state"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "locations",
+      "column": "zip_code"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "locations",
+      "column": "number_of_courts"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "locations",
+      "column": "court_notes"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "locations",
+      "column": "club_pros"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "locations",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "locations",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "locations",
+      "column": "updated_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "locations",
+      "column": "club_pro_member_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "locations",
+      "column": "club_pro_2_member_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "match_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "division_line_id"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lines",
+      "column": "line_number"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "home_player_1_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "home_player_2_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "away_player_1_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "away_player_2_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "match_lines",
+      "column": "line_status"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lines",
+      "column": "home_wins"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lines",
+      "column": "away_wins"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "match_lines",
+      "column": "posted_to_dupr"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "match_lines",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "match_lines",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "winning_team_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "match_lines",
+      "column": "verification_status"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lines",
+      "column": "verified_by_member_id"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "match_lines",
+      "column": "verified_at"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lines",
+      "column": "home_team_games_won"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lines",
+      "column": "away_team_games_won"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lines",
+      "column": "home_team_points"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lines",
+      "column": "away_team_points"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "match_lines",
+      "column": "rating_type_at_play"
+    },
+    {
+      "acl": null,
+      "type": "numeric(6,3)",
+      "table": "match_lines",
+      "column": "home_player_1_rating_at_play"
+    },
+    {
+      "acl": null,
+      "type": "numeric(6,3)",
+      "table": "match_lines",
+      "column": "home_player_2_rating_at_play"
+    },
+    {
+      "acl": null,
+      "type": "numeric(6,3)",
+      "table": "match_lines",
+      "column": "away_player_1_rating_at_play"
+    },
+    {
+      "acl": null,
+      "type": "numeric(6,3)",
+      "table": "match_lines",
+      "column": "away_player_2_rating_at_play"
+    },
+    {
+      "acl": null,
+      "type": "numeric(7,3)",
+      "table": "match_lines",
+      "column": "home_team_rating_at_play"
+    },
+    {
+      "acl": null,
+      "type": "numeric(7,3)",
+      "table": "match_lines",
+      "column": "away_team_rating_at_play"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "match_lines",
+      "column": "ratings_snapshotted_at"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "match_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "team_id"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "match_lineups",
+      "column": "line_number"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "player_1_member_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "match_lineups",
+      "column": "player_2_member_id"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "match_lineups",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "match_lineups",
+      "column": "updated_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "matches",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "matches",
+      "column": "league_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "matches",
+      "column": "division_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "matches",
+      "column": "home_team_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "matches",
+      "column": "away_team_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "matches",
+      "column": "location_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "date",
+      "table": "matches",
+      "column": "scheduled_date"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "time without time zone",
+      "table": "matches",
+      "column": "scheduled_time"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "matches",
+      "column": "week_number"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "matches",
+      "column": "status"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "matches",
+      "column": "home_score"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "matches",
+      "column": "away_score"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "matches",
+      "column": "notes"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "matches",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "matches",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "matches",
+      "column": "published_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "boolean",
+      "table": "matches",
+      "column": "is_published"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "matches",
+      "column": "schedule_setting_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "matches",
+      "column": "winning_team_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "matches",
+      "column": "score_status"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "matches",
+      "column": "score_entered_by_member_id"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "matches",
+      "column": "score_entered_at"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "matches",
+      "column": "score_verified_by_member_id"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "matches",
+      "column": "score_verified_at"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "matches",
+      "column": "score_disputed"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "matches",
+      "column": "score_dispute_notes"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "matches",
+      "column": "finalized_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "matches",
+      "column": "score_exported_at"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "matches",
+      "column": "result_type"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "matches",
+      "column": "result_notes"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "member_season_ratings",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "member_season_ratings",
+      "column": "member_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "member_season_ratings",
+      "column": "season_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "numeric(4,2)",
+      "table": "member_season_ratings",
+      "column": "season_dupr_rating"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "numeric(4,2)",
+      "table": "member_season_ratings",
+      "column": "season_primetime_rating"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "member_season_ratings",
+      "column": "notes"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "member_season_ratings",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "member_season_ratings",
+      "column": "updated_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "member_season_ratings",
+      "column": "dupr_doubles_rating"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "numeric(6,3)",
+      "table": "member_season_ratings",
+      "column": "dupr_reliability_rating"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "members",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "membershipworks_account_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "full_name"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "members",
+      "column": "first_name"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "members",
+      "column": "last_name"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "members",
+      "column": "email"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "phone"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "club_location"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "self_rating"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "dupr_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "member_comment"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "waiver_status"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "stripe_customer_id"
+    },
+    {
+      "acl": null,
+      "type": "text[]",
+      "table": "members",
+      "column": "profile_image_urls"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "membership_levels"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "membership_addons"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "labels"
+    },
+    {
+      "acl": null,
+      "type": "date",
+      "table": "members",
+      "column": "join_date"
+    },
+    {
+      "acl": null,
+      "type": "date",
+      "table": "members",
+      "column": "renewal_date"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "billing_method"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "auto_recurring_billing_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "ip_address"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "members",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "members",
+      "column": "last_imported_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "members",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "members",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "members",
+      "column": "location_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "membershipworks_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "membership_status"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "membership_level"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "members",
+      "column": "imported_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "members",
+      "column": "last_membership_sync_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "boolean",
+      "table": "members",
+      "column": "is_active_member"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "notification_preference"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "members",
+      "column": "notes"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "score_sheet_templates",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "name"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "description"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "sheet_title"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "template_html"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "score_sheet_templates",
+      "column": "rules_text"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "score_sheet_templates",
+      "column": "is_default"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "score_sheet_templates",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "score_sheet_templates",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "score_sheet_templates",
+      "column": "updated_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "seasons",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "seasons",
+      "column": "name"
+    },
+    {
+      "acl": null,
+      "type": "date",
+      "table": "seasons",
+      "column": "start_date"
+    },
+    {
+      "acl": null,
+      "type": "date",
+      "table": "seasons",
+      "column": "end_date"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "boolean",
+      "table": "seasons",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "seasons",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "seasons",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "seasons",
+      "column": "abbreviation"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "league_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "division_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_byes",
+      "column": "team_id"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_byes",
+      "column": "week_number"
+    },
+    {
+      "acl": null,
+      "type": "date",
+      "table": "team_byes",
+      "column": "bye_date"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "team_byes",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "team_byes",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_members",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "team_members",
+      "column": "team_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "team_members",
+      "column": "member_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "team_members",
+      "column": "role"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "boolean",
+      "table": "team_members",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "team_members",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "league_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "division_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "team_standings",
+      "column": "team_id"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "matches_played"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "integer",
+      "table": "team_standings",
+      "column": "match_wins"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "integer",
+      "table": "team_standings",
+      "column": "match_losses"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "match_ties"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "line_wins"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "line_losses"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "line_ties"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "game_wins"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "game_losses"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "points_for"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "points_against"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "point_differential"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "numeric",
+      "table": "team_standings",
+      "column": "standings_points"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "integer",
+      "table": "team_standings",
+      "column": "rank"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "team_standings",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "team_standings",
+      "column": "updated_at"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "home_wins"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "home_losses"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "away_wins"
+    },
+    {
+      "acl": null,
+      "type": "integer",
+      "table": "team_standings",
+      "column": "away_losses"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "team_standings",
+      "column": "current_streak"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "team_standings",
+      "column": "recent_form"
+    },
+    {
+      "acl": null,
+      "type": "boolean",
+      "table": "team_standings",
+      "column": "finalized"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "teams",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "teams",
+      "column": "division_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "teams",
+      "column": "name"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "teams",
+      "column": "captain_member_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "teams",
+      "column": "co_captain_member_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "boolean",
+      "table": "teams",
+      "column": "is_active"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "teams",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp without time zone",
+      "table": "teams",
+      "column": "updated_at"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "teams",
+      "column": "home_location_id"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "teams",
+      "column": "team_number"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "teams",
+      "column": "notes"
+    },
+    {
+      "acl": null,
+      "type": "text",
+      "table": "teams",
+      "column": "abbreviation"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "teams",
+      "column": "co_captain_2_member_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "teams",
+      "column": "club_pro_member_id"
+    },
+    {
+      "acl": null,
+      "type": "uuid",
+      "table": "user_roles",
+      "column": "id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "user_roles",
+      "column": "user_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "uuid",
+      "table": "user_roles",
+      "column": "member_id"
+    },
+    {
+      "acl": [
+        "lms_view_as_executor=r/postgres"
+      ],
+      "type": "text",
+      "table": "user_roles",
+      "column": "role"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "user_roles",
+      "column": "created_at"
+    },
+    {
+      "acl": null,
+      "type": "timestamp with time zone",
+      "table": "user_roles",
+      "column": "updated_at"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read division lines",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete division lines",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert division lines",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update division lines",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "division_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete divisions",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert divisions",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read divisions",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update divisions",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "divisions",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "divisions",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete leagues",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert leagues",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read leagues",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update leagues",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "leagues",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "leagues",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read line games",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Captains and managers can insert own-team line games",
+      "qual": null,
+      "check": "private.current_user_can_manage_match_line(match_line_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Captains and managers can update own-team line games",
+      "qual": "private.current_user_can_manage_match_line(match_line_id)",
+      "check": "private.current_user_can_manage_match_line(match_line_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete line games",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "line_games",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete locations",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert locations",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read locations",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update locations",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "locations",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "locations",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read match lines",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Captains and managers can update own-team match lines",
+      "qual": "private.current_user_can_manage_match(match_id)",
+      "check": "private.current_user_can_manage_match(match_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete match lines",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert match lines",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lines",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "match_lineups_delete_captains_and_managers",
+      "qual": "private.current_user_can_manage_match_lineup(team_id)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "match_lineups_insert_captains_and_managers",
+      "qual": null,
+      "check": "private.current_user_can_manage_match_lineup(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "match_lineups_select_authenticated",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "match_lineups_update_captains_and_managers",
+      "qual": "private.current_user_can_manage_match_lineup(team_id)",
+      "check": "private.current_user_can_manage_match_lineup(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "match_lineups",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read matches",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Captains and managers can update own-team matches",
+      "qual": "private.current_user_can_manage_match(id)",
+      "check": "private.current_user_can_manage_match(id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete matches",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert matches",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "matches",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "matches",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read member season ratings",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete member season ratings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert member season ratings",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update member season ratings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "member_season_ratings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "member_season_ratings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read members",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete members",
+      "qual": "(( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text]))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert members",
+      "qual": null,
+      "check": "(( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text]))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Users and managers can update members",
+      "qual": "(private.current_user_can_update_member(id) OR (( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))",
+      "check": "(private.current_user_can_update_member(id) OR (( SELECT private.current_user_role() AS current_user_role) = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete score sheet templates",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert score sheet templates",
+      "qual": null,
+      "check": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update score sheet templates",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "check": "(EXISTS ( SELECT 1\n   FROM (members m\n     JOIN user_roles ur ON ((ur.member_id = m.id)))\n  WHERE ((lower(m.email) = lower((( SELECT auth.jwt() AS jwt) ->> 'email'::text))) AND (ur.role = ANY (ARRAY['league_manager'::text, 'commissioner'::text])))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Score sheet templates are readable by authenticated users",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "score_sheet_templates",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Admins can delete seasons",
+      "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Admins can insert seasons",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Admins can update seasons",
+      "qual": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "check": "( SELECT private.current_user_is_admin() AS current_user_is_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read seasons",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "seasons",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "seasons",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Allow authenticated users to delete team byes",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Allow authenticated users to insert team byes",
+      "qual": null,
+      "check": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Allow authenticated users to update team byes",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "check": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Allow authenticated users to view team byes",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_byes",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete team members",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert team members",
+      "qual": null,
+      "check": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read team members",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update team members",
+      "qual": "private.current_user_can_manage_team(team_id)",
+      "check": "private.current_user_can_manage_team(team_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "team_members",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read team standings",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "League managers can delete team standings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "League managers can insert team standings",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "League managers can update team standings",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "team_standings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "team_standings",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert teams",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "teams",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read teams",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "teams",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Authenticated users can update teams",
+      "qual": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "check": "( SELECT private.current_user_is_lwrpc_admin() AS current_user_is_lwrpc_admin)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "teams",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "teams",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Authenticated users can read user roles",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Commissioners can delete roles",
+      "qual": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Commissioners can insert roles",
+      "qual": null,
+      "check": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Commissioners can update roles",
+      "qual": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+      "check": "( SELECT private.current_user_is_commissioner() AS current_user_is_commissioner)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "user_roles",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "view_as_executor_read",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "lms_view_as_executor"
+      ],
+      "table": "user_roles",
+      "permissive": "PERMISSIVE"
+    }
+  ],
+  "functions": [
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "private.current_user_can_manage_match(uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_can_manage_match(target_match_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (\n    select 1 from public.matches m\n    where m.id = target_match_id\n      and (private.current_user_can_manage_team(m.home_team_id)\n           or private.current_user_can_manage_team(m.away_team_id))\n  )\n$function$\n"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "private.current_user_can_manage_match_line(uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_can_manage_match_line(target_match_line_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (\n    select 1 from public.match_lines ml\n    where ml.id = target_match_line_id\n      and private.current_user_can_manage_match(ml.match_id)\n  )\n$function$\n"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "private.current_user_can_manage_match_lineup(uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_can_manage_match_lineup(lineup_team_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select private.current_user_is_lwrpc_admin()\n    or exists (\n      select 1\n      from public.user_roles ur\n      join public.teams t on t.id = lineup_team_id\n      where ur.user_id = (select auth.uid())\n        and ur.role in ('captain', 'club_pro', 'league_manager', 'commissioner')\n        and ur.member_id in (\n          t.captain_member_id,\n          t.co_captain_member_id,\n          t.co_captain_2_member_id,\n          t.club_pro_member_id\n        )\n    )\n$function$\n"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "private.current_user_can_manage_team(uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_can_manage_team(target_team_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select private.current_user_is_lwrpc_admin() or exists (\n    select 1\n    from public.user_roles ur\n    join public.teams t on t.id = target_team_id\n    where ur.user_id = (select auth.uid())\n      and ur.role in ('captain', 'club_pro', 'league_manager', 'commissioner')\n      and ur.member_id in (t.captain_member_id, t.co_captain_member_id,\n                           t.co_captain_2_member_id, t.club_pro_member_id)\n  )\n$function$\n"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "private.current_user_can_update_member(uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_can_update_member(target_member_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select private.current_user_is_lwrpc_admin() or exists (\n    select 1 from public.user_roles ur\n    where ur.user_id = (select auth.uid())\n      and ur.member_id = target_member_id\n  )\n$function$\n"
+    },
+    {
+      "acl": [
+        "=X/postgres",
+        "postgres=X/postgres",
+        "authenticated=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=public"
+      ],
+      "definer": true,
+      "signature": "private.current_user_is_admin()",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_is_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\n  select exists (\r\n    select 1\r\n    from public.user_roles ur\r\n    where ur.user_id = auth.uid()\r\n      and ur.role in ('league_manager', 'commissioner')\r\n  )\r\n$function$\n"
+    },
+    {
+      "acl": [
+        "=X/postgres",
+        "postgres=X/postgres",
+        "authenticated=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=public"
+      ],
+      "definer": true,
+      "signature": "private.current_user_is_commissioner()",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_is_commissioner()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\n  select exists (\r\n    select 1\r\n    from public.user_roles ur\r\n    where ur.user_id = auth.uid()\r\n      and ur.role = 'commissioner'\r\n  )\r\n$function$\n"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "private.current_user_is_lwrpc_admin()",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_is_lwrpc_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (\n    select 1\n    from public.user_roles ur\n    where ur.user_id = (select auth.uid())\n      and ur.role in ('league_manager', 'commissioner')\n  )\n$function$\n"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "private.current_user_role()",
+      "definition": "CREATE OR REPLACE FUNCTION private.current_user_role()\n RETURNS text\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select ur.role\n  from public.user_roles ur\n  join public.members m on m.id = ur.member_id\n  where lower(m.email) = lower((select auth.jwt() ->> 'email'))\n  limit 1\n$function$\n"
+    }
+  ],
+  "privileges": [
+    {
+      "role": "anon",
+      "table": "division_lines",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "division_lines",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "divisions",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "divisions",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "leagues",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "leagues",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "line_games",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "line_games",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "locations",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "locations",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "match_lines",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "match_lines",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "match_lineups",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "match_lineups",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "matches",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "matches",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "member_season_ratings",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "member_season_ratings",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "members",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "members",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "score_sheet_templates",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "score_sheet_templates",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "seasons",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "seasons",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "team_byes",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "team_byes",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "team_members",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "team_members",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "team_standings",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "team_standings",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "teams",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "teams",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "anon",
+      "table": "user_roles",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    },
+    {
+      "role": "authenticated",
+      "table": "user_roles",
+      "delete": true,
+      "insert": true,
+      "select": true,
+      "update": true,
+      "trigger": true,
+      "truncate": true,
+      "references": true
+    }
+  ]
+}
