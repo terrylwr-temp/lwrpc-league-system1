@@ -1112,6 +1112,7 @@ async function createSession(supabase, group, body) {
     roundCount: Number(body.roundCount || group.settings?.defaultRounds || 6),
     courtCount: requestedCourtCount || undefined,
     shuffle: body.shuffle !== false,
+    nightBalancing: (body.mode || group.mode) !== "ladder",
   });
 
   const sessionPayload = {
@@ -1849,6 +1850,7 @@ async function generateNextGame(supabase, group, body) {
     courts: resolveSessionCourts(session, courtsResult.data || []),
     existingMatches,
     historyMatches,
+    plannedRoundCount: Number(session.settings?.plannedRounds || group.settings?.defaultRounds || 6),
     courtCount: Number(session.court_count || 0) || undefined,
   });
 
@@ -1883,7 +1885,7 @@ async function generateNextGame(supabase, group, body) {
 
   await rebuildResults(supabase, group, session.id);
   await addLog(supabase, group.id, session.id, "session", `Generated round ${nextRound.roundNumber}${manualByePlayers.length > 0 ? ` with ${manualByePlayers.length} selected bye${manualByePlayers.length === 1 ? "" : "s"}` : ""}.`);
-  return { session: updatedSession, matches: matchesResult.data || [], roundNumber: nextRound.roundNumber };
+  return { session: updatedSession, matches: matchesResult.data || [], roundNumber: nextRound.roundNumber, schedulingQuality: nextRound.quality || null };
 }
 
 async function generateNextLadderGame(supabase, group, session, joinedPlayers, existingMatches, courts = [], manualByePlayers = []) {

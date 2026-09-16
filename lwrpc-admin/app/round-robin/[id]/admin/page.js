@@ -6572,9 +6572,9 @@ function noticeForAction(action, result) {
   if (action === "updateSessionPlayerStatus") return "Player status updated.";
   if (action === "addSessionPlayer") return "Player added and joined.";
   if (action === "startSession") return "Match started.";
-  if (action === "startSessionAndGenerateFirstGame") return `Match started. Round ${result.roundNumber || 1} generated.`;
+  if (action === "startSessionAndGenerateFirstGame") return `Match started. Round ${result.roundNumber || 1} generated.${result.schedulingQuality?.summary ? ` ${result.schedulingQuality.summary}` : ""}`;
   if (action === "deleteSession") return result.deleteMode === "deleted" ? "Match permanently deleted." : "Match removed from active matches and kept in history.";
-  if (action === "generateNextGame") return `Round ${result.roundNumber || ""} generated.`;
+  if (action === "generateNextGame") return `Round ${result.roundNumber || ""} generated.${result.schedulingQuality?.summary ? ` ${result.schedulingQuality.summary}` : ""}`;
   if (action === "updateMatchScore") return "Score saved.";
   if (action === "updateMatchLineup") return "Lineup updated.";
   if (action === "markSessionDuprExported") return `DUPR Export marked complete for ${result.rowCount || 0} row${Number(result.rowCount || 0) === 1 ? "" : "s"}.`;

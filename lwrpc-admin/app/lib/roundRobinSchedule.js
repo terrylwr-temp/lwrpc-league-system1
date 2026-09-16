@@ -1,3 +1,5 @@
+import { planBalancedNight } from "./roundRobinNightPlanner.js";
+
 export function suggestedRoundRobinCourts(playerCount, configuredCourtCount = 8) {
   const count = Number(playerCount || 0);
   const maxConfigured = Math.max(1, Number(configuredCourtCount || 1));
@@ -34,6 +36,7 @@ export function createRoundRobinSchedule({
   roundCount = 6,
   courtCount,
   shuffle = true,
+  nightBalancing = true,
 } = {}) {
   const activePlayers = players
     .filter((player) => player && player.id)
@@ -60,6 +63,12 @@ export function createRoundRobinSchedule({
 
   if (resolvedCourtCount < 1) {
     throw new Error("At least 1 court is required.");
+  }
+
+  if (nightBalancing && resolvedCourtCount === 2 && [8, 9].includes(totalPlayers)) {
+    const ordered = shuffle ? shuffleArray([...activePlayers]) : [...activePlayers];
+    const plan = planBalancedNight({players: ordered, courts, roundCount: roundsToPlay});
+    return {players: activePlayers, courtCount: 2, roundCount: roundsToPlay, rounds: plan.rounds, quality: plan.quality};
   }
 
   const playerIndexes = activePlayers.map((_, index) => index);
@@ -142,6 +151,7 @@ export function createNextRoundRobinRound({
   existingMatches = [],
   historyMatches = [],
   courtCount,
+  plannedRoundCount = 6,
 } = {}) {
   const activePlayers = players
     .filter((player) => player && player.id)
@@ -162,6 +172,13 @@ export function createNextRoundRobinRound({
 
   if (totalPlayers < 4) {
     throw new Error("Confirm at least 4 players before generating a game.");
+  }
+
+  if (resolvedCourtCount === 2 && [8, 9].includes(totalPlayers) && historyMatches.length === 0) {
+    const lastRound = Math.max(0, ...existingMatches.map(m => Number(m.round_number || m.roundNumber || 0)));
+    const plan = planBalancedNight({players: activePlayers, courts, matches: existingMatches,
+      roundCount: Math.max(lastRound + 1, Math.min(9, Number(plannedRoundCount) || 6))});
+    return {...plan.rounds[0], quality: plan.quality};
   }
 
   const playersById = new Map(activePlayers.map((player, index) => [String(player.id), index]));
