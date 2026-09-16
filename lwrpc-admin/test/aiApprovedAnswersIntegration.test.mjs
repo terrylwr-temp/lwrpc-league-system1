@@ -1,9 +1,10 @@
+import {retainNonVerificationFixture} from '../scripts/ai-nonverification-test-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 process.env.LWR_AI_ENABLED='true';process.env.OPENAI_API_KEY='synthetic-local-only';process.env.SUPABASE_SERVICE_ROLE_KEY='synthetic-local-receipt-key';
-const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
+const {retrieveOfficialEvidence:retrieveOfficialEvidenceRaw}=await import('../app/lib/aiRetrieval.js');
 const {generateOfficialAnswer}=await import('../app/lib/aiAnswerGeneration.js');
 const {toPlayerAnswerResult}=await import('../app/lib/askLwrPlayerAnswer.js');
 const {qualityOutcome,qualityException}=await import('../app/lib/aiQualitySnapshots.js');
@@ -62,3 +63,5 @@ test('0721 scope, competing policies and complementary evidence remain distinct'
  assert.equal(chooseApprovedEvidence(revision.canonical_question,[],[row,other]).conflict,true);
  assert.equal(chooseApprovedEvidence(revision.canonical_question,[],[other,row]).conflict,true);
 });
+
+async function retrieveOfficialEvidence(options){return retainNonVerificationFixture(await retrieveOfficialEvidenceRaw(options));}

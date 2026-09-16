@@ -1,3 +1,4 @@
+import {retainNonVerificationFixture} from '../scripts/ai-nonverification-test-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -5,7 +6,7 @@ process.env.LWR_AI_ENABLED='true';
 const {officialQuestionConcept}=await import('../app/lib/aiQuestionConcepts.js');
 const {liveIntent}=await import('../app/lib/liveLmsIntent.js');
 const {isUnsupportedOperationalQuestion}=await import('../app/lib/askLwrPlayerAnswer.js');
-const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
+const {retrieveOfficialEvidence:retrieveOfficialEvidenceRaw}=await import('../app/lib/aiRetrieval.js');
 const {selectAnswerEvidence,selectAnswerEvidenceWithAssistance}=await import('../app/lib/aiAnswerGeneration.js');
 const {trustedSelectedRuleIdentity}=await import('../app/lib/aiSelectedRuleIdentity.js');
 const {sources,scope}=JSON.parse(fs.readFileSync(new URL('./fixtures/saturday-dupr-posting.json',import.meta.url)));
@@ -71,3 +72,5 @@ test('league posting with that is self-contained without importing previous subj
  assert.equal(resolveConversationTurn({question:'Will that be entered in DUPR?',userId}).kind,'clarification');
  assert.equal(resolveConversationTurn({question:'For the Saturday league, will my rating be entered in DUPR?',userId}).effectiveQuestion,'For the Saturday league, will my rating be entered in DUPR?');
 });
+
+async function retrieveOfficialEvidence(options){return retainNonVerificationFixture(await retrieveOfficialEvidenceRaw(options));}

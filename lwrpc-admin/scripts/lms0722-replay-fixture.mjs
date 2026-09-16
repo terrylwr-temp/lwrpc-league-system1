@@ -1,5 +1,6 @@
+import {retainNonVerificationFixture} from './ai-nonverification-test-fixture.mjs';
 import fs from 'node:fs';
-import {retrieveOfficialEvidence} from '../app/lib/aiRetrieval.js';
+import {retrieveOfficialEvidence as retrieveOfficialEvidenceRaw} from '../app/lib/aiRetrieval.js';
 import {selectAnswerEvidenceWithAssistance} from '../app/lib/aiAnswerGeneration.js';
 import {clarificationFromRetrieval,resolveConversationTurn} from '../app/lib/aiConversation.js';
 export const fixture=JSON.parse(fs.readFileSync(new URL('../../docs/lms-0722-current-replay.json',import.meta.url)));
@@ -14,3 +15,5 @@ export async function replay(c,{select=true}={}){
  return {r,selected,clarification,calls,embeddings};
 }
 if(process.argv[1]?.endsWith('lms0722-replay-fixture.mjs')){for(const c of fixture.cases.filter(c=>c.searches?.length)){let a=await replay(c);console.log(JSON.stringify({q:c.question,count:a.selected.length,kind:a.clarification?'clarification':a.selected.length?'answer':'insufficient',rules:a.selected.map(x=>x.ruleNumber),content:a.selected.map(x=>x.content).join('\n')}));}}
+
+async function retrieveOfficialEvidence(options){return retainNonVerificationFixture(await retrieveOfficialEvidenceRaw(options));}

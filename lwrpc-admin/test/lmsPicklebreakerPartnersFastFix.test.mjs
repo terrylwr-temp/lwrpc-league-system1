@@ -1,9 +1,10 @@
+import {retainNonVerificationFixture} from '../scripts/ai-nonverification-test-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.LWR_AI_ENABLED='true';
 const {officialQuestionConcept}=await import('../app/lib/aiQuestionConcepts.js');
 const {selectAnswerEvidence,selectAnswerEvidenceWithAssistance}=await import('../app/lib/aiAnswerGeneration.js');
-const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
+const {retrieveOfficialEvidence:retrieveOfficialEvidenceRaw}=await import('../app/lib/aiRetrieval.js');
 const exact='can i switch my mix team partners to play the picklebreakers?';
 const rule={chunkId:'partners',documentId:'rules',documentVersionId:'active',documentTitle:'DUPR League Rules',documentType:'league_rules',documentAuthorityRank:10,ruleNumber:'6.2.3',pageNumber:9,heading:'Match Day Format',combinedScore:.49,structuralContext:[{content:'6.2. Saturday DUPR League'}],content:'6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams (same partners as the Mixed Round) that'};
 const noise={...rule,chunkId:'other',ruleNumber:'18.G',documentType:'usap_rulebook',content:'18.G Partner Change (Doubles). Tournament partner changes.'};
@@ -36,3 +37,5 @@ test('missed initial passage is recovered with one bounded concept search',async
  assert.equal(searches,2);assert.deepEqual(embeddings,[exact,'Picklebreaker same partners as the Mixed Round']);
  assert.equal(result.request.question,exact);
 });
+
+async function retrieveOfficialEvidence(options){return retainNonVerificationFixture(await retrieveOfficialEvidenceRaw(options));}

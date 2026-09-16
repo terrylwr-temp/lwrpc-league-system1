@@ -1,3 +1,4 @@
+import {retainNonVerificationFixture} from '../scripts/ai-nonverification-test-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -6,7 +7,7 @@ process.env.LWR_AI_ENABLED='true';process.env.OPENAI_API_KEY='synthetic-test';
 const {chooseApprovedEvidence}=await import('../app/lib/aiApprovedAnswersSelection.js');
 const {MATERIAL_SUPPLEMENT_INSTRUCTION,hasMaterialSupplements,supplementalPromptMetadata}=await import('../app/lib/aiSupplementContract.js');
 const {managedFormalPassages,trustedPassageHeading}=await import('../app/lib/aiApprovedSourceBinding.js');
-const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
+const {retrieveOfficialEvidence:retrieveOfficialEvidenceRaw}=await import('../app/lib/aiRetrieval.js');
 const {generateOfficialAnswer}=await import('../app/lib/aiAnswerGeneration.js');
 const formal={chunkId:randomUUID(),documentId:randomUUID(),documentVersionId:randomUUID(),documentType:'league_rules',documentAuthorityRank:1,documentTitle:'Synthetic Review Policy',content:'An organizer may request a review.',combinedScore:.9};
 const revision={id:randomUUID(),answer_id:randomUUID(),revision_number:1,status:'active',activated_at:'2026-01-01',effective_on:'2026-01-01',expires_on:null,league_scope:'all',temporal_scope:'standing',authority_manifest_hash:'m',title:'Synthetic Review Procedure',topic_key:'review',canonical_question:'Can an organizer request a review?',approved_answer:'An organizer may request a review. Every request must include a written summary.',related_chunk_id:formal.chunkId,content_hash:'a'.repeat(64)};
@@ -74,3 +75,5 @@ test('unheaded sibling uses truthful parent, never neighboring title; forged hea
  assert.equal(trustedPassageHeading(source,{...stored,section_label:'Rule 8.1'}),'');
  assert.throws(()=>trustedPassageHeading({...source,content:source.content+' invented'},stored));
 });
+
+async function retrieveOfficialEvidence(options){return retainNonVerificationFixture(await retrieveOfficialEvidenceRaw(options));}

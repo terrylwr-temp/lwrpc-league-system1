@@ -1,4 +1,5 @@
 import {deriveTemporalContext} from './aiTemporalContext.js';
+import {mayVerifyValue} from './aiProposedValue.js';
 import {revalidateExcerptItems,bindOfficialExcerpts,officialDocumentPeriod} from './aiEvidenceExcerpts.js';
 import {assistSemanticRetrieval,candidateDiagnostic} from './aiSemanticRetrieval.js';
 import {selectPolicyEvidence,needsPolicyEvidence,policyCalendarContext} from './aiPolicyEvidence.js';
@@ -253,11 +254,11 @@ function asksForTiming(question) { return /\b(?:when|deadline|due|date|open|clos
 
 export async function selectAnswerEvidenceWithAssistance(retrieval) {
   const selected=await selectLegacyAnswerEvidenceWithAssistance(retrieval);
-  if(selected.length){
+  if(selected.length&&!mayVerifyValue(retrieval.request.question)){
     if(retrieval.queryUnderstanding)retrieval.queryUnderstanding.finalEvidence=selected.map(candidateDiagnostic);
     return selected;
   }
-  const assisted=await assistSemanticRetrieval(retrieval,selectAnswerEvidence);
+  const assisted=await assistSemanticRetrieval(retrieval,selectAnswerEvidence,selected);
   const completed=await completeSelectedPassages(retrieval,assisted);
   if(retrieval.queryUnderstanding){
     retrieval.queryUnderstanding.finalEvidence=completed.map(candidateDiagnostic);
@@ -358,6 +359,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         ...(managedSelection?["Treat an Approved Answer as policy evidence, not a literal question/answer macro. Answer the actual user's question and its polarity: an inverse permission question may require No even if the source's original answer starts Yes. Do not copy the source's leading Yes/No without checking the current question. Preserve every applicable qualification, including NR provisions; do not infer individual eligibility or reverse a requirement."]:[]),
         ...(hasMaterialSupplements(selectedEvidence)?[MATERIAL_SUPPLEMENT_INSTRUCTION]:[]),
         "Use each event's verified chronology year when supplied. A season title year is not the calendar year of every event. Explicit source years take precedence; never substitute the current year. If event chronology says unknown_calendar_year, do not assert a year from the title alone.",
+        "For proposed-value verification, compare the proposed value with the affirmative documented value for the SAME subject and scope. Evidence assigning a different value can support a negative answer even if the proposed value never appears. Never convert not found into No. Absence, generic approval, or unrelated assignments cannot establish a negative. Preserve limits, dates, conditions and category scope; do not treat a maximum as an exact required count. A club operational assignment in a guide is distinct from general governing-rule permission.",
         "Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request.",
         ...(officialQuestionConcept(retrieval.request.question)?.kind?.startsWith('nvz_') ? ['The question interpreter recognizes kitchen and NVZ as terms for non-volley zone. Use that terminology mapping to understand the question; do not add commentary about common usage or claim the source literally uses every alias. Rules and dimensions must still come only from selected evidence.'] : []),
         ...(questionIntent(retrieval.request.question).kind==='scoring_applicability'?['This is scoring APPLICABILITY. Mechanics do not prove applicability. Apply the explicit default only after the supplied complete scoped-format check. For a general applicability question, explicitly name the governing default scoring method; merely denying the proposed method is incomplete. Keep each express exception limited to its league, division and game, including the tie condition. Never answer that the whole league uses Rally from a Picklebreaker-only exception.']:[]),

@@ -1,8 +1,9 @@
+import {retainNonVerificationFixture} from '../scripts/ai-nonverification-test-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 process.env.LWR_AI_ENABLED='true';
-const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
+const {retrieveOfficialEvidence:retrieveOfficialEvidenceRaw}=await import('../app/lib/aiRetrieval.js');
 const {selectAnswerEvidence,selectAnswerEvidenceWithAssistance}=await import('../app/lib/aiAnswerGeneration.js');
 const fixtures=JSON.parse(await readFile(new URL('./fixtures/lms0720-assisted-retrieval-production.json',import.meta.url),'utf8'));
 async function replay(fixture,override) {
@@ -62,3 +63,5 @@ for(const index of [0,1,2])test('0720 generation follows completed retry '+index
  });
  assert.equal(modelCalls,1);assert.equal(result.evidenceSufficient,true);assert.equal(managedCalls.length,fixtures[index].question.includes('comunity')?0:1);
 });
+
+async function retrieveOfficialEvidence(options){return retainNonVerificationFixture(await retrieveOfficialEvidenceRaw(options));}
