@@ -22,11 +22,17 @@ export function parseRatingsCsv(text) {
   }
   if (quoted) throw Error('Unclosed CSV quote.');
   if (cell || record.length) pushRow();
-  const headers = records.shift()?.map(header);
+  const rawHeaders = records.shift();
+  const headers = rawHeaders?.map(header);
   if (!headers?.includes('duprid')) throw Error('CSV requires duprId.');
   if (new Set(headers.filter(Boolean)).size !== headers.filter(Boolean).length) throw Error('Duplicate CSV headers.');
   if (!records.length || records.length > MAX_IMPORT_ROWS) throw Error('Choose a CSV with 1–1,000 rows.');
   return records.map((values, index) => {
+    // DUPR exports may append empty header columns but omit them from data rows.
+    // Only pad omitted, literally empty trailing headers; never a named field.
+    if (values.length < headers.length && rawHeaders.slice(values.length).every(value => !value.trim())) {
+      values = [...values, ...Array(headers.length - values.length).fill('')];
+    }
     if (values.length !== headers.length) throw Error(`CSV row ${index + 2} has the wrong number of fields.`);
     const row = {};
     headers.forEach((key, i) => { if (key) row[key] = values[i].trim(); else if (values[i].trim()) throw Error('Unnamed nonempty CSV column.'); });
