@@ -172,7 +172,7 @@ function applyConceptContext(retrieval) {
   if(!rows)return;
   for(const c of retrieval.candidates||[])c.structuralContext=rows.filter(x=>x.document_version_id===c.documentVersionId).map(x=>({ruleNumber:x.rule_number,content:x.content}));
   const plan=officialQuestionConcept(retrieval.request?.question);
-  if(plan?.leagues.length===1 && ['format','composition','scoring','mixed_participation'].includes(plan.kind)) {
+  if(plan?.leagues.length===1 && ['format','composition','scoring','mixed_participation','dupr_posting'].includes(plan.kind)) {
     // Preserve eight ranked candidates. The four existing authority-review slots
     // prioritize controlling candidates with verified matching structural scope.
     // No score/rank mutation and no expansion of the 32/12/4 limits.

@@ -228,7 +228,7 @@ function clarifiedQuestion(originalQuestion, category, subject) {
 
 function isContextualFollowUp(question) {
   const value = cleanQuestion(question).toLowerCase();
-  if (officialQuestionConcept(value)?.kind === 'document_navigation' || /\bwhere\b.*\bwhat\s+balls?\b.*\b(?:using|use)\b/.test(value)) return false;
+  if (['document_navigation','dupr_posting'].includes(officialQuestionConcept(value)?.kind) || /\bwhere\b.*\bwhat\s+balls?\b.*\b(?:using|use)\b/.test(value)) return false;
   return /^(?:what\s+about|what\s+if|does\s+that|and\s+what|and\s+does)\b/.test(value)
     || /\b(?:that|it|mine|ours)\b/.test(value) && value.split(/\s+/).length <= 12;
 }
