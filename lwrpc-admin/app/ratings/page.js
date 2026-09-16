@@ -1,5 +1,6 @@
 "use client";
 
+import { finishRatingsUpload, uploadCompletionSummary } from "../lib/seasonRatingsUploadResult";
 import RatingsImportPreview from "../components/RatingsImportPreview";
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,6 +28,8 @@ export default function RatingsPage() {
   const [ratings, setRatings] = useState([]);
   const [allRatings, setAllRatings] = useState([]);
   const [ratingImportPreview, setRatingImportPreview] = useState(null);
+  const [ratingImportFile, setRatingImportFile] = useState(null);
+  const [ratingsRefreshVersion, setRatingsRefreshVersion] = useState(0);
   const selectedSeasonRef = useRef("");
   const importEpochRef = useRef(0);
   const setRatingImportRows = () => setRatingImportPreview(null);
@@ -424,6 +427,7 @@ export default function RatingsPage() {
     selectedSeasonRef.current = selectedSeason;
     importEpochRef.current++;
     setRatingImportPreview(null);
+    setRatingImportFile(null);
   }, [selectedSeason]);
 
   async function requestSourceImport(body) {
@@ -436,20 +440,21 @@ export default function RatingsPage() {
 
   async function chooseRatingsImportFile() {
     if (!selectedSeason) return;
-    const ok = await appConfirm("Choose a DUPR CSV to preview current source ratings. Matching uses DUPR ID only. Existing season ratings and member details are preserved. No ratings change until you review and confirm.", { title: "Upload Ratings CSV", confirmLabel: "Continue" });
+    const ok = await appConfirm("Choose a DUPR CSV to preview creating missing season records and filling blank DUPR Doubles, Reliability and Age-Based inputs. Matching uses DUPR ID only. Populated inputs and final ratings are protected. Nothing changes until you confirm.", { title: "Upload Ratings CSV", confirmLabel: "Continue" });
     if (ok) ratingsImportInputRef.current?.click();
   }
 
   async function handleRatingsImportFile(event) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    const epoch = ++importEpochRef.current;
-    setRatingImportPreview(null);
     if (!file || !selectedSeason) return;
+    const epoch = ++importEpochRef.current;
+    setRatingImportFile(file);
+    setRatingImportPreview(null);
     if (file.size > 2 * 1024 * 1024) { setRatingImportStatus("Error: CSV exceeds 2 MiB."); return; }
     const seasonId = selectedSeason;
     setIsImportingRatings(true);
-    setRatingImportStatus("Preparing source ratings preview…");
+    setRatingImportStatus("Preparing ratings import preview…");
     try {
       const result = await requestSourceImport({ action: "preview", seasonId, csv: await file.text() });
       if (selectedSeasonRef.current !== seasonId || epoch !== importEpochRef.current) return;
@@ -461,26 +466,33 @@ export default function RatingsPage() {
 
   async function applyRatingsImport() {
     const preview = ratingImportPreview;
-    if (!preview?.receipt || !preview.counts.ready || preview.season.id !== selectedSeasonRef.current) return;
+    if (isImportingRatings || !preview?.receipt || !preview.counts.ready || preview.season.id !== selectedSeasonRef.current) return;
     const epoch = importEpochRef.current;
-    const fields = [...new Set(preview.rows.filter(r => r.action === "UPDATE").flatMap(r => r.changes.map(c => c.field)))];
-    const ok = await appConfirm([
-      `Target Season: ${preview.season.name}`,
-      `Rows to update: ${preview.counts.ready}`,
-      `No change: ${preview.counts.noChange}`,
-      `Skipped/invalid: ${preview.counts.skipped + preview.counts.invalid}`,
-      `Season ID: ${preview.season.id}`,
-      `Source fields: ${fields.map(field => ({ doubles: "DUPR Doubles", rf: "Reliability Factor", age: "Age-based DUPR", ageSource: "age metric", ageMissing: "age presence", rfMissing: "RF presence", doublesMissing: "Doubles presence" })[field] || field).join(", ")}`,
-      "Season DUPR, PrimeTime Season DUPR, season RF, notes and member details are preserved. Clean Ratings will not run.",
-    ].join("\n"), { title: "Confirm Source Ratings Import", confirmLabel: "Import Matched Ratings", tone: "warning" });
-    if (!ok || preview.season.id !== selectedSeasonRef.current || epoch !== importEpochRef.current) return;
     setIsImportingRatings(true);
-    setRatingImportStatus("Importing source ratings…");
     try {
-      const result = await requestSourceImport({ action: "commit", confirmed: true, seasonId: preview.season.id, receipt: preview.receipt });
-      setRatingImportPreview({ ...preview, receipt: null, committed: true });
-      setRatingImportStatus(`Imported ${result.updated} source rating rows. Season ratings preserved.`);
-    } catch (error) { setRatingImportStatus(`Import failed: ${error.message}. No successful commit is confirmed; retrying this same preview is safe.`); }
+      const ok = await appConfirm([
+        `Target Season: ${preview.season.name}`,
+        `Member rows to import: ${preview.counts.ready}`,
+        `Blank fields to fill — Doubles: ${preview.counts.doubles}; Reliability: ${preview.counts.rf}; Age-Based: ${preview.counts.age}`,
+        `Protected input fields: ${preview.counts.protectedFields}; skipped/review rows: ${preview.counts.skipped}`,
+        "Missing season records will be created. Populated inputs, final Season DUPR, PrimeTime Season DUPR, notes and member details are preserved. Clean Ratings will not run.",
+      ].join("\n"), { title: "Confirm Ratings Import", confirmLabel: "Import Matched Ratings", tone: "warning" });
+      if (!ok || preview.season.id !== selectedSeasonRef.current || epoch !== importEpochRef.current) return;
+      setRatingImportStatus("Importing rating inputs…");
+      const stillCurrent = () => epoch === importEpochRef.current && preview.season.id === selectedSeasonRef.current;
+      await finishRatingsUpload({
+        commit: () => requestSourceImport({ action: "commit", confirmed: true, seasonId: preview.season.id, receipt: preview.receipt }),
+        clearPreview: () => { if (stillCurrent()) { setRatingImportPreview(null); setRatingImportFile(null); if (ratingsImportInputRef.current) ratingsImportInputRef.current.value = ""; } },
+        showSuccess: result => { if (stillCurrent()) setRatingImportStatus(uploadCompletionSummary(result, preview.season.name)); },
+        refresh: async () => {
+          const [selected, all] = await Promise.all([loadAllSeasonRatingRows(preview.season.id), loadAllSeasonRatingRows()]);
+          if (selected.error || all.error) throw Error(selected.error?.message || all.error?.message);
+          setAllRatings(all.rows);
+          if (stillCurrent()) { setRatings(selected.rows); setRatingsRefreshVersion(v => v + 1); }
+        },
+        showRefreshError: error => { if (stillCurrent()) setRatingImportStatus(message => message + " Display refresh failed: " + error.message + ". Refresh the page to see committed values; do not repeat the import."); },
+      });
+    } catch (error) { setRatingImportStatus(`Import failed: ${error.message}. No successful commit is confirmed. Preview/input retained for review; no automatic retry.`); }
     finally { setIsImportingRatings(false); }
   }
 
@@ -1244,6 +1256,7 @@ function goToPage(value) {
               <h2 className="text-lg font-bold text-slate-900">
                 Ratings Import
               </h2>
+              {ratingImportFile && <p className="mt-2 text-sm">Selected CSV: {ratingImportFile.name}</p>}
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -1492,7 +1505,7 @@ function goToPage(value) {
                         <label className="text-xs font-black uppercase tracking-wide text-slate-500">
                           DUPR Doubles
                           <input
-                            key={`${member.id}-${selectedSeason}-mobile-dupr-doubles`}
+                            key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-mobile-dupr-doubles`}
                             type="text"
                             defaultValue={getRating(member.id, "dupr_doubles_rating")}
                             onBlur={(e) => {
@@ -1508,7 +1521,7 @@ function goToPage(value) {
                         <label className="text-xs font-black uppercase tracking-wide text-slate-500">
                           Reliability
                           <input
-                            key={`${member.id}-${selectedSeason}-mobile-dupr-reliability`}
+                            key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-mobile-dupr-reliability`}
                             type="number"
                             step="0.01"
                             defaultValue={getRating(member.id, "dupr_reliability_rating")}
@@ -1527,7 +1540,7 @@ function goToPage(value) {
                         <label className="text-xs font-black uppercase tracking-wide text-slate-500">
                           Season DUPR
                           <input
-                            key={`${member.id}-${selectedSeason}-mobile-season-dupr`}
+                            key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-mobile-season-dupr`}
                             type="number"
                             step="0.01"
                             defaultValue={getRating(member.id, "season_dupr_rating")}
@@ -1544,7 +1557,7 @@ function goToPage(value) {
                         <label className="text-xs font-black uppercase tracking-wide text-slate-500">
                           Age-Based
                           <input
-                            key={`${member.id}-${selectedSeason}-mobile-age`}
+                            key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-mobile-age`}
                             type="number"
                             step="0.01"
                             defaultValue={getRating(member.id, "season_primetime_rating")}
@@ -1560,7 +1573,7 @@ function goToPage(value) {
                       <label className="text-xs font-black uppercase tracking-wide text-slate-500">
                         DUPR Notes
                         <textarea
-                          key={`${member.id}-${selectedSeason}-mobile-dupr-notes`}
+                          key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-mobile-dupr-notes`}
                           defaultValue={getRating(member.id, "notes")}
                           onBlur={(e) => updateRating(member.id, "notes", e.target.value)}
                           className="mt-1 min-h-16 w-full resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-950"
@@ -1713,7 +1726,7 @@ function goToPage(value) {
 
                     <td className="px-4 py-4">
                       <input
-                        key={`${member.id}-${selectedSeason}-dupr-doubles`}
+                        key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-dupr-doubles`}
                         type="text"
                         defaultValue={getRating(member.id, "dupr_doubles_rating")}
                         onBlur={(e) => {
@@ -1732,7 +1745,7 @@ function goToPage(value) {
 
                     <td className="px-4 py-4">
                       <input
-                        key={`${member.id}-${selectedSeason}-dupr-reliability`}
+                        key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-dupr-reliability`}
                         type="number"
                         step="0.01"
                         defaultValue={getRating(member.id, "dupr_reliability_rating")}
@@ -1752,7 +1765,7 @@ function goToPage(value) {
 
                     <td className="px-4 py-4">
                       <input
-                        key={`${member.id}-${selectedSeason}-season-dupr`}
+                        key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-season-dupr`}
                         type="number"
                         step="0.01"
                         defaultValue={getRating(member.id, "season_dupr_rating")}
@@ -1772,7 +1785,7 @@ function goToPage(value) {
 
                     <td className="px-4 py-4">
                       <input
-                        key={`${member.id}-${selectedSeason}-age`}
+                        key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-age`}
                         type="number"
                         step="0.01"
                         defaultValue={getRating(
@@ -1793,7 +1806,7 @@ function goToPage(value) {
 
                     <td className="px-4 py-4">
                       <textarea
-                        key={`${member.id}-${selectedSeason}-dupr-notes`}
+                        key={`${member.id}-${selectedSeason}-${ratingsRefreshVersion}-dupr-notes`}
                         defaultValue={getRating(member.id, "notes")}
                         onBlur={(e) =>
                           updateRating(

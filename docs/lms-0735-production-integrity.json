@@ -1,0 +1,301 @@
+{
+  "before": [
+    {
+      "name": "teams",
+      "count": 115,
+      "hash": "a7ba2d45195232ff8e1564572c7ef0bc"
+    },
+    {
+      "name": "leagues",
+      "count": 3,
+      "hash": "0c1e03808d32f97c5002861c66e68e72"
+    },
+    {
+      "name": "matches",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "members",
+      "count": 1995,
+      "hash": "a112bf8de969630a1fc342761059794d"
+    },
+    {
+      "name": "seasons",
+      "count": 2,
+      "hash": "567fbd9c62bb8861ffc7df9469e76074"
+    },
+    {
+      "name": "divisions",
+      "count": 18,
+      "hash": "c305e15086ca4b6528097a438f09cf0f"
+    },
+    {
+      "name": "team_byes",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "line_games",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "user_roles",
+      "count": 206,
+      "hash": "b749887e237b5cd06746d127425c8f5a"
+    },
+    {
+      "name": "match_lines",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "team_members",
+      "count": 15,
+      "hash": "09c7d7568b6386580d07938ecca7b11c"
+    },
+    {
+      "name": "match_lineups",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "team_standings",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "member_season_ratings",
+      "count": 1759,
+      "hash": "aa27394c3f7e73ae816d42dfce59c051"
+    },
+    {
+      "name": "ai_documents",
+      "count": 7,
+      "hash": "310efb443b65ee8ad6bb3f12b525fd77"
+    },
+    {
+      "name": "ai_document_versions",
+      "count": 31,
+      "hash": "5319b926662ffeb2070ce7b7e53a9898"
+    },
+    {
+      "name": "ai_document_chunks",
+      "count": 2277,
+      "hash": "4286ac4f2591b4b6b5a6ee4876accc84"
+    },
+    {
+      "name": "system_settings",
+      "count": 12,
+      "hash": "d33d89ac2b48a1ae8e27ed125ef012cd"
+    },
+    {
+      "name": "locations",
+      "count": 140,
+      "hash": "797a65412bb3a89c7310a83808f0fbe1"
+    },
+    {
+      "name": "division_lines",
+      "count": 204,
+      "hash": "becaabf5f94f43efe85ae367303254d5"
+    },
+    {
+      "name": "league_schedule_settings",
+      "count": 12,
+      "hash": "cc6bcbe82d8612be4e99ee64de5a3e1d"
+    },
+    {
+      "name": "league_blackout_dates",
+      "count": 7,
+      "hash": "efcbb82c875d613da4c980c7a71e53a0"
+    },
+    {
+      "name": "score_sheet_templates",
+      "count": 4,
+      "hash": "697c2b32b43e02ff52dadd43b04e1188"
+    },
+    {
+      "name": "policies",
+      "count": 132,
+      "hash": "80bad38070cb17f0ab85f67b37565564"
+    },
+    {
+      "name": "rls_and_acl",
+      "count": 259,
+      "hash": "91a74c06537db4752e5cb76f6445535a"
+    },
+    {
+      "name": "functions",
+      "count": 38,
+      "hash": "86bb6836589285fff8f17ac58eedddf5"
+    },
+    {
+      "name": "migrations",
+      "count": 38,
+      "hash": "cce4a8ee3612bab128c79f7304c7371c"
+    },
+    {
+      "name": "cron_jobs",
+      "count": 3,
+      "hash": "62d884e754e0c524d476932cffe41f60"
+    }
+  ],
+  "after": [
+    {
+      "name": "teams",
+      "count": 115,
+      "hash": "092f62f3530f9217ef478fc384ae86d9"
+    },
+    {
+      "name": "leagues",
+      "count": 3,
+      "hash": "0c1e03808d32f97c5002861c66e68e72"
+    },
+    {
+      "name": "matches",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "members",
+      "count": 1995,
+      "hash": "a112bf8de969630a1fc342761059794d"
+    },
+    {
+      "name": "seasons",
+      "count": 2,
+      "hash": "567fbd9c62bb8861ffc7df9469e76074"
+    },
+    {
+      "name": "divisions",
+      "count": 18,
+      "hash": "c305e15086ca4b6528097a438f09cf0f"
+    },
+    {
+      "name": "team_byes",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "line_games",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "user_roles",
+      "count": 208,
+      "hash": "c9a7e743f022c6db85557a0029a6fbef"
+    },
+    {
+      "name": "match_lines",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "team_members",
+      "count": 15,
+      "hash": "09c7d7568b6386580d07938ecca7b11c"
+    },
+    {
+      "name": "match_lineups",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "team_standings",
+      "count": 0,
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "member_season_ratings",
+      "count": 1759,
+      "hash": "aa27394c3f7e73ae816d42dfce59c051"
+    },
+    {
+      "name": "ai_documents",
+      "count": 7,
+      "hash": "310efb443b65ee8ad6bb3f12b525fd77"
+    },
+    {
+      "name": "ai_document_versions",
+      "count": 31,
+      "hash": "5319b926662ffeb2070ce7b7e53a9898"
+    },
+    {
+      "name": "ai_document_chunks",
+      "count": 2277,
+      "hash": "4286ac4f2591b4b6b5a6ee4876accc84"
+    },
+    {
+      "name": "system_settings",
+      "count": 12,
+      "hash": "d33d89ac2b48a1ae8e27ed125ef012cd"
+    },
+    {
+      "name": "locations",
+      "count": 140,
+      "hash": "797a65412bb3a89c7310a83808f0fbe1"
+    },
+    {
+      "name": "division_lines",
+      "count": 204,
+      "hash": "becaabf5f94f43efe85ae367303254d5"
+    },
+    {
+      "name": "league_schedule_settings",
+      "count": 12,
+      "hash": "cc6bcbe82d8612be4e99ee64de5a3e1d"
+    },
+    {
+      "name": "league_blackout_dates",
+      "count": 7,
+      "hash": "efcbb82c875d613da4c980c7a71e53a0"
+    },
+    {
+      "name": "score_sheet_templates",
+      "count": 4,
+      "hash": "697c2b32b43e02ff52dadd43b04e1188"
+    },
+    {
+      "name": "policies",
+      "count": 132,
+      "hash": "80bad38070cb17f0ab85f67b37565564"
+    },
+    {
+      "name": "rls_and_acl",
+      "count": 259,
+      "hash": "91a74c06537db4752e5cb76f6445535a"
+    },
+    {
+      "name": "functions",
+      "count": 38,
+      "hash": "86bb6836589285fff8f17ac58eedddf5"
+    },
+    {
+      "name": "migrations",
+      "count": 38,
+      "hash": "cce4a8ee3612bab128c79f7304c7371c"
+    },
+    {
+      "name": "cron_jobs",
+      "count": 3,
+      "hash": "62d884e754e0c524d476932cffe41f60"
+    }
+  ],
+  "changes": [
+    {
+      "name": "teams",
+      "count": 115,
+      "hash": "092f62f3530f9217ef478fc384ae86d9"
+    },
+    {
+      "name": "user_roles",
+      "count": 208,
+      "hash": "c9a7e743f022c6db85557a0029a6fbef"
+    }
+  ],
+  "commit": "acf4341949546eb5070f1012e47efb6f44678e34",
+  "deployment": "dpl_EjCSVvvYtLrxvoASkRPwZsVxN8yy",
+  "status": "acceptance stopped on match-ball control; 26/28 fingerprints unchanged; teams and user_roles changed during window and attribution remains unconfirmed"
+}

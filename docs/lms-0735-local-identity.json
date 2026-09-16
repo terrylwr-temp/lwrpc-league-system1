@@ -1,0 +1,64 @@
+{
+  "version": "LMS-0735 / 0.1.557",
+  "baseline": "e88946c",
+  "status": "local; not deployed",
+  "recordedAt": "2026-09-16T15:26:56.714882+00:00",
+  "files": [
+    {
+      "path": "lwrpc-admin/app/lib/aiTemporalContext.js",
+      "sha256": "8cc05e62625d217d77622c71a24dd8f2ab2ba36f7e3f42365cf309c894a5c62d"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/aiSemanticEvidence.js",
+      "sha256": "3ae7701a4eddb1fe315e68f4966f03dcd70476a36168a15abc135de277d1d661"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/aiSemanticRetrieval.js",
+      "sha256": "541fdd8143d30d8512c73d759e1f514efedc4de20dd4303b722f048af4388024"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/aiAnswerGeneration.js",
+      "sha256": "da95acfadcb208b355e380720a81d095cf6080800dc3a32a4defaa29fa194277"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/aiLeagueDateFacts.js",
+      "sha256": "34ed9db5e34d3be6da6116db59ecc4ba1a4e5005c64359d63a9301b22b32df62"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/aiRetrieval.js",
+      "sha256": "c8657f9e96724f5bf48488d94e1034a4369bed331113a3063409089e77daeb97"
+    },
+    {
+      "path": "lwrpc-admin/app/lib/version.js",
+      "sha256": "ca206c15c1a84201d0fff1768006b84f1de0f86aa692a0024ca5c29eb1a40c67"
+    },
+    {
+      "path": "lwrpc-admin/app/ai-assistant/console/page.js",
+      "sha256": "b13f79aeaf394c76cf568f5b3b434eb7445eafdfdfea214464e73394f920a026"
+    },
+    {
+      "path": "lwrpc-admin/app/ai-assistant/console/QueryUnderstandingDiagnostics.js",
+      "sha256": "193e1b73fd09912171d713f6f0162d6925f43fd1dddea34d5b2f10d86449adda"
+    },
+    {
+      "path": "lwrpc-admin/package.json",
+      "sha256": "d348e975091ed18b716a62e1e2fbff6c6130fb5900aa6f11da5634b9cd81960f"
+    },
+    {
+      "path": "lwrpc-admin/package-lock.json",
+      "sha256": "7eaf44310b4f88d9095379521d72ad066b1e53711fab4deb2eb09880f0719256"
+    },
+    {
+      "path": "lwrpc-admin/test/aiTemporalContext.test.mjs",
+      "sha256": "6d2f285cd1c7599950bdfbd7d7f18a9b440440a6203509c9ad12b55cef157fb1"
+    },
+    {
+      "path": "lwrpc-admin/test/aiSemanticRetrieval.test.mjs",
+      "sha256": "b35cf1bc94e05355d5cc10377bda0283ee30210a8efe61ec64cc4e38c6ffa723"
+    },
+    {
+      "path": "lwrpc-admin/test/aiSemanticRetrievalPipeline.test.mjs",
+      "sha256": "ee053d5c459f992bd68482ad3f65998b8bca847c0fa1d246776f750328e3dfda"
+    }
+  ]
+}
