@@ -228,6 +228,11 @@ function clarifiedQuestion(originalQuestion, category, subject) {
 
 function isContextualFollowUp(question) {
   const value = cleanQuestion(question).toLowerCase();
+  // A named topic in the current turn supplies the antecedent ("Regarding
+  // match setup, when is it due?"). Preserve the original wording for retrieval.
+  // A pronoun-only topic still requires the signed previous conversation.
+  const topic = /^(?:regarding|concerning|as for)\s+([^,;:]+)[,;:]\s*(?:when|what|where|how|why|is|are|does|do|can|will)\b/.exec(value)?.[1];
+  if (topic && /[a-z]/.test(topic) && !/\b(?:this|that|these|those|it|they|them|mine|ours|previous|above|earlier)\b/.test(topic)) return false;
   if (['document_navigation','dupr_posting'].includes(officialQuestionConcept(value)?.kind) || /\bwhere\b.*\bwhat\s+balls?\b.*\b(?:using|use)\b/.test(value)) return false;
   return /^(?:what\s+about|what\s+if|does\s+that|and\s+what|and\s+does)\b/.test(value)
     || /\b(?:that|it|mine|ours)\b/.test(value) && value.split(/\s+/).length <= 12;

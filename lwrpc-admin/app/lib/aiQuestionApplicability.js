@@ -62,9 +62,11 @@ export function ratingQuestionKind(question) {
 }
 
 export function isSeasonRatingDateQuestion(question) {
-  return /^\s*(?:when\s+(?:are|were|will|do)|(?:on\s+)?what\s+date\b)/i.test(question)
+  const recording = /^\s*(?:when\s+(?:are|were|will|do)|(?:on\s+)?what\s+date\b)/i.test(question) && /\brecorded\b/i.test(question);
+  const namedDate = /\bseason\s+dupr(?:['’]s|s)?\s+ratings?\s+date\b/i.test(question) && /\b(?:when|what)\b/i.test(question);
+  const topicDate = /^(?:regarding|concerning|as for)\s+(?:the\s+)?season\s+dupr\s+ratings?\s*[,;:]\s*(?:when\b.*\brecorded\b|what\b.*\bdate\b)/i.test(question);
+  return (recording || namedDate || topicDate)
     && /\bseason\s+dupr(?:['’]s|s)?(?:\s+ratings?)?\b/i.test(question)
-    && /\brecorded\b/i.test(question)
     && !/\b(?:and|scores?|rosters?|lineups?|match\s+setup|calculated|determined)\b/i.test(question);
 }
 

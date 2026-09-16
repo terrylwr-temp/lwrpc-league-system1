@@ -2,7 +2,7 @@ import {selectRegistrationEvidence} from './aiRegistrationEvidence.js';
 import {selectAgeReferenceEvidence} from './aiAgeReferencePolicy.js';
 import {selectLeagueDateEvidence} from './aiLeagueDateEvidence.js';
 import {excerptSelection,sourceRange,officialDocumentPeriod} from './aiEvidenceExcerpts.js';
-import {communityParticipationPassages,leagueCompatible,evidencePassages} from './aiQuestionApplicability.js';
+import {communityParticipationPassages,leagueCompatible,evidencePassages,isSeasonRatingDateQuestion} from './aiQuestionApplicability.js';
 import {questionIntent} from './aiRequestIntent.js';
 import {policySelectionDiagnostic} from './aiPolicyDiagnostics.js';
 
@@ -90,7 +90,7 @@ function selectPolicyEvidenceInternal(retrieval){
   const dates=candidates.filter(c=>c.documentType==='league_supplement'&&(!p.leagues.length||p.leagues.some(l=>new RegExp(l,'i').test(c.heading)))).flatMap(c=>evidencePassages(c).filter(text=>/Season DUPR ratings? recorded/i.test(text)).map(text=>({c,text})));
   const dated=()=>dates.map(({c,text})=>excerptSelection(c,[{text,applicability:{league:['weekday','saturday','primetime'].find(l=>new RegExp(l,'i').test(c.heading)),role:'recording_date'},scopeBindings:[{...sourceRange(c,c.heading),kind:'league'}]}],'recording_date'));
   if(p.kind==='policy_date'){
-   if(/\brecorded\b/.test(p.matchingQuestion))return dated().slice(0,4);
+   if(/\brecorded\b/.test(p.matchingQuestion)||isSeasonRatingDateQuestion(p.matchingQuestion))return dated().slice(0,4);
    if(!definitions.length)return [];
    // Establishment/duration and any explicit season-rating reset qualifications
    // are separate exact passages. Never interpret absence as a reset permission.

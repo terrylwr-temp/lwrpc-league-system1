@@ -4,6 +4,7 @@ import {ageReferenceIntent} from './aiAgeReferencePolicy.js';
 import {leagueDateIntent} from './aiLeagueDateFacts.js';
 import {isRosterTroubleshooting} from './aiRosterTroubleshooting.js';
 import {matchingQuestion} from './aiQuestionInterpretation.js';
+import {isSeasonRatingDateQuestion} from './aiQuestionApplicability.js';
 
 // Describes the requested proposition, never the answer or an authorization grant.
 export function questionIntent(value) {
@@ -22,7 +23,7 @@ export function questionIntent(value) {
  const mixed=/\b(?:and|also)\b.*\b(?:when|can|policy|eligible|rating|dupr|email)\b/.test(q)&&/\b(?:my|our)\b/.test(q);
  const ratingOperation=rating&&/\b(?:establish(?:ed|ment)?|recorded|determined|calculated|set|truncated|lock(?:ed|s)?|chang(?:e|ed|es)|reset|remain(?:s)?|stay(?:s)?|duration|effective|updated)\b/.test(q);
  const ratingMethod=/\b(?:how|method)\b/.test(q)&&/\b(?:determined|calculated|truncated)\b/.test(q);
- const ratingPolicy=ratingOperation&&(/\b(?:when|how|date|can|may|does|do|policy|duration)\b/.test(q));
+ const ratingPolicy=isSeasonRatingDateQuestion(q)||ratingOperation&&(/\b(?:when|how|date|can|may|does|do|policy|duration)\b/.test(q));
  if(isCommunityParticipationQuestion(q))return {kind:'community_policy',object:'community_participation',leagues,division,personalWording:/\b(?:i|my|me|our|we)\b/.test(q),matchingQuestion:q};
  let kind='unresolved',object=null;
  if(!completed&&!mixed&&!isRosterTroubleshooting(q)){
