@@ -29,6 +29,11 @@ export function officialQuestionConcept(question) {
     if (/\bline\b/.test(q) && /\b(?:part|include|inside|belong)\b/.test(q)) return make('nvz_boundary', { query: 'non-volley zone boundary lines' });
     if (/\b(?:stand|standing|be|stay)\b/.test(q) && /\b(?:not|without)\s+volley(?:ing)?\b/.test(q)) return make('nvz_presence', { query: 'non-volley zone allowable contact' });
   }
+  if (/\bpicklebreakers?\b/.test(q) && /\bpartners?\b/.test(q)
+    && /\b(?:switch|swap|change|changing|different|same|keep)\b/.test(q)
+    && !/\b(?:ratings?|dupr|eligible|eligibility|rosters?|injur\w*|substitut\w*)\b/.test(q)) {
+    return make('picklebreaker_partners', { query: 'Picklebreaker same partners as the Mixed Round' });
+  }
   const mixed = /\bmixed\b/.test(q);
   if (mixed && /\b(?:additional|other than|same|only|just|gender)\b/.test(q) && /\b(?:players?|someone|participate|play|use|teams?)\b/.test(q) && !division) return make('mixed_participation', { query: 'Saturday mixed round additional players' });
   const rating = /\b(?:dupr|rating|ratings|aggregate)\b/.test(q) || (division && /\b(?:mean|total|combined|limit)\b/.test(q));

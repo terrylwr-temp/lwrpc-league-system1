@@ -53,6 +53,7 @@ function applies(candidate, text, plan, scope) {
   if(candidate.documentType!=='league_rules' && !(plan.kind==='composition'&&plan.operation==='roster'&&candidate.documentType==='captain_guide'))return false;
   if(scope.league && plan.leagues.length && !plan.leagues.includes(scope.league))return false;
   if(scope.division && scope.division!==plan.division)return false;
+  if(plan.kind==='picklebreaker_partners')return /\bpicklebreaker\b/.test(p) && /same partners as the mixed round/.test(p);
   if(plan.kind==='mixed_participation')return /mixed teams[\s\S]*additional players[\s\S]*only in the mixed round/.test(p) && scope.league && (!plan.leagues.length||plan.leagues.includes(scope.league));
   if(plan.kind==='composition') {
     if(plan.operation==='pair_rating')return /adding the season dupr ratings of both players/.test(p) || /every lineup[\s\S]*individual[\s\S]*combined/.test(p);

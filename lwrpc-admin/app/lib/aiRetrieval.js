@@ -100,7 +100,7 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   if (concept?.query) {
     conceptSearches.set(result, async () => {
       let args=rpcArgs(concept.query),additionalEmbeddingCalls=0;
-      if(concept.kind==='nvz_fault_call'){
+      if(['nvz_fault_call','picklebreaker_partners'].includes(concept.kind)){
         const conceptEmbedding=await embedQuery(concept.query);
         if(!Array.isArray(conceptEmbedding.embedding)||conceptEmbedding.embedding.length!==aiAssistantConfig.embeddingDimensions)throw new Error('The embedding provider returned an unexpected vector size.');
         args={...args,p_query_embedding:toPgVector(conceptEmbedding.embedding)};
