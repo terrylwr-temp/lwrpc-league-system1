@@ -33,3 +33,11 @@ Clean, Delete and Copy handlers remain unchanged. In particular, the currently s
 Production access this turn was read-only function-definition inspection. No member, source, rating, roster, team, document or authorization data was modified. Only synthetic local transactions were committed.
 
 Recommendation: review this bounded Upload candidate before controlled deployment. Deployment and production acceptance have not occurred. Any acceptance should first check normal Commissioner workflows, then preview the original CSV without committing; actual imports remain an administrator-confirmed business operation. Retain accepted LMS-0738 commit `7c72f89973aba08e3de2856cfe5de8c6bcf77836` / deployment `dpl_Hxpxk6erDFT8szveYas98Fk9kST1` as the application recovery point. Application rollback does not undo an administrator's later committed import.
+
+## 2026-09-16 — follow-up: missing final Age-Based rating
+
+Read-only production check for owner-specified DUPR ID 8EPKQE confirms the original CSV (line 51, over_65) and 2026 Fall Season source/working Age-Based input both contain 4.659; RF is 100. Final season_primetime_rating is null. The 26/27 Saturday Season row has neither an Age-Based input nor a matching source record for that season. No writes performed.
+
+Root cause of the Fall final-value gap: app/ratings/page.js RATING_SELECT omits dupr_age_based_rating, and Clean passes existing season_primetime_rating back into cleanedAgeBasedRating. A blank final remains blank despite a populated input. Existing truncation produces 4.6 from 4.659. Upload correctly preserved the final field and did not automatically run Clean.
+
+Minimum next correction for review: fetch the internal Age-Based input and have Clean use that input to propose the final Age-Based Season value, with explicit legacy fallback/protection controls, RF/NR policy preserved and synthetic regression coverage. Do not copy raw 4.659 into the final column during Upload. This extends beyond the approved Upload-only candidate into ratings calculation/write behavior, excluded from FAST FIX; do not deploy or perform a live Clean as diagnostic acceptance. No code change made in this follow-up.

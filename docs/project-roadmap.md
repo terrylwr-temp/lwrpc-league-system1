@@ -1530,3 +1530,9 @@ DUPR CSV parser automatically tolerates omitted empty trailing header fields; al
 ## 2026-09-16 — LMS-0739 / 0.1.561 local Upload restoration candidate
 
 Owner-approved local implementation reconnects Upload to the existing protected workflow transaction; unchanged source evidence now fills deleted/missing selected-season working inputs. No new SQL or authorization expansion. Preview separates CSV/current/fills; committed summary, file/receipt clearing and selected-season refetch verified. 1,287/1,287 full automated tests, 46/46 final focused controls, lint 0 errors/11 existing warnings, build and synthetic local browser checks pass. Clean/Delete/Copy unchanged; legacy Clean Age-Based handling is outside this Upload scope. NOT DEPLOYED; no production business writes. Review: docs/lms-0739-upload-restoration-local-review.md.
+
+## 2026-09-16 — LMS-0740 / 0.1.562 local Age-Based Clean correction
+
+Owner approved local correction/testing after read-only evidence showed 8EPKQE Fall input 4.659 but final Age-Based rating blank. Clean now fetches the separate input and uses it to propose 4.6; absent inputs preserve legacy final truncation. No Upload/Delete/Copy, RF/NR policy, SQL or security changes. Successful Clean advances the refreshed grid key. Eight new synthetic planner/write-flow tests pass alongside four existing RF controls; full suite 1,295/1,295 passed, lint 0 errors/11 existing warnings. Local build encountered EPERM on existing .next cache and is being retried with local filesystem permission. Candidate remains LOCAL ONLY, not deployed; no production writes. Details: docs/lms-0740-age-based-clean-local-review.md.
+
+LMS-0740 final verification: local production build retry PASSED; the initial failure was cache-file permission only. All local gates above passed. Remains not deployed.

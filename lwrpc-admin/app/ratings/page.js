@@ -13,7 +13,7 @@ import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 const PAGE_SIZE = 100;
-const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, dupr_reliability_rating, season_dupr_rating, season_primetime_rating, notes";
+const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, dupr_reliability_rating, dupr_age_based_rating, season_dupr_rating, season_primetime_rating, notes";
 
 export default function RatingsPage() {
   const router = useRouter();
@@ -595,7 +595,7 @@ export default function RatingsPage() {
     const seasonName = selectedSeasonLabel();
     const reliabilityThresholdText = await appPrompt({
       title: `Reliability rating threshold — ${seasonName}`,
-      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active division Rating Range Max minus 0.5 instead. Existing Age-Based ratings are also rounded down to one decimal place. DUPR Doubles ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
+      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active division Rating Range Max minus 0.5 instead. Imported Age-Based inputs become Age-Based Season ratings, rounded down to one decimal place. If no Age-Based input exists, the existing Age-Based Season rating is rounded down instead. DUPR Doubles ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
       inputLabel: "Reliability Rating threshold",
       placeholder: "0",
       confirmLabel: "Continue",
@@ -679,7 +679,7 @@ export default function RatingsPage() {
         existing?.dupr_reliability_rating,
         reliabilityThreshold
       );
-      const cleanedAgeBasedValue = cleanedAgeBasedRating(existing?.season_primetime_rating);
+      const cleanedAgeBasedValue = cleanedAgeBasedRating(existing?.dupr_age_based_rating, existing?.season_primetime_rating);
 
       if (cleanedValue === null && cleanedAgeBasedValue === null) {
         skippedCount += 1;
@@ -757,6 +757,7 @@ export default function RatingsPage() {
 
     await loadRatings(selectedSeason);
     await loadAllRatings();
+    setRatingsRefreshVersion((version) => version + 1);
     const seasonDuprCount = changes.filter((change) => "season_dupr_rating" in change.payload).length;
     const ageBasedCount = changes.filter((change) => "season_primetime_rating" in change.payload).length;
     const reliabilityAdjustedCount = changes.filter((change) => change.reliabilityTriggered).length;
@@ -2184,12 +2185,15 @@ function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = 
   return truncateToTenth(numberValue);
 }
 
-function cleanedAgeBasedRating(rawValue) {
-  const text = String(rawValue ?? "").trim();
+function cleanedAgeBasedRating(rawValue, existingFinalValue = null) {
+  // Older rows may predate separate Age-Based inputs. Preserve their cleanup path.
+  // A present but invalid input must not be disguised by falling back to a final.
+  const inputText = String(rawValue ?? "").trim();
+  const text = inputText || String(existingFinalValue ?? "").trim();
   if (!text) return null;
 
   const numberValue = Number(text);
-  return Number.isNaN(numberValue) ? null : truncateToTenth(numberValue);
+  return Number.isFinite(numberValue) ? truncateToTenth(numberValue) : null;
 }
 
 function truncateToTenth(value) {
