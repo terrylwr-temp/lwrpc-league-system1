@@ -1,4 +1,6 @@
+import {deriveTemporalContext} from './aiTemporalContext.js';
 import {revalidateExcerptItems,bindOfficialExcerpts,officialDocumentPeriod} from './aiEvidenceExcerpts.js';
+import {assistSemanticRetrieval,candidateDiagnostic} from './aiSemanticRetrieval.js';
 import {selectPolicyEvidence,needsPolicyEvidence,policyCalendarContext} from './aiPolicyEvidence.js';
 import {questionIntent} from './aiRequestIntent.js';
 import {policyValidationDiagnostic} from './aiPolicyDiagnostics.js';
@@ -250,6 +252,23 @@ function isMatchSpecificPassage(passage) { return /\b(?:match\s+setup|upcoming\s
 function asksForTiming(question) { return /\b(?:when|deadline|due|date|open|close|lock|start)\b/i.test(String(question || "")); }
 
 export async function selectAnswerEvidenceWithAssistance(retrieval) {
+  const selected=await selectLegacyAnswerEvidenceWithAssistance(retrieval);
+  if(selected.length){
+    if(retrieval.queryUnderstanding)retrieval.queryUnderstanding.finalEvidence=selected.map(candidateDiagnostic);
+    return selected;
+  }
+  const assisted=await assistSemanticRetrieval(retrieval,selectAnswerEvidence);
+  const completed=await completeSelectedPassages(retrieval,assisted);
+  if(retrieval.queryUnderstanding){
+    retrieval.queryUnderstanding.finalEvidence=completed.map(candidateDiagnostic);
+    const rescue=retrieval.queryUnderstanding.rescue;
+    if(rescue){rescue.selectedCandidateIds=rescue.selectedCandidateIds.filter(id=>completed.some(c=>c.chunkId===id));rescue.evidenceSelected=rescue.selectedCandidateIds.length>0;}
+    if(assisted.length&&!completed.length)retrieval.queryUnderstanding.fallbackReason='INCOMPLETE_PASSAGE_CONTEXT';
+  }
+  return completed;
+}
+
+async function selectLegacyAnswerEvidenceWithAssistance(retrieval) {
   await prepareConceptContext(retrieval);
   let selected = selectAnswerEvidence(retrieval);
   const concept=officialQuestionConcept(retrieval?.request?.question);
@@ -266,7 +285,7 @@ export async function selectAnswerEvidenceWithAssistance(retrieval) {
 export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = fetch, clock = performance.now.bind(performance), resolveSources = resolveOfficialSources }) {
   const started = clock();
   let selectedEvidence = await selectAnswerEvidenceWithAssistance(retrieval);
-  const approvedRows=needsPolicyEvidence(retrieval.request?.question)?null:await retrieveApprovedForAnswer(retrieval);
+  const approvedRows=needsPolicyEvidence(retrieval.request?.question)||selectedEvidence.length&&needsPolicyEvidence(retrieval.queryUnderstanding?.plan?.normalizedQuestion)?null:await retrieveApprovedForAnswer(retrieval);
   if(approvedRows){
     const explicit=['weekday','saturday','primetime'].filter(s=>new RegExp(`\\b${s}\\b`,'i').test(retrieval.request.question));
     const options={scope:explicit.length===1?explicit[0]:retrieval.request.askAbout,seasonId:retrieval.request.context?.seasonId};
@@ -298,6 +317,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   for (const chunk of selectedEvidence) {
     const source = sources.find(source => chunk.sourceKind==='approved_answer'?source.approvedRevisionId===chunk.approvedRevisionId:source.chunkId === chunk.chunkId);
     if(source.excerptItems)chunk.excerptItems=source.excerptItems;
+    if(source.temporalContext)chunk.temporalContext=source.temporalContext;
       if(source.officialPeriod)chunk.officialPeriod=source.officialPeriod;
     chunk.chunkRuleNumber = chunk.ruleNumber;
     chunk.ruleNumber = source.ruleNumber || "";
@@ -305,6 +325,8 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   }
 
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured on the server.");
+  retrieval.temporalContext=selectedEvidence.filter(c=>c.temporalContext?.length).map(c=>({chunkId:c.chunkId,events:c.temporalContext}));
+  if(retrieval.queryUnderstanding)retrieval.queryUnderstanding.temporalContext=retrieval.temporalContext;
   const generationStarted = clock();
   let response;
   try {
@@ -335,6 +357,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         ...(managedSelection?["The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts."]:[]),
         ...(managedSelection?["Treat an Approved Answer as policy evidence, not a literal question/answer macro. Answer the actual user's question and its polarity: an inverse permission question may require No even if the source's original answer starts Yes. Do not copy the source's leading Yes/No without checking the current question. Preserve every applicable qualification, including NR provisions; do not infer individual eligibility or reverse a requirement."]:[]),
         ...(hasMaterialSupplements(selectedEvidence)?[MATERIAL_SUPPLEMENT_INSTRUCTION]:[]),
+        "Use each event's verified chronology year when supplied. A season title year is not the calendar year of every event. Explicit source years take precedence; never substitute the current year. If event chronology says unknown_calendar_year, do not assert a year from the title alone.",
         "Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request.",
         ...(officialQuestionConcept(retrieval.request.question)?.kind?.startsWith('nvz_') ? ['The question interpreter recognizes kitchen and NVZ as terms for non-volley zone. Use that terminology mapping to understand the question; do not add commentary about common usage or claim the source literally uses every alias. Rules and dimensions must still come only from selected evidence.'] : []),
         ...(questionIntent(retrieval.request.question).kind==='scoring_applicability'?['This is scoring APPLICABILITY. Mechanics do not prove applicability. Apply the explicit default only after the supplied complete scoped-format check. For a general applicability question, explicitly name the governing default scoring method; merely denying the proposed method is incomplete. Keep each express exception limited to its league, division and game, including the tie condition. Never answer that the whole league uses Rally from a Picklebreaker-only exception.']:[]),
@@ -459,6 +482,7 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     return {
       ...(excerptItems?{excerptItems}:{}),
       officialPeriod:officialDocumentPeriod(document.title),
+      temporalContext:deriveTemporalContext(citedChunk.content,{title:document.title,heading:citedChunk.heading}),
       documentId: chunk.documentId,
       documentVersionId: chunk.documentVersionId,
       chunkId: chunk.chunkId,
@@ -646,7 +670,7 @@ function rejectedIntentReason(candidate, intents) {
 }
 
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}${supplementalPromptMetadata(chunk)}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nVerified period metadata: ${JSON.stringify(chunk.officialPeriod||null)}\nTrusted passage scope: ${JSON.stringify(chunk.passageScopes||[])}\n${chunk.excerptItems?`Separately verified evidence items:\n${JSON.stringify(chunk.excerptItems.map(item=>({sourceText:item.text,sourceIdentity:{documentId:chunk.documentId,documentVersionId:chunk.documentVersionId,chunkId:chunk.chunkId,start:item.start,end:item.end,page:item.pageNumber,rule:item.ruleNumber},derivedApplicability:item.applicability,scopeBindings:item.scopeBindings,...(item.officialDatePeriod?{verifiedDatePeriod:item.officialDatePeriod}:{})})))}`:`Text:\n${chunk.content}`}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}${supplementalPromptMetadata(chunk)}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nVerified event chronology (takes precedence over a document-wide year): ${JSON.stringify(chunk.temporalContext||[])}\nVerified period metadata: ${JSON.stringify(chunk.officialPeriod||null)}\nTrusted passage scope: ${JSON.stringify(chunk.passageScopes||[])}\n${chunk.excerptItems?`Separately verified evidence items:\n${JSON.stringify(chunk.excerptItems.map(item=>({sourceText:item.text,sourceIdentity:{documentId:chunk.documentId,documentVersionId:chunk.documentVersionId,chunkId:chunk.chunkId,start:item.start,end:item.end,page:item.pageNumber,rule:item.ruleNumber},derivedApplicability:item.applicability,scopeBindings:item.scopeBindings,...(item.officialDatePeriod?{verifiedDatePeriod:item.officialDatePeriod}:{})})))}`:`Text:\n${chunk.content}`}`).join("\n\n")}`;
 }
 
 function cleanCitationDetail(value) {

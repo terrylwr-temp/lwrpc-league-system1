@@ -1,3 +1,4 @@
+import {deriveTemporalContext} from './aiTemporalContext.js';
 // Official calendar intent/metadata only: no user records, model calls or answer dates.
 export function leagueDateIntent(q) {
  if (/\b(?:my|our|his|her|their|next|upcoming|reschedule|change|move|cancel|create|delete)\b/.test(q)) return null;
@@ -21,15 +22,7 @@ export function officialDateEvent(text) {
 // The source's chronological bullet list, not today's date, grounds a year rollover.
 export function officialDatePeriod(content,start,period) {
  const result={seasonLabel:period?.seasonLabel||'',calendarYear:null,derivation:'unknown_calendar_year'};
- if (!period?.calendarYear || !/League Key Dates/i.test(content.split('\n')[0])) return result;
- let year=Number(period.calendarYear),previous=0,rollovers=0;
- const months=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
- for (const m of content.matchAll(/^[•]\s*(Jan\w*|Feb\w*|Mar\w*|Apr\w*|May|Jun\w*|Jul\w*|Aug\w*|Sep\w*|Oct\w*|Nov\w*|Dec\w*)\.?\s+\d{1,2}/gm)) {
-  if (m.index>start) break;
-  const month=months.indexOf(m[1].slice(0,3).toLowerCase())+1;
-  if (month<previous) { if (previous<10||month>3||++rollovers>1)return result; year++; }
-  previous=month;
-  if(m.index===start)return {...result,calendarYear:String(year),derivation:rollovers?'active_title_and_ordered_month_rollover':'revalidated_active_document_title'};
- }
- return result;
+ const event=deriveTemporalContext(content,{title:period?.seasonLabel||'',heading:content.split('\n')[0]}).find(e=>e.start===start);
+ if(!event?.calendarYear)return result;
+ return {...result,calendarYear:event.calendarYear,derivation:event.derivation==='ordered_source_month_rollover'?'active_title_and_ordered_month_rollover':event.derivation==='source_heading_year'?'revalidated_active_document_title':event.derivation};
 }

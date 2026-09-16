@@ -1,4 +1,5 @@
 import {completePolicyEvidence} from './aiPolicyEvidence.js';
+import {retainSemanticRetrieval,createSemanticQueryPlan} from './aiSemanticRetrieval.js';
 import { passageScope } from './aiOfficialApplicability.js';
 import { retainPassageReader } from './aiPassageContinuations.js';
 import { interpretQuestion } from "./aiQuestionInterpretation.js";
@@ -49,7 +50,7 @@ export function normalizeRetrievalRequest(body = {}) {
   });
 }
 
-export async function retrieveOfficialEvidence({ supabase, body, embedQuery = createQueryEmbedding, clock = performance.now.bind(performance) }) {
+export async function retrieveOfficialEvidence({ supabase, body, embedQuery = createQueryEmbedding, planQuery = createSemanticQueryPlan, clock = performance.now.bind(performance) }) {
   if (!aiAssistantConfig.enabled) throw new Error("Ask LWR Pickleball Club AI retrieval is disabled. Set LWR_AI_ENABLED=true on the server.");
   const request = normalizeRetrievalRequest(body);
   const navigation = await retrieveDocumentNavigation(supabase, request);
@@ -96,6 +97,28 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     metrics: { interpretationMs, embeddingInputTokens: finiteOrNull(embedding.inputTokens), embeddingMs: Math.round(embeddingDone - started), retrievalMs: Math.round(clock() - embeddingDone), totalMs: Math.round(clock() - started) },
   };
   retainPassageReader(result,supabase);
+  retainSemanticRetrieval(result,{
+    supabase,plan:planQuery,
+    qualifies:c=>evaluateEvidence([c],aiAssistantConfig.evidenceThreshold).sufficient,
+    catalog:async()=>{
+      const {data:docs,error:catalogError}=await supabase.from('ai_documents').select('id,title,document_type,authority_rank,scope_kind,active_version_id,active_version:ai_document_versions!ai_documents_active_version_id_fkey!inner(processing_status)').eq('status','active').eq('active_version.processing_status','ready').limit(40).abortSignal(AbortSignal.timeout(5000));
+      if(catalogError)throw catalogError;
+      return (docs||[]).map(d=>({id:d.id,title:d.title,type:d.document_type,authorityRank:d.authority_rank,scope:d.scope_kind,activeVersionId:d.active_version_id}));
+    },
+    search:async query=>{
+      const extra=await embedQuery(query,undefined,AbortSignal.timeout(8000));
+      if(Number.isFinite(extra.inputTokens)&&Number.isFinite(result.metrics.embeddingInputTokens))result.metrics.embeddingInputTokens+=extra.inputTokens;
+      const rpc=supabase.rpc('search_ai_official_chunks',{...rpcArgs(query),p_query_embedding:toPgVector(extra.embedding)});
+      const {data:rows,error:searchError}=await (typeof rpc.abortSignal==='function'?rpc.abortSignal(AbortSignal.timeout(5000)):rpc);
+      if(searchError){searchError.queryExecuted=true;throw searchError;}
+      return (rows||[]).map(row=>candidateFromRow(row,{...retrievalRequest,retrievalQuery:query}));
+    },
+    refresh:()=>{
+      result.suppliedEvidence=result.candidates.slice(0,aiAssistantConfig.retrievalLimit);
+      result.authorityReviewCandidates=result.candidates.slice(0,AUTHORITY_REVIEW_LIMIT);
+      result.evidence=evaluateEvidence(result.suppliedEvidence,aiAssistantConfig.evidenceThreshold);
+    },
+  });
   const concept = officialQuestionConcept(interpretation.matchingView);
   if (concept?.query) {
     conceptSearches.set(result, async () => {
@@ -310,10 +333,11 @@ async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuer
   };
 }
 
-export async function createQueryEmbedding(question, fetchImpl = fetch) {
+export async function createQueryEmbedding(question, fetchImpl = fetch, signal) {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured on the server.");
   assertEmbeddingConfiguration();
   const response = await fetchImpl("https://api.openai.com/v1/embeddings", {
+    ...(signal?{signal}:{}),
     method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
     body: JSON.stringify({ model: aiAssistantConfig.embeddingModel, input: question, dimensions: aiAssistantConfig.embeddingDimensions, encoding_format: "float" }),
   });
