@@ -18,6 +18,7 @@ import { filterHistoryRows, sortHistoryRows } from "../lib/playHistory";
 import { formatDisplayTimestamp } from "../lib/dateTime";
 import {
   buildMemberLocationReviewRows,
+  buildSafeMemberLocationTextUpdates,
   memberLocationReviewCsv,
 } from "../lib/memberLocationReviewExport";
 
@@ -172,29 +173,51 @@ export default function MembersPage() {
 
     const ok = await appConfirm(
       [
-        "Clean Members will standardize member phone numbers only.",
+        "Clean Members will standardize member phone numbers and safely correct saved Location text.",
         "",
         "It will:",
         "- Format 10-digit US numbers as (###) ###-####.",
         "- Remove a leading 1 from 11-digit US numbers.",
         "- Preserve extensions like x123.",
+        "- Correct saved Location text only when the linked Location and latest MembershipWorks Location agree.",
         "",
-        "It will not change names, emails, DUPR IDs, roles, locations, or phone numbers it cannot safely interpret.",
+        "It will not change names, emails, DUPR IDs, roles, Location links, ambiguous Location records, or phone numbers it cannot safely interpret.",
         "",
         "Continue?",
       ].join("\n"),
-      { title: "Clean member phone numbers", confirmLabel: "Clean members", tone: "warning" }
+      { title: "Clean member records", confirmLabel: "Clean members", tone: "warning" }
     );
 
     if (!ok) return;
 
-    const { rows: memberRows, error: memberLoadError } = await loadAllExportMemberRows();
-    if (memberLoadError) {
-      alert(memberLoadError.message);
+    const [memberResult, batchResult, locationResult] = await Promise.all([
+      loadAllExportMemberRows(),
+      supabase
+        .from("member_import_batches")
+        .select("id")
+        .eq("source", "membershipworks")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      loadAllLocationReviewLocations(),
+    ]);
+    const loadError = memberResult.error || batchResult.error || locationResult.error;
+    if (loadError) {
+      alert(loadError.message);
       return;
     }
 
-    const updates = memberRows
+    const auditResult = batchResult.data
+      ? await loadAllLocationReviewAuditRows(batchResult.data.id)
+      : { rows: [], error: null };
+    if (auditResult.error) {
+      alert(auditResult.error.message);
+      return;
+    }
+
+    const memberRows = memberResult.rows;
+
+    const phoneUpdates = memberRows
       .map((member) => {
         const cleanedPhone = formatPhoneNumberForStorage(member.phone);
         const currentPhone = String(member.phone || "").trim();
@@ -210,8 +233,14 @@ export default function MembersPage() {
       })
       .filter(Boolean);
 
-    if (updates.length === 0) {
-      alert("No member phone numbers need cleanup.");
+    const locationUpdates = buildSafeMemberLocationTextUpdates({
+      auditRows: auditResult.rows,
+      members: memberRows,
+      locations: locationResult.rows,
+    });
+
+    if (phoneUpdates.length === 0 && locationUpdates.length === 0) {
+      alert("No member phone numbers or safe saved Location text values need cleanup.");
       return;
     }
 
@@ -219,8 +248,8 @@ export default function MembersPage() {
 
     const updatedAt = new Date().toISOString();
 
-    for (let i = 0; i < updates.length; i += CLEAN_MEMBERS_BATCH_SIZE) {
-      const batch = updates.slice(i, i + CLEAN_MEMBERS_BATCH_SIZE);
+    for (let i = 0; i < phoneUpdates.length; i += CLEAN_MEMBERS_BATCH_SIZE) {
+      const batch = phoneUpdates.slice(i, i + CLEAN_MEMBERS_BATCH_SIZE);
       const results = await Promise.all(
         batch.map((update) =>
           supabase
@@ -242,9 +271,54 @@ export default function MembersPage() {
       }
     }
 
+    let correctedLocationCount = 0;
+    let staleLocationCount = 0;
+
+    for (let i = 0; i < locationUpdates.length; i += CLEAN_MEMBERS_BATCH_SIZE) {
+      const batch = locationUpdates.slice(i, i + CLEAN_MEMBERS_BATCH_SIZE);
+      const results = await Promise.all(
+        batch.map((update) => {
+          let query = supabase
+            .from("members")
+            .update({
+              club_location: update.club_location,
+              updated_at: updatedAt,
+            })
+            .eq("id", update.id)
+            .eq("location_id", update.expectedLocationId);
+
+          query = update.expectedClubLocation == null
+            ? query.is("club_location", null)
+            : query.eq("club_location", update.expectedClubLocation);
+
+          return query.select("id");
+        })
+      );
+
+      const failedResult = results.find((result) => result.error);
+      if (failedResult?.error) {
+        alert(failedResult.error.message);
+        setCleaningMembers(false);
+        return;
+      }
+
+      correctedLocationCount += results.filter((result) => result.data?.length).length;
+      staleLocationCount += results.filter((result) => !result.data?.length).length;
+    }
+
     await loadMembers();
     setCleaningMembers(false);
-    alert(`Cleaned ${updates.length} member phone number${updates.length === 1 ? "" : "s"}.`);
+    alert(
+      [
+        "Clean Members completed.",
+        "",
+        `Phone numbers cleaned: ${phoneUpdates.length}`,
+        `Saved Location text corrected: ${correctedLocationCount}`,
+        ...(staleLocationCount > 0
+          ? [`Location corrections skipped because the member changed during cleanup: ${staleLocationCount}`]
+          : []),
+      ].join("\n")
+    );
   }
 
   async function correctRoles() {
@@ -1558,6 +1632,9 @@ async function loadAllExportMemberRows() {
         phone,
         notification_preference,
         club_location,
+        location_id,
+        membershipworks_id,
+        membershipworks_account_id,
         dupr_id,
         is_active_member,
         user_roles (

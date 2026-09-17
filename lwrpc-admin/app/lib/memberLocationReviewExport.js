@@ -113,6 +113,69 @@ export function buildMemberLocationReviewRows({ batch, auditRows, members, locat
     .filter(Boolean);
 }
 
+export function buildSafeMemberLocationTextUpdates({ auditRows, members, locations }) {
+  const membersByMembershipWorksId = new Map();
+  const membersByEmail = new Map();
+  const importedLocationsByMemberId = new Map();
+  const locationsById = new Map(
+    (locations || []).map((location) => [String(location.id || ""), location])
+  );
+
+  for (const member of members || []) {
+    const membershipWorksId = String(
+      member.membershipworks_account_id || member.membershipworks_id || ""
+    ).trim();
+    const email = normalizeEmail(member.email);
+    if (membershipWorksId) membersByMembershipWorksId.set(membershipWorksId, member);
+    if (email) membersByEmail.set(email, member);
+  }
+
+  for (const row of auditRows || []) {
+    if (row.action === "skip") continue;
+
+    const membershipWorksId = String(
+      row.membershipworks_id || row.membershipworks_account_id || ""
+    ).trim();
+    const member =
+      (membershipWorksId && membersByMembershipWorksId.get(membershipWorksId)) ||
+      membersByEmail.get(normalizeEmail(row.email)) ||
+      null;
+    const importedLocation = membershipWorksLocationFromRaw(row.raw_data);
+    if (!member?.id || !importedLocation) continue;
+
+    const memberId = String(member.id);
+    if (!importedLocationsByMemberId.has(memberId)) {
+      importedLocationsByMemberId.set(memberId, new Set());
+    }
+    importedLocationsByMemberId.get(memberId).add(normalizeLocationName(importedLocation));
+  }
+
+  return (members || []).flatMap((member) => {
+    const linkedLocation = locationsById.get(String(member.location_id || ""));
+    const linkedName = String(linkedLocation?.name || "").trim();
+    const importedNames = importedLocationsByMemberId.get(String(member.id || ""));
+    const currentName = String(member.club_location || "").trim();
+
+    if (
+      !member.id ||
+      !linkedName ||
+      !importedNames?.size ||
+      importedNames.size !== 1 ||
+      !importedNames.has(normalizeLocationName(linkedName)) ||
+      currentName === linkedName
+    ) {
+      return [];
+    }
+
+    return [{
+      id: member.id,
+      club_location: linkedName,
+      expectedClubLocation: member.club_location ?? null,
+      expectedLocationId: member.location_id,
+    }];
+  });
+}
+
 export function memberLocationReviewCsv(rows) {
   return [LOCATION_REVIEW_CSV_HEADER, ...(rows || [])]
     .map((row) => row.map(csvCell).join(","))
@@ -126,5 +189,9 @@ function csvCell(value) {
 }
 
 function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function normalizeLocationName(value) {
   return String(value || "").trim().toLowerCase();
 }
