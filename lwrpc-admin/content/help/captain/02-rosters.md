@@ -18,7 +18,7 @@ Use **Add Player** to select from eligible members. The player list is filtered 
 - **Eligible** means the player has the required rating and fits the team rating range.
 - **Rating Needed** means the player can be added to the roster, but cannot be used for Match Setup or score entry until the required rating is entered.
 - **DUPR ID Needed** means the player can be added to the roster and league support will be notified to follow up on the missing DUPR ID.
-- **Not Eligible** means the player cannot be added because their rating is outside the division rating range.
+- **Not Eligible** means the player cannot be added because their rating is outside the division rating range. These players remain visible for reference but cannot be selected.
 
 ## Home community filtering
 
@@ -26,4 +26,4 @@ Some leagues restrict roster adds to the team home community. When that rule is 
 
 ## Player information check notices
 
-If you add a player who has a missing season rating or DUPR ID, the system sends a player information check email to league support. You will receive an update when the missing information is entered.
+Selecting a player who has a missing season rating or DUPR ID displays a notice explaining the review process. If you continue and add the player, the system sends the existing player-check alert to league support and a separate email to the player and the team's Captain/Co-Captain(s). League support will follow up on the missing information.

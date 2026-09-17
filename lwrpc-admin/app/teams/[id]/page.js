@@ -11,6 +11,12 @@ import { confirmDeleteActionAsync } from "../../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 import { EMAIL_TEMPLATE_KEYS, escapeHtml, getEmailTemplateConfig, renderEmailTemplate } from "../../lib/emailTemplates";
 import {
+  rosterPlayerCheckRecipientEmails,
+  rosterPlayerCheckSelectionMessage,
+  rosterPlayerNeedsInformationCheck,
+  rosterPlayerSelectionDisabled,
+} from "../../lib/rosterPlayerChecks";
+import {
   filterHistoryRows,
   formatDate,
   historyScoreSummary,
@@ -496,6 +502,22 @@ export default function TeamRosterPage() {
     return "Eligible";
   }
 
+  function handleAvailablePlayerSelection(memberId) {
+    setSelectedMemberId(memberId);
+
+    const member = members.find((candidate) => String(candidate.id) === String(memberId));
+    if (!member) return;
+
+    const status = playerRatingEligibility(member);
+    if (!rosterPlayerNeedsInformationCheck(status)) return;
+
+    alert(rosterPlayerCheckSelectionMessage({
+      playerName: formatMemberName(member),
+      status,
+      ratingLabel: getRatingLabel(),
+    }));
+  }
+
   function captainAlertDetailsHtml() {
     const captains = [
       ["Captain", team?.captain],
@@ -591,6 +613,56 @@ export default function TeamRosterPage() {
 
     if (Number(result?.email?.sent || 0) < 1) {
       throw new Error(result?.email?.reason || "Rating check alert was not sent");
+    }
+  }
+
+  async function sendRatingCheckPlayerAlert(member, reason) {
+    const recipients = rosterPlayerCheckRecipientEmails([
+      member,
+      team?.captain,
+      team?.co_captain_1,
+      team?.co_captain_2,
+    ]);
+
+    if (recipients.length === 0) {
+      throw new Error("The player and team captains do not have email addresses on file.");
+    }
+
+    const playerName = formatMemberName(member) || "Unknown player";
+    const template = await loadClientEmailTemplate(EMAIL_TEMPLATE_KEYS.ratingCheckAlertToPlayer);
+    const rendered = renderEmailTemplate(template, {
+      player_name: playerName,
+      team: team?.name || "Unknown team",
+      league: team?.divisions?.leagues?.name || "Unknown league",
+      division: team?.divisions?.name || "Unknown division",
+      reason,
+      rating_type: getRatingLabel(),
+      rating_range: ratingRangeLabel(),
+      captain_contacts: captainAlertDetailsHtml(),
+    });
+
+    const response = await fetch("/api/notifications", {
+      method: "POST",
+      headers: await getRequestAuthorizationHeaders({
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify({
+        emails: recipients,
+        phones: [],
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Player and captain rating check alert failed");
+    }
+
+    const result = await response.json();
+
+    if (Number(result?.email?.sent || 0) < recipients.length) {
+      throw new Error(result?.email?.reason || "Player and captain rating check alert was not sent");
     }
   }
 
@@ -809,17 +881,6 @@ function getAverageTeamRating() {
       return;
     }
 
-    if (missingDuprId || missingRating) {
-      const missingInformation = missingRating
-        ? `a ${getRatingLabel()} for this season`
-        : "a DUPR ID";
-      const verificationMessage = missingRating
-        ? "We will send you an email when we verify their DUPR Rating. If their Rating is not eligible for this team, we will notify you and delete that player from this roster."
-        : "We will send you an email when their information is updated.";
-
-      alert(`${formatMemberName(member)} does not currently have ${missingInformation} entered. They will be added to this roster, and a player information check email will be sent to info@lwrpickleballclub.com. ${verificationMessage}`);
-    }
-
     const alreadyOnRoster = roster.find(
       r => r.member_id === selectedMemberId
     );
@@ -846,11 +907,37 @@ function getAverageTeamRating() {
       if (missingDuprId) reasons.push("No DUPR ID entered");
       if (missingRating) reasons.push(`No ${getRatingLabel()} entered`);
       if (nrDuprDoublesRating) reasons.push("NR DUPR Doubles rating");
+      const reason = reasons.join("; ");
+      const notificationRequests = [
+        {
+          label: "League Management",
+          send: () => sendRatingCheckAlert(member, reason),
+        },
+      ];
 
-      await sendRatingCheckAlert(member, reasons.join("; ")).catch((alertError) => {
-        console.warn("Roster player information check alert failed.", alertError);
-        alert("Player added, but the player information check email could not be sent. Please notify the league manually.");
+      if (missingDuprId || missingRating) {
+        notificationRequests.push({
+          label: "the player and team captains",
+          send: () => sendRatingCheckPlayerAlert(member, reason),
+        });
+      }
+
+      const notificationResults = await Promise.allSettled(
+        notificationRequests.map((notification) => notification.send())
+      );
+      const failedNotifications = notificationResults
+        .map((result, index) => ({ result, label: notificationRequests[index].label }))
+        .filter(({ result }) => result.status === "rejected");
+
+      failedNotifications.forEach(({ result, label }) => {
+        console.warn(`Roster player information check alert failed for ${label}.`, result.reason);
       });
+
+      if (failedNotifications.length > 0) {
+        alert(
+          `Player added, but the roster player-check email could not be sent to ${failedNotifications.map(({ label }) => label).join(" and ")}. Please notify those recipients manually.`
+        );
+      }
     }
 
     setSelectedMemberId("");
@@ -1151,7 +1238,7 @@ function getAverageTeamRating() {
 
                 <select
                   value={selectedMemberId}
-                  onChange={e => setSelectedMemberId(e.target.value)}
+                  onChange={e => handleAvailablePlayerSelection(e.target.value)}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3"
                 >
                   <option value="">
@@ -1162,6 +1249,7 @@ function getAverageTeamRating() {
                     <option
                       key={member.id}
                       value={member.id}
+                      disabled={rosterPlayerSelectionDisabled(playerRatingEligibility(member))}
                     >
                       {member.last_name}, {member.first_name}
                       {" - "}
@@ -1473,7 +1561,7 @@ function getAverageTeamRating() {
 
                   <select
                     value={selectedMemberId}
-                    onChange={e => setSelectedMemberId(e.target.value)}
+                    onChange={e => handleAvailablePlayerSelection(e.target.value)}
                     className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   >
                     <option value="">
@@ -1484,6 +1572,7 @@ function getAverageTeamRating() {
                       <option
                         key={member.id}
                         value={member.id}
+                        disabled={rosterPlayerSelectionDisabled(playerRatingEligibility(member))}
                       >
                         {member.last_name}, {member.first_name}
                         {" - "}

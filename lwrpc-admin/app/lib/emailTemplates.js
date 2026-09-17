@@ -10,6 +10,7 @@ export const EMAIL_TEMPLATE_KEYS = {
   matchSetupReminder: "match_setup_reminder",
   flexDateTimeChange: "flex_date_time_change",
   ratingCheckAlert: "rating_check_alert",
+  ratingCheckAlertToPlayer: "rating_check_alert_to_player",
 };
 
 const COMMON_TEMPLATE_PLACEHOLDERS = ["{{date}}", "{{time}}", "{{league_site_url}}", "{{main_email}}"];
@@ -209,6 +210,29 @@ export const EMAIL_TEMPLATES = [
   <p><strong>Captain Contacts:</strong></p>
   <div>{{captain_contacts}}</div>
   <p>Please check this player and update their rating or DUPR ID as needed.</p>
+</div>`,
+  },
+  {
+    key: EMAIL_TEMPLATE_KEYS.ratingCheckAlertToPlayer,
+    label: "Roster Player Check Alert-To Player",
+    description: "Sent to the added player and the team's captains when a roster add needs rating or DUPR ID review.",
+    placeholders: withCommonPlaceholders(["{{player_name}}", "{{team}}", "{{league}}", "{{division}}", "{{reason}}", "{{rating_type}}", "{{rating_range}}", "{{captain_contacts}}"]),
+    defaultSubject: "Roster player information check: {{player_name}}",
+    defaultBody: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <h2>Roster Player Information Check</h2>
+  <p>Hello {{player_name}} and Team Captains,</p>
+  <p><strong>{{player_name}}</strong> was added to the <strong>{{team}}</strong> roster, but some player information still needs review.</p>
+  <p>
+    <strong>League:</strong> {{league}}<br />
+    <strong>Division:</strong> {{division}}<br />
+    <strong>Reason:</strong> {{reason}}<br />
+    <strong>Rating Type:</strong> {{rating_type}}<br />
+    <strong>Team Rating Range:</strong> {{rating_range}}
+  </p>
+  <p>League Management has also been notified and will review the missing information.</p>
+  <p><strong>Captain Contacts:</strong></p>
+  <div>{{captain_contacts}}</div>
+  <p>Please contact League Management at {{main_email}} if you have questions.</p>
 </div>`,
   },
 ];
