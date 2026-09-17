@@ -16,6 +16,10 @@ import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsav
 import { appConfirm } from "../lib/appDialog";
 import { filterHistoryRows, sortHistoryRows } from "../lib/playHistory";
 import { formatDisplayTimestamp } from "../lib/dateTime";
+import {
+  buildMemberLocationReviewRows,
+  memberLocationReviewCsv,
+} from "../lib/memberLocationReviewExport";
 
 const PAGE_SIZE = 100;
 const MEMBER_DIRECTORY_VIEW_STATE_KEY = "lwrpc-member-directory-view";
@@ -57,6 +61,7 @@ export default function MembersPage() {
   const [exportType, setExportType] = useState("membership_all");
   const [exportSeasonId, setExportSeasonId] = useState("");
   const [exportingMembers, setExportingMembers] = useState(false);
+  const [exportingLocationReview, setExportingLocationReview] = useState(false);
   const [correctingRoles, setCorrectingRoles] = useState(false);
   const [teamsMember, setTeamsMember] = useState(null);
   const [historyMember, setHistoryMember] = useState(null);
@@ -670,6 +675,57 @@ export default function MembersPage() {
     setExportModalOpen(false);
   }
 
+  async function exportLocationReview() {
+    if (exportingLocationReview) return;
+
+    setExportingLocationReview(true);
+
+    try {
+      const { data: batch, error: batchError } = await supabase
+        .from("member_import_batches")
+        .select("id, file_name, created_at")
+        .eq("source", "membershipworks")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (batchError) throw batchError;
+      if (!batch) {
+        alert("No MembershipWorks import batch was found.");
+        return;
+      }
+
+      const [auditResult, memberResult, locationResult] = await Promise.all([
+        loadAllLocationReviewAuditRows(batch.id),
+        loadAllLocationReviewMembers(),
+        loadAllLocationReviewLocations(),
+      ]);
+      const loadError = auditResult.error || memberResult.error || locationResult.error;
+      if (loadError) throw loadError;
+
+      const rows = buildMemberLocationReviewRows({
+        batch,
+        auditRows: auditResult.rows,
+        members: memberResult.rows,
+        locations: locationResult.rows,
+      });
+
+      if (rows.length === 0) {
+        alert(`No Location names from the latest MembershipWorks import (${batch.file_name || "unnamed file"}) currently need review.`);
+        return;
+      }
+
+      downloadCsv(
+        memberLocationReviewCsv(rows),
+        `lwrpc-membershipworks-location-review-${localDateString()}.csv`
+      );
+    } catch (error) {
+      alert(error?.message || "Unable to export the Location review report.");
+    } finally {
+      setExportingLocationReview(false);
+    }
+  }
+
   async function resetMemberPassword(member) {
     const normalizedEmail = normalizeEmailAddress(member.email);
 
@@ -898,7 +954,7 @@ export default function MembersPage() {
                   Data Tools
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Import MembershipWorks files and run controlled cleanup tools for member records.
+                  Import MembershipWorks files, export review lists, and run controlled cleanup tools for member records.
                 </p>
               </div>
 
@@ -917,6 +973,16 @@ export default function MembersPage() {
                   className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
                 >
                   Member Export
+                </button>
+
+                <button
+                  type="button"
+                  onClick={exportLocationReview}
+                  disabled={exportingLocationReview}
+                  title="Export Location names needing review from the latest MembershipWorks import"
+                  className="rounded-xl bg-amber-700 px-5 py-3 font-semibold text-white hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {exportingLocationReview ? "Exporting..." : "Location Review CSV"}
                 </button>
 
                 <button
@@ -1507,6 +1573,72 @@ async function loadAllExportMemberRows() {
 
     if (!data || data.length < pageSize) break;
 
+    from += pageSize;
+  }
+
+  return { rows, error: null };
+}
+
+async function loadAllLocationReviewAuditRows(batchId) {
+  return loadAllLocationReviewRows((from, to) =>
+    supabase
+      .from("member_import_rows")
+      .select(`
+        row_number,
+        action,
+        email,
+        first_name,
+        last_name,
+        membershipworks_id,
+        membershipworks_account_id,
+        raw_data
+      `)
+      .eq("batch_id", batchId)
+      .order("row_number", { ascending: true })
+      .range(from, to)
+  );
+}
+
+async function loadAllLocationReviewMembers() {
+  return loadAllLocationReviewRows((from, to) =>
+    supabase
+      .from("members")
+      .select(`
+        id,
+        first_name,
+        last_name,
+        email,
+        membershipworks_id,
+        membershipworks_account_id,
+        club_location,
+        location_id
+      `)
+      .order("id", { ascending: true })
+      .range(from, to)
+  );
+}
+
+async function loadAllLocationReviewLocations() {
+  return loadAllLocationReviewRows((from, to) =>
+    supabase
+      .from("locations")
+      .select("id, name, is_active")
+      .order("name", { ascending: true })
+      .range(from, to)
+  );
+}
+
+async function loadAllLocationReviewRows(loadPage) {
+  const pageSize = 1000;
+  let from = 0;
+  const rows = [];
+
+  while (true) {
+    const { data, error } = await loadPage(from, from + pageSize - 1);
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+    if (!data || data.length < pageSize) break;
     from += pageSize;
   }
 
