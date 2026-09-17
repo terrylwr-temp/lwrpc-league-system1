@@ -46,6 +46,10 @@ import {
 } from "../lib/matchRatingSnapshots";
 import { saveProfilePhoto } from "../lib/profilePhotos";
 import { currentMemberRating, divisionRatingIssue, divisionRatingStatus } from "../lib/ratingEligibility";
+import {
+  rosterPlayerInformationStatus,
+  rosterPlayerNeedsInformationCheck,
+} from "../lib/rosterPlayerChecks";
 
 const CaptainDesignPreviewView = dynamic(() => import("../design-preview/captain/CaptainDesignPreviewView"), {
   loading: () => <LoadingScreen subtitle="Loading Captain Dashboard..." />,
@@ -671,6 +675,7 @@ export default function CaptainDashboardPage() {
               last_name,
               email,
               phone,
+              dupr_id,
               self_rating
             )
           `)
@@ -4052,21 +4057,47 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {roster.map((player) => (
-                <tr key={player.id} role={player.email ? "link" : undefined} tabIndex={player.email ? 0 : undefined} title={player.email ? "Email " + formatMemberName(player) : "No email address on file"} onClick={() => { if (player.email) window.location.href = "mailto:" + player.email; }} onKeyDown={(event) => { if (player.email && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); window.location.href = "mailto:" + player.email; } }} className={"border-b border-slate-100 hover:bg-blue-50 " + (player.email ? "cursor-pointer focus:bg-blue-50 focus:outline-none" : "")}>
-                  <td className="p-3 font-bold text-slate-900">{formatMemberName(player)}</td>
-                  <td className="p-3 font-bold text-blue-900">
-                    {ratingForMember(player.id, seasonId, ratingType, player)}
-                  </td>
-                  <td className="p-3 font-semibold text-slate-700">
-                    {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
-                  </td>
-                  <td className="hidden p-3 text-slate-700 md:table-cell">{player.email || ""}</td>
-                  <td className="hidden p-3 text-slate-700 md:table-cell">
-                    {formatPhoneNumberForStorage(player.phone) || ""}
-                  </td>
-                </tr>
-              ))}
+              {roster.map((player) => {
+                const playerRating = ratingForMember(player.id, seasonId, ratingType, player);
+                const playerInformationStatus = rosterPlayerInformationStatus({
+                  duprId: player.dupr_id,
+                  rating: playerRating,
+                });
+                const playerNeedsInformation = rosterPlayerNeedsInformationCheck(playerInformationStatus);
+
+                return (
+                  <tr
+                    key={player.id}
+                    role={player.email ? "link" : undefined}
+                    tabIndex={player.email ? 0 : undefined}
+                    title={player.email ? "Email " + formatMemberName(player) : "No email address on file"}
+                    onClick={() => { if (player.email) window.location.href = "mailto:" + player.email; }}
+                    onKeyDown={(event) => { if (player.email && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); window.location.href = "mailto:" + player.email; } }}
+                    className={`${
+                      playerNeedsInformation
+                        ? "border-b border-red-300 bg-red-100 hover:bg-red-200 focus:bg-red-200"
+                        : "border-b border-slate-100 hover:bg-blue-50 focus:bg-blue-50"
+                    } ${player.email ? "cursor-pointer focus:outline-none" : ""}`}
+                  >
+                    <td className="p-3 font-bold text-slate-900">
+                      <div>{formatMemberName(player)}</div>
+                      {playerNeedsInformation && (
+                        <span className="mt-1 inline-flex rounded-full border border-red-300 bg-white px-2 py-0.5 text-[10px] font-black uppercase text-red-800">
+                          {playerInformationStatus}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 font-bold text-blue-900">{playerRating}</td>
+                    <td className="p-3 font-semibold text-slate-700">
+                      {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
+                    </td>
+                    <td className="hidden p-3 text-slate-700 md:table-cell">{player.email || ""}</td>
+                    <td className="hidden p-3 text-slate-700 md:table-cell">
+                      {formatPhoneNumberForStorage(player.phone) || ""}
+                    </td>
+                  </tr>
+                );
+              })}
               {roster.length === 0 && (
                 <tr>
                   <td colSpan="5" className="p-8 text-center text-slate-500">

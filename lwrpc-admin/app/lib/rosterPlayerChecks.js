@@ -16,6 +16,23 @@ export function rosterPlayerNeedsInformationCheck(status) {
   ].includes(status);
 }
 
+export function rosterPlayerInformationStatus({ duprId, rating } = {}) {
+  if (!String(duprId || "").trim()) {
+    return ROSTER_PLAYER_ELIGIBILITY.duprIdNeeded;
+  }
+
+  const normalizedRating = String(rating ?? "").trim();
+  if (
+    !normalizedRating ||
+    normalizedRating.toUpperCase() === "NR" ||
+    !Number.isFinite(Number(normalizedRating))
+  ) {
+    return ROSTER_PLAYER_ELIGIBILITY.ratingNeeded;
+  }
+
+  return "";
+}
+
 export function rosterPlayerCheckRecipientEmails(members = []) {
   const uniqueEmails = new Map();
 

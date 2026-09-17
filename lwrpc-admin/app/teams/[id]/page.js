@@ -13,6 +13,7 @@ import { EMAIL_TEMPLATE_KEYS, escapeHtml, getEmailTemplateConfig, renderEmailTem
 import {
   rosterPlayerCheckRecipientEmails,
   rosterPlayerCheckSelectionMessage,
+  rosterPlayerInformationStatus,
   rosterPlayerNeedsInformationCheck,
   rosterPlayerSelectionDisabled,
 } from "../../lib/rosterPlayerChecks";
@@ -1316,6 +1317,13 @@ function getAverageTeamRating() {
               {sortedRoster.map(player => {
                 const member = player.members;
                 const memberDetailVisible = teamRosterDetailView || mobileExpandedRosterMemberId === member?.id;
+                const playerInformationStatus = member
+                  ? rosterPlayerInformationStatus({
+                      duprId: member.dupr_id,
+                      rating: getPlayerRating(member),
+                    })
+                  : "";
+                const playerNeedsInformation = rosterPlayerNeedsInformationCheck(playerInformationStatus);
 
                 const isCaptain =
                   String(team.captain_member_id) ===
@@ -1335,7 +1343,11 @@ function getAverageTeamRating() {
                   <div
                     key={player.id}
                     id={member?.id ? `roster-player-${member.id}` : undefined}
-                    className="rounded-xl border-2 border-slate-300 bg-white px-4 py-3 shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
+                    className={`rounded-xl border-2 px-4 py-3 shadow-sm transition ${
+                      playerNeedsInformation
+                        ? "border-red-400 bg-red-100 hover:border-red-500 hover:bg-red-200"
+                        : "border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50"
+                    }`}
                   >
 
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1374,6 +1386,12 @@ function getAverageTeamRating() {
                           {isClubPro && (
                             <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase text-emerald-800">
                               Club Pro
+                            </span>
+                          )}
+
+                          {playerNeedsInformation && (
+                            <span className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-black uppercase text-red-800">
+                              {playerInformationStatus}
                             </span>
                           )}
 

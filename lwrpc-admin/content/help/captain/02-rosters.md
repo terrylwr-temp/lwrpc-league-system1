@@ -27,3 +27,5 @@ Some leagues restrict roster adds to the team home community. When that rule is 
 ## Player information check notices
 
 Selecting a player who has a missing season rating or DUPR ID displays a notice explaining the review process. If you continue and add the player, the system sends the existing player-check alert to league support and a separate email to the player and the team's Captain/Co-Captain(s). League support will follow up on the missing information.
+
+After the player is added, their card in **Team Roster Management** has a red background and shows **Rating Needed** or **DUPR ID Needed** until the missing information is supplied. The same warning background and label appear when a captain selects **View Team** from the Captain Dashboard.

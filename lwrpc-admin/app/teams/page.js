@@ -12,6 +12,7 @@ import { hasRole } from "../lib/permissions";
 import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
+import { buildTeamExportCsv, teamExportFilename } from "../lib/teamExport";
 
 export default function TeamsPage() {
   const router = useRouter();
@@ -234,7 +235,7 @@ export default function TeamsPage() {
 
     const { data: locationData } = await supabase
       .from("locations")
-      .select("id, name")
+      .select("id, name, address, city, state, zip_code, number_of_courts, court_notes")
       .order("name", { ascending: true });
 
     const { rows: memberData, error: memberError } = await loadAllTeamMemberOptions();
@@ -258,12 +259,22 @@ export default function TeamsPage() {
             id,
             name,
             season_id,
-            rosters_locked
+            rosters_locked,
+            seasons (
+              id,
+              name
+            )
           )
         ),
         locations (
           id,
-          name
+          name,
+          address,
+          city,
+          state,
+          zip_code,
+          number_of_courts,
+          court_notes
         ),
         captain:members!teams_captain_member_id_fkey (
           id,
@@ -331,6 +342,16 @@ export default function TeamsPage() {
     const warning = await ensureAssignedMemberRole(supabase, memberId, "club_pro");
     if (warning) alert(warning);
   }
+
+  function exportTeams() {
+    if (teams.length === 0) {
+      alert("There are no teams to export.");
+      return;
+    }
+
+    downloadCsv(buildTeamExportCsv(teams), teamExportFilename());
+  }
+
   async function saveTeam(e) {
     e.preventDefault();
 
@@ -1260,7 +1281,7 @@ if (loading) {
               </div>
 
               <div className="space-y-3">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={openCreateTeam}
@@ -1275,6 +1296,14 @@ if (loading) {
                     className="min-h-12 rounded-xl bg-blue-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-blue-800"
                   >
                     Copy Division Teams
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={exportTeams}
+                    className="min-h-12 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-emerald-800"
+                  >
+                    Export Teams
                   </button>
                 </div>
 
@@ -1819,6 +1848,18 @@ async function loadAllRosterRows() {
   }
 
   return { rows, error: null };
+}
+
+function downloadCsv(csv, filename) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function copyTeamPayload(team, teamName, targetDivisionId) {

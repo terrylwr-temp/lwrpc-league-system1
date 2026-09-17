@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   rosterPlayerCheckRecipientEmails,
   rosterPlayerCheckSelectionMessage,
+  rosterPlayerInformationStatus,
   rosterPlayerNeedsInformationCheck,
   rosterPlayerSelectionDisabled,
 } from "../app/lib/rosterPlayerChecks.js";
@@ -21,6 +22,25 @@ test("only Rating Needed and DUPR ID Needed selections trigger the information-c
   assert.equal(rosterPlayerNeedsInformationCheck("DUPR ID Needed"), true);
   assert.equal(rosterPlayerNeedsInformationCheck("Eligible"), false);
   assert.equal(rosterPlayerNeedsInformationCheck("Not Eligible"), false);
+});
+
+test("roster cards identify missing DUPR IDs before missing ratings", () => {
+  assert.equal(
+    rosterPlayerInformationStatus({ duprId: "", rating: null }),
+    "DUPR ID Needed"
+  );
+  assert.equal(
+    rosterPlayerInformationStatus({ duprId: "123456", rating: null }),
+    "Rating Needed"
+  );
+  assert.equal(
+    rosterPlayerInformationStatus({ duprId: "123456", rating: "NR" }),
+    "Rating Needed"
+  );
+  assert.equal(
+    rosterPlayerInformationStatus({ duprId: "123456", rating: 4.25 }),
+    ""
+  );
 });
 
 test("player and captain roster-check recipients are trimmed and deduplicated", () => {
@@ -77,4 +97,21 @@ test("both roster player selectors use the guarded selection handler", () => {
   );
   assert.match(source, /EMAIL_TEMPLATE_KEYS\.ratingCheckAlertToPlayer/);
   assert.match(source, /Promise\.allSettled/);
+});
+
+test("roster management and Captain View Team visibly flag missing player information", () => {
+  const teamSource = fs.readFileSync(
+    new URL("../app/teams/[id]/page.js", import.meta.url),
+    "utf8"
+  );
+  const captainSource = fs.readFileSync(
+    new URL("../app/captain-dashboard/page.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(teamSource, /border-red-400 bg-red-100/);
+  assert.match(teamSource, /\{playerInformationStatus\}/);
+  assert.match(captainSource, /phone,\s+dupr_id,\s+self_rating/);
+  assert.match(captainSource, /border-red-300 bg-red-100/);
+  assert.match(captainSource, /\{playerInformationStatus\}/);
 });
