@@ -11,6 +11,10 @@ import {
 } from "../lib/emailTemplates";
 import { DEFAULT_SYSTEM_SETTINGS, emailIsActivated } from "../lib/systemSettings";
 import { appConfirm, appPrompt } from "../lib/appDialog";
+import {
+  captureEditorSelection,
+  restoreEditorSelection,
+} from "../lib/richEmailEditorSelection";
 
 export default function EmailOptionsPage() {
   const router = useRouter();
@@ -576,6 +580,7 @@ function RichEmailEditor({ value, onChange }) {
   const editorRef = useRef(null);
   const initializedRef = useRef(false);
   const lastHtmlRef = useRef(value || "");
+  const selectionRef = useRef(null);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -584,6 +589,7 @@ function RichEmailEditor({ value, onChange }) {
     if (!initializedRef.current) {
       editorRef.current.innerHTML = nextValue;
       lastHtmlRef.current = nextValue;
+      selectionRef.current = null;
       initializedRef.current = true;
       return;
     }
@@ -593,6 +599,7 @@ function RichEmailEditor({ value, onChange }) {
 
     editorRef.current.innerHTML = nextValue;
     lastHtmlRef.current = nextValue;
+    selectionRef.current = null;
   }, [value]);
 
   function syncValue() {
@@ -601,26 +608,58 @@ function RichEmailEditor({ value, onChange }) {
     onChange(html);
   }
 
-  function focusEditor() {
-    editorRef.current?.focus();
+  function rememberSelection() {
+    const range = captureEditorSelection(editorRef.current, window.getSelection());
+    if (range) selectionRef.current = range;
+    return range;
   }
 
-  function runCommand(command, commandValue = null) {
-    focusEditor();
+  function restoreSelection(preferredRange = selectionRef.current) {
+    const range = restoreEditorSelection(
+      editorRef.current,
+      window.getSelection(),
+      document,
+      preferredRange
+    );
+    if (range) selectionRef.current = range.cloneRange();
+    return range;
+  }
+
+  function runCommand(command, commandValue = null, preferredRange = selectionRef.current) {
+    restoreSelection(preferredRange);
     document.execCommand(command, false, commandValue);
     syncValue();
+    rememberSelection();
   }
 
-  function insertHtml(html) {
-    focusEditor();
+  function insertHtml(html, preferredRange = selectionRef.current) {
+    restoreSelection(preferredRange);
     document.execCommand("insertHTML", false, html);
     syncValue();
+    rememberSelection();
   }
 
   async function addLink() {
+    const selectedRange = rememberSelection() || selectionRef.current?.cloneRange() || null;
     const url = await appPrompt({ title: "Add link", message: "Enter the link URL.", inputLabel: "Link URL", confirmLabel: "Add link" });
-    if (!url) return;
-    runCommand("createLink", url);
+    if (!url) {
+      restoreSelection(selectedRange);
+      return;
+    }
+
+    const href = String(url).trim();
+    if (!href) {
+      restoreSelection(selectedRange);
+      return;
+    }
+
+    if (selectedRange?.collapsed !== false) {
+      const escapedHref = escapeEditorHtml(href);
+      insertHtml(`<a href="${escapedHref}">${escapedHref}</a>`, selectedRange);
+      return;
+    }
+
+    runCommand("createLink", href, selectedRange);
   }
 
   function addLeagueSiteLink() {
@@ -664,12 +703,28 @@ function RichEmailEditor({ value, onChange }) {
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
-        onInput={syncValue}
+        onFocus={rememberSelection}
+        onInput={() => {
+          syncValue();
+          rememberSelection();
+        }}
+        onKeyUp={rememberSelection}
+        onMouseUp={rememberSelection}
         onBlur={syncValue}
         className="min-h-72 overflow-auto px-4 py-3 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-200"
       />
     </div>
   );
+}
+
+function escapeEditorHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character]);
 }
 
 function EditorButton({ label, title, onClick }) {
