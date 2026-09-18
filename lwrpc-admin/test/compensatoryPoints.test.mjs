@@ -98,6 +98,7 @@ test("finalization blocks unfinished matches, missing dates, and standings misma
 test("the additive migrations and standings integration preserve the audited security contract", () => {
   const initialMigration = readFileSync(new URL("../supabase/migrations/20260918012928_rule_5_15_1_compensatory_points.sql", import.meta.url), "utf8");
   const endOnlyMigration = readFileSync(new URL("../supabase/migrations/20260918114101_end_of_season_played_date_points.sql", import.meta.url), "utf8");
+  const compatibilityMigration = readFileSync(new URL("../supabase/migrations/20260918121344_end_of_season_points_relationship_compatibility.sql", import.meta.url), "utf8");
   const rebuild = readFileSync(new URL("../app/lib/standingsRebuild.js", import.meta.url), "utf8");
   const route = readFileSync(new URL("../app/api/standings-compensation/route.js", import.meta.url), "utf8");
 
@@ -108,6 +109,8 @@ test("the additive migrations and standings integration preserve the audited sec
   assert.match(endOnlyMigration, /calculation_basis text not null default 'starting_schedule'/);
   assert.match(endOnlyMigration, /foreign key \(division_id\) references public\.divisions\(id\) on delete cascade/);
   assert.match(endOnlyMigration, /foreign key \(team_id\) references public\.teams\(id\) on delete cascade/);
+  assert.match(compatibilityMigration, /drop constraint if exists division_compensatory_point_awards_division_fk/);
+  assert.match(compatibilityMigration, /drop constraint if exists division_compensatory_point_awards_team_fk/);
   assert.match(route, /authorizeAdminRequest\(req, "league_manager"\)/);
   assert.match(route, /body\.confirmation !== "FINALIZE"/);
   assert.match(route, /calculation_basis: "verified_match_dates"/);
@@ -120,9 +123,11 @@ test("the additive migrations and standings integration preserve the audited sec
 test("League Standings is grouped under Match Operations and exposes End of Season Points", () => {
   const navigation = readFileSync(new URL("../app/lib/adminNavigation.js", import.meta.url), "utf8");
   const standingsPage = readFileSync(new URL("../app/standings/page.js", import.meta.url), "utf8");
+  const captainDashboard = readFileSync(new URL("../app/captain-dashboard/page.js", import.meta.url), "utf8");
 
   assert.match(navigation, /key: "matches"[\s\S]*title: "League Standings"[\s\S]*DUPR Rules, Rule 6\.3\.9/);
   assert.match(standingsPage, />\s*End of Season Points\s*</);
+  assert.match(captainDashboard, /divisions:divisions!teams_division_id_fkey/);
   assert.match(standingsPage, /DUPR Rules · Rule 6\.3\.9/);
   assert.match(standingsPage, /Match Dates Played/);
   assert.doesNotMatch(standingsPage, /Capture Starting Schedule|onCapture|baselineMissing/);

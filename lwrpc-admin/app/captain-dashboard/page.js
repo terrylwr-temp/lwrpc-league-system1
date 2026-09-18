@@ -306,7 +306,7 @@ export default function CaptainDashboardPage() {
       .from("teams")
       .select(`
         *,
-        divisions (
+        divisions:divisions!teams_division_id_fkey (
           id,
           name,
           flex_league,

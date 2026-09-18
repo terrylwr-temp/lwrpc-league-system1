@@ -11,6 +11,10 @@ const endOnlyMigration = await readFile(
   new URL("../supabase/migrations/20260918114101_end_of_season_played_date_points.sql", import.meta.url),
   "utf8"
 );
+const compatibilityMigration = await readFile(
+  new URL("../supabase/migrations/20260918121344_end_of_season_points_relationship_compatibility.sql", import.meta.url),
+  "utf8"
+);
 
 test("end-of-season points migrations retain least privilege and support audited awards without a baseline", async () => {
   const db = new PGlite();
@@ -29,6 +33,16 @@ test("end-of-season points migrations retain least privilege and support audited
     `);
     await db.exec(initialMigration);
     await db.exec(endOnlyMigration);
+    await db.exec(compatibilityMigration);
+
+    const awardRelationshipConstraints = (await db.query(
+      "select conname from pg_constraint where conrelid='public.division_compensatory_point_awards'::regclass and conname = any($1)",
+      [["division_compensatory_point_awards_division_fk", "division_compensatory_point_awards_team_fk"]]
+    )).rows;
+    assert.equal(awardRelationshipConstraints.length, 0);
+    assert.equal((await db.query(
+      "select count(*) n from pg_indexes where schemaname='public' and tablename='division_compensatory_point_awards' and indexname='division_compensatory_point_awards_team_idx'"
+    )).rows[0].n, 1);
 
     const tables = [
       "division_compensation_baselines",
@@ -104,9 +118,10 @@ test("end-of-season points migrations retain least privilege and support audited
     assert.equal(standing.earned_standings_points, null);
     assert.equal(standing.compensatory_points, 0);
 
-    await db.query("delete from teams where id=$1", [newTeamId]);
-    assert.equal(Number((await db.query("select count(*) n from division_compensatory_point_awards where team_id=$1", [newTeamId])).rows[0].n), 0);
-    await db.query("delete from teams where id=$1", [oldTeamId]);
+    await db.exec("set role service_role");
+    await db.query("delete from division_compensatory_point_awards where division_id=$1", [divisionId]);
+    await db.exec("reset role");
+    await db.query("delete from teams where id = any($1)", [[oldTeamId, newTeamId]]);
     await db.query("delete from divisions where id=$1", [divisionId]);
     assert.equal(Number((await db.query("select count(*) n from division_compensation_baselines")).rows[0].n), 0);
     assert.equal(Number((await db.query("select count(*) n from division_compensatory_point_awards")).rows[0].n), 0);
