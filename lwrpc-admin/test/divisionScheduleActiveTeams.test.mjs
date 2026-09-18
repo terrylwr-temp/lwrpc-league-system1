@@ -9,7 +9,7 @@ import { createViewAsProjectionClient } from '../app/lib/viewAsProjectionClient.
 for (const [file, loader] of [
   ['captain-dashboard/page.js', 'openDivisionSchedule'],
   ['player-dashboard/page.js', 'openDivisionScheduleForTeam'],
-  ['AdminDashboardClient.js', 'loadDivisionSchedule'],
+  ['division-schedules/page.js', 'loadDivisionSchedule'],
 ]) {
   test(`${file}: division schedule selects only active teams in the selected division`, async () => {
     const source = await readFile(new URL(`../app/${file}`, import.meta.url), 'utf8');

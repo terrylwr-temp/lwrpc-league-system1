@@ -27,6 +27,7 @@ export default function TeamScheduleModal({
   selectedDivisionId = "",
   onSelectDivision = null,
   onClose,
+  page = false,
 }) {
   const [standingsView, setStandingsView] = useState("summary");
   const [expandedMatchId, setExpandedMatchId] = useState("");
@@ -75,8 +76,8 @@ export default function TeamScheduleModal({
   }, [selectedTeamId]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 p-0">
-      <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-6xl flex-col overflow-hidden rounded-none bg-white shadow-2xl">
+    <div className={page ? "w-full" : "fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 p-0"}>
+      <div className={page ? "flex min-h-[70dvh] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow" : "flex h-[100dvh] max-h-[100dvh] w-full max-w-6xl flex-col overflow-hidden rounded-none bg-white shadow-2xl"}>
         <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-950 via-blue-950 to-emerald-900 px-4 py-4 text-white sm:px-6 sm:py-5 md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
@@ -107,13 +108,15 @@ export default function TeamScheduleModal({
                 </select>
               </label>
             )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="min-h-[40px] rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-md"
-            >
-              Close
-            </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="min-h-[40px] rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-md"
+              >
+                Close
+              </button>
+            )}
           </div>
         </div>
 
