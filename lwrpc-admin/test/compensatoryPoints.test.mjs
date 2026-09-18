@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildCompensatoryPointsPreview, roundCompensatoryPoints } from "../app/lib/compensatoryPoints.js";
 
-test("Rule 5.15.1 rounds the total compensation once using half-up whole-number rounding", () => {
+test("DUPR Rules Rule 6.3.9 rounds the total compensation once using half-up whole-number rounding", () => {
   assert.equal(roundCompensatoryPoints(6.49), 6);
   assert.equal(roundCompensatoryPoints(6.5), 7);
 });
 
-test("Rule 5.15.1 compares starting match dates and excludes cancelled matches from the average", () => {
+test("DUPR Rules Rule 6.3.9 compares starting match dates and excludes cancelled matches from the average", () => {
   const preview = buildCompensatoryPointsPreview({
     baseline: { max_scheduled_match_dates: 10 },
     baselineTeams: [
@@ -76,7 +76,7 @@ test("finalization blocks unresolved or standings-mismatched starting-schedule m
   assert.match(preview.rows[0].validationError, /do not match/);
 });
 
-test("Rule 5.15.1 migration and standings integration preserve the audited security contract", () => {
+test("the historical Rule 5.15.1 migration and standings integration preserve the audited security contract", () => {
   const migration = readFileSync(new URL("../supabase/migrations/20260918012928_rule_5_15_1_compensatory_points.sql", import.meta.url), "utf8");
   const rebuild = readFileSync(new URL("../app/lib/standingsRebuild.js", import.meta.url), "utf8");
   const route = readFileSync(new URL("../app/api/standings-compensation/route.js", import.meta.url), "utf8");
@@ -91,4 +91,14 @@ test("Rule 5.15.1 migration and standings integration preserve the audited secur
   assert.match(route, /COMPENSATORY_POINTS_CALCULATION_VERSION/);
   assert.match(rebuild, /division_compensatory_point_awards/);
   assert.doesNotMatch(rebuild, /applyFinalByeAdjustments|publishedScheduleIsFullyVerified/);
+});
+
+test("End of Season Points is grouped under Match Operations and identifies DUPR Rules Rule 6.3.9", () => {
+  const navigation = readFileSync(new URL("../app/lib/adminNavigation.js", import.meta.url), "utf8");
+  const standingsPage = readFileSync(new URL("../app/standings/page.js", import.meta.url), "utf8");
+
+  assert.match(navigation, /key: "matches"[\s\S]*title: "End of Season Points"[\s\S]*DUPR Rules, Rule 6\.3\.9/);
+  assert.match(standingsPage, />\s*End of Season Points\s*</);
+  assert.match(standingsPage, /DUPR Rules · Rule 6\.3\.9/);
+  assert.doesNotMatch(standingsPage, /Rule 5\.15\.1 Finalization/);
 });

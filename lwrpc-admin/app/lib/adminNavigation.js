@@ -25,6 +25,7 @@ const ADMIN_SECTIONS = [
       { title: "Scheduling Admin", desc: "Rules, blackout dates, and initial schedule generation.", path: "/scheduling", code: "SA", tone: "blue", role: "league_manager" },
       { title: "Schedule Editor", desc: "Review, edit, publish, and reset matches.", path: "/schedule-editor", code: "SE", tone: "amber", role: "league_manager" },
       { title: "Scoring Operations", desc: "Create and manage matches, send score reminders, review verification, and export to DUPR.", path: "/scoring", code: "SC", tone: "emerald", role: "league_manager" },
+      { title: "End of Season Points", desc: "Apply end-of-season compensatory points under the DUPR Rules, Rule 6.3.9.", path: "/standings", code: "EP", tone: "amber", role: "league_manager" },
       { title: "Dashboard Messages", desc: "Create dashboard login messages and review message history.", path: "#dashboard-messages", code: "DM", tone: "blue", role: "league_manager", dialog: "messages" },
       { title: "League Communications", desc: "Compose, preview, send, and review scoped league emails.", path: "/league-communications", code: "LC", tone: "amber", role: "league_manager" },
     ],

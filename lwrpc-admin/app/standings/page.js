@@ -227,7 +227,7 @@ export default function StandingsPage() {
     const result = await response.json().catch(() => ({}));
     setCompensationLoading(false);
     if (!response.ok || !result.success) {
-      alert(result.error || "Unable to load Rule 5.15.1.");
+      alert(result.error || "Unable to load DUPR Rules Rule 6.3.9.");
       setCompensationOpen(false);
       return;
     }
@@ -239,8 +239,8 @@ export default function StandingsPage() {
     const confirmation = await appPrompt({
       title: action === "capture" ? "Capture starting schedule" : "Finalize compensatory points",
       message: action === "capture"
-        ? "This permanently records the currently published Division/Pool schedule as the Rule 5.15.1 starting baseline."
-        : "This applies the previewed Rule 5.15.1 whole-number compensatory points and rebuilds final standings.",
+        ? "This permanently records the currently published Division/Pool schedule as the DUPR Rules Rule 6.3.9 starting baseline."
+        : "This applies the previewed DUPR Rules Rule 6.3.9 whole-number compensatory points and rebuilds final standings.",
       inputLabel: `Type ${requiredValue} to continue`,
       requiredValue,
       confirmLabel: action === "capture" ? "Capture baseline" : "Finalize points",
@@ -260,13 +260,13 @@ export default function StandingsPage() {
     const result = await response.json().catch(() => ({}));
     setCompensationLoading(false);
     if (!response.ok || !result.success) {
-      alert(result.error || "Unable to update Rule 5.15.1.");
+      alert(result.error || "Unable to update DUPR Rules Rule 6.3.9.");
       return;
     }
     setCompensationData(result);
     if (action === "apply") {
       await loadData();
-      alert("Rule 5.15.1 compensatory points were finalized and standings were rebuilt.");
+      alert("DUPR Rules Rule 6.3.9 end-of-season points were finalized and standings were rebuilt.");
     }
   }
 
@@ -546,7 +546,7 @@ if (loading) {
                   disabled={!selectedDivision || compensationLoading}
                   className="w-full rounded-xl bg-amber-700 px-4 py-3 font-bold text-white hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
-                  Rule 5.15.1 Finalization
+                  End of Season Points
                 </button>
               </>
             )}
@@ -845,15 +845,15 @@ function CompensatoryPointsModal({ data, loading, divisionName, onCapture, onApp
       <div className="max-h-[92vh] w-full max-w-6xl overflow-auto rounded-2xl bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white p-5">
           <div>
-            <div className="text-xs font-black uppercase tracking-wide text-amber-700">Rule 5.15.1</div>
-            <h2 id="compensatory-points-title" className="mt-1 text-xl font-black text-slate-950">Compensatory Points · {divisionName}</h2>
+            <div className="text-xs font-black uppercase tracking-wide text-amber-700">DUPR Rules · Rule 6.3.9</div>
+            <h2 id="compensatory-points-title" className="mt-1 text-xl font-black text-slate-950">End of Season Points · {divisionName}</h2>
             <p className="mt-1 text-sm text-slate-600">Average earned points per verified starting-schedule match date × missing starting match dates, rounded once to a whole number.</p>
           </div>
           <button type="button" onClick={onClose} disabled={loading} className="rounded-lg bg-slate-200 px-3 py-2 font-bold text-slate-900 disabled:opacity-50">Close</button>
         </div>
 
         <div className="p-5">
-          {loading && <div className="rounded-xl bg-blue-50 p-4 font-bold text-blue-900">Loading Rule 5.15.1…</div>}
+          {loading && <div className="rounded-xl bg-blue-50 p-4 font-bold text-blue-900">Loading end-of-season points…</div>}
 
           {!loading && data?.baselineMissing && (
             <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">

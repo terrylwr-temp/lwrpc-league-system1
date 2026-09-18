@@ -31,7 +31,7 @@ async function divisionSchedule(supabase, divisionId) {
   if (divisionError || teamsError || matchesError) throw divisionError || teamsError || matchesError;
   if (!division) throw new Error("Division was not found.");
   if ((teams || []).length < 2) throw new Error("At least two active teams are required.");
-  if ((matches || []).length === 0) throw new Error("Publish the starting schedule before capturing its Rule 5.15.1 baseline.");
+  if ((matches || []).length === 0) throw new Error("Publish the starting schedule before capturing its DUPR Rules Rule 6.3.9 baseline.");
   if ((matches || []).some((match) => !match.scheduled_date)) {
     throw new Error("Every published starting-schedule match must have a scheduled date.");
   }
@@ -129,7 +129,7 @@ export async function GET(req) {
     if (!divisionId) return NextResponse.json({ success: false, error: "Select a division." }, { status: 400 });
     return NextResponse.json({ success: true, ...(await loadPreview(authorization.supabase, divisionId)) });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message || "Unable to load Rule 5.15.1." }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || "Unable to load DUPR Rules Rule 6.3.9." }, { status: 500 });
   }
 }
 
@@ -203,7 +203,7 @@ export async function POST(req) {
       }
       const preview = await loadPreview(authorization.supabase, divisionId);
       if (preview.baselineMissing || !preview.readyToApply) {
-        return NextResponse.json({ success: false, error: "Rule 5.15.1 is not ready to finalize. Review the preview." }, { status: 409 });
+        return NextResponse.json({ success: false, error: "DUPR Rules Rule 6.3.9 is not ready to finalize. Review the preview." }, { status: 409 });
       }
       const awardRows = preview.rows.map((row) => ({
         division_id: divisionId,
@@ -234,6 +234,6 @@ export async function POST(req) {
 
     return NextResponse.json({ success: false, error: "Unsupported action." }, { status: 400 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message || "Unable to update Rule 5.15.1." }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || "Unable to update DUPR Rules Rule 6.3.9." }, { status: 500 });
   }
 }
