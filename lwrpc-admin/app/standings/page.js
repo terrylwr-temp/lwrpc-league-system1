@@ -234,16 +234,14 @@ export default function StandingsPage() {
     setCompensationData(result);
   }
 
-  async function runCompensationAction(action) {
-    const requiredValue = action === "capture" ? "CAPTURE" : "FINALIZE";
+  async function runCompensationAction() {
+    const requiredValue = "FINALIZE";
     const confirmation = await appPrompt({
-      title: action === "capture" ? "Capture starting schedule" : "Finalize compensatory points",
-      message: action === "capture"
-        ? "This permanently records the currently published Division/Pool schedule as the DUPR Rules Rule 6.3.9 starting baseline."
-        : "This applies the previewed DUPR Rules Rule 6.3.9 whole-number compensatory points and rebuilds final standings.",
+      title: "Finalize end-of-season points",
+      message: "This compares each team's verified match dates with the Division/Pool maximum, applies the DUPR Rules Rule 6.3.9 whole-number compensatory points, and rebuilds final standings.",
       inputLabel: `Type ${requiredValue} to continue`,
       requiredValue,
-      confirmLabel: action === "capture" ? "Capture baseline" : "Finalize points",
+      confirmLabel: "Finalize points",
       tone: "warning",
     });
     if (confirmation !== requiredValue) return;
@@ -255,7 +253,7 @@ export default function StandingsPage() {
         "Content-Type": "application/json",
         ...(await getRequestAuthorizationHeaders()),
       },
-      body: JSON.stringify({ action, divisionId: selectedDivision, confirmation }),
+      body: JSON.stringify({ action: "apply", divisionId: selectedDivision, confirmation }),
     });
     const result = await response.json().catch(() => ({}));
     setCompensationLoading(false);
@@ -264,10 +262,8 @@ export default function StandingsPage() {
       return;
     }
     setCompensationData(result);
-    if (action === "apply") {
-      await loadData();
-      alert("DUPR Rules Rule 6.3.9 end-of-season points were finalized and standings were rebuilt.");
-    }
+    await loadData();
+    alert("DUPR Rules Rule 6.3.9 end-of-season points were finalized and standings were rebuilt.");
   }
 
   async function openDivisionSchedule(standingRow) {
@@ -822,8 +818,7 @@ if (loading) {
             data={compensationData}
             loading={compensationLoading}
             divisionName={selectedDivisionRow?.name || "Division/Pool"}
-            onCapture={() => runCompensationAction("capture")}
-            onApply={() => runCompensationAction("apply")}
+            onApply={runCompensationAction}
             onClose={() => {
               if (compensationLoading) return;
               setCompensationOpen(false);
@@ -837,8 +832,8 @@ if (loading) {
   );
 }
 
-function CompensatoryPointsModal({ data, loading, divisionName, onCapture, onApply, onClose }) {
-  const rows = data?.baselineMissing ? data?.proposedBaseline?.rows || [] : data?.rows || [];
+function CompensatoryPointsModal({ data, loading, divisionName, onApply, onClose }) {
+  const rows = data?.rows || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-3" role="dialog" aria-modal="true" aria-labelledby="compensatory-points-title">
@@ -847,7 +842,7 @@ function CompensatoryPointsModal({ data, loading, divisionName, onCapture, onApp
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-amber-700">DUPR Rules · Rule 6.3.9</div>
             <h2 id="compensatory-points-title" className="mt-1 text-xl font-black text-slate-950">End of Season Points · {divisionName}</h2>
-            <p className="mt-1 text-sm text-slate-600">Average earned points per verified starting-schedule match date × missing starting match dates, rounded once to a whole number.</p>
+            <p className="mt-1 text-sm text-slate-600">At season end, each team&apos;s average earned points per verified match date is multiplied by the difference from the Division/Pool&apos;s highest verified match-date count, then rounded once to a whole number.</p>
           </div>
           <button type="button" onClick={onClose} disabled={loading} className="rounded-lg bg-slate-200 px-3 py-2 font-bold text-slate-900 disabled:opacity-50">Close</button>
         </div>
@@ -855,21 +850,14 @@ function CompensatoryPointsModal({ data, loading, divisionName, onCapture, onApp
         <div className="p-5">
           {loading && <div className="rounded-xl bg-blue-50 p-4 font-bold text-blue-900">Loading end-of-season points…</div>}
 
-          {!loading && data?.baselineMissing && (
-            <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
-              <div className="font-black">Starting-schedule baseline has not been captured.</div>
-              <p className="mt-1">Review the currently published schedule below. Capture it only if it represents the Division/Pool schedule at the start of the season. It cannot be silently replaced later.</p>
-            </div>
-          )}
-
-          {!loading && !data?.baselineMissing && data?.unresolvedMatches?.length > 0 && (
+          {!loading && data?.unresolvedMatches?.length > 0 && (
             <div className="mb-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-950">
               <div className="font-black">Finalization is blocked.</div>
-              <p className="mt-1">{data.unresolvedMatches.length} starting-schedule match{data.unresolvedMatches.length === 1 ? " is" : "es are"} not verified or explicitly cancelled.</p>
+              <p className="mt-1">{data.unresolvedMatches.length} match{data.unresolvedMatches.length === 1 ? " is" : "es are"} not verified or explicitly cancelled.</p>
             </div>
           )}
 
-          {!loading && !data?.baselineMissing && data?.rows?.some((row) => row.validationError) && (
+          {!loading && data?.rows?.some((row) => row.validationError) && (
             <div className="mb-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-950">
               <div className="font-black">Standings validation is required.</div>
               <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -885,22 +873,22 @@ function CompensatoryPointsModal({ data, loading, divisionName, onCapture, onApp
               <table className="min-w-full text-sm">
                 <thead className="bg-slate-900 text-left text-xs uppercase tracking-wide text-white">
                   <tr>
-                    <th className="p-3">Team</th><th className="p-3">Start Dates</th><th className="p-3">Max Dates</th><th className="p-3">Missing Dates</th>
-                    {!data?.baselineMissing && <><th className="p-3">Played Dates</th><th className="p-3">Earned</th><th className="p-3">Average</th><th className="p-3">Comp.</th><th className="p-3">Final</th></>}
+                    <th className="p-3">Team</th><th className="p-3">Match Dates Played</th><th className="p-3">Division Max</th><th className="p-3">Missing Dates</th>
+                    <th className="p-3">Verified Matches</th><th className="p-3">Earned</th><th className="p-3">Average</th><th className="p-3">Comp.</th><th className="p-3">Final</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.teamId} className="border-t border-slate-200">
                       <td className="p-3 font-bold text-slate-950">{row.teamName}</td>
-                      <td className="p-3">{row.scheduledMatchDatesAtStart}</td>
-                      <td className="p-3">{row.maximumScheduledMatchDates ?? data?.proposedBaseline?.maximumScheduledMatchDates}</td>
-                      <td className="p-3">{row.missingMatchDates ?? Math.max(0, Number(data?.proposedBaseline?.maximumScheduledMatchDates || 0) - Number(row.scheduledMatchDatesAtStart || 0))}</td>
-                      {!data?.baselineMissing && <>
-                        <td className="p-3">{row.qualifyingMatchDates}</td><td className="p-3">{formatStandingNumber(row.earnedPoints)}</td>
+                      <td className="p-3">{row.matchDatesPlayed}</td>
+                      <td className="p-3">{row.maximumMatchDatesPlayed}</td>
+                      <td className="p-3">{row.missingMatchDates}</td>
+                      <>
+                        <td className="p-3">{row.verifiedMatchCount}</td><td className="p-3">{formatStandingNumber(row.earnedPoints)}</td>
                         <td className="p-3">{Number(row.averagePoints || 0).toFixed(2)}</td><td className="p-3 font-black text-amber-800">{row.compensatoryPoints}</td>
                         <td className="p-3 font-black">{formatStandingNumber(row.finalPoints)}</td>
-                      </>}
+                      </>
                     </tr>
                   ))}
                 </tbody>
@@ -910,13 +898,9 @@ function CompensatoryPointsModal({ data, loading, divisionName, onCapture, onApp
 
           {!loading && (
             <div className="mt-5 flex justify-end">
-              {data?.baselineMissing ? (
-                <button type="button" onClick={onCapture} className="rounded-xl bg-amber-700 px-5 py-3 font-black text-white hover:bg-amber-800">Capture Starting Schedule</button>
-              ) : (
-                <button type="button" onClick={onApply} disabled={!data?.readyToApply} className="rounded-xl bg-emerald-700 px-5 py-3 font-black text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300">
-                  {data?.applied ? "Recalculate Final Points" : "Finalize Compensatory Points"}
-                </button>
-              )}
+              <button type="button" onClick={onApply} disabled={!data?.readyToApply} className="rounded-xl bg-emerald-700 px-5 py-3 font-black text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300">
+                {data?.applied ? "Recalculate End of Season Points" : "Finalize End of Season Points"}
+              </button>
             </div>
           )}
         </div>

@@ -3,12 +3,16 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
 
-const migration = await readFile(
+const initialMigration = await readFile(
   new URL("../supabase/migrations/20260918012928_rule_5_15_1_compensatory_points.sql", import.meta.url),
   "utf8"
 );
+const endOnlyMigration = await readFile(
+  new URL("../supabase/migrations/20260918114101_end_of_season_played_date_points.sql", import.meta.url),
+  "utf8"
+);
 
-test("Rule 5.15.1 migration enforces RLS, least privilege, constraints, defaults, and parent cleanup", async () => {
+test("end-of-season points migrations retain least privilege and support audited awards without a baseline", async () => {
   const db = new PGlite();
   try {
     await db.exec(`
@@ -20,9 +24,11 @@ test("Rule 5.15.1 migration enforces RLS, least privilege, constraints, defaults
       create table public.members (id uuid primary key);
       create table public.leagues (id uuid primary key);
       create table public.divisions (id uuid primary key, league_id uuid references public.leagues(id));
+      create table public.teams (id uuid primary key, division_id uuid references public.divisions(id));
       create table public.team_standings (id uuid primary key default gen_random_uuid());
     `);
-    await db.exec(migration);
+    await db.exec(initialMigration);
+    await db.exec(endOnlyMigration);
 
     const tables = [
       "division_compensation_baselines",
@@ -48,9 +54,11 @@ test("Rule 5.15.1 migration enforces RLS, least privilege, constraints, defaults
 
     const leagueId = "10000000-0000-4000-8000-000000000001";
     const divisionId = "20000000-0000-4000-8000-000000000001";
-    const teamId = "30000000-0000-4000-8000-000000000001";
+    const oldTeamId = "30000000-0000-4000-8000-000000000001";
+    const newTeamId = "30000000-0000-4000-8000-000000000002";
     await db.query("insert into leagues(id) values($1)", [leagueId]);
     await db.query("insert into divisions(id,league_id) values($1,$2)", [divisionId, leagueId]);
+    await db.query("insert into teams(id,division_id) values($1,$2),($3,$2)", [oldTeamId, divisionId, newTeamId]);
     await db.exec("set role service_role");
     const baseline = (await db.query(
       `insert into division_compensation_baselines
@@ -64,12 +72,29 @@ test("Rule 5.15.1 migration enforces RLS, least privilege, constraints, defaults
          missing_match_dates,qualifying_match_dates,verified_match_count,earned_standings_points,
          average_points_per_match,raw_compensatory_points,compensatory_points)
        values($1,$2,$3,8,10,2,8,8,28,3.5,7,7)`,
-      [divisionId, teamId, baseline.id]
+      [divisionId, oldTeamId, baseline.id]
+    );
+    await db.query(
+      `insert into division_compensatory_point_awards
+        (division_id,team_id,baseline_id,scheduled_match_dates_at_start,maximum_scheduled_match_dates,
+         missing_match_dates,qualifying_match_dates,verified_match_count,earned_standings_points,
+         average_points_per_match,raw_compensatory_points,compensatory_points,calculation_basis,
+         match_dates_played,maximum_match_dates_played)
+       values($1,$2,null,8,10,2,8,8,28,3.5,7,7,'verified_match_dates',8,10)`,
+      [divisionId, newTeamId]
     );
     await db.exec("reset role");
 
     await db.exec("set role authenticated");
-    assert.equal((await db.query("select compensatory_points from division_compensatory_point_awards")).rows[0].compensatory_points, 7);
+    const awards = (await db.query(
+      "select team_id, baseline_id, calculation_basis, match_dates_played, maximum_match_dates_played from division_compensatory_point_awards order by team_id"
+    )).rows;
+    assert.equal(awards.length, 2);
+    assert.equal(awards[0].calculation_basis, "starting_schedule");
+    assert.equal(awards[1].baseline_id, null);
+    assert.equal(awards[1].calculation_basis, "verified_match_dates");
+    assert.equal(awards[1].match_dates_played, 8);
+    assert.equal(awards[1].maximum_match_dates_played, 10);
     await assert.rejects(db.query("select * from division_compensation_baselines"), /permission denied/);
     await assert.rejects(db.query("delete from division_compensatory_point_awards"), /permission denied/);
     await db.exec("reset role");
@@ -79,6 +104,9 @@ test("Rule 5.15.1 migration enforces RLS, least privilege, constraints, defaults
     assert.equal(standing.earned_standings_points, null);
     assert.equal(standing.compensatory_points, 0);
 
+    await db.query("delete from teams where id=$1", [newTeamId]);
+    assert.equal(Number((await db.query("select count(*) n from division_compensatory_point_awards where team_id=$1", [newTeamId])).rows[0].n), 0);
+    await db.query("delete from teams where id=$1", [oldTeamId]);
     await db.query("delete from divisions where id=$1", [divisionId]);
     assert.equal(Number((await db.query("select count(*) n from division_compensation_baselines")).rows[0].n), 0);
     assert.equal(Number((await db.query("select count(*) n from division_compensatory_point_awards")).rows[0].n), 0);
