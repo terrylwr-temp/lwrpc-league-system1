@@ -9,11 +9,18 @@ import { formatDisplayDate, formatDisplayTime, formatDisplayTimestamp } from "..
 import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { appConfirm } from "../lib/appDialog";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
+import {
+  buildSpecialRequestPayload,
+  filterAndSortSpecialRequests,
+  filterSpecialRequestMembers,
+  specialRequestMemberLabel,
+  specialRequestTeamsForDivision,
+} from "../lib/schedulingSpecialRequests";
 
 export default function SchedulingPage() {
   const router = useRouter();
 
-  const [activeSection, setActiveSection] = useState("settings");
+  const [activeSection, setActiveSection] = useState("requests");
   const [matches, setMatches] = useState([]);
   const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
 
@@ -23,6 +30,9 @@ export default function SchedulingPage() {
   const [settings, setSettings] = useState([]);
   const [availability, setAvailability] = useState([]);
   const [leagueBlackouts, setLeagueBlackouts] = useState([]);
+  const [specialRequests, setSpecialRequests] = useState([]);
+  const [specialRequestMembers, setSpecialRequestMembers] = useState([]);
+  const [specialRequestTeams, setSpecialRequestTeams] = useState([]);
 
   const [editingSettingId, setEditingSettingId] = useState(null);
   const [settingFormOpen, setSettingFormOpen] = useState(false);
@@ -32,6 +42,8 @@ export default function SchedulingPage() {
   const [editingLeagueBlackoutId, setEditingLeagueBlackoutId] = useState(null);
   const [availabilityFormOpen, setAvailabilityFormOpen] = useState(false);
   const [blackoutFormOpen, setBlackoutFormOpen] = useState(false);
+  const [specialRequestFormOpen, setSpecialRequestFormOpen] = useState(false);
+  const [editingSpecialRequestId, setEditingSpecialRequestId] = useState(null);
 
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
@@ -60,6 +72,18 @@ export default function SchedulingPage() {
   const [blackoutDate, setBlackoutDate] = useState("");
   const [blackoutReason, setBlackoutReason] = useState("");
   const [blackoutSearch, setBlackoutSearch] = useState("");
+
+  const [requestLocation, setRequestLocation] = useState("");
+  const [requestMember, setRequestMember] = useState("");
+  const [requestMemberSearch, setRequestMemberSearch] = useState("");
+  const [requestDate, setRequestDate] = useState("");
+  const [requestDivision, setRequestDivision] = useState("");
+  const [requestTeam, setRequestTeam] = useState("");
+  const [requestText, setRequestText] = useState("");
+  const [requestLocationFilter, setRequestLocationFilter] = useState("");
+  const [requestDivisionFilter, setRequestDivisionFilter] = useState("");
+  const [requestTeamFilter, setRequestTeamFilter] = useState("");
+  const [requestDateFilter, setRequestDateFilter] = useState("");
 
   useUnsavedChangesWarning(
     Boolean(
@@ -94,6 +118,15 @@ export default function SchedulingPage() {
         blackoutDivision ||
         blackoutDate ||
         blackoutReason.trim()
+      )) ||
+      (specialRequestFormOpen && (
+        editingSpecialRequestId ||
+        requestLocation ||
+        requestMember ||
+        requestDate ||
+        requestDivision ||
+        requestTeam ||
+        requestText.trim()
       ))
     ),
     "schedule setup"
@@ -123,6 +156,35 @@ export default function SchedulingPage() {
       .order("name", { ascending: true });
     if (locationError) return alert(locationError.message);
 
+    const { rows: memberData, error: memberError } = await loadAllSpecialRequestMembers();
+    if (memberError) return alert(memberError.message);
+
+    const { data: teamData, error: teamError } = await supabase
+      .from("teams")
+      .select("id, name, division_id, is_active")
+      .order("name", { ascending: true });
+    if (teamError) return alert(teamError.message);
+
+    const { data: specialRequestData, error: specialRequestError } = await supabase
+      .from("scheduling_special_requests")
+      .select(`
+        id,
+        location_id,
+        member_id,
+        request_date,
+        division_id,
+        team_id,
+        request_text,
+        created_at,
+        updated_at,
+        location:locations!scheduling_special_requests_location_id_fkey(id, name),
+        member:members!scheduling_special_requests_member_id_fkey(id, first_name, last_name, full_name, email),
+        division:divisions!scheduling_special_requests_division_id_fkey(id, name),
+        team:teams!scheduling_special_requests_team_id_fkey(id, name, division_id)
+      `)
+      .order("request_date", { ascending: true });
+    if (specialRequestError) return alert(specialRequestError.message);
+
     const { data: settingsData, error: settingsError } = await supabase
       .from("league_schedule_settings")
       .select("*, leagues(name), divisions(name)")
@@ -149,6 +211,9 @@ export default function SchedulingPage() {
     setLeagues((leagueData || []).filter((league) => league.is_active !== false && league.seasons?.is_active !== false));
     setDivisions((divisionData || []).filter((division) => division.is_active !== false));
     setLocations(locationData || []);
+    setSpecialRequestMembers(memberData || []);
+    setSpecialRequestTeams(teamData || []);
+    setSpecialRequests(specialRequestData || []);
     setSettings(settingsData || []);
     setAvailability(availabilityData || []);
     setLeagueBlackouts(leagueBlackoutData || []);
@@ -213,6 +278,31 @@ export default function SchedulingPage() {
       row.reason,
     ].filter(Boolean).some((value) => String(value).toLowerCase().includes(search)));
   }, [blackoutSearch, leagueBlackouts]);
+
+  const requestMemberOptions = useMemo(
+    () => filterSpecialRequestMembers(specialRequestMembers, requestMemberSearch),
+    [requestMemberSearch, specialRequestMembers]
+  );
+
+  const requestTeamOptions = useMemo(
+    () => specialRequestTeamsForDivision(specialRequestTeams, requestDivision),
+    [requestDivision, specialRequestTeams]
+  );
+
+  const requestFilterTeamOptions = useMemo(
+    () => specialRequestTeamsForDivision(specialRequestTeams, requestDivisionFilter),
+    [requestDivisionFilter, specialRequestTeams]
+  );
+
+  const filteredSpecialRequests = useMemo(
+    () => filterAndSortSpecialRequests(specialRequests, {
+      locationId: requestLocationFilter,
+      divisionId: requestDivisionFilter,
+      teamId: requestTeamFilter,
+      requestDate: requestDateFilter,
+    }),
+    [requestDateFilter, requestDivisionFilter, requestLocationFilter, requestTeamFilter, specialRequests]
+  );
 
   function getSeasonWeeks(startDate, endDate) {
     if (!startDate || !endDate) return "";
@@ -336,6 +426,74 @@ export default function SchedulingPage() {
 
     clearLeagueBlackoutForm();
     setBlackoutFormOpen(false);
+    await loadData();
+  }
+
+  async function saveSpecialRequest(e) {
+    e.preventDefault();
+
+    let payload;
+    try {
+      payload = buildSpecialRequestPayload({
+        locationId: requestLocation,
+        memberId: requestMember,
+        requestDate,
+        divisionId: requestDivision,
+        teamId: requestTeam,
+        requestText,
+      }, specialRequestTeams);
+    } catch (error) {
+      alert(error.message);
+      return;
+    }
+
+    const result = editingSpecialRequestId
+      ? await supabase.from("scheduling_special_requests").update(payload).eq("id", editingSpecialRequestId)
+      : await supabase.from("scheduling_special_requests").insert(payload);
+
+    if (result.error) return alert(result.error.message);
+
+    clearSpecialRequestForm();
+    setSpecialRequestFormOpen(false);
+    await loadData();
+  }
+
+  function editSpecialRequest(row) {
+    setEditingSpecialRequestId(row.id);
+    setActiveSection("requests");
+    setRequestLocation(row.location_id || "");
+    setRequestMember(row.member_id || "");
+    setRequestMemberSearch(specialRequestMemberLabel(row.member));
+    setRequestDate(row.request_date || "");
+    setRequestDivision(row.division_id || "");
+    setRequestTeam(row.team_id || "");
+    setRequestText(row.request_text || "");
+    setSpecialRequestFormOpen(true);
+  }
+
+  function openCreateSpecialRequest() {
+    clearSpecialRequestForm();
+    setSpecialRequestFormOpen(true);
+  }
+
+  function closeSpecialRequestForm() {
+    clearSpecialRequestForm();
+    setSpecialRequestFormOpen(false);
+  }
+
+  async function deleteSpecialRequest(id) {
+    if (!await confirmDeleteActionAsync({
+      title: "Delete this Special Request?",
+      details: "This removes only the administrative request record. It does not change schedules, matches, blackout dates, courts, teams, or members.",
+    })) return;
+
+    const { error } = await supabase
+      .from("scheduling_special_requests")
+      .delete()
+      .eq("id", id);
+
+    if (error) return alert(error.message);
+    if (editingSpecialRequestId === id) clearSpecialRequestForm();
     await loadData();
   }
 
@@ -499,6 +657,17 @@ export default function SchedulingPage() {
     setBlackoutDivision("");
     setBlackoutDate("");
     setBlackoutReason("");
+  }
+
+  function clearSpecialRequestForm() {
+    setEditingSpecialRequestId(null);
+    setRequestLocation("");
+    setRequestMember("");
+    setRequestMemberSearch("");
+    setRequestDate("");
+    setRequestDivision("");
+    setRequestTeam("");
+    setRequestText("");
   }
 
   function generateRoundRobin(teamList) {
@@ -1064,6 +1233,12 @@ export default function SchedulingPage() {
 
   const sectionCards = [
     {
+      id: "requests",
+      title: "Special Requests",
+      description: "Track member, team, division, and location scheduling requests without changing generation rules.",
+      count: specialRequests.length,
+    },
+    {
       id: "settings",
       title: "Schedule Settings",
       description: "Season dates, match day/time, courts, frequency, byes, and schedule generation.",
@@ -1088,11 +1263,11 @@ export default function SchedulingPage() {
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Scheduling"
-          subtitle="Manage schedule settings, court unavailability, league blackout dates, and generated season schedules."
+          subtitle="Track special requests and manage schedule settings, court unavailability, league blackout dates, and generated season schedules."
         />
 
         <section className="mt-6 rounded-2xl bg-white p-5 shadow">
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
             {sectionCards.map((section) => (
               <button
                 key={section.id}
@@ -1118,6 +1293,168 @@ export default function SchedulingPage() {
             ))}
           </div>
         </section>
+
+        {activeSection === "requests" && (
+          <section className="mt-6">
+            {specialRequestFormOpen && (
+              <div className="fixed inset-0 z-50 flex overflow-y-auto bg-slate-950/55 p-4" role="dialog" aria-modal="true" aria-label={editingSpecialRequestId ? "Edit Special Request" : "Add Special Request"}>
+                <div className="my-auto w-full max-w-3xl mx-auto">
+                  <FormCard
+                    title={editingSpecialRequestId ? "Edit Special Request" : "Add Special Request"}
+                    subtitle="Record an informational scheduling request. This does not alter schedule generation, courts, blackout dates, matches, or standings."
+                  >
+                    <form onSubmit={saveSpecialRequest} className="space-y-4">
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div>
+                          <FieldLabel label="Date" />
+                          <input type="date" required value={requestDate} onChange={(e) => setRequestDate(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" />
+                          <p className="mt-2 text-xs text-slate-500">The date the request applies to, not necessarily the date it was entered.</p>
+                        </div>
+                        <div>
+                          <FieldLabel label="Location Optional" />
+                          <select value={requestLocation} onChange={(e) => setRequestLocation(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3">
+                            <option value="">No Specific Location</option>
+                            {locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <FieldLabel label="Member Requesting" />
+                        <input
+                          type="search"
+                          value={requestMemberSearch}
+                          onChange={(e) => { setRequestMemberSearch(e.target.value); setRequestMember(""); }}
+                          placeholder="Search member name or email"
+                          className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                        />
+                        <select required value={requestMember} onChange={(e) => setRequestMember(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3">
+                          <option value="">Select Member</option>
+                          {requestMemberOptions.map((member) => (
+                            <option key={member.id} value={member.id}>
+                              {specialRequestMemberLabel(member)}{member.email ? ` — ${member.email}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="mt-2 text-xs text-slate-500">Showing up to 50 matching active members. Refine the search if needed.</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div>
+                          <FieldLabel label="Division Optional" />
+                          <select value={requestDivision} onChange={(e) => { setRequestDivision(e.target.value); setRequestTeam(""); }} className="w-full rounded-xl border border-slate-300 px-4 py-3">
+                            <option value="">No Specific Division</option>
+                            {divisions.map((division) => <option key={division.id} value={division.id}>{division.name}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <FieldLabel label="Team Optional" />
+                          <select value={requestTeam} onChange={(e) => setRequestTeam(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3">
+                            <option value="">No Specific Team</option>
+                            {requestTeamOptions.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                          </select>
+                          <p className="mt-2 text-xs text-slate-500">Selecting a Division limits this list to that Division&apos;s teams.</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <FieldLabel label="Request" />
+                        <textarea
+                          required
+                          maxLength={5000}
+                          rows={5}
+                          value={requestText}
+                          onChange={(e) => setRequestText(e.target.value)}
+                          className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                          placeholder="Describe the scheduling request or explanation."
+                        />
+                        <p className="mt-2 text-xs text-slate-500">{requestText.length.toLocaleString()} of 5,000 characters</p>
+                      </div>
+
+                      <FormButtons showCancel submitLabel={editingSpecialRequestId ? "Save Special Request" : "Add Special Request"} onCancel={closeSpecialRequestForm} />
+                    </form>
+                  </FormCard>
+                </div>
+              </div>
+            )}
+
+            <ListCard
+              title="Special Requests"
+              subtitle="Administrative tracking only. These requests are not enforced by schedule generation."
+              countLabel="Requests"
+              shownCount={filteredSpecialRequests.length}
+              totalCount={specialRequests.length}
+              emptyText="No Special Requests saved yet."
+              actions={(
+                <button type="button" onClick={openCreateSpecialRequest} className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800">
+                  Add Special Request
+                </button>
+              )}
+            >
+              <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2 xl:grid-cols-5">
+                <select value={requestLocationFilter} onChange={(e) => setRequestLocationFilter(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3" aria-label="Filter Special Requests by Location">
+                  <option value="">All Locations</option>
+                  {locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
+                </select>
+                <select value={requestDivisionFilter} onChange={(e) => { setRequestDivisionFilter(e.target.value); setRequestTeamFilter(""); }} className="rounded-xl border border-slate-300 bg-white px-4 py-3" aria-label="Filter Special Requests by Division">
+                  <option value="">All Divisions</option>
+                  {divisions.map((division) => <option key={division.id} value={division.id}>{division.name}</option>)}
+                </select>
+                <select value={requestTeamFilter} onChange={(e) => setRequestTeamFilter(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3" aria-label="Filter Special Requests by Team">
+                  <option value="">All Teams</option>
+                  {requestFilterTeamOptions.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                </select>
+                <input type="date" value={requestDateFilter} onChange={(e) => setRequestDateFilter(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3" aria-label="Filter Special Requests by Date" />
+                <button type="button" onClick={() => { setRequestLocationFilter(""); setRequestDivisionFilter(""); setRequestTeamFilter(""); setRequestDateFilter(""); }} className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300">
+                  Clear Filters
+                </button>
+              </div>
+
+              {filteredSpecialRequests.length > 0 ? (
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                  <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead className="bg-slate-100 text-xs font-bold uppercase tracking-wide text-slate-600">
+                      <tr>
+                        <th className="px-4 py-3">Date</th>
+                        <th className="px-4 py-3">Location</th>
+                        <th className="px-4 py-3">Member Requesting</th>
+                        <th className="px-4 py-3">Division</th>
+                        <th className="px-4 py-3">Team</th>
+                        <th className="min-w-72 px-4 py-3">Request</th>
+                        <th className="px-4 py-3">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 bg-white">
+                      {filteredSpecialRequests.map((row) => (
+                        <tr key={row.id} className="align-top hover:bg-slate-50">
+                          <td className="whitespace-nowrap px-4 py-4 font-semibold text-slate-900">{formatDisplayDate(row.request_date, "")}</td>
+                          <td className="px-4 py-4 text-slate-700">{row.location?.name || "—"}</td>
+                          <td className="px-4 py-4 text-slate-700">
+                            <div className="font-semibold text-slate-900">{specialRequestMemberLabel(row.member) || "Member Removed"}</div>
+                            {row.member?.email && <div className="text-xs text-slate-500">{row.member.email}</div>}
+                          </td>
+                          <td className="px-4 py-4 text-slate-700">{row.division?.name || "—"}</td>
+                          <td className="px-4 py-4 text-slate-700">{row.team?.name || "—"}</td>
+                          <td className="whitespace-pre-wrap px-4 py-4 leading-6 text-slate-700">{row.request_text}</td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-wrap gap-2">
+                              <SmallButton onClick={() => editSpecialRequest(row)}>Edit</SmallButton>
+                              <SmallButton color="lightRed" onClick={() => deleteSpecialRequest(row.id)}>Delete</SmallButton>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
+                  {specialRequests.length === 0 ? "No Special Requests saved yet." : "No Special Requests match the selected filters."}
+                </div>
+              )}
+            </ListCard>
+          </section>
+        )}
 
         {activeSection === "settings" && (
           <section className="mt-6">
@@ -1679,5 +2016,27 @@ function NoteBox({ children }) {
       {children}
     </div>
   );
+}
+
+async function loadAllSpecialRequestMembers() {
+  const rows = [];
+  const pageSize = 1000;
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from("members")
+      .select("id, first_name, last_name, full_name, email, is_active_member")
+      .eq("is_active_member", true)
+      .order("last_name", { ascending: true })
+      .order("first_name", { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+
+  return { rows, error: null };
 }
 

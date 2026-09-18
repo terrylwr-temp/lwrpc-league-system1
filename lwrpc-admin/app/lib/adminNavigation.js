@@ -22,7 +22,7 @@ const ADMIN_SECTIONS = [
     icon: "calendar",
     desc: "Generate, edit, publish, reset, score, and export matches.",
     cards: [
-      { title: "Scheduling Admin", desc: "Rules, blackout dates, and initial schedule generation.", path: "/scheduling", code: "SA", tone: "blue", role: "league_manager" },
+      { title: "Scheduling Admin", desc: "Special requests, rules, blackout dates, and initial schedule generation.", path: "/scheduling", code: "SA", tone: "blue", role: "league_manager" },
       { title: "Schedule Editor", desc: "Review, edit, publish, and reset matches.", path: "/schedule-editor", code: "SE", tone: "amber", role: "league_manager" },
       { title: "Scoring Operations", desc: "Create and manage matches, send score reminders, review verification, and export to DUPR.", path: "/scoring", code: "SC", tone: "emerald", role: "league_manager" },
       { title: "League Standings", desc: "Review standings and apply end-of-season points under the DUPR Rules, Rule 6.3.9.", path: "/standings", code: "LS", tone: "amber", role: "league_manager" },
