@@ -20,7 +20,7 @@ import {
 export default function SchedulingPage() {
   const router = useRouter();
 
-  const [activeSection, setActiveSection] = useState("requests");
+  const [activeSection, setActiveSection] = useState("settings");
   const [matches, setMatches] = useState([]);
   const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
 
@@ -1233,12 +1233,6 @@ export default function SchedulingPage() {
 
   const sectionCards = [
     {
-      id: "requests",
-      title: "Special Requests",
-      description: "Track member, team, division, and location scheduling requests without changing generation rules.",
-      count: specialRequests.length,
-    },
-    {
       id: "settings",
       title: "Schedule Settings",
       description: "Season dates, match day/time, courts, frequency, byes, and schedule generation.",
@@ -1255,6 +1249,12 @@ export default function SchedulingPage() {
       title: "League Blackout Dates",
       description: "Holidays and no-play dates for a league or division.",
       count: leagueBlackouts.length,
+    },
+    {
+      id: "requests",
+      title: "Special Requests",
+      description: "Track member, team, division, and location scheduling requests without changing generation rules.",
+      count: specialRequests.length,
     },
   ];
 

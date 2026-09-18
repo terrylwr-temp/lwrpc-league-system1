@@ -81,8 +81,10 @@ test("Scheduling UI exposes CRUD and filters while generation remains request-in
   const migration = fs.readFileSync(new URL("../supabase/migrations/20260918150701_scheduling_special_requests.sql", import.meta.url), "utf8");
   const generation = page.slice(page.indexOf("async function generateSchedule"), page.indexOf("async function deleteGeneratedSchedule"));
 
-  assert.match(page, /useState\("requests"\)/);
-  assert.ok(page.indexOf('id: "requests"') < page.indexOf('id: "settings"'));
+  assert.match(page, /useState\("settings"\)/);
+  assert.ok(page.indexOf('id: "settings"') < page.indexOf('id: "courts"'));
+  assert.ok(page.indexOf('id: "courts"') < page.indexOf('id: "blackouts"'));
+  assert.ok(page.indexOf('id: "blackouts"') < page.indexOf('id: "requests"'));
   assert.match(page, /Add Special Request/);
   assert.match(page, /Edit Special Request/);
   assert.match(page, /Delete this Special Request/);
