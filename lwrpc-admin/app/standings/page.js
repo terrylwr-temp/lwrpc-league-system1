@@ -5,7 +5,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import TeamScheduleModal from "../components/TeamScheduleModal";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 import { sortStandingsByDivisionRules } from "../lib/standingsSort";
 import { defaultDashboardForRole } from "../lib/permissions";
@@ -25,6 +25,9 @@ export default function StandingsPage() {
   const [selectedDivision, setSelectedDivision] = useState("");
   const [currentUserRole, setCurrentUserRole] = useState("player");
   const [rebuilding, setRebuilding] = useState(false);
+  const [compensationOpen, setCompensationOpen] = useState(false);
+  const [compensationLoading, setCompensationLoading] = useState(false);
+  const [compensationData, setCompensationData] = useState(null);
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
   const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
@@ -212,6 +215,59 @@ export default function StandingsPage() {
 
     await loadData();
     alert(`League statistics rebuilt for ${result.teams} teams from ${result.matches} verified matches.`);
+  }
+
+  async function loadCompensationPreview() {
+    if (!selectedDivision || compensationLoading) return;
+    setCompensationOpen(true);
+    setCompensationLoading(true);
+    const response = await fetch(`/api/standings-compensation?divisionId=${encodeURIComponent(selectedDivision)}`, {
+      headers: await getRequestAuthorizationHeaders(),
+    });
+    const result = await response.json().catch(() => ({}));
+    setCompensationLoading(false);
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to load Rule 5.15.1.");
+      setCompensationOpen(false);
+      return;
+    }
+    setCompensationData(result);
+  }
+
+  async function runCompensationAction(action) {
+    const requiredValue = action === "capture" ? "CAPTURE" : "FINALIZE";
+    const confirmation = await appPrompt({
+      title: action === "capture" ? "Capture starting schedule" : "Finalize compensatory points",
+      message: action === "capture"
+        ? "This permanently records the currently published Division/Pool schedule as the Rule 5.15.1 starting baseline."
+        : "This applies the previewed Rule 5.15.1 whole-number compensatory points and rebuilds final standings.",
+      inputLabel: `Type ${requiredValue} to continue`,
+      requiredValue,
+      confirmLabel: action === "capture" ? "Capture baseline" : "Finalize points",
+      tone: "warning",
+    });
+    if (confirmation !== requiredValue) return;
+
+    setCompensationLoading(true);
+    const response = await fetch("/api/standings-compensation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await getRequestAuthorizationHeaders()),
+      },
+      body: JSON.stringify({ action, divisionId: selectedDivision, confirmation }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setCompensationLoading(false);
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to update Rule 5.15.1.");
+      return;
+    }
+    setCompensationData(result);
+    if (action === "apply") {
+      await loadData();
+      alert("Rule 5.15.1 compensatory points were finalized and standings were rebuilt.");
+    }
   }
 
   async function openDivisionSchedule(standingRow) {
@@ -475,14 +531,24 @@ if (loading) {
             </select>
 
             {canRebuildLeagueStatistics && (
-              <button
-                type="button"
-                onClick={rebuildLeagueStatistics}
-                disabled={!selectedDivision || rebuilding}
-                className="w-full rounded-xl bg-slate-900 px-4 py-3 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 md:col-span-2"
-              >
-                {rebuilding ? "Rebuilding..." : "Rebuild League Statistics"}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={rebuildLeagueStatistics}
+                  disabled={!selectedDivision || rebuilding}
+                  className="w-full rounded-xl bg-slate-900 px-4 py-3 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {rebuilding ? "Rebuilding..." : "Rebuild League Statistics"}
+                </button>
+                <button
+                  type="button"
+                  onClick={loadCompensationPreview}
+                  disabled={!selectedDivision || compensationLoading}
+                  className="w-full rounded-xl bg-amber-700 px-4 py-3 font-bold text-white hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  Rule 5.15.1 Finalization
+                </button>
+              </>
             )}
 
           </div>
@@ -540,7 +606,7 @@ if (loading) {
                         Pts
                       </div>
                       <div className="text-xl font-black">
-                        {formatStandingNumber(team.standings_points)}
+                        <StandingPointsValue standing={team} compact />
                       </div>
                     </div>
                   </div>
@@ -709,7 +775,7 @@ if (loading) {
                   )}
 
                   <td className="p-3 font-bold text-blue-700">
-                    {formatStandingNumber(team.standings_points)}
+                    <StandingPointsValue standing={team} />
                   </td>
 
                 </tr>
@@ -751,8 +817,111 @@ if (loading) {
           />
         )}
 
+        {compensationOpen && (
+          <CompensatoryPointsModal
+            data={compensationData}
+            loading={compensationLoading}
+            divisionName={selectedDivisionRow?.name || "Division/Pool"}
+            onCapture={() => runCompensationAction("capture")}
+            onApply={() => runCompensationAction("apply")}
+            onClose={() => {
+              if (compensationLoading) return;
+              setCompensationOpen(false);
+              setCompensationData(null);
+            }}
+          />
+        )}
+
       </div>
     </main>
+  );
+}
+
+function CompensatoryPointsModal({ data, loading, divisionName, onCapture, onApply, onClose }) {
+  const rows = data?.baselineMissing ? data?.proposedBaseline?.rows || [] : data?.rows || [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-3" role="dialog" aria-modal="true" aria-labelledby="compensatory-points-title">
+      <div className="max-h-[92vh] w-full max-w-6xl overflow-auto rounded-2xl bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white p-5">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-amber-700">Rule 5.15.1</div>
+            <h2 id="compensatory-points-title" className="mt-1 text-xl font-black text-slate-950">Compensatory Points · {divisionName}</h2>
+            <p className="mt-1 text-sm text-slate-600">Average earned points per verified starting-schedule match date × missing starting match dates, rounded once to a whole number.</p>
+          </div>
+          <button type="button" onClick={onClose} disabled={loading} className="rounded-lg bg-slate-200 px-3 py-2 font-bold text-slate-900 disabled:opacity-50">Close</button>
+        </div>
+
+        <div className="p-5">
+          {loading && <div className="rounded-xl bg-blue-50 p-4 font-bold text-blue-900">Loading Rule 5.15.1…</div>}
+
+          {!loading && data?.baselineMissing && (
+            <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+              <div className="font-black">Starting-schedule baseline has not been captured.</div>
+              <p className="mt-1">Review the currently published schedule below. Capture it only if it represents the Division/Pool schedule at the start of the season. It cannot be silently replaced later.</p>
+            </div>
+          )}
+
+          {!loading && !data?.baselineMissing && data?.unresolvedMatches?.length > 0 && (
+            <div className="mb-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-950">
+              <div className="font-black">Finalization is blocked.</div>
+              <p className="mt-1">{data.unresolvedMatches.length} starting-schedule match{data.unresolvedMatches.length === 1 ? " is" : "es are"} not verified or explicitly cancelled.</p>
+            </div>
+          )}
+
+          {!loading && !data?.baselineMissing && data?.rows?.some((row) => row.validationError) && (
+            <div className="mb-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-950">
+              <div className="font-black">Standings validation is required.</div>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {data.rows.filter((row) => row.validationError).map((row) => (
+                  <li key={row.teamId}><span className="font-bold">{row.teamName}:</span> {row.validationError}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {!loading && rows.length > 0 && (
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-900 text-left text-xs uppercase tracking-wide text-white">
+                  <tr>
+                    <th className="p-3">Team</th><th className="p-3">Start Dates</th><th className="p-3">Max Dates</th><th className="p-3">Missing Dates</th>
+                    {!data?.baselineMissing && <><th className="p-3">Played Dates</th><th className="p-3">Earned</th><th className="p-3">Average</th><th className="p-3">Comp.</th><th className="p-3">Final</th></>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.teamId} className="border-t border-slate-200">
+                      <td className="p-3 font-bold text-slate-950">{row.teamName}</td>
+                      <td className="p-3">{row.scheduledMatchDatesAtStart}</td>
+                      <td className="p-3">{row.maximumScheduledMatchDates ?? data?.proposedBaseline?.maximumScheduledMatchDates}</td>
+                      <td className="p-3">{row.missingMatchDates ?? Math.max(0, Number(data?.proposedBaseline?.maximumScheduledMatchDates || 0) - Number(row.scheduledMatchDatesAtStart || 0))}</td>
+                      {!data?.baselineMissing && <>
+                        <td className="p-3">{row.qualifyingMatchDates}</td><td className="p-3">{formatStandingNumber(row.earnedPoints)}</td>
+                        <td className="p-3">{Number(row.averagePoints || 0).toFixed(2)}</td><td className="p-3 font-black text-amber-800">{row.compensatoryPoints}</td>
+                        <td className="p-3 font-black">{formatStandingNumber(row.finalPoints)}</td>
+                      </>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {!loading && (
+            <div className="mt-5 flex justify-end">
+              {data?.baselineMissing ? (
+                <button type="button" onClick={onCapture} className="rounded-xl bg-amber-700 px-5 py-3 font-black text-white hover:bg-amber-800">Capture Starting Schedule</button>
+              ) : (
+                <button type="button" onClick={onApply} disabled={!data?.readyToApply} className="rounded-xl bg-emerald-700 px-5 py-3 font-black text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300">
+                  {data?.applied ? "Recalculate Final Points" : "Finalize Compensatory Points"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -766,6 +935,25 @@ function StandingStat({ label, value, mono = false }) {
         {value}
       </div>
     </div>
+  );
+}
+
+function StandingPointsValue({ standing, compact = false }) {
+  const compensatoryPoints = Number(standing.compensatory_points || 0);
+  const earnedPoints = Number(
+    standing.earned_standings_points ??
+    (Number(standing.standings_points || 0) - compensatoryPoints)
+  );
+
+  return (
+    <span className="inline-flex flex-col">
+      <span>{formatStandingNumber(standing.standings_points)}</span>
+      {compensatoryPoints > 0 && (
+        <span className={`${compact ? "text-blue-100" : "text-slate-500"} text-[10px] font-bold whitespace-nowrap`}>
+          {formatStandingNumber(earnedPoints)} + {compensatoryPoints} comp.
+        </span>
+      )}
+    </span>
   );
 }
 
