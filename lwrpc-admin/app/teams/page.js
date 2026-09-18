@@ -13,10 +13,17 @@ import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { buildTeamExportCsv, teamExportFilename } from "../lib/teamExport";
+import {
+  filterTeamsForRosterManagement,
+  hydrateTeamsForRosterManagement,
+  TEAM_ROSTER_TEAM_COLUMNS,
+  teamRosterListingCounts,
+} from "../lib/teamRosterData";
 
 export default function TeamsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
 
   const [leagues, setLeagues] = useState([]);
@@ -124,52 +131,16 @@ export default function TeamsPage() {
   }, [captainId, clubProId, coCaptain1Id, coCaptain2Id, members, selectedLocation, showAllCaptainCommunities]);
 
   const filteredTeams = useMemo(() => {
-    const q = teamSearch.trim().toLowerCase();
-    const sortedTeams = [...teams].sort((a, b) => {
-      const leagueCompare = (a.divisions?.leagues?.name || "").localeCompare(
-        b.divisions?.leagues?.name || ""
-      );
-
-      if (leagueCompare !== 0) return leagueCompare;
-
-      const divisionCompare = (a.divisions?.name || "").localeCompare(
-        b.divisions?.name || ""
-      );
-
-      if (divisionCompare !== 0) return divisionCompare;
-
-      const nameCompare = (a.name || "").localeCompare(b.name || "");
-      if (nameCompare !== 0) return nameCompare;
-
-      return String(a.id || "").localeCompare(String(b.id || ""));
-    });
-
-    return sortedTeams.filter((team) => {
-      const matchesActiveScope = showInactiveTeams || (
-        team.is_active !== false &&
-        team.divisions?.is_active !== false &&
-        team.divisions?.leagues?.is_active !== false &&
-        team.divisions?.leagues?.seasons?.is_active !== false
-      );
-      if (!matchesActiveScope) return false;
-      if (!q) return true;
-
-      const searchText = [
-        team.name,
-        team.abbreviation,
-        team.divisions?.leagues?.name,
-        team.divisions?.name,
-        team.locations?.name,
-        team.is_active === false ? "inactive" : "active",
-        displayMemberName(team.captain),
-        displayMemberName(team.co_captain_1),
-        displayMemberName(team.co_captain_2),
-        displayMemberName(team.club_pro),
-      ].join(" ").toLowerCase();
-
-      return searchText.includes(q);
+    return filterTeamsForRosterManagement(teams, {
+      includeInactive: showInactiveTeams,
+      query: teamSearch,
     });
   }, [showInactiveTeams, teams, teamSearch]);
+
+  const teamCounts = useMemo(
+    () => teamRosterListingCounts(teams, filteredTeams),
+    [filteredTeams, teams]
+  );
 
   const groupedTeams = useMemo(() => {
     const groups = [];
@@ -214,11 +185,15 @@ export default function TeamsPage() {
   }, [router]);
 
   const loadData = useCallback(async function loadData() {
-    const { data: leagueData } = await supabase
+    setLoadError("");
+
+    const { data: leagueData, error: leagueError } = await supabase
       .from("leagues")
       .select(`
         id,
         name,
+        season_id,
+        rosters_locked,
         is_active,
         seasons (
           id,
@@ -228,108 +203,59 @@ export default function TeamsPage() {
       `)
       .order("name", { ascending: true });
 
-    const { data: divisionData } = await supabase
+    const { data: divisionData, error: divisionError } = await supabase
       .from("divisions")
-      .select("id, name, league_id, is_active")
+      .select("id, name, league_id, rating_type, is_active")
       .order("name", { ascending: true });
 
-    const { data: locationData } = await supabase
+    const { data: locationData, error: locationError } = await supabase
       .from("locations")
       .select("id, name, address, city, state, zip_code, number_of_courts, court_notes")
       .order("name", { ascending: true });
 
     const { rows: memberData, error: memberError } = await loadAllTeamMemberOptions();
 
-    if (memberError) {
-      alert(memberError.message);
+    const referenceError = leagueError || divisionError || locationError || memberError;
+    if (referenceError) {
+      setLoadError(referenceError.message || "The supporting team data could not be loaded.");
       setLoading(false);
       return;
     }
 
-    const { data: teamData } = await supabase
+    const { data: teamData, error: teamError } = await supabase
       .from("teams")
-      .select(`
-        *,
-        divisions (
-          id,
-          name,
-          league_id,
-          rating_type,
-          leagues (
-            id,
-            name,
-            season_id,
-            rosters_locked,
-            seasons (
-              id,
-              name
-            )
-          )
-        ),
-        locations (
-          id,
-          name,
-          address,
-          city,
-          state,
-          zip_code,
-          number_of_courts,
-          court_notes
-        ),
-        captain:members!teams_captain_member_id_fkey (
-          id,
-          full_name,
-          first_name,
-          last_name,
-          email
-        ),
-        co_captain_1:members!teams_co_captain_member_id_fkey (
-          id,
-          full_name,
-          first_name,
-          last_name,
-          email
-        ),
-        co_captain_2:members!teams_co_captain_2_member_id_fkey (
-          id,
-          full_name,
-          first_name,
-          last_name,
-          email
-        ),
-        club_pro:members!teams_club_pro_member_id_fkey (
-          id,
-          full_name,
-          first_name,
-          last_name,
-          email
-        )
-      `)
+      .select(TEAM_ROSTER_TEAM_COLUMNS)
       .order("name", { ascending: true });
+
+    if (teamError) {
+      setLoadError(teamError.message || "Teams could not be loaded.");
+      setLoading(false);
+      return;
+    }
+
+    const { rows: leaderData, error: leaderError } = await loadAssignedTeamLeaders(teamData);
 
     const { rows: rosterRows, error: rosterError } = await loadAllRosterRows();
 
-    if (rosterError) {
-      alert(rosterError.message);
+    const teamSupportError = leaderError || rosterError;
+    if (teamSupportError) {
+      setLoadError(teamSupportError.message || "Team details could not be loaded.");
       setLoading(false);
       return;
     }
-
-    const rosterCountByTeamId = (rosterRows || []).reduce((counts, row) => {
-      counts[row.team_id] = (counts[row.team_id] || 0) + 1;
-      return counts;
-    }, {});
 
     setLeagues(leagueData || []);
     setDivisions(divisionData || []);
     setLocations(locationData || []);
     setMembers(memberData || []);
-    setTeams(
-      (teamData || []).map((team) => ({
-        ...team,
-        roster_count: rosterCountByTeamId[team.id] || 0,
-      }))
-    );
+    setTeams(hydrateTeamsForRosterManagement({
+      teams: teamData || [],
+      divisions: divisionData || [],
+      leagues: leagueData || [],
+      locations: locationData || [],
+      members: [...(memberData || []), ...(leaderData || [])],
+      rosterRows: rosterRows || [],
+    }));
     setLoading(false);
   }, []);
 
@@ -983,6 +909,33 @@ if (loading) {
   return <LoadingScreen subtitle="Loading Teams & Rosters..." />;
 }
 
+if (loadError) {
+  return (
+    <main className="min-h-screen bg-slate-100 p-6">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <AppHeader
+          title="Teams & Rosters"
+          subtitle="Create teams, edit team information, assign captains, and manage rosters."
+        />
+        <div role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-5 text-red-950 shadow-sm">
+          <h2 className="text-lg font-black">Teams & Rosters could not be loaded</h2>
+          <p className="mt-2 text-sm">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              loadData();
+            }}
+            className="mt-4 rounded-xl bg-red-800 px-4 py-2 text-sm font-bold text-white hover:bg-red-900"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
@@ -1326,7 +1279,7 @@ if (loading) {
                     </button>
                   </div>
 
-                  <ListingCount className="sm:ml-auto" label="Teams" shown={filteredTeams.length} total={teams.length} />
+                  <ListingCount className="sm:ml-auto" label="Teams" shown={teamCounts.shown} total={teamCounts.total} />
                 </div>
               </div>
             </div>
@@ -1827,6 +1780,32 @@ async function loadAllTeamMemberOptions() {
 
   return { rows, error: null };
 }
+
+async function loadAssignedTeamLeaders(teams) {
+  const memberIds = [...new Set(
+    (teams || []).flatMap((team) => [
+      team.captain_member_id,
+      team.co_captain_member_id,
+      team.co_captain_2_member_id,
+      team.club_pro_member_id,
+    ]).filter(Boolean).map(String)
+  )];
+  const rows = [];
+  const batchSize = 100;
+
+  for (let index = 0; index < memberIds.length; index += batchSize) {
+    const { data, error } = await supabase
+      .from("members")
+      .select("id, full_name, first_name, last_name, email")
+      .in("id", memberIds.slice(index, index + batchSize));
+
+    if (error) return { rows: [], error };
+    rows.push(...(data || []));
+  }
+
+  return { rows, error: null };
+}
+
 async function loadAllRosterRows() {
   const pageSize = 1000;
   let from = 0;
