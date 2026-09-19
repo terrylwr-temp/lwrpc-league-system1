@@ -1,3 +1,4 @@
+import { interactionReport, interactionDetail } from './aiInteractionHistory.js';
 import { requireReviewRole, ReviewError, reviewReport, reviewDetail, reviewHistory, reviewAction, reviewSource } from './aiReviewService.js';
 
 export async function handleReviewRequest(request, authorize) {
@@ -7,11 +8,14 @@ export async function handleReviewRequest(request, authorize) {
     const params=new URL(request.url).searchParams; let result;
     if(request.method==='GET') {
       const op=params.get('op') || 'report';
-      if(op==='detail') result=await reviewDetail(auth.supabase,params,auth.user.id);
+      if(op==='interactions') result=await interactionReport(auth.supabase,params,auth.user.id);
+      else if(op==='interaction') result=await interactionDetail(auth.supabase,params);
+      else if(op==='detail') result=await reviewDetail(auth.supabase,params,auth.user.id);
       else if(op==='history') result=await reviewHistory(auth.supabase,params,auth.user.id);
       else if(op==='report') result=await reviewReport(auth.supabase,params,auth.user.id);
       else throw new ReviewError('Invalid operation.');
     } else if(request.method==='POST') {
+      if(['interactions','interaction'].includes(params.get('op'))) throw new ReviewError('Method not allowed.',405);
       const raw=await request.text(); if(Buffer.byteLength(raw)>10000) throw new ReviewError('Request too large.',413);
       let body; try{body=JSON.parse(raw);}catch{throw new ReviewError('Invalid request.');}
       if(params.get('op')==='source') result=await reviewSource(auth.supabase,body.answer,body.index,auth.user.id);

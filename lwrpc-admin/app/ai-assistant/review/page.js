@@ -8,6 +8,7 @@ import { REVIEW_CATEGORIES, REVIEW_STATUSES, RETEST_KEY, feedbackPercent, review
 import styles from './review.module.css';
 import LiveFeedbackPanel from './LiveFeedbackPanel';
 import ApprovedAnswersPanel from './ApprovedAnswersPanel';
+import InteractionHistoryPanel from './InteractionHistoryPanel';
 
 async function api(params, body) {
   const response=await fetch(`/api/ai-assistant/review?${new URLSearchParams(params)}`,{method:body?'POST':'GET',cache:'no-store',headers:{...(await getRequestAuthorizationHeaders()),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
@@ -45,11 +46,12 @@ export default function AiFeedbackReviewPage() {
   const select=(name,title,values)=><label>{title}<select aria-label={title} value={draft[name]} onChange={e=>setDraft({...draft,[name]:e.target.value})}><option value="">All</option>{values.map(v=><option key={v} value={v}>{label(v)}</option>)}</select></label>;
   return <main className={styles.page}><AppHeader title="AI Feedback & Review" subtitle="Official-answer feedback, unanswered questions and manager review."/>
     <div className={styles.workspace}><div className={styles.health}>AI Quality Capture: <b>{health?.status==='degraded'?'Degraded':'Unknown'}</b> · Last recorded: {date(health?.lastRecordedAt)}. Independent operator log verification is required.</div>
-    <LiveFeedbackPanel/><section className={styles.cards} aria-label="Player outcome summary">{[
+    <InteractionHistoryPanel api={api}/>
+    <LiveFeedbackPanel/><h2 className="mt-6 text-lg font-bold">Player answer quality &amp; review queues</h2><section className={styles.cards} aria-label="Supporting player quality indicators">{[
       ['Grounded Answers',summary?.grounded],['Feedback Participation',summary?feedbackPercent(summary.voted,summary.eligible):'—'],
-      ['Helpful %',summary?(summary.voted && !summary.helpful && !summary.not_helpful?'Ambiguous':feedbackPercent(summary.helpful,summary.helpful+summary.not_helpful)):'—'],['Not Helpful',summary?.not_helpful],['Unanswered',summary?.unanswered],['Open Review Cases',summary?.open_cases],
+      ['Helpful %',summary?(summary.voted && !summary.helpful && !summary.not_helpful?'Ambiguous':feedbackPercent(summary.helpful,summary.helpful+summary.not_helpful)):'—'],['Feedback Received',summary?.voted],['Unanswered',summary?.unanswered],['Open Review Cases',summary?.open_cases],
     ].map(([name,value])=><article key={name}><span>{name}</span><strong>{value??'—'}</strong></article>)}</section>
-    <p className={styles.hint}>Player metrics only; manager tests and legacy feedback are excluded. Participation counts answers, not clicks. Cards use completion dates; queues use latest activity. Search/status/type apply to lists only. Date filters are UTC; displayed times use your device timezone. Small, test-heavy activity is not a long-term performance trend.</p>
+    <p className={styles.hint}>These supporting metrics and review queues use the separate filters below. Player metrics only; manager tests and legacy feedback are excluded. Participation counts answers, not clicks. Metrics use completion dates; queues use latest activity. Search/status/type apply to queues only. Date filters are UTC; displayed times use your device timezone. Small, test-heavy activity is not a long-term performance trend.</p>
     <p className={styles.hint}>Future Live LMS Intelligence demand: {summary?.protected??'—'} protected outcomes (category unspecified). These are not unanswered failures. Clarifications: {summary?.clarification??'—'}.</p>
     <form className={styles.filters} onSubmit={e=>{e.preventDefault();setFilters({...draft});}}>{f('search','Question search')}{f('from','From (UTC)','date')}{f('to','Through (UTC)','date')}{select('status','Status',REVIEW_STATUSES)}{select('type','Type',tab==='feedback'?['helpful','not_helpful']:['not_helpful','unanswered','conflict'])}{select('source','Source family',['lwr','usap','mixed','none','unknown'])}{f('version','LMS version')}<button disabled={busy}>Apply filters</button></form>
     <nav className={styles.tabs} aria-label="Review views">{[['needs','Needs Review'],['unanswered','Unanswered'],['feedback','Feedback'],['resolved','Resolved'],['approved','Approved Answers']].map(([key,title])=><button data-approved-leave key={key} aria-current={tab===key?'page':undefined} onClick={()=>{setTab(key);setDraft(d=>({...d,type:''}));setFilters(d=>({...d,type:''}));}}>{title}</button>)}</nav>
