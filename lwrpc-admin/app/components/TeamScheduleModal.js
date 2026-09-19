@@ -30,12 +30,13 @@ export default function TeamScheduleModal({
   page = false,
 }) {
   const [expandedMatchId, setExpandedMatchId] = useState("");
+  const [teamSort, setTeamSort] = useState("rank");
+  const displayedTeams = page ? sortScheduleTeams(teams, teamSort) : teams;
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
   const selectedTeamCaptainName = formatCaptainName(selectedTeam?.captain);
   const selectedTeamCoCaptainNames = [selectedTeam?.co_captain_1, selectedTeam?.co_captain_2]
     .map(formatCaptainName)
-    .filter(Boolean)
-    .join(", ");
+    .filter(Boolean);
   const divisionOptionGroups = divisionOptions.reduce((groups, division) => {
     const leagueName = division.leagueName || "League";
     const current = groups.find((group) => group.leagueName === leagueName);
@@ -125,6 +126,28 @@ export default function TeamScheduleModal({
 
         <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[290px_minmax(0,1fr)]">
           <aside className="border-b border-slate-200 bg-slate-100 p-3 sm:p-4 md:max-h-none md:overflow-auto md:border-b-0 md:border-r">
+            {page && (
+              <div className="mb-3">
+                <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Teams sorted by {teamSort === "rank" ? "Rank" : "Name"} ({teams.length})
+                </div>
+                <div role="group" aria-label="Sort teams" className="mt-2 flex gap-1 rounded-xl bg-slate-200 p-1">
+                  {[["rank", "Sorted by Rank"], ["name", "Sorted by Name"]].map(([sort, label]) => (
+                    <button
+                      key={sort}
+                      type="button"
+                      onClick={() => setTeamSort(sort)}
+                      aria-pressed={teamSort === sort}
+                      className={`flex-1 rounded-lg px-2 py-2 text-xs font-bold transition ${
+                        teamSort === sort ? "bg-white text-blue-800 shadow-sm" : "text-slate-600 hover:bg-white/60"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <label className="block md:hidden">
               <span className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
                 Team Schedule
@@ -132,13 +155,13 @@ export default function TeamScheduleModal({
               <select
                 value={selectedTeamId || ""}
                 onChange={(event) => {
-                  const team = teams.find((candidate) => String(candidate.id) === String(event.target.value));
+                  const team = displayedTeams.find((candidate) => String(candidate.id) === String(event.target.value));
                   if (team) onSelectTeam?.(team);
                 }}
                 className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-bold text-slate-900 shadow-sm"
                 aria-label="Choose team schedule"
               >
-                {teams.map((team) => (
+                {displayedTeams.map((team) => (
                   <option key={team.id} value={team.id}>
                     {team.standing?.rank ? `#${team.standing.rank} ` : ""}{team.name} - {team.standing?.standings_points ?? 0} pts
                   </option>
@@ -146,13 +169,15 @@ export default function TeamScheduleModal({
               </select>
             </label>
             <div className="hidden md:block">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                Teams sorted by Rank
+            {!page && (
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Teams sorted by Rank
+                </div>
               </div>
-            </div>
+            )}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:block md:space-y-2">
-              {teams.map((team) => (
+              {displayedTeams.map((team) => (
                 <button
                   key={team.id}
                   type="button"
@@ -188,10 +213,12 @@ export default function TeamScheduleModal({
                     {selectedTeam?.name || "Select a team"}
                   </div>
                 </div>
-                {selectedTeam && (selectedTeamCaptainName || selectedTeamCoCaptainNames) && (
+                {selectedTeam && (selectedTeamCaptainName || selectedTeamCoCaptainNames.length > 0) && (
                   <div className="w-full min-w-0 break-words text-left text-sm font-bold text-blue-100 sm:max-w-[42%] sm:shrink-0 sm:text-right">
                     {selectedTeamCaptainName && <div>Captain: {selectedTeamCaptainName}</div>}
-                    {selectedTeamCoCaptainNames && <div>Co-Captains: {selectedTeamCoCaptainNames}</div>}
+                    {selectedTeamCoCaptainNames.length > 0 && (
+                      <div>{selectedTeamCoCaptainNames.length === 1 ? "Co-Captain" : "Co-Captains"}: {selectedTeamCoCaptainNames.join(", ")}</div>
+                    )}
                   </div>
                 )}
               </div>
@@ -255,6 +282,17 @@ export default function TeamScheduleModal({
       </div>
     </div>
   );
+}
+
+function sortScheduleTeams(teams, sort) {
+  return [...teams].sort((a, b) => {
+    if (sort === "rank") {
+      const rankDifference = Number(a.standing?.rank || 999) - Number(b.standing?.rank || 999);
+      if (rankDifference) return rankDifference;
+    }
+
+    return (a.name || "").localeCompare(b.name || "") || String(a.id || "").localeCompare(String(b.id || ""));
+  });
 }
 
 function ScheduleByeCard({ bye }) {

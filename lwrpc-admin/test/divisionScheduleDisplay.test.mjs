@@ -28,6 +28,7 @@ const scheduleFunctions = scheduleAst.statements
 const Schedule = evaluate(`${scheduleFunctions.join("\n")}\nTeamScheduleModal`, {
   React, ...React, ...dateTime, ...specialMatchResults, ...matchRatingSnapshots,
 });
+const sortScheduleTeams = evaluate(`${scheduleFunctions.find((source) => source.startsWith("function sortScheduleTeams"))}\nsortScheduleTeams`, {});
 const textContent = (html) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 const captain = { id: "leader-1", full_name: "Casey Captain" };
 const coCaptain1 = { id: "leader-2", first_name: "Cameron", last_name: "Co-Captain" };
@@ -45,6 +46,33 @@ function render(props = {}) {
     title: "Division Team Schedules", teams, selectedTeamId: "team-a", ...props,
   }));
 }
+
+test("Division Schedules shows a counted Rank-first toggle without changing contextual overlays", () => {
+  const pageHtml = render({ page: true });
+  const pageText = textContent(pageHtml);
+  assert.match(pageText, /Teams sorted by Rank \(2\)/);
+  assert.match(pageText, /Sorted by Rank/);
+  assert.match(pageText, /Sorted by Name/);
+  assert.match(pageHtml, /<button[^>]*aria-pressed="true"[^>]*>Sorted by Rank<\/button>/);
+  assert.match(pageHtml, /<button[^>]*aria-pressed="false"[^>]*>Sorted by Name<\/button>/);
+  assert.ok(pageHtml.indexOf('value="team-a"') < pageHtml.indexOf('value="team-b"'));
+
+  const overlayText = textContent(render());
+  assert.doesNotMatch(overlayText, /Sorted by Name|Teams sorted by Rank \(2\)/);
+  assert.match(overlayText, /Teams sorted by Rank/);
+  assert.match(textContent(render({ page: true, teams: [] })), /Teams sorted by Rank \(0\)/);
+});
+
+test("team sort keeps ranked order by default and sorts names without mutating source teams", () => {
+  const input = [
+    { id: "b", name: "Zebras", standing: { rank: 1 } },
+    { id: "a", name: "Aces", standing: { rank: 2 } },
+    { id: "c", name: "Dinkers", standing: null },
+  ];
+  assert.deepEqual(Array.from(sortScheduleTeams(input, "rank"), (team) => team.id), ["b", "a", "c"]);
+  assert.deepEqual(Array.from(sortScheduleTeams(input, "name"), (team) => team.id), ["a", "c", "b"]);
+  assert.deepEqual(input.map((team) => team.id), ["b", "a", "c"]);
+});
 
 for (const page of [true, false]) {
   test(`${page ? "Commissioner page" : "Captain overlay"}: one team format retains rank, record, and both co-captains`, () => {
@@ -76,8 +104,21 @@ test("a co-captain remains visible when no captain or first co-captain is assign
   const content = textContent(render({ teams: [{
     id: "team-a", name: "Aces", captain: null, co_captain_1: null, co_captain_2: coCaptain2,
   }] }));
-  assert.match(content, /Co-Captains: Charlie Second Co-Captain/);
+  assert.match(content, /Co-Captain: Charlie Second Co-Captain/);
+  assert.doesNotMatch(content, /Co-Captains:/);
   assert.doesNotMatch(content, /(?:^| )Captain:|undefined|null/);
+});
+
+test("one first co-captain uses the singular label and no co-captain shows no label", () => {
+  const one = textContent(render({ teams: [{
+    id: "team-a", name: "Aces", captain, co_captain_1: coCaptain1, co_captain_2: null,
+  }] }));
+  assert.match(one, /Captain: Casey Captain/);
+  assert.match(one, /Co-Captain: Cameron Co-Captain/);
+  assert.doesNotMatch(one, /Co-Captains:/);
+
+  const none = textContent(render({ teams: [{ id: "team-a", name: "Aces", captain }] }));
+  assert.doesNotMatch(none, /Co-Captain(?:s)?:/);
 });
 
 test("leader display retains full names, split names, long names, and existing overlay email fallback", () => {
