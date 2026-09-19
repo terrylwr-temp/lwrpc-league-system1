@@ -29,10 +29,13 @@ export default function TeamScheduleModal({
   onClose,
   page = false,
 }) {
-  const [standingsView, setStandingsView] = useState("summary");
   const [expandedMatchId, setExpandedMatchId] = useState("");
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
-  const selectedTeamCaptainNames = captainNames(selectedTeam);
+  const selectedTeamCaptainName = formatCaptainName(selectedTeam?.captain);
+  const selectedTeamCoCaptainNames = [selectedTeam?.co_captain_1, selectedTeam?.co_captain_2]
+    .map(formatCaptainName)
+    .filter(Boolean)
+    .join(", ");
   const divisionOptionGroups = divisionOptions.reduce((groups, division) => {
     const leagueName = division.leagueName || "League";
     const current = groups.find((group) => group.leagueName === leagueName);
@@ -147,30 +150,6 @@ export default function TeamScheduleModal({
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 Teams sorted by Rank
               </div>
-              <div className="inline-grid grid-cols-2 overflow-hidden rounded-xl border border-slate-300 bg-white p-0.5 text-xs font-black shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => setStandingsView("summary")}
-                  className={`rounded-lg px-3 py-1.5 ${
-                    standingsView === "summary"
-                      ? "bg-blue-700 text-white"
-                      : "text-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  Summary
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStandingsView("detail")}
-                  className={`rounded-lg px-3 py-1.5 ${
-                    standingsView === "detail"
-                      ? "bg-blue-700 text-white"
-                      : "text-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  Detail
-                </button>
-              </div>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:block md:space-y-2">
               {teams.map((team) => (
@@ -184,25 +163,14 @@ export default function TeamScheduleModal({
                       : "border-white bg-white text-slate-800 hover:border-blue-200 hover:bg-blue-50"
                   }`}
                 >
-                  {standingsView === "summary" ? (
-                    <span className="flex min-w-0 items-center justify-between gap-3">
-                      <span className="min-w-0 truncate">{team.name}</span>
-                      <span className="shrink-0 text-right text-xs font-black">
-                        {team.standing?.standings_points ?? 0} pts / {formatTeamRecord(team)}
-                      </span>
-                    </span>
-                  ) : (
-                    <>
-                      <span>{team.standing?.rank ? `#${team.standing.rank} ` : ""}{team.name}</span>
-                      <span className={`mt-1 block text-xs ${
-                        String(team.id) === String(selectedTeamId)
-                          ? "text-slate-300"
-                          : "text-slate-500"
-                      }`}>
-                        {formatTeamSummary(team)}
-                      </span>
-                    </>
-                  )}
+                  <span>{team.standing?.rank ? `#${team.standing.rank} ` : ""}{team.name}</span>
+                  <span className={`mt-1 block text-xs ${
+                    String(team.id) === String(selectedTeamId)
+                      ? "text-slate-300"
+                      : "text-slate-500"
+                  }`}>
+                    {formatTeamSummary(team)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -220,12 +188,10 @@ export default function TeamScheduleModal({
                     {selectedTeam?.name || "Select a team"}
                   </div>
                 </div>
-                {selectedTeam && selectedTeamCaptainNames && (
-                  <div
-                    className="w-full min-w-0 text-left text-[11px] font-bold leading-tight text-blue-100 sm:max-w-[42%] sm:shrink-0 sm:truncate sm:text-right sm:text-xs"
-                    title={`Captains: ${selectedTeamCaptainNames}`}
-                  >
-                    Captains: {selectedTeamCaptainNames}
+                {selectedTeam && (selectedTeamCaptainName || selectedTeamCoCaptainNames) && (
+                  <div className="w-full min-w-0 break-words text-left text-sm font-bold text-blue-100 sm:max-w-[42%] sm:shrink-0 sm:text-right">
+                    {selectedTeamCaptainName && <div>Captain: {selectedTeamCaptainName}</div>}
+                    {selectedTeamCoCaptainNames && <div>Co-Captains: {selectedTeamCoCaptainNames}</div>}
                   </div>
                 )}
               </div>
@@ -680,17 +646,6 @@ function formatTeamSummary(team) {
 
 function formatHomeLocation(team) {
   return team?.locations?.name || "No Home Location";
-}
-
-function captainNames(team) {
-  return [
-    team?.captain,
-    team?.co_captain_1,
-    team?.co_captain_2,
-  ]
-    .map(formatCaptainName)
-    .filter(Boolean)
-    .join(", ");
 }
 
 function formatCaptainName(member) {

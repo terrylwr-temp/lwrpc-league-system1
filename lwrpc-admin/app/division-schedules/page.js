@@ -40,24 +40,46 @@ export default function DivisionSchedulesPage() {
       { data: divisionStandings, error: standingsError },
       { data: divisionRatings, error: ratingsError },
     ] = await Promise.all([
-      supabase.from("teams").select("id, name, division_id, locations(id, name)").eq("division_id", divisionId).eq("is_active", true).order("name"),
+      supabase.from("teams").select("id, name, division_id, captain_member_id, co_captain_member_id, co_captain_2_member_id, locations(id, name)").eq("division_id", divisionId).eq("is_active", true).order("name"),
       supabase.from("matches").select("id, division_id, home_team_id, away_team_id, scheduled_date, scheduled_time, week_number, status, score_status, home_score, away_score, winning_team_id, result_type, result_notes, is_published, locations(id, name), home_team:teams!matches_home_team_id_fkey(id, name), away_team:teams!matches_away_team_id_fkey(id, name), match_lines(id, line_number, home_team_games_won, away_team_games_won, winning_team_id, home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, full_name, self_rating), home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, full_name, self_rating), away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, full_name, self_rating), away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, full_name, self_rating), line_games(id, game_number, home_score, away_score, game_status))").eq("division_id", divisionId).eq("is_published", true).order("scheduled_date").order("scheduled_time"),
       supabase.from("team_byes").select("id, team_id, division_id, week_number, bye_date, teams(id, name), divisions(id, name)").eq("division_id", divisionId).order("bye_date"),
       supabase.from("team_standings").select("team_id, rank, standings_points, match_wins, match_losses").eq("division_id", divisionId),
       seasonId ? supabase.from("member_season_ratings").select("member_id, season_dupr_rating, season_primetime_rating").eq("season_id", seasonId) : Promise.resolve({ data: [], error: null }),
     ]);
 
-    setScheduleLoading(false);
     const loadError = teamsError || matchesError || byesError || standingsError || ratingsError;
     if (loadError) {
+      setScheduleLoading(false);
       setError(loadError.message || "Unable to load division schedules.");
       setSelectedTeam({ division_id: divisionId, divisions: option.division });
       return;
     }
 
+    // Keep member reads shallow and limited to this division's assigned leaders.
+    const leaderIds = [...new Set((divisionTeams || []).flatMap((team) => [
+      team.captain_member_id, team.co_captain_member_id, team.co_captain_2_member_id,
+    ]).filter(Boolean))];
+    const leaders = [];
+    for (let offset = 0; offset < leaderIds.length; offset += 100) {
+      const { data, error: leadersError } = await supabase.from("members")
+        .select("id, first_name, last_name, full_name")
+        .in("id", leaderIds.slice(offset, offset + 100));
+      if (leadersError) {
+        setError(leadersError.message || "Unable to load team captains.");
+        break;
+      }
+      leaders.push(...(data || []));
+    }
+    const leadersById = Object.fromEntries(leaders.map((member) => [String(member.id), member]));
     const standingsByTeamId = Object.fromEntries((divisionStandings || []).map((row) => [String(row.team_id), row]));
     const populatedTeams = (divisionTeams || [])
-      .map((team) => ({ ...team, standing: standingsByTeamId[String(team.id)] || null }))
+      .map((team) => ({
+        ...team,
+        captain: leadersById[String(team.captain_member_id)] || null,
+        co_captain_1: leadersById[String(team.co_captain_member_id)] || null,
+        co_captain_2: leadersById[String(team.co_captain_2_member_id)] || null,
+        standing: standingsByTeamId[String(team.id)] || null,
+      }))
       .sort((a, b) => Number(a.standing?.rank || 999) - Number(b.standing?.rank || 999) || a.name.localeCompare(b.name));
     const preferredTeam = populatedTeams.find((team) => String(team.id) === String(preferredTeamId));
 
@@ -66,6 +88,7 @@ export default function DivisionSchedulesPage() {
     setMatches(divisionMatches || []);
     setByes(divisionByes || []);
     setRatings(divisionRatings || []);
+    setScheduleLoading(false);
   }, []);
 
   useEffect(() => {
