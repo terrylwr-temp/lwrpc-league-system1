@@ -19,6 +19,7 @@ import {approvedSourceIdentity,approvedEligible} from './aiApprovedAnswersShared
 import { trustedSelectedRuleIdentity } from "./aiSelectedRuleIdentity.js";
 import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
+import {isMultiTeamMembershipQuestion,multiTeamMembershipPassages} from './aiTeamMembership.js';
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER, selectGoverningEvidence } from "./aiGoverningSources.js";
 import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapBallSpecificationEvidence, isUsapLegalBallQuestion } from "./aiEquipmentIntents.js";
@@ -62,6 +63,13 @@ function selectPrimaryAnswerEvidence(retrieval) {
     : retrieval.suppliedEvidence;
   const intentEvidenceCandidates = Array.isArray(retrieval.intentEvidenceCandidates) ? retrieval.intentEvidenceCandidates : [];
   const governingCandidates = [...new Map([...authorityReviewCandidates, ...intentEvidenceCandidates].map((candidate) => [candidate.chunkId, candidate])).values()];
+  if(isMultiTeamMembershipQuestion(retrieval.request.question)){
+    const selected=governingCandidates.filter(candidate=>candidate.combinedScore>=retrieval.evidence.threshold&&leagueCompatible(candidate,retrieval.request.question))
+      .map(candidate=>({...candidate,selectedPassages:multiTeamMembershipPassages(candidate)}))
+      .filter(candidate=>candidate.selectedPassages.length).slice(0,MAX_SELECTED_CHUNKS)
+      .map(candidate=>({...candidate,content:candidate.selectedPassages.join('\n\n')}));
+    return classifyAnswerEvidence(selected,retrieval.request.question);
+  }
   // A candidate product in a selection question is a proposition to verify,
   // not a second rule issue that must occur in the official evidence.
   if(isClubSelectedMatchEquipmentQuestion(retrieval.request.question) && /\b(?:thought|made-up)\b|where[\s\S]*(?:info|find|say)/i.test(retrieval.request.question) && !/\b(?:legal|specifications?|damag\w*|crack\w*|br(?:eak|oke)\w*|color|colour|paddle|volley)\b/i.test(retrieval.request.question)) {

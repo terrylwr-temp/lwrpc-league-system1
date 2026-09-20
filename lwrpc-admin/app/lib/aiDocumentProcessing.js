@@ -173,11 +173,11 @@ function needsInjectedSpace(previous, item, existingText, value) {
 }
 
 function repairVerifiedLigatureArtifact(text, diagnostics) {
-  // The Code of Conduct source maps its visual `ff` ligature to U+01AF in
-  // its ToUnicode table. Restrict repair to the impossible-in-English run
-  // o/U+01AF/i so legitimate U+01AF characters remain untouched elsewhere.
-  const repaired = text.replace(/([oO])\u01af(?=[iI])/g, "$1ff");
-  const count = [...text.matchAll(/([oO])\u01af(?=[iI])/g)].length;
+  // The English LWR PC PDFs map visual `ff` to U+01AF in their ToUnicode
+  // tables across many words. Repair only here, after PDF text-line assembly
+  // and before chunk construction; other application Unicode is untouched.
+  const count = (text.match(/\u01af/g) || []).length;
+  const repaired = text.replace(/\u01af/g, "ff");
   diagnostics.verifiedLigatureRepairs += count;
   return repaired;
 }

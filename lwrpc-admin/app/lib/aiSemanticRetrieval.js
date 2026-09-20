@@ -4,6 +4,7 @@ import {completePolicyEvidence,needsPolicyEvidence} from './aiPolicyEvidence.js'
 import {questionIntent} from './aiRequestIntent.js';
 import {officialQuestionConcept} from './aiQuestionConcepts.js';
 import {selectSemanticEvidence} from './aiSemanticEvidence.js';
+import {canonicalMembershipQuery,sourceAlignedMembershipQuery} from './aiTeamMembership.js';
 
 // Capabilities stay request-local. Never serialize clients, vectors or credentials.
 const runtimes=new WeakMap();
@@ -89,6 +90,30 @@ export async function assistSemanticRetrieval(retrieval,select,established=[]) {
   diagnostic.initialFailure=established.length?null:retrieval.evidence.sufficient?'APPLICABILITY_REJECTED':'BELOW_EVIDENCE_THRESHOLD';
   const originalPolicy=needsPolicyEvidence(retrieval.request.question);
   try {
+    const canonical=canonicalMembershipQuery(retrieval.request.question);
+    if(!established.length&&canonical){
+      const grounded=sourceAlignedMembershipQuery(retrieval.candidates);
+      for(const [kind,query] of [['concept_aligned',canonical],['source_aligned',grounded]].filter(([,q],i,all)=>q&&all.findIndex(([,other])=>other===q)===i)){
+        // These lexical queries stay inside the existing database RPC. Reuse
+        // the original question vector; no source passage goes to a provider.
+        let aligned;
+        try{aligned=await runtime.search(query,{reuseOriginalEmbedding:true});}
+        catch(error){diagnostic.paths.push({kind,query,status:'SEARCH_FAILED',queryExecuted:error?.queryExecuted===true,candidates:[]});continue;}
+        diagnostic.paths.push({kind,query,status:'completed',queryExecuted:true,candidates:aligned.map(candidateDiagnostic)});
+        const merged=new Map(retrieval.candidates.map(c=>[c.chunkId,c]));
+        for(const candidate of aligned){const old=merged.get(candidate.chunkId);if(!old||candidate.combinedScore>old.combinedScore)merged.set(candidate.chunkId,candidate);}
+        retrieval.candidates=[...merged.values()].sort((a,b)=>b.combinedScore-a.combinedScore||a.chunkId.localeCompare(b.chunkId)).slice(0,Math.max(aiAssistantConfig.retrievalLimit*4,24));
+        runtime.refresh();
+        const selected=select(retrieval);
+        if(selected.length){
+          diagnostic.status='completed';
+          diagnostic[`${kind==='concept_aligned'?'conceptAligned':'sourceAligned'}Query`]=query;
+          diagnostic.rankedCandidates=retrieval.candidates.map(candidateDiagnostic);
+          diagnostic.finalEvidence=selected.map(candidateDiagnostic);
+          return selected;
+        }
+      }
+    }
     const documents=await runtime.catalog();diagnostic.documentsConsidered=documents;
     const response=await runtime.plan({question:retrieval.request.question,documents});
     const plan=validateQueryPlan(response.plan,retrieval.request.question,documents);

@@ -1,0 +1,157 @@
+{
+  "recordedAt": "2026-09-20T14:49:02.263Z",
+  "method": "Read-only normal generation with active-source revalidation; no feedback/quality writes.",
+  "results": [
+    {
+      "question": "Can we have players on multiple teams?",
+      "answer": "Yes. A player may be listed on more than one team roster, as long as the player independently satisfies all eligibility requirements for each team, league, and division involved.",
+      "model": "gpt-5.5-2026-04-23",
+      "usage": null,
+      "selected": [
+        {
+          "id": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "rule": "5.1.2",
+          "content": "5.1.2. A player may be listed on more than one team roster, provided the player\nindependently satisfies all eligibility requirements applicable to each team, league,\nand division under these League Rules."
+        }
+      ],
+      "sources": [
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "chunkId": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "ruleNumber": "5.1.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.1.2 — TEAM/GAME RULES — Page 4"
+        }
+      ],
+      "queryUnderstanding": {
+        "status": "completed",
+        "paths": [
+          {
+            "kind": "original",
+            "query": "Can we have players on multiple teams?",
+            "candidateCount": 32
+          },
+          {
+            "kind": "concept_aligned",
+            "query": "more than one team roster",
+            "candidateCount": 32
+          }
+        ],
+        "fallbackReason": null
+      }
+    },
+    {
+      "question": "Can I play on two teams?",
+      "answer": "Yes. A player may be listed on more than one team roster, as long as the player independently meets all eligibility requirements for each team, league, and division under the League Rules.",
+      "model": "gpt-5.5-2026-04-23",
+      "usage": null,
+      "selected": [
+        {
+          "id": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "rule": "5.1.2",
+          "content": "5.1.2. A player may be listed on more than one team roster, provided the player\nindependently satisfies all eligibility requirements applicable to each team, league,\nand division under these League Rules."
+        }
+      ],
+      "sources": [
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "chunkId": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "ruleNumber": "5.1.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.1.2 — TEAM/GAME RULES — Page 4"
+        }
+      ],
+      "queryUnderstanding": {
+        "status": "completed",
+        "paths": [
+          {
+            "kind": "original",
+            "query": "Can I play on two teams?",
+            "candidateCount": 32
+          },
+          {
+            "kind": "concept_aligned",
+            "query": "more than one team roster",
+            "candidateCount": 32
+          }
+        ],
+        "fallbackReason": null
+      }
+    },
+    {
+      "question": "Are players limited to only one roster?",
+      "answer": "No. A player may be listed on more than one team roster, as long as the player independently meets all eligibility requirements for each team, league, and division.",
+      "model": "gpt-5.5-2026-04-23",
+      "usage": null,
+      "selected": [
+        {
+          "id": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "rule": "5.1.2",
+          "content": "5.1.2. A player may be listed on more than one team roster, provided the player\nindependently satisfies all eligibility requirements applicable to each team, league,\nand division under these League Rules."
+        }
+      ],
+      "sources": [
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "chunkId": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "ruleNumber": "5.1.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.1.2 — TEAM/GAME RULES — Page 4"
+        }
+      ],
+      "queryUnderstanding": {
+        "status": "completed",
+        "paths": [
+          {
+            "kind": "original",
+            "query": "Are players limited to only one roster?",
+            "candidateCount": 32
+          },
+          {
+            "kind": "concept_aligned",
+            "query": "more than one team roster",
+            "candidateCount": 32
+          }
+        ],
+        "fallbackReason": null
+      }
+    },
+    {
+      "question": "Can a player be rostered on more than one team?",
+      "answer": "Yes. A player may be listed on more than one team roster, as long as the player independently satisfies all eligibility requirements for each team, league, and division under the League Rules.",
+      "model": "gpt-5.5-2026-04-23",
+      "usage": null,
+      "selected": [
+        {
+          "id": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "rule": "5.1.2",
+          "content": "5.1.2. A player may be listed on more than one team roster, provided the player\nindependently satisfies all eligibility requirements applicable to each team, league,\nand division under these League Rules."
+        }
+      ],
+      "sources": [
+        {
+          "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+          "versionId": "2b548146-006e-4f66-853e-e1e61430a50e",
+          "chunkId": "e639ea4d-4b81-4595-b255-e7586f8770a6",
+          "ruleNumber": "5.1.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.1.2 — TEAM/GAME RULES — Page 4"
+        }
+      ],
+      "queryUnderstanding": {
+        "status": "not_needed",
+        "paths": [
+          {
+            "kind": "original",
+            "query": "Can a player be rostered on more than one team?",
+            "candidateCount": 32
+          }
+        ],
+        "fallbackReason": null
+      }
+    }
+  ]
+}

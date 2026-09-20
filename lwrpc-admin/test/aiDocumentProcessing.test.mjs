@@ -10,6 +10,7 @@ import {
   sanitizePdfFilename,
   searchableChunksForEmbedding,
 } from "../app/lib/aiDocumentProcessing.js";
+import { normalizeRetrievalRequest } from "../app/lib/aiRetrieval.js";
 
 function createTextPdf(text) {
   const stream = `BT\n/F1 18 Tf\n72 720 Td\n(${text.replace(/[\\()]/g, "\\$&")}) Tj\nET\n`;
@@ -109,7 +110,7 @@ test("normalizes structural bullets and PDF whitespace while preserving meaningf
   assert.equal(result.diagnostics.structuralBullets, 1);
 });
 
-test("repairs only the verified broken ff ligature context and safely dehyphenates soft line breaks", () => {
+test("repairs the PDF ff mapping across words and safely dehyphenates soft line breaks", () => {
   const result = normalizePdfTextItems([
     { str: "O", transform: [16, 0, 0, 16, 228, 655], width: 12, height: 16 },
     { str: "Ư", fontName: "subset-heading", transform: [16, 0, 0, 16, 240, 655], width: 11, height: 16 },
@@ -124,17 +125,34 @@ test("repairs only the verified broken ff ligature context and safely dehyphenat
   assert.deepEqual(extractionWarnings(result.diagnostics), ["Recovered 1 verified PDF ligature mapping artifact(s). Review the affected text before activation."]);
 });
 
-test("warns rather than guessing about unrecoverable replacement, private-use, and unusual embedded glyphs", () => {
+test("repairs each PDF ff mapping before chunk construction without changing punctuation or normal ff", () => {
+  const cases=[
+    ["suƯicient", "sufficient"],
+    ["oƯicial", "official"],
+    ["diƯerent", "different"],
+    ["eƯect", "effect"],
+    ["aƯected", "affected"],
+    ["PlayoƯs/championship", "Playoffs/championship"],
+    ["(oƯer), off;", "(offer), off;"],
+  ];
+  const result=normalizePdfTextItems(cases.map(([source])=>({str:source,hasEOL:true})));
+  assert.deepEqual(result.lines,cases.map(([,expected])=>expected));
+  assert.equal(result.diagnostics.verifiedLigatureRepairs,7);
+  const chunks=chunkPdfPages([{pageNumber:4,lines:["5. TEAM/GAME RULES",...result.lines]}]);
+  assert.match(chunks.map(chunk=>chunk.content).join("\n"),/sufficient/);
+  assert.doesNotMatch(chunks.map(chunk=>chunk.content).join("\n"),/Ư/);
+  assert.equal(normalizeRetrievalRequest({question:"What does Ư mean?"}).question,"What does Ư mean?");
+});
+
+test("warns rather than guessing about unrecoverable replacement and private-use glyphs", () => {
   const result = normalizePdfTextItems([
     { str: "Bad \ufffd glyph", transform: [12, 0, 0, 12, 72, 500], width: 60, height: 12, hasEOL: true },
     { str: "Unknown \ue123 glyph", transform: [12, 0, 0, 12, 72, 484], width: 60, height: 12, hasEOL: true },
-    { str: "AƯB", transform: [12, 0, 0, 12, 72, 468], width: 30, height: 12, hasEOL: true },
   ]);
   const warnings = extractionWarnings(result.diagnostics);
-  assert.equal(result.lines[2], "AƯB");
   assert.match(warnings.join("\n"), /replacement character/i);
   assert.match(warnings.join("\n"), /private-use glyph/i);
-  assert.match(warnings.join("\n"), /unusual character sequence/i);
+  assert.doesNotMatch(warnings.join("\n"), /unusual character sequence/i);
 });
 
 test("extracts text from an actual PDF on the server without browser DOM globals", async () => {

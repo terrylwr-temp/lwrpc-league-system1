@@ -105,9 +105,9 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
       if(catalogError)throw catalogError;
       return (docs||[]).map(d=>({id:d.id,title:d.title,type:d.document_type,authorityRank:d.authority_rank,scope:d.scope_kind,activeVersionId:d.active_version_id}));
     },
-    search:async query=>{
-      const extra=await embedQuery(query,undefined,AbortSignal.timeout(8000));
-      if(Number.isFinite(extra.inputTokens)&&Number.isFinite(result.metrics.embeddingInputTokens))result.metrics.embeddingInputTokens+=extra.inputTokens;
+    search:async (query,{reuseOriginalEmbedding=false}={})=>{
+      const extra=reuseOriginalEmbedding?embedding:await embedQuery(query,undefined,AbortSignal.timeout(8000));
+      if(!reuseOriginalEmbedding&&Number.isFinite(extra.inputTokens)&&Number.isFinite(result.metrics.embeddingInputTokens))result.metrics.embeddingInputTokens+=extra.inputTokens;
       const rpc=supabase.rpc('search_ai_official_chunks',{...rpcArgs(query),p_query_embedding:toPgVector(extra.embedding)});
       const {data:rows,error:searchError}=await (typeof rpc.abortSignal==='function'?rpc.abortSignal(AbortSignal.timeout(5000)):rpc);
       if(searchError){searchError.queryExecuted=true;throw searchError;}
