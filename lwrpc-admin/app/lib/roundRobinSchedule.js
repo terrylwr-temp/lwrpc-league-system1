@@ -152,6 +152,7 @@ export function createNextRoundRobinRound({
   historyMatches = [],
   courtCount,
   plannedRoundCount = 6,
+  forcedByePlayerIds = [],
 } = {}) {
   const activePlayers = players
     .filter((player) => player && player.id)
@@ -173,11 +174,15 @@ export function createNextRoundRobinRound({
   if (totalPlayers < 4) {
     throw new Error("Confirm at least 4 players before generating a game.");
   }
+  if (forcedByePlayerIds.length && (resolvedCourtCount !== 2 || ![9, 10].includes(totalPlayers) || historyMatches.length)) {
+    throw new Error("Manual bye night balancing requires nine or ten players on two courts.");
+  }
 
   if (resolvedCourtCount === 2 && [8, 9, 10].includes(totalPlayers) && historyMatches.length === 0) {
     const lastRound = Math.max(0, ...existingMatches.map(m => Number(m.round_number || m.roundNumber || 0)));
     const plan = planBalancedNight({players: activePlayers, courts, matches: existingMatches,
-      roundCount: Math.max(lastRound + 1, Math.min(9, Number(plannedRoundCount) || 6))});
+      roundCount: Math.max(lastRound + 1, Math.min(9, Number(plannedRoundCount) || 6)),
+      forcedByePlayerIds});
     return {...plan.rounds[0], quality: plan.quality};
   }
 

@@ -82,6 +82,11 @@ export function nightlyHistory(players, matches = []) {
         for (const i of active) {
             if (court === 0 || court === 1)
                 state.courts[i * 2 + court]++;
+            const overlap = pop(mask & state.last[i]);
+            state.quad += Number(overlap === 4);
+            state.triple += Number(overlap >= 3);
+            state.adjacent += Math.max(0, overlap - 1);
+            state.streak += Math.max(0, pop(mask & state.last[i] & state.previous[i]) - 1);
             state.previous[i] = state.last[i];
             state.last[i] = mask;
         }
@@ -138,7 +143,7 @@ function nightRank(state, n) {
     const excess = Array.from({ length: n }, (_, i) => Math.floor(Math.abs(state.courts[i * 2] - state.courts[i * 2 + 1]) / 2));
     return [state.quad, state.triple, Math.max(...excess), excess.reduce((a, b) => a + b, 0), state.streak, state.adjacent, Math.max(0, ...state.groups.values()), [...state.groups.values()].reduce((sum, v) => sum + v * v, 0)];
 }
-function improveNight(initial, seed, n) {
+function improveNight(initial, seed, n, lockFirstRoundByes = false) {
     let randomState = 712367;
     const random = () => { randomState = (Math.imul(randomState, 1664525) + 1013904223) >>> 0; return randomState / 4294967296; };
     const evaluate = path => path.reduce((s, c) => advance(s, c), initial);
@@ -149,6 +154,7 @@ function improveNight(initial, seed, n) {
     for (let iteration = 0; iteration < 40000; iteration++) {
         const path = [...current.path], a = Math.floor(random() * path.length), b = Math.floor(random() * path.length);
         if (random() < 0.3) {
+            if (lockFirstRoundByes && (a === 0 || b === 0)) continue;
             [path[a], path[b]] = [path[b], path[a]];
         }
         else {
@@ -176,28 +182,53 @@ function improveNight(initial, seed, n) {
     }
     return best;
 }
-export function planBalancedNight({ players, courts = [], matches = [], roundCount = 7, beamWidth = 128 }) {
+export function planBalancedNight({ players, courts = [], matches = [], roundCount = 7, beamWidth = 128, forcedByePlayerIds = [] }) {
     const n = players.length;
     if (![8, 9, 10].includes(n) || new Set(players.map(p => String(p.id))).size !== n)
         throw Error('Night balancing requires eight, nine or ten distinct players.');
+    const forcedByes = new Set(forcedByePlayerIds.map(String));
+    if (forcedByePlayerIds.length && (![9, 10].includes(n) || forcedByePlayerIds.length !== n - 8
+        || forcedByes.size !== n - 8 || players.filter(p => forcedByes.has(String(p.id))).length !== n - 8))
+        throw Error('Choose one distinct joined player for a nine-player bye, or two for a ten-player bye.');
     const { state, roundNumber } = nightlyHistory(players, matches);
     if (!Number.isInteger(roundCount) || roundCount < 1 || roundCount > 9)
         throw Error('Choose between one and nine rounds for this two-court planner.');
+    const matchesForcedByes = byePlayers => byePlayers.length === forcedByes.size
+        && byePlayers.every(p => forcedByes.has(String(p.id)));
+    const freshPlan = roster => {
+        try { return planBalancedNight({ players: roster, courts, roundCount, beamWidth }); }
+        catch (error) { if (error.code !== 'NIGHT_SEARCH_LIMIT') throw error; return null; }
+    };
+    const rotatedNinePlan = (targetId, reference) => {
+        if (n !== 9 || !reference || !targetId) return null;
+        const firstByeIndex = players.findIndex(p => String(p.id) === String(reference.rounds[0].byes[0]?.id));
+        const targetIndex = players.findIndex(p => String(p.id) === String(targetId));
+        if (firstByeIndex < 0 || targetIndex < 0) return null;
+        const offset = (targetIndex - firstByeIndex + n) % n;
+        return offset ? freshPlan([...players.slice(offset), ...players.slice(0, offset)]) : null;
+    };
+    if (forcedByes.size && !matches.length) {
+        const fresh = freshPlan(players);
+        if (fresh && matchesForcedByes(fresh.rounds[0].byes)) return fresh;
+        const rotated = rotatedNinePlan([...forcedByes][0], fresh);
+        if (rotated && matchesForcedByes(rotated.rounds[0].byes)) return rotated;
+    }
     if (matches.length && roundNumber < roundCount) {
-        let fresh = null;
-        try { fresh = planBalancedNight({ players, courts, roundCount, beamWidth }); }
-        catch (error) { if (error.code !== 'NIGHT_SEARCH_LIMIT') throw error; }
+        const fresh = freshPlan(players);
         const unique = new Map();
         for (const m of matches)
             unique.set(`${m.round_number ?? m.roundNumber}:${m.court_number ?? m.courtNumber}`, m);
         const signature = teams => teams.map(t => list(t).sort().join(':')).sort().join('|');
-        const verified = fresh && unique.size === roundNumber * 2 && fresh.rounds.slice(0, roundNumber).every(r => r.courts.every((c, i) => {
+        const verified = plan => plan && unique.size === roundNumber * 2 && plan.rounds.slice(0, roundNumber).every(r => r.courts.every((c, i) => {
             const m = unique.get(`${r.roundNumber}:${c.courtNumber}`);
             return m && m.status !== 'not_played' && signature([m.team1_players ?? m.team1, m.team2_players ?? m.team2]) === signature([c.team1, c.team2])
                 && list(m.bye_players ?? m.byes).sort().join(':') === list(i === 0 ? r.byes : []).sort().join(':');
         }));
-        if (verified)
-            return { ...fresh, rounds: fresh.rounds.slice(roundNumber), quality: { ...fresh.quality, basis: 'verified saved-game prefix' } };
+        const firstSavedBye = matches.filter(m => Number(m.round_number ?? m.roundNumber) === 1)
+            .flatMap(m => list(m.bye_players ?? m.byes))[0];
+        for (const plan of [fresh, rotatedNinePlan(firstSavedBye, fresh)])
+            if (verified(plan) && (!forcedByes.size || matchesForcedByes(plan.rounds[roundNumber].byes)))
+                return { ...plan, rounds: plan.rounds.slice(roundNumber), quality: { ...plan.quality, basis: 'verified saved-game prefix' } };
     }
     const remaining = Math.max(1, Math.trunc(roundCount) - roundNumber);
     if (remaining > 9)
@@ -210,9 +241,12 @@ export function planBalancedNight({ players, courts = [], matches = [], roundCou
             const local = [];
             const byeThreshold = [...current.byes].sort((a, b) => a - b)[n - 8 - 1];
             for (const c of choices) {
+                if (step === 0 && forcedByes.size && (c.byes.length !== forcedByes.size
+                    || c.byes.some(i => !forcedByes.has(String(players[i].id)))))
+                    continue;
                 if (c.pairs.some(p => current.partners[p] > 0))
                     continue;
-                if (c.byes.some(i => current.byes[i] > byeThreshold))
+                if (!(step === 0 && forcedByes.size) && c.byes.some(i => current.byes[i] > byeThreshold))
                     continue;
                 const rank = score(current, c);
                 if (local.length >= 32 && compare(rank, local[local.length - 1].rank) >= 0)
@@ -262,8 +296,8 @@ export function planBalancedNight({ players, courts = [], matches = [], roundCou
                 chosen = { ...candidate, path, courts: counts };
             }
         }
-    chosen = improveNight(state, chosen, n);
-    if (!matches.length && remaining <= n - 1 + (n % 2)) {
+    chosen = improveNight(state, chosen, n, forcedByes.size > 0);
+    if (!matches.length && !forcedByes.size && remaining <= n - 1 + (n % 2)) {
         // Independent round-robin factorization supplies a second, structurally
         // different unique-partner seed; it is optimized by the same history score.
         const ring = Array.from({ length: n + (n % 2) }, (_, i) => i), seed = [];

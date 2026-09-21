@@ -1844,14 +1844,31 @@ async function generateNextGame(supabase, group, body) {
   }
 
   const historyMatches = await loadLadderSeasonHistoryMatches(supabase, group, session);
+  const sessionCourts = resolveSessionCourts(session, courtsResult.data || []);
+  const useManualNightByes = [9, 10].includes(joinedSessionPlayers.length)
+    && selectedSessionPlayers.length === 8
+    && manualByePlayers.length === joinedSessionPlayers.length - 8
+    && Number(session.court_count || 0) !== 1
+    && sessionCourts.length !== 1
+    && historyMatches.length === 0;
+  const planningPlayers = useManualNightByes
+    ? joinedSessionPlayers.map((player) => ({
+        id: player.player_id,
+        displayName: player.display_name,
+        firstLabel: roundRobinPlayerLabel(player.display_name),
+        phone: player.phone || "",
+        email: player.email || "",
+      }))
+    : joinedPlayers;
 
   const nextRound = createNextRoundRobinRound({
-    players: joinedPlayers,
-    courts: resolveSessionCourts(session, courtsResult.data || []),
+    players: planningPlayers,
+    courts: sessionCourts,
     existingMatches,
     historyMatches,
     plannedRoundCount: Number(session.settings?.plannedRounds || group.settings?.defaultRounds || 6),
     courtCount: Number(session.court_count || 0) || undefined,
+    forcedByePlayerIds: useManualNightByes ? manualByePlayers.map((player) => player.id) : [],
   });
 
   const matchPayload = nextRound.courts.map((court, courtIndex) => ({
@@ -1861,7 +1878,7 @@ async function generateNextGame(supabase, group, body) {
     court_name: court.courtName,
     team1_players: court.team1.map(publicPlayerPayload),
     team2_players: court.team2.map(publicPlayerPayload),
-    bye_players: courtIndex === 0 ? [...nextRound.byes, ...manualByePlayers].map(publicPlayerPayload) : [],
+    bye_players: courtIndex === 0 ? (useManualNightByes ? nextRound.byes : [...nextRound.byes, ...manualByePlayers]).map(publicPlayerPayload) : [],
     status: "scheduled",
   }));
 
