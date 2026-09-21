@@ -3,12 +3,12 @@ import { createNextRoundRobinRound, createRoundRobinSchedule } from "../app/lib/
 
 const courts = [{ name: "Court 1" }, { name: "Court 2" }];
 
-for (const playerCount of [8, 9]) for (const roundCount of [6, 7]) {
+for (const playerCount of [8, 9, 10]) for (const roundCount of [6, 7]) {
   verifySchedule(`pre-generated ${playerCount}-player ${roundCount}-game schedule`, createBatchSchedule(playerCount, roundCount), playerCount, roundCount);
   verifySchedule(`game-by-game ${playerCount}-player ${roundCount}-game schedule`, createSequentialSchedule(playerCount, roundCount), playerCount, roundCount);
 }
 
-console.log("Round-robin balance verification passed for 8- and 9-player, 2-court schedules.");
+console.log("Round-robin balance verification passed for 8-, 9- and 10-player, 2-court schedules.");
 
 function createPlayers(playerCount) {
   return Array.from({ length: playerCount }, (_, index) => ({
@@ -103,12 +103,12 @@ function verifySchedule(label, matches, playerCount, roundCount) {
   assert.equal(maxPairCount(partnerCounts), 1, `${label}: a partner pairing repeated`);
   // Opponent repetition is subordinate to the owner-approved court/group spacing priorities.
   console.log(label, {maxOpponents: maxPairCount(opponentCounts), maxCoCourt: maxPairCount(sharedCourtCounts), courtCounts});
-  assert.ok(maxPairCount(sharedCourtCounts) <= (playerCount === 9 || roundCount === 6 ? 4 : 5), `${label}: two players shared a court too often`);
+  assert.ok(maxPairCount(sharedCourtCounts) <= (playerCount >= 9 || roundCount === 6 ? 4 : 5), `${label}: two players shared a court too often`);
   assert.ok(
     Math.max(...courtCounts.map(([firstCourt, secondCourt]) => Math.abs(firstCourt - secondCourt))) <= 1,
     `${label}: court assignments are not balanced`
   );
-  assert.ok(Math.max(...byeCounts) <= 1, `${label}: a player received more than one bye`);
+  assert.ok(Math.max(...byeCounts) - Math.min(...byeCounts) <= 1, `${label}: byes are not balanced`);
 }
 
 function createMatrix(size) {

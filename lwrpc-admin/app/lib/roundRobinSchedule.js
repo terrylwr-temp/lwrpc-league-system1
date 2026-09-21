@@ -65,7 +65,7 @@ export function createRoundRobinSchedule({
     throw new Error("At least 1 court is required.");
   }
 
-  if (nightBalancing && resolvedCourtCount === 2 && [8, 9].includes(totalPlayers)) {
+  if (nightBalancing && resolvedCourtCount === 2 && [8, 9, 10].includes(totalPlayers)) {
     const ordered = shuffle ? shuffleArray([...activePlayers]) : [...activePlayers];
     const plan = planBalancedNight({players: ordered, courts, roundCount: roundsToPlay});
     return {players: activePlayers, courtCount: 2, roundCount: roundsToPlay, rounds: plan.rounds, quality: plan.quality};
@@ -174,7 +174,7 @@ export function createNextRoundRobinRound({
     throw new Error("Confirm at least 4 players before generating a game.");
   }
 
-  if (resolvedCourtCount === 2 && [8, 9].includes(totalPlayers) && historyMatches.length === 0) {
+  if (resolvedCourtCount === 2 && [8, 9, 10].includes(totalPlayers) && historyMatches.length === 0) {
     const lastRound = Math.max(0, ...existingMatches.map(m => Number(m.round_number || m.roundNumber || 0)));
     const plan = planBalancedNight({players: activePlayers, courts, matches: existingMatches,
       roundCount: Math.max(lastRound + 1, Math.min(9, Number(plannedRoundCount) || 6))});

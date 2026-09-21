@@ -45,13 +45,13 @@ function audit(rounds, n) {
     assert.ok(Math.max(...byes) - Math.min(...byes) <= 1, 'fair byes');
     return { counts, byes, maxCoCourt: Math.max(...pairs.values()) };
 }
-for (const n of [8, 9])
+for (const n of [8, 9, 10])
     for (const roundCount of [6, 7])
         test(`${n} players / ${roundCount} games: whole-night and saved-prefix next-game balance`, () => {
             const roster = players(n), before = structuredClone(roster);
             const plan = createRoundRobinSchedule({ players: roster, courts, roundCount, shuffle: false });
             const metrics = audit(plan.rounds, n);
-            assert.ok(metrics.maxCoCourt <= (n === 9 || roundCount === 6 ? 4 : 5), 'bounded pair co-presence, not impossible half-night claim');
+            assert.ok(metrics.maxCoCourt <= (n >= 9 || roundCount === 6 ? 4 : 5), 'bounded pair co-presence, not impossible half-night claim');
             assert.deepEqual(roster, before);
             // Replay from a mid-night saved prefix; do not rely on object identity or scores.
             const existingMatches = plan.rounds.slice(0, 3).flatMap(rows), original = structuredClone(existingMatches);
@@ -95,6 +95,21 @@ test('edited history reserves partners and same-night input is never mutated', (
     for (const c of next.courts)
         for (const team of [c.team1, c.team2])
             assert.ok(!['0:7', '1:6'].includes(team.map(p => p.id).sort().join(':')));
+    assert.deepEqual(existing, before);
+});
+test('ten-player edited history keeps two byes and does not reuse saved partners', () => {
+    const p = players(10), existing = [
+        { id: 'manual-1', round_number: 1, court_number: 1, team1: [p[0], p[9]], team2: [p[1], p[8]], byes: [p[4], p[5]] },
+        { id: 'manual-2', round_number: 1, court_number: 2, team1: [p[2], p[7]], team2: [p[3], p[6]] },
+    ];
+    const before = structuredClone(existing);
+    const next = createNextRoundRobinRound({ players: p, courts, existingMatches: existing, plannedRoundCount: 6 });
+    assert.equal(next.roundNumber, 2);
+    assert.equal(next.byes.length, 2);
+    assert.equal(new Set([...next.courts.flatMap(c => [...c.team1, ...c.team2]), ...next.byes].map(p => p.id)).size, 10);
+    for (const court of next.courts)
+        for (const team of [court.team1, court.team2])
+            assert.ok(!['0:9', '1:8', '2:7', '3:6'].includes(team.map(p => p.id).sort().join(':')));
     assert.deepEqual(existing, before);
 });
 test('exhausted partners stop generation instead of silently repeating', () => {

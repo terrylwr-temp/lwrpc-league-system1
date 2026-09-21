@@ -1,4 +1,4 @@
-// Bounded whole-night planner for two-court, eight/nine-player round robins.
+// Bounded whole-night planner for two-court, eight-to-ten-player round robins.
 // Saved games are immutable; only a continuation is searched. No database access.
 const pairings = ([a, b, c, d]) => [[a, b, c, d], [a, c, b, d], [a, d, b, c]];
 const bit = i => 1 << i;
@@ -18,8 +18,11 @@ function candidates(n) {
     if (cache.has(n))
         return cache.get(n);
     const result = [];
-    for (const bye of n === 9 ? Array.from({ length: n }, (_, i) => i) : [-1]) {
-        const pool = Array.from({ length: n }, (_, i) => i).filter(i => i !== bye);
+    const byeChoices = n === 10
+        ? Array.from({ length: n }, (_, i) => Array.from({ length: n - i - 1 }, (_, j) => [i, i + j + 1])).flat()
+        : n === 9 ? Array.from({ length: n }, (_, i) => [i]) : [[]];
+    for (const byes of byeChoices) {
+        const pool = Array.from({ length: n }, (_, i) => i).filter(i => !byes.includes(i));
         for (let a = 1; a < 6; a++)
             for (let b = a + 1; b < 7; b++)
                 for (let c = b + 1; c < 8; c++) {
@@ -29,7 +32,7 @@ function candidates(n) {
                             for (const groups of [[left, right]]) {
                                 const masks = groups.map(g => g.reduce((m, i) => m | bit(i), 0));
                                 const pairs = groups.flatMap(([a, b, c, d]) => [Math.min(a, b) * n + Math.max(a, b), Math.min(c, d) * n + Math.max(c, d)]);
-                                result.push({ groups, masks, pairs, bye });
+                                result.push({ groups, masks, pairs, byes });
                             }
                 }
     }
@@ -105,14 +108,14 @@ function score(state, c) {
             exposureMax = Math.max(exposureMax, count);
             exposureSum += count * count;
         }
-    const byeCounts = state.byes.map((v, i) => v + Number(c.bye === i));
+    const byeCounts = state.byes.map((v, i) => v + Number(c.byes.includes(i)));
     // Longer group streaks are especially undesirable; odd appearance totals allow 3/2 or 4/3.
     return [Math.max(...byeCounts) - Math.min(...byeCounts), quad, triple, streak, adjacent, exposureMax, exposureSum];
 }
 function advance(state, c) {
     const next = { ...state, partners: [...state.partners], courts: [...state.courts], byes: [...state.byes], last: [...state.last], previous: [...state.previous], groups: new Map(state.groups), path: [...state.path, c] };
-    if (c.bye >= 0)
-        next.byes[c.bye]++;
+    for (const bye of c.byes)
+        next.byes[bye]++;
     c.pairs.forEach(p => next.partners[p]++);
     for (let court = 0; court < 2; court++) {
         const mask = c.masks[court];
@@ -175,8 +178,8 @@ function improveNight(initial, seed, n) {
 }
 export function planBalancedNight({ players, courts = [], matches = [], roundCount = 7, beamWidth = 128 }) {
     const n = players.length;
-    if (![8, 9].includes(n) || new Set(players.map(p => String(p.id))).size !== n)
-        throw Error('Night balancing requires eight or nine distinct players.');
+    if (![8, 9, 10].includes(n) || new Set(players.map(p => String(p.id))).size !== n)
+        throw Error('Night balancing requires eight, nine or ten distinct players.');
     const { state, roundNumber } = nightlyHistory(players, matches);
     if (!Number.isInteger(roundCount) || roundCount < 1 || roundCount > 9)
         throw Error('Choose between one and nine rounds for this two-court planner.');
@@ -205,10 +208,11 @@ export function planBalancedNight({ players, courts = [], matches = [], roundCou
         const ranked = [];
         for (const current of beam) {
             const local = [];
+            const byeThreshold = [...current.byes].sort((a, b) => a - b)[n - 8 - 1];
             for (const c of choices) {
                 if (c.pairs.some(p => current.partners[p] > 0))
                     continue;
-                if (c.bye >= 0 && current.byes[c.bye] > Math.min(...current.byes))
+                if (c.byes.some(i => current.byes[i] > byeThreshold))
                     continue;
                 const rank = score(current, c);
                 if (local.length >= 32 && compare(rank, local[local.length - 1].rank) >= 0)
@@ -265,20 +269,24 @@ export function planBalancedNight({ players, courts = [], matches = [], roundCou
         const ring = Array.from({ length: n + (n % 2) }, (_, i) => i), seed = [];
         for (let r = 0; r < remaining; r++) {
             const teams = [];
-            let bye = -1;
+            const byes = [];
             for (let i = 0; i < ring.length / 2; i++) {
                 const a = ring[i], b = ring[ring.length - 1 - i];
                 if (a === n || b === n)
-                    bye = a === n ? b : a;
+                    byes.push(a === n ? b : a);
                 else
                     teams.push([a, b]);
             }
+            if (n === 10)
+                byes.push(...teams.pop());
             const groups = [[...teams[0], ...teams[1]], [...teams[2], ...teams[3]]];
-            seed.push({ groups, masks: groups.map(g => g.reduce((m, i) => m | bit(i), 0)), pairs: teams.map(([a, b]) => Math.min(a, b) * n + Math.max(a, b)), bye });
+            seed.push({ groups, masks: groups.map(g => g.reduce((m, i) => m | bit(i), 0)), pairs: teams.map(([a, b]) => Math.min(a, b) * n + Math.max(a, b)), byes });
             ring.splice(1, 0, ring.pop());
         }
         const alternative = improveNight(state, seed.reduce((s, c) => advance(s, c), state), n);
-        if (compare(nightRank(alternative, n), nightRank(chosen, n)) < 0)
+        const byeSpread = counts => Math.max(...counts) - Math.min(...counts);
+        if (byeSpread(alternative.byes) <= byeSpread(chosen.byes)
+            && compare(nightRank(alternative, n), nightRank(chosen, n)) < 0)
             chosen = alternative;
     }
     if (!matches.length && n === 8 && remaining <= 7) {
@@ -286,12 +294,12 @@ export function planBalancedNight({ players, courts = [], matches = [], roundCou
         for (let d = 1; d <= remaining; d++) {
             const teams = Array.from({ length: 8 }, (_, i) => [i, i ^ d]).filter(([a, b]) => a < b);
             const groups = [[...teams[0], ...teams[1]], [...teams[2], ...teams[3]]];
-            seed.push({ groups, masks: groups.map(g => g.reduce((m, i) => m | bit(i), 0)), pairs: teams.map(([a, b]) => a * n + b), bye: -1 });
+            seed.push({ groups, masks: groups.map(g => g.reduce((m, i) => m | bit(i), 0)), pairs: teams.map(([a, b]) => a * n + b), byes: [] });
         }
         const alternative = improveNight(state, seed.reduce((s, c) => advance(s, c), state), n);
         if (compare(nightRank(alternative, n), nightRank(chosen, n)) < 0)
             chosen = alternative;
     }
     quality = nightRank(chosen, n);
-    return { rounds: chosen.path.map((c, i) => ({ roundNumber: roundNumber + i + 1, courtCount: 2, courts: c.groups.map((g, j) => ({ courtNumber: j + 1, courtName: courts[j]?.name || `Court ${j + 1}`, courtDescription: courts[j]?.description || courts[j]?.desc || '', team1: g.slice(0, 2).map(k => players[k]), team2: g.slice(2).map(k => players[k]) })), byes: c.bye < 0 ? [] : [players[c.bye]] })), quality: { uniquePartners: true, search: 'bounded', summary: `New assignments do not repeat a partner. ${quality[2] === 0 ? 'Planned court use differs by at most one game per player.' : 'The best continuation found still has uneven court use.'} ${quality[1] === 0 ? 'No consecutive groups of three or four in the planned continuation.' : 'Some consecutive groups of three or four remain in the best continuation found.'} Some repeated same-court pairs may remain.`, score: quality, courtCounts: players.map((p, i) => ({ playerId: p.id, counts: chosen.courts.slice(i * 2, i * 2 + 2) })), consecutiveGroupOfFourPlayerExposures: chosen.quad, consecutiveGroupOfThreePlayerExposures: chosen.triple, threeAppearancePairPlayerExposures: chosen.streak, maxSharedCourtGames: quality[6] } };
+    return { rounds: chosen.path.map((c, i) => ({ roundNumber: roundNumber + i + 1, courtCount: 2, courts: c.groups.map((g, j) => ({ courtNumber: j + 1, courtName: courts[j]?.name || `Court ${j + 1}`, courtDescription: courts[j]?.description || courts[j]?.desc || '', team1: g.slice(0, 2).map(k => players[k]), team2: g.slice(2).map(k => players[k]) })), byes: c.byes.map(k => players[k]) })), quality: { uniquePartners: true, search: 'bounded', summary: `New assignments do not repeat a partner. ${quality[2] === 0 ? 'Planned court use differs by at most one game per player.' : 'The best continuation found still has uneven court use.'} ${quality[1] === 0 ? 'No consecutive groups of three or four in the planned continuation.' : 'Some consecutive groups of three or four remain in the best continuation found.'} Some repeated same-court pairs may remain.`, score: quality, courtCounts: players.map((p, i) => ({ playerId: p.id, counts: chosen.courts.slice(i * 2, i * 2 + 2) })), consecutiveGroupOfFourPlayerExposures: chosen.quad, consecutiveGroupOfThreePlayerExposures: chosen.triple, threeAppearancePairPlayerExposures: chosen.streak, maxSharedCourtGames: quality[6] } };
 }
