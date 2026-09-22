@@ -9,6 +9,7 @@ import { formatDisplayDate, formatDisplayTime, formatDisplayTimestamp } from "..
 import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { appConfirm } from "../lib/appDialog";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
+import { copyScheduleSettingPayload, scheduleSettingMatches } from "../lib/scheduleSettingsCopy";
 import {
   buildSpecialRequestPayload,
   filterAndSortSpecialRequests,
@@ -23,6 +24,7 @@ export default function SchedulingPage() {
   const [activeSection, setActiveSection] = useState("settings");
   const [matches, setMatches] = useState([]);
   const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
+  const [copyingSettingId, setCopyingSettingId] = useState(null);
 
   const [leagues, setLeagues] = useState([]);
   const [divisions, setDivisions] = useState([]);
@@ -533,6 +535,24 @@ export default function SchedulingPage() {
     );
   }
 
+  async function copySetting(setting) {
+    if (!setting.league_id || !setting.division_id) {
+      alert("This schedule setting must have a league and division before it can be copied.");
+      return;
+    }
+
+    setCopyingSettingId(setting.id);
+    try {
+      const { error } = await supabase
+        .from("league_schedule_settings")
+        .insert(copyScheduleSettingPayload(setting, settings));
+      if (error) return alert(error.message);
+      await loadData();
+    } finally {
+      setCopyingSettingId(null);
+    }
+  }
+
   async function deleteSetting(settingId) {
     if (!await confirmDeleteActionAsync({
       title: "Delete this schedule setting?",
@@ -1002,6 +1022,7 @@ export default function SchedulingPage() {
               byeRows.push({
                 league_id: setting.league_id,
                 division_id: setting.division_id,
+                schedule_setting_id: setting.id,
                 team_id: realTeamId,
                 week_number: roundIndex + 1,
                 bye_date: matchDate,
@@ -1046,6 +1067,7 @@ export default function SchedulingPage() {
           rowsToInsert.push({
             league_id: setting.league_id,
             division_id: setting.division_id,
+            schedule_setting_id: setting.id,
             home_team_id: finalHomeTeamId,
             away_team_id: finalAwayTeamId,
             location_id: finalLocationId,
@@ -1115,8 +1137,10 @@ export default function SchedulingPage() {
     }
 
     const continueToMatchCount = await appConfirm({
-      title: `Delete all scheduled matches for ${setting.name || "Unnamed Schedule"}?`,
-      message: "This will first find the generated matches in this league/division/season window. You will then see the match count and type DELETE once to permanently remove the matches, match lines, game score rows, and related bye rows.",
+      title: `Delete scheduled matches for ${setting.name || "Unnamed Schedule"}?`,
+      message: setting.is_copy
+        ? "This will find only matches generated from this copied setting. You will then see the match count and type DELETE once to permanently remove those matches, match lines, game score rows, and related bye rows."
+        : "This will first find the generated matches in this league/division/season window. You will then see the match count and type DELETE once to permanently remove the matches, match lines, game score rows, and related bye rows.",
       confirmLabel: "Continue",
       cancelLabel: "Keep schedule",
       defaultAction: "cancel",
@@ -1126,7 +1150,7 @@ export default function SchedulingPage() {
 
     let query = supabase
       .from("matches")
-      .select("id")
+      .select("id, league_id, division_id, scheduled_date, schedule_setting_id")
       .eq("league_id", setting.league_id)
       .eq("division_id", setting.division_id);
 
@@ -1136,7 +1160,7 @@ export default function SchedulingPage() {
     const { data: matchesToDelete, error: findError } = await query;
     if (findError) return alert(findError.message);
 
-    const matchIds = (matchesToDelete || []).map((match) => match.id);
+    const matchIds = scheduleSettingMatches(setting, matchesToDelete || []).map((match) => match.id);
     if (matchIds.length === 0) return alert("No matches found for this league/division/season.");
 
     if (!await confirmDeleteActionAsync({
@@ -1164,25 +1188,23 @@ export default function SchedulingPage() {
     const { error: matchError } = await supabase.from("matches").delete().in("id", matchIds);
     if (matchError) return alert(matchError.message);
 
-    await supabase
+    let byeQuery = supabase
       .from("team_byes")
       .delete()
       .eq("league_id", setting.league_id)
       .eq("division_id", setting.division_id);
+    byeQuery = setting.is_copy
+      ? byeQuery.eq("schedule_setting_id", setting.id)
+      : byeQuery.or(`schedule_setting_id.is.null,schedule_setting_id.eq.${setting.id}`);
+    const { error: byeError } = await byeQuery;
+    if (byeError) return alert(byeError.message);
 
     await loadData();
     alert(`Deleted ${matchIds.length} match(es).`);
   }
 
   function scheduleGenerationSummary(setting) {
-    const settingMatches = matches.filter((match) => {
-      const sameLeague = match.league_id === setting.league_id;
-      const sameDivision = match.division_id === setting.division_id;
-      const inStart = !setting.season_start_date || match.scheduled_date >= setting.season_start_date;
-      const inEnd = !setting.season_end_date || match.scheduled_date <= setting.season_end_date;
-
-      return sameLeague && sameDivision && inStart && inEnd;
-    });
+    const settingMatches = scheduleSettingMatches(setting, matches);
 
     if (settingMatches.length === 0) return "Not generated";
 
@@ -1674,9 +1696,10 @@ export default function SchedulingPage() {
                                 {setting.notes && <NoteBox>{setting.notes}</NoteBox>}
                                 <div className="mt-4 flex flex-wrap gap-2">
                                   <SmallButton onClick={() => editSetting(setting)}>Edit</SmallButton>
+                                  <SmallButton disabled={copyingSettingId !== null} onClick={() => copySetting(setting)}>{copyingSettingId === setting.id ? "Copying..." : "Copy Setting"}</SmallButton>
                                   <SmallButton color="lightRed" onClick={() => deleteSetting(setting.id)}>Delete Setting</SmallButton>
                                   <SmallButton color="green" disabled={isGeneratingSchedule} onClick={() => generateSchedule(setting)}>{isGeneratingSchedule ? "Generating..." : "Generate Schedule"}</SmallButton>
-                                  <SmallButton color="red" onClick={() => deleteGeneratedSchedule(setting)}>Delete Schedule</SmallButton>
+                                  <SmallButton color="red" disabled={setting.is_copy && generationSummary === "Not generated"} onClick={() => deleteGeneratedSchedule(setting)}>Delete Schedule</SmallButton>
                                 </div>
                               </RecordCard>
                             );
