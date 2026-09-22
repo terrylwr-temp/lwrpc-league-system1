@@ -2668,7 +2668,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
         <div className={`shrink-0 p-3 sm:p-4 ${MODAL_HEADER_CHROME}`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Start Match</div>
+            <div className={MODAL_EYEBROW_CHROME}>{initialMode ? "Start Match" : "Create Next Round"}</div>
             <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
             <div className={MODAL_SUPPORTING_TEXT}>
               {checkedCount} checked players{!initialMode && selectedByeCount > 0 ? ` - ${selectedByeCount} selected bye${selectedByeCount === 1 ? "" : "s"}` : ""}{initialMode ? ` - ${courtLabel}` : ""} - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
@@ -2846,7 +2846,9 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
         </div>
         <div className="sticky bottom-0 z-10 mt-auto shrink-0 border-t border-slate-200 bg-white p-3 shadow-[0_-16px_36px_-28px_rgba(15,23,42,0.9)] sm:p-4">
           <button type="button" onClick={onStart} disabled={busy || checkedCount < 4} className="w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
-            {busy ? "Starting..." : initialMode ? "Start and Generate First Game" : "Start Match"}
+            {busy
+              ? initialMode ? "Starting..." : "Creating Next Round..."
+              : initialMode ? "Start and Generate First Game" : "Create Next Round"}
           </button>
         </div>
       </div>
