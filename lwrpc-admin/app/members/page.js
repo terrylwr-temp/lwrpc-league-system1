@@ -2433,9 +2433,18 @@ function CopyEmailButton({ email }) {
       onClick={copyEmail}
       aria-label={`Copy email ${email}`}
       title={copied ? "Copied" : "Copy Email"}
-      className="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
     >
-      {copied ? "Copied" : "Copy Email"}
+      {copied ? (
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+      ) : (
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="8" y="8" width="11" height="11" rx="2" />
+          <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+        </svg>
+      )}
     </button>
   );
 }

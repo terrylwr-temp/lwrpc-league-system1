@@ -38,3 +38,24 @@ test('0757 Member Administration uses Eastern short time and both desktop/mobile
   assert.match(page, /formatDisplayTimestampShort\(/);
   assert.doesNotMatch(page, /formatDisplayTimestamp\(/);
 });
+
+test('Member Administration copy control stays compact and icon-only in both states', async () => {
+  const page = await readFile(new URL('../app/members/page.js', import.meta.url), 'utf8');
+  const component = page.slice(
+    page.indexOf('function CopyEmailButton('),
+    page.indexOf('\nfunction readMemberDirectoryViewState(')
+  );
+
+  assert.ok(component.startsWith('function CopyEmailButton('));
+  assert.ok(component.includes('if (await copyMemberEmail(event, email)) setCopied(true)'));
+  assert.ok(component.includes('window.setTimeout(() => setCopied(false), 2000)'));
+  assert.ok(component.includes('aria-label={`Copy email ${email}`}'));
+  assert.ok(component.includes('title={copied ? "Copied" : "Copy Email"}'));
+  assert.match(component, /className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-blue-700 hover:bg-blue-100/);
+  assert.equal((component.match(/<svg aria-hidden="true"/g) || []).length, 2);
+  assert.match(component, /<rect x="8" y="8" width="11" height="11" rx="2" \/>/);
+  assert.match(component, /<path d="m5 12 4 4L19 6" \/>/);
+  const buttonContent = component.split('    >\n')[1]?.split('    </button>')[0];
+  assert.ok(buttonContent);
+  assert.doesNotMatch(buttonContent, /"Copied"|"Copy Email"/);
+});

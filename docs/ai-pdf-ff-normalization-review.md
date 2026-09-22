@@ -1,6 +1,6 @@
 # Stage 2.2 PDF `ff` glyph normalization review
 
-**Status: all affected active PDFs corrected; application release pending.** On 2026-09-20 automatic approval review rejected the first attempted production Rules reprocess before the command started. The stated reason was that normal reprocessing creates a persistent Supabase version and sends the complete extracted official Rules text to OpenAI's embeddings API; the authorization did not explicitly identify that payload and destination. The owner then explicitly authorized that full Rules payload, OpenAI destination, and persistent version creation. The owner separately authorized the same payload, destination, and inactive-version workflow for the Captains Guide and Important Dates. Each reprocess succeeded through the controlled processing function. No business-data write resulted from the rejected attempt or the three reprocesses.
+**Predeployment review complete; [LMS-0750 was subsequently production accepted](lms-0750-production-acceptance.md).** On 2026-09-20 automatic approval review rejected the first attempted production Rules reprocess before the command started. The stated reason was that normal reprocessing creates a persistent Supabase version and sends the complete extracted official Rules text to OpenAI's embeddings API; the authorization did not explicitly identify that payload and destination. The owner then explicitly authorized that full Rules payload, OpenAI destination, and persistent version creation. The owner separately authorized the same payload, destination, and inactive-version workflow for the Captains Guide and Important Dates. Each reprocess succeeded through the controlled processing function. No business-data write resulted from the rejected attempt or the three reprocesses.
 
 ## Corpus and source audit
 
@@ -57,6 +57,6 @@ With all three documents active, a fresh [retrieval trace](../.local-validation/
 
 The final full suite passed **1,409/1,409**, focused PDF tests **11/11**, lint **0 errors/11 existing warnings**, and production build passed. Logs are in `.local-validation/ai-pdf-glyph-final-{tests,pdf-tests,lint,build}.txt`.
 
-## Remaining release gates
+## Predeployment release gates (subsequently completed)
 
 Complete the prior controlled application deployment and production acceptance gates. The currently aliased READY production deployment is `dpl_EP8usAGHkKhqmCMBLkTVbdi6pb1B` from GitHub main commit `dfec4e81b947ce8f4d368e7d030d6607cbc4b41f`; it is the rollback target for this release. The older `dpl_Dr68zt62cthVFL5HHb5diAwKE12B` recorded in the LMS-0749 acceptance report was superseded by the subsequent commit `dfec4e8` before this review. Stop before deployment for any new unexplained corpus change. No application commit, version bump, or deployment had occurred as of this review.

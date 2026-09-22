@@ -1,5 +1,7 @@
 # PBCC ten players on two courts — local review
 
+**Subsequently deployed and [production accepted](pbcc-ten-player-two-court-production-acceptance.md) as LMS-0751 / 0.1.574.** The local results below remain the release's synthetic scheduling evidence; no live match generation was used for acceptance.
+
 2026-09-20. Local synthetic schedules only. No production PBCC session, match, score, roster, notification, configuration or database row was changed. This is a scheduling change outside FAST FIX deployment authorization.
 
 ## Existing behavior and requirements
