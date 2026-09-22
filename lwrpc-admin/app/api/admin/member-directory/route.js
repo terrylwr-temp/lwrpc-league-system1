@@ -34,15 +34,16 @@ export async function GET(req) {
     );
     const sortKey = allowedSortKey(url.searchParams.get("sort"));
     const sortDirection = url.searchParams.get("direction") === "desc" ? "desc" : "asc";
+    const includeInactive = mode === "roles" || url.searchParams.get("includeInactive") === "true";
+    const duplicateDuprOnly = mode === "members" && url.searchParams.get("duplicateDuprOnly") === "true";
+    const currentRosterOnly = mode === "members" && !duplicateDuprOnly && url.searchParams.get("currentRosterOnly") === "true";
     const { data, error } = await authorization.supabase.rpc(
       "admin_member_directory_page",
       {
         p_search: url.searchParams.get("search") || "",
-        p_include_inactive:
-          mode === "roles" || url.searchParams.get("includeInactive") === "true",
-        p_current_roster_only:
-          mode === "members" &&
-          url.searchParams.get("currentRosterOnly") === "true",
+        p_include_inactive: includeInactive || duplicateDuprOnly,
+        p_current_roster_only: currentRosterOnly,
+        p_duplicate_dupr_only: duplicateDuprOnly,
         p_sort_key: sortKey === "last_login" ? "member" : sortKey,
         p_sort_direction: sortDirection,
         p_offset: (page - 1) * pageSize,
@@ -67,8 +68,9 @@ export async function GET(req) {
             "admin_member_directory_page",
             {
               p_search: url.searchParams.get("search") || "",
-              p_include_inactive: true,
-              p_current_roster_only: false,
+              p_include_inactive: includeInactive || duplicateDuprOnly,
+              p_current_roster_only: currentRosterOnly,
+              p_duplicate_dupr_only: duplicateDuprOnly,
               p_sort_key: "member",
               p_sort_direction: "asc",
               p_offset: offset,

@@ -132,7 +132,7 @@ export default function RatingsPage() {
 
     setMembers(memberData || []);
     const activeRosterRows = (rosterRows || []).filter(
-      (row) => row.teams?.is_active !== false
+      (row) => row.is_active !== false && row.teams?.is_active !== false
     );
     setCurrentRosterMemberIds(new Set(activeRosterRows.map((row) => String(row.member_id))));
     setTeamRatingRangesByMemberId(
@@ -2098,6 +2098,7 @@ async function loadAllRatingRosterRows() {
       .from("team_members")
       .select(`
         member_id,
+        is_active,
         teams (
           id,
           is_active,

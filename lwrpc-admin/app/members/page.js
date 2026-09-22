@@ -15,7 +15,8 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } fr
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { appConfirm } from "../lib/appDialog";
 import { filterHistoryRows, sortHistoryRows } from "../lib/playHistory";
-import { formatDisplayTimestamp } from "../lib/dateTime";
+import { formatDisplayTimestampShort } from "../lib/dateTime";
+import { copyMemberEmail } from "../lib/memberEmailClipboard";
 import {
   buildMemberLocationReviewRows,
   buildSafeMemberLocationTextUpdates,
@@ -52,6 +53,7 @@ export default function MembersPage() {
   const [sortConfig, setSortConfig] = useState(directoryViewState.sortConfig);
   const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(directoryViewState.showCurrentRosterOnly);
   const [includeInactiveMembers, setIncludeInactiveMembers] = useState(directoryViewState.includeInactiveMembers);
+  const [showDuplicateDuprOnly, setShowDuplicateDuprOnly] = useState(directoryViewState.showDuplicateDuprOnly);
   const [page, setPage] = useState(directoryViewState.page);
   const [cleaningMembers, setCleaningMembers] = useState(false);
   const [resettingPasswordMemberId, setResettingPasswordMemberId] = useState("");
@@ -113,7 +115,8 @@ export default function MembersPage() {
       pageSize: String(PAGE_SIZE),
       search: deferredSearch.trim(),
       includeInactive: String(includeInactiveMembers),
-      currentRosterOnly: String(showCurrentRosterOnly),
+      currentRosterOnly: String(showCurrentRosterOnly && !showDuplicateDuprOnly),
+      duplicateDuprOnly: String(showDuplicateDuprOnly),
       sort: sortConfig.key,
       direction: sortConfig.direction,
     });
@@ -165,6 +168,7 @@ export default function MembersPage() {
     page,
     router,
     showCurrentRosterOnly,
+    showDuplicateDuprOnly,
     sortConfig.direction,
     sortConfig.key,
   ]);
@@ -906,14 +910,14 @@ export default function MembersPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [includeInactiveMembers, search, showCurrentRosterOnly]);
+  }, [includeInactiveMembers, search, showCurrentRosterOnly, showDuplicateDuprOnly]);
 
   useEffect(() => {
     window.sessionStorage.setItem(
       MEMBER_DIRECTORY_VIEW_STATE_KEY,
-      JSON.stringify({ search, sortConfig, showCurrentRosterOnly, includeInactiveMembers, page })
+      JSON.stringify({ search, sortConfig, showCurrentRosterOnly, showDuplicateDuprOnly, includeInactiveMembers, page })
     );
-  }, [includeInactiveMembers, page, search, showCurrentRosterOnly, sortConfig]);
+  }, [includeInactiveMembers, page, search, showCurrentRosterOnly, showDuplicateDuprOnly, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMemberCount / PAGE_SIZE));
   const pagedMembers = members;
@@ -954,25 +958,41 @@ export default function MembersPage() {
                   <button
                     type="button"
                     onClick={() => setShowCurrentRosterOnly((value) => !value)}
+                    disabled={showDuplicateDuprOnly}
                     className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
                       showCurrentRosterOnly
                         ? "bg-emerald-700 text-white hover:bg-emerald-800"
                         : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
                     }`}
                   >
-                    {showCurrentRosterOnly ? "Show All Members" : "Current Rosters Only"}
+                    {showDuplicateDuprOnly ? "All Rosters" : showCurrentRosterOnly ? "Show All Members" : "Current Rosters Only"}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setIncludeInactiveMembers((value) => !value)}
+                    disabled={showDuplicateDuprOnly}
                     className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
                       includeInactiveMembers
                         ? "bg-red-700 text-white hover:bg-red-800"
                         : "bg-red-100 text-red-900 hover:bg-red-200"
                     }`}
                   >
-                    {includeInactiveMembers ? "Hide Inactive" : "Include Inactive"}
+                    {showDuplicateDuprOnly ? "Inactive Included" : includeInactiveMembers ? "Hide Inactive" : "Include Inactive"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDuplicateDuprOnly((value) => !value);
+                      setShowCurrentRosterOnly(false);
+                    }}
+                    aria-pressed={showDuplicateDuprOnly}
+                    className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
+                      showDuplicateDuprOnly ? "bg-amber-700 text-white hover:bg-amber-800" : "bg-amber-100 text-amber-900 hover:bg-amber-200"
+                    }`}
+                  >
+                    Duplicate DUPR IDs
                   </button>
 
                   <button
@@ -989,6 +1009,12 @@ export default function MembersPage() {
 
             </div>
           </div>
+
+          {showDuplicateDuprOnly && (
+            <p className="mb-4 text-sm text-amber-900" role="status">
+              Showing every record in each duplicate DUPR ID group, including inactive members. Review only; no records are changed.
+            </p>
+          )}
 
           <div className="grid grid-cols-1 gap-3 border-t border-slate-200 pt-5 md:grid-cols-[1fr_auto] md:gap-4 md:border-t-0 md:pt-0">
             <div>
@@ -1213,8 +1239,9 @@ export default function MembersPage() {
                           {member.last_name}, {member.first_name}
                         </div>
 
-                        <div className="mt-1 truncate text-sm text-slate-500">
-                          {member.email || "No Email"}
+                        <div className="mt-1 flex min-w-0 items-center gap-1 text-sm text-slate-500">
+                          <span className="truncate">{member.email || "No Email"}</span>
+                          <CopyEmailButton email={member.email} />
                         </div>
                       </div>
 
@@ -1262,7 +1289,7 @@ export default function MembersPage() {
                   </td>
 
                   <td className="whitespace-nowrap bg-white px-4 py-4 align-middle text-sm text-slate-700 group-hover:bg-slate-50">
-                    {formatDisplayTimestamp(
+                    {formatDisplayTimestampShort(
                       lastLoginsByEmail[normalizeEmailAddress(member.email)],
                       "Never"
                     )}
@@ -1357,6 +1384,11 @@ export default function MembersPage() {
                   >
                     <EditIcon />
                   </button>
+                </div>
+
+                <div className="mt-1 flex min-w-0 items-center gap-2 text-sm text-slate-600">
+                  <span className="truncate">{member.email || "No Email"}</span>
+                  <CopyEmailButton email={member.email} />
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-2">
@@ -2380,11 +2412,40 @@ function formatMemberRating(value) {
   return Number.isFinite(number) ? number.toFixed(3) : String(value);
 }
 
+function CopyEmailButton({ email }) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return undefined;
+    const timeout = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timeout);
+  }, [copied]);
+
+  if (!email) return null;
+
+  async function copyEmail(event) {
+    if (await copyMemberEmail(event, email)) setCopied(true);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copyEmail}
+      aria-label={`Copy email ${email}`}
+      title={copied ? "Copied" : "Copy Email"}
+      className="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+    >
+      {copied ? "Copied" : "Copy Email"}
+    </button>
+  );
+}
+
 function readMemberDirectoryViewState() {
   const fallback = {
     search: "",
     sortConfig: { key: "member", direction: "asc" },
     showCurrentRosterOnly: false,
+    showDuplicateDuprOnly: false,
     includeInactiveMembers: false,
     page: 1,
   };
@@ -2395,6 +2456,7 @@ function readMemberDirectoryViewState() {
       search: typeof saved.search === "string" ? saved.search : fallback.search,
       sortConfig: saved.sortConfig?.key && saved.sortConfig?.direction ? saved.sortConfig : fallback.sortConfig,
       showCurrentRosterOnly: saved.showCurrentRosterOnly === true,
+      showDuplicateDuprOnly: saved.showDuplicateDuprOnly === true,
       includeInactiveMembers: saved.includeInactiveMembers === true,
       page: Number(saved.page) > 0 ? Number(saved.page) : fallback.page,
     };
