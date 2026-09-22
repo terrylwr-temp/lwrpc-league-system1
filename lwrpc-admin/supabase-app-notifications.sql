@@ -9,6 +9,7 @@ create table if not exists public.app_notification_subscriptions (
   recipient_email text,
   recipient_phone text,
   user_agent text,
+  vapid_key_id text,
   enabled boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

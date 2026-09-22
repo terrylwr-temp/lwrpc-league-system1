@@ -1,25 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { appConfirm } from "../lib/appDialog";
+import {
+  APP_NOTIFICATION_MIGRATION_ERROR_MESSAGE,
+  enableCurrentPushSubscription,
+  reconcileExistingPushSubscription,
+} from "../lib/appNotificationBrowser.js";
 
 function isMobileDevice() {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(pointer: coarse), (max-width: 1023px)").matches;
-}
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = `${base64String}${padding}`.replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let index = 0; index < rawData.length; index += 1) {
-    outputArray[index] = rawData.charCodeAt(index);
-  }
-
-  return outputArray;
 }
 
 function browserSupported() {
@@ -44,11 +36,43 @@ function buttonText(status) {
   return "App Notifications";
 }
 
+async function publicKeyConfiguration() {
+  const response = await fetch("/api/app-notifications/public-key");
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.configured || !result.publicKey) {
+    throw new Error("App Notifications need the server notification keys before they can be turned on.");
+  }
+  return result.publicKey;
+}
+
+async function saveBrowserSubscription(action, subscription, { phone, groupId }) {
+  const response = await fetch("/api/app-notifications/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action,
+      scope: "pbcc",
+      phone,
+      groupId,
+      subscription: subscription.toJSON(),
+    }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.success) {
+    const fallback = action === "unsubscribe"
+      ? "Unable to turn off App Notifications."
+      : "Unable to save App Notifications.";
+    throw new Error(result.error || fallback);
+  }
+  return result;
+}
+
 export default function AppNotificationsButton({ phone = "", groupId = "", compact = false, iconOnly = false }) {
   const [visible, setVisible] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
   const [statusModal, setStatusModal] = useState(null);
+  const automaticCheckRef = useRef(null);
 
   useEffect(() => {
     function updateVisible() {
@@ -60,24 +84,68 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
     if (query.addEventListener) query.addEventListener("change", updateVisible);
     else query.addListener(updateVisible);
 
-    if (!browserSupported()) setStatus("unsupported");
-    else if (Notification.permission === "denied") setStatus("blocked");
-    else if (Notification.permission === "granted") {
-      serviceWorkerRegistration()
-        .then((registration) => registration.pushManager.getSubscription())
-        .then((subscription) => {
-          if (subscription) setStatus("enabled");
-        })
-        .catch(() => {
-          setStatus((current) => current === "enabled" ? "idle" : current);
-        });
-    }
-
     return () => {
       if (query.removeEventListener) query.removeEventListener("change", updateVisible);
       else query.removeListener(updateVisible);
     };
   }, []);
+
+  useEffect(() => {
+    if (!browserSupported()) {
+      setStatus("unsupported");
+      return undefined;
+    }
+    if (Notification.permission === "denied") {
+      setStatus("blocked");
+      return undefined;
+    }
+    if (Notification.permission !== "granted" || !phone || !groupId) return undefined;
+
+    const identity = `${groupId}:${phone}`;
+    if (!automaticCheckRef.current || automaticCheckRef.current.identity !== identity) {
+      const promise = (async () => {
+        const registration = await serviceWorkerRegistration();
+        const subscription = await registration.pushManager.getSubscription();
+        if (!subscription) return { status: "none", subscription: null };
+
+        const publicKey = await publicKeyConfiguration();
+        return reconcileExistingPushSubscription({
+          subscription,
+          publicKey,
+          disableSubscription: (oldSubscription) => saveBrowserSubscription("unsubscribe", oldSubscription, { phone, groupId }),
+          createSubscription: (applicationServerKey) => registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey,
+          }),
+          saveSubscription: (newSubscription) => saveBrowserSubscription("subscribe", newSubscription, { phone, groupId }),
+        });
+      })();
+      automaticCheckRef.current = { identity, promise };
+    }
+
+    let active = true;
+    automaticCheckRef.current.promise
+      .then((result) => {
+        if (!active) return;
+        if (result.status === "none") {
+          setStatus("idle");
+          return;
+        }
+        setStatus("enabled");
+        if (result.status === "migrated") {
+          setMessage("App Notifications were securely updated for this device. Text messages remain available as backup.");
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setStatus("idle");
+        setMessage(APP_NOTIFICATION_MIGRATION_ERROR_MESSAGE);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [groupId, phone]);
 
   async function enableNotifications() {
     if (!browserSupported()) {
@@ -90,13 +158,11 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
     setMessage("");
 
     try {
-      const keyResponse = await fetch("/api/app-notifications/public-key");
-      const keyResult = await keyResponse.json().catch(() => ({}));
-      if (!keyResult.configured || !keyResult.publicKey) {
-        throw new Error("App Notifications need the server notification keys before they can be turned on.");
-      }
+      const publicKey = await publicKeyConfiguration();
 
-      const permission = await Notification.requestPermission();
+      const permission = Notification.permission === "granted"
+        ? "granted"
+        : await Notification.requestPermission();
       if (permission !== "granted") {
         setStatus(permission === "denied" ? "blocked" : "idle");
         setMessage(permission === "denied" ? "Notifications are blocked in this browser." : "Notifications were not turned on.");
@@ -105,26 +171,16 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
 
       const registration = await serviceWorkerRegistration();
       const existing = await registration.pushManager.getSubscription();
-      const subscription = existing || await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(keyResult.publicKey),
-      });
-
-      const saveResponse = await fetch("/api/app-notifications/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "subscribe",
-          scope: "pbcc",
-          phone,
-          groupId,
-          subscription: subscription.toJSON(),
+      await enableCurrentPushSubscription({
+        subscription: existing,
+        publicKey,
+        disableSubscription: (oldSubscription) => saveBrowserSubscription("unsubscribe", oldSubscription, { phone, groupId }),
+        createSubscription: (applicationServerKey) => registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
         }),
+        saveSubscription: (subscription) => saveBrowserSubscription("subscribe", subscription, { phone, groupId }),
       });
-      const saveResult = await saveResponse.json().catch(() => ({}));
-      if (!saveResponse.ok || !saveResult.success) {
-        throw new Error(saveResult.error || "Unable to save App Notifications.");
-      }
 
       setStatus("enabled");
       setMessage("Text messages will still be used if an app notification cannot be delivered.");
@@ -156,22 +212,7 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
-        const saveResponse = await fetch("/api/app-notifications/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "unsubscribe",
-            scope: "pbcc",
-            phone,
-            groupId,
-            subscription: subscription.toJSON(),
-          }),
-        });
-        const saveResult = await saveResponse.json().catch(() => ({}));
-        if (!saveResponse.ok || !saveResult.success) {
-          throw new Error(saveResult.error || "Unable to turn off App Notifications.");
-        }
-
+        await saveBrowserSubscription("unsubscribe", subscription, { phone, groupId });
         await subscription.unsubscribe();
       }
 

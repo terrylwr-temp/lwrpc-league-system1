@@ -2,6 +2,7 @@ import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { normalizeAppNotificationPhone } from "../../../lib/appNotifications";
+import { buildAppNotificationSubscriptionRecord } from "../../../lib/appNotificationVapid.js";
 
 export const runtime = "nodejs";
 
@@ -89,17 +90,15 @@ export async function POST(req) {
 
     const recipient = await resolvePbccRecipient(supabase, body);
 
+    const record = buildAppNotificationSubscriptionRecord({
+      subscription: { endpoint, p256dh, auth },
+      recipient,
+      userAgent: req.headers.get("user-agent"),
+    });
+
     const { error } = await supabase
       .from("app_notification_subscriptions")
-      .upsert({
-        endpoint,
-        p256dh,
-        auth,
-        ...recipient,
-        user_agent: String(req.headers.get("user-agent") || "").slice(0, 500),
-        enabled: true,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "endpoint" });
+      .upsert(record, { onConflict: "endpoint" });
 
     if (error) throw error;
 

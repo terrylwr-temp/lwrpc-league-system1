@@ -1,5 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import webPush from "web-push";
+import {
+  appNotificationsConfigured,
+  currentVapidKeyId,
+  publicVapidKey,
+} from "./appNotificationVapid.js";
+
+export { appNotificationsConfigured, publicVapidKey } from "./appNotificationVapid.js";
 
 const DEFAULT_PUSH_TITLE = "PBCourtCommand";
 const DEFAULT_PUSH_URL = "/pbcc/player";
@@ -46,17 +53,6 @@ function cleanUnique(values, normalizer = (value) => String(value || "").trim())
   return [...new Set((values || []).map(normalizer).filter(Boolean))];
 }
 
-export function appNotificationsConfigured() {
-  return Boolean(
-    (process.env.WEB_PUSH_PUBLIC_KEY || process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY) &&
-    process.env.WEB_PUSH_PRIVATE_KEY
-  );
-}
-
-export function publicVapidKey() {
-  return process.env.WEB_PUSH_PUBLIC_KEY || process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY || "";
-}
-
 function configureVapid() {
   if (vapidConfigured) return;
   const publicKey = publicVapidKey();
@@ -94,7 +90,7 @@ function notificationPayload({ title, body, url, tag, icon }) {
   });
 }
 
-async function loadSubscriptions(supabase, { phones, emails }) {
+export async function loadSubscriptions(supabase, { phones, emails, vapidKeyId = currentVapidKeyId() }) {
   const normalizedPhones = cleanUnique(phones, normalizeAppNotificationPhone);
   const normalizedEmails = cleanUnique(emails, normalizeEmail);
   const rowsByEndpoint = new Map();
@@ -104,6 +100,7 @@ async function loadSubscriptions(supabase, { phones, emails }) {
       .from("app_notification_subscriptions")
       .select("id, endpoint, p256dh, auth, recipient_phone, recipient_email")
       .eq("enabled", true)
+      .eq("vapid_key_id", vapidKeyId)
       .in("recipient_phone", normalizedPhones);
     if (error) throw error;
     (data || []).forEach((row) => rowsByEndpoint.set(row.endpoint, row));
@@ -114,12 +111,21 @@ async function loadSubscriptions(supabase, { phones, emails }) {
       .from("app_notification_subscriptions")
       .select("id, endpoint, p256dh, auth, recipient_phone, recipient_email")
       .eq("enabled", true)
+      .eq("vapid_key_id", vapidKeyId)
       .in("recipient_email", normalizedEmails);
     if (error) throw error;
     (data || []).forEach((row) => rowsByEndpoint.set(row.endpoint, row));
   }
 
   return [...rowsByEndpoint.values()];
+}
+
+export function fallbackPhonesForPushResults(phones, results) {
+  const normalizedPhones = cleanUnique(phones, normalizeAppNotificationPhone);
+  const phonesWithPush = new Set(
+    (results || []).filter((result) => result.ok && result.phone).map((result) => result.phone)
+  );
+  return normalizedPhones.filter((phone) => !phonesWithPush.has(phone));
 }
 
 async function markSubscriptionSuccess(supabase, id) {
@@ -160,7 +166,11 @@ export async function sendAppNotificationMessages({ phones = [], emails = [], ti
   try {
     configureVapid();
     supabase = serviceClient();
-    const subscriptions = await loadSubscriptions(supabase, { phones: normalizedPhones, emails: normalizedEmails });
+    const subscriptions = await loadSubscriptions(supabase, {
+      phones: normalizedPhones,
+      emails: normalizedEmails,
+      vapidKeyId: currentVapidKeyId(),
+    });
 
     if (subscriptions.length === 0) {
       return { ...emptyFallback, reason: "No App Notification subscriptions" };
@@ -192,8 +202,7 @@ export async function sendAppNotificationMessages({ phones = [], emails = [], ti
       })
     );
 
-    const phonesWithPush = new Set(results.filter((result) => result.ok && result.phone).map((result) => result.phone));
-    const fallbackPhones = normalizedPhones.filter((phone) => !phonesWithPush.has(phone));
+    const fallbackPhones = fallbackPhonesForPushResults(normalizedPhones, results);
 
     return {
       skipped: false,
