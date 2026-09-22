@@ -5,6 +5,7 @@ import { uploadPreview } from './seasonRatingsUploadResult.js';
 // Reuse the already deployed, audited working-input transaction for Upload only.
 // Distinct receipt domain rejects old source-only and other-operation receipts.
 const policy = 'upload-working-inputs-v1';
+export const RATINGS_UPLOAD_RPC_TIMEOUT_MS = 30_000;
 const key = secret => { if (!secret) throw Error('Server import credentials are not configured.'); return createHash('sha256').update(policy+'\0'+secret).digest(); };
 const binding = (actor,token) => createHash('sha256').update(actor+'\0'+token).digest('hex');
 export function signUpload(payload,actor,token,secret) {
@@ -31,7 +32,7 @@ export async function ratingsUploadRequest({body,actor,token,db,secret,now=Date.
  if(body.operation && body.operation!=='upload')throw Error('This endpoint supports Upload only.');
  if(body.action==='preview') {
   const upload=uploadInputs(body.csv);
-  const {data,error}=await db.rpc('season_ratings_workflow_preview',{p_actor:actor,p_season:body.seasonId,p_operation:'upload',p_upload:upload}).abortSignal(AbortSignal.timeout(10000));
+  const {data,error}=await db.rpc('season_ratings_workflow_preview',{p_actor:actor,p_season:body.seasonId,p_operation:'upload',p_upload:upload}).abortSignal(AbortSignal.timeout(RATINGS_UPLOAD_RPC_TIMEOUT_MS));
   if(error)throw Error(error.message);
   if(data?.operation!=='upload'||data.season?.id!==body.seasonId||!data.fingerprint)throw Error('Unexpected import preview.');
   const payload={id:randomUUID(),policy,actor,seasonId:body.seasonId,operation:'upload',upload,fingerprint:data.fingerprint,fileHash:createHash('sha256').update(body.csv).digest('hex'),expires:new Date(now+600000).toISOString()};
@@ -40,7 +41,7 @@ export async function ratingsUploadRequest({body,actor,token,db,secret,now=Date.
  if(body.action==='commit'&&body.confirmed===true) {
   const payload=verifyUpload(body.receipt,actor,token,secret,now);
   if(payload.seasonId!==body.seasonId)throw Error('Season changed; preview again.');
-  const {data,error}=await db.rpc('season_ratings_workflow_commit',{p_actor:actor,p_payload:payload}).abortSignal(AbortSignal.timeout(10000));
+  const {data,error}=await db.rpc('season_ratings_workflow_commit',{p_actor:actor,p_payload:payload}).abortSignal(AbortSignal.timeout(RATINGS_UPLOAD_RPC_TIMEOUT_MS));
   if(error)throw Error(error.message);
   if(data?.status!=='success')throw Error(data?.reason||'Import rolled back. Preview again.');
   return data;

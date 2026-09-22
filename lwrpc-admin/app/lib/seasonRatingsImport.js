@@ -1,5 +1,5 @@
 export const IMPORT_POLICY = 'source-only-v1';
-export const MAX_IMPORT_ROWS = 1000;
+export const MAX_IMPORT_ROWS = 5000;
 export const MAX_CSV_BYTES = 2 * 1024 * 1024;
 const header = value => value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 export const normalizeDuprId = value => String(value ?? '').trim().toUpperCase();
@@ -26,7 +26,7 @@ export function parseRatingsCsv(text) {
   const headers = rawHeaders?.map(header);
   if (!headers?.includes('duprid')) throw Error('CSV requires duprId.');
   if (new Set(headers.filter(Boolean)).size !== headers.filter(Boolean).length) throw Error('Duplicate CSV headers.');
-  if (!records.length || records.length > MAX_IMPORT_ROWS) throw Error('Choose a CSV with 1–1,000 rows.');
+  if (!records.length || records.length > MAX_IMPORT_ROWS) throw Error('Choose a CSV with 1–5,000 rows.');
   return records.map((values, index) => {
     // DUPR exports may append empty header columns but omit them from data rows.
     // Only pad omitted, literally empty trailing headers; never a named field.

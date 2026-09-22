@@ -60,7 +60,7 @@ test('full RF header is primary; short alias works only when primary absent', ()
 test('strict CSV multiline, escaping, duplicate headers, width and row bound', () => {
   assert.equal(parseRatingsCsv('duprId,name,doubles\nABC123,"A\nB",3.2')[0].name, 'A\nB');
   for (const s of ['duprId,duprId\nA,A', 'duprId,doubles\nA', 'duprId\n"ABC', 'duprId,\nABC,x']) assert.throws(() => parseRatingsCsv(s));
-  assert.throws(() => parseRatingsCsv('duprId\n' + 'ABC123\n'.repeat(1001)));
+  assert.throws(() => parseRatingsCsv('duprId\n' + 'ABC123\n'.repeat(5001)));
 });
 test('signed exact preview rejects tampering, wrong session, expiration and wrong purpose', () => {
   const payload = { policy: 'source-only-v1', expires: '2099-01-01', updates: [] };
