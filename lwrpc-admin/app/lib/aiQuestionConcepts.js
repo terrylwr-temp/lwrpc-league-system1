@@ -11,14 +11,14 @@ export function officialQuestionConcept(question) {
   const division = /\b(?:league|division|team|dupr|weekday|saturday|primetime|players?|match|combined|total|limit|mean|format)\b/.test(q) ? q.match(/\b\d{1,2}\.\d\b/)?.[0] || null : null;
   const base = { leagues, division, question: q };
   const make = (kind, extra = {}) => ({ ...base, kind, ...extra });
-  const duprEntry = /\benter(?:ed|ing|s)?\s+(?:in|into|to)\s+dupr\b/.test(q)
-    && !/\b(?:how|where|players?|members?|teams?|ratings?|register|registration|account)\b/.test(q);
-  if (leagues.length===1 && /\bdupr\b/.test(q) && (
-    /\b(?:games?|matches|doubles|picklebreaker)\b/.test(q)
-    && /\b(?:post(?:ed|ing)?|upload(?:ed|s|ing)?|submit(?:ted|s)?|record(?:ed|s)?|reported)\b/.test(q)
-    || duprEntry && /\b(?:league|games?|matches|doubles|picklebreaker)\b/.test(q))
-    && !/\b(?:did|have|has|already|my|our)\b/.test(q))
-    return make('dupr_posting', { query: `${leagues[0]} DUPR Posting` });
+  const postingObject = /\b(?:games?|matches|doubles|picklebreakers?|scores?|results?|mixed|gender(?:-based)?)\b/.test(q);
+  const postingDestination = /\b(?:post(?:ed|ing|s)?|upload(?:ed|ing|s)?|submit(?:ted|ting|s)?|record(?:ed|ing|s)?|report(?:ed|ing|s)?)\b[^?.!]{0,100}\b(?:to|in|into)\s+(?:the\s+)?dupr\b/.test(q);
+  const duprEntry = /\b(?:enter(?:ed|ing|s)?|go(?:es|ing)?)\b[^?.!]{0,100}\b(?:in|into|to)\s+(?:the\s+)?dupr\b/.test(q);
+  const postingQuestion = postingObject && (postingDestination || duprEntry)
+    || duprEntry && leagues.length===1 && /\bleague\b/.test(q); // Existing self-contained “that” wording.
+  if (leagues.length<=1 && /\bdupr\b/.test(q) && postingQuestion
+    && !/\b(?:how|where|did|have|has|already|my|our|players?|members?|ratings?|register|registration|account|join)\b/.test(q))
+    return make('dupr_posting', { query: `${leagues[0] ? `${leagues[0]} ` : ''}DUPR Posting` });
   const navigation = /\b(?:where|locate|find|show|direct|need)\b/.test(q) || /^(?:(?:the|official|lwrpc|lwr|pickleball|club|lms|dupr|usa|usap)\s+)*(?:captains? guide|players? guide|rulebook|important dates)[.!?]*$/.test(q);
   const procedural = /\b(?:how|where|forgot|reset|unable|can't|cannot|log|sign)\b/.test(q);
   if (/\b(?:password|log\s*in|log into|logging|sign\s*in|sign into)\b/.test(q) && procedural) return make('account_help', { operation: /\b(?:reset|forgot|password)\b/.test(q) ? 'password' : 'login', query: /password/.test(q) ? 'reset password' : 'logging into LMS' });
