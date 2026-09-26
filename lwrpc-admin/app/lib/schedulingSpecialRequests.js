@@ -63,6 +63,15 @@ export function filterAndSortSpecialRequests(rows, filters = {}, today = new Dat
   });
 
   return [...filtered].sort((a, b) => {
+    if (filters.sortBy !== "date") {
+      const aLocation = String(a.location?.name || "").trim();
+      const bLocation = String(b.location?.name || "").trim();
+      if (!aLocation && bLocation) return 1;
+      if (aLocation && !bLocation) return -1;
+      const locationOrder = aLocation.localeCompare(bLocation, undefined, { sensitivity: "base" });
+      if (locationOrder) return locationOrder;
+    }
+
     const aDate = String(a.request_date || "9999-12-31");
     const bDate = String(b.request_date || "9999-12-31");
     const aUpcoming = aDate >= today;
