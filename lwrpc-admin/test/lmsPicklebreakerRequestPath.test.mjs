@@ -23,8 +23,8 @@ const partners = {
   content: '6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds - 12-12): Features all the mixed teams (same partners as the Mixed Round) that played in the Mixed rounds.',
 };
 const scoring = {
-  id: '7f7f7f7f-7f7f-47f7-87f7-7f7f7f7f7f7f', rule: '6.2.3.5',
-  content: '6.2.3.5. Picklebreaker™ Game: The Saturday Picklebreaker is played to 25 points, win by two.',
+  id: '7f7f7f7f-7f7f-47f7-87f7-7f7f7f7f7f7f', rule: '6.2.3',
+  content: '6.2.3. Match Day Format: The Saturday Picklebreaker is played to 25 points, win by two.',
 };
 const raw = (passage) => ({
   chunk_id: passage.id, document_id: documentId, document_version_id: versionId,
@@ -154,5 +154,6 @@ test('Saturday Picklebreaker scoring question selects scoring evidence, not part
   const result = await ask(question, () => [partners, scoring, roster], plan);
   assert.equal(officialQuestionConcept(question)?.kind, 'scoring');
   assert.deepEqual(result.answer.selectedEvidence.map((item) => item.chunkId), [scoring.id]);
+  assert.deepEqual(result.result.sources.map((source) => source.ruleNumber), ['6.2.3']);
   assert.match(result.result.answer, /25 points/);
 });

@@ -156,6 +156,16 @@ export async function assistSemanticRetrieval(retrieval,select,established=[]) {
         const assessed=await selectSemanticEvidence(assessmentView,{assess:runtime.assess,qualifies:runtime.qualifies,preferredIds:(selected.length?selected:established).map(c=>c.chunkId)});
         diagnostic.semanticEvidence=assessed.diagnostic;
         if(assessed.selected.length){retrieval.policyDiagnostic=view.policyDiagnostic;retrieval.policyEvidence=view.policyEvidence;}
+        // A verification assessment selects chunk IDs, not passages. The
+        // Saturday mixed-participation provision may share its stored chunk
+        // with Scheduling (6.2.1), so replacing the direct 6.2.2 passage with
+        // that whole chunk changes the final citation and admits adjacent
+        // Player Cap (6.2.5) as governing evidence. Keep only assessed IDs
+        // whose directly applicable passages were selected above.
+        if(originalConcept?.kind==='mixed_participation'&&selected.length){
+          const verifiedIds=new Set(assessed.selected.map(c=>c.chunkId));
+          return selected.filter(c=>verifiedIds.has(c.chunkId));
+        }
         return assessed.selected;
       }
       if(selected.length){
