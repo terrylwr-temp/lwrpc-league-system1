@@ -1,0 +1,20 @@
+# The Vercel project root is lwrpc-admin. Upload only that app from this repo.
+/*
+!lwrpc-admin
+
+# Local configuration and generated files inside the app are never deploy inputs.
+/lwrpc-admin/.env*
+/lwrpc-admin/.agents/
+/lwrpc-admin/.codex/
+/lwrpc-admin/.local-validation/
+/lwrpc-admin/.next/
+/lwrpc-admin/.vercel/
+/lwrpc-admin/node_modules/
+/lwrpc-admin/dev-server.*
+
+# Verification fixtures and database scripts are not Next.js build inputs.
+/lwrpc-admin/test/
+/lwrpc-admin/supabase/
+/lwrpc-admin/scripts/
+/lwrpc-admin/*.sql
+/lwrpc-admin/*.docx
