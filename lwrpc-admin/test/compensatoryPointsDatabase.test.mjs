@@ -24,7 +24,6 @@ test("end-of-season points migrations retain least privilege and support audited
       create role authenticated;
       create role service_role bypassrls;
       grant usage on schema public to anon, authenticated, service_role;
-      alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
       create table public.members (id uuid primary key);
       create table public.leagues (id uuid primary key);
       create table public.divisions (id uuid primary key, league_id uuid references public.leagues(id));
@@ -34,6 +33,10 @@ test("end-of-season points migrations retain least privilege and support audited
     await db.exec(initialMigration);
     await db.exec(endOnlyMigration);
     await db.exec(compatibilityMigration);
+
+    // The fixture has no historical automatic grants. Required access must
+    // come from the migration itself, including the service-role write path.
+    assert.equal((await db.query("select has_table_privilege('service_role','public.members','SELECT') allowed")).rows[0].allowed, false);
 
     const awardRelationshipConstraints = (await db.query(
       "select conname from pg_constraint where conrelid='public.division_compensatory_point_awards'::regclass and conname = any($1)",
@@ -65,6 +68,7 @@ test("end-of-season points migrations retain least privilege and support audited
     assert.equal((await db.query("select has_table_privilege('authenticated','division_compensatory_point_awards','SELECT') allowed")).rows[0].allowed, true);
     assert.equal((await db.query("select has_table_privilege('authenticated','division_compensatory_point_awards','INSERT') allowed")).rows[0].allowed, false);
     assert.equal((await db.query("select has_table_privilege('anon','division_compensatory_point_awards','SELECT') allowed")).rows[0].allowed, false);
+    assert.equal((await db.query("select has_table_privilege('service_role','division_compensatory_point_awards','SELECT,INSERT,UPDATE,DELETE') allowed")).rows[0].allowed, true);
 
     const leagueId = "10000000-0000-4000-8000-000000000001";
     const divisionId = "20000000-0000-4000-8000-000000000001";
