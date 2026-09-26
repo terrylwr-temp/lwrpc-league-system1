@@ -1,27 +1,48 @@
 import { sourceRfClassification, rulesRfThreshold } from './rfPolicy.js';
 import {excerptSelection} from './aiEvidenceExcerpts.js';
-// Reviewed current-season binding, not a threshold store. Future/version changes
-// require a new explicit policy binding; no automatic inheritance.
-export const ELIGIBILITY_POLICY_BINDING=Object.freeze({version:'6ae10e5f-fdde-41be-a941-d1b7ed360d1a',seasons:['3780e56b-adeb-46be-ab1c-b754bc8aa737','073a4b31-7e66-460c-87bb-65ff29d1d341']});
+// Season scope remains explicit; the Rules version comes only from the active,
+// ready catalog and must pass the passage checks below.
+export const ELIGIBILITY_POLICY_BINDING=Object.freeze({seasons:['3780e56b-adeb-46be-ab1c-b754bc8aa737','073a4b31-7e66-460c-87bb-65ff29d1d341']});
 export function decimal(value){if(value===null||value===undefined||value==='')return null;const s=String(value);if(!/^\d+(?:\.\d{1,6})?$/.test(s))return null;const [a,b='']=s.split('.');const n=Number(a)*1000000+Number(b.padEnd(6,'0'));return Number.isSafeInteger(n)?n:null;}
 export function rfClassification(rf,policy){return sourceRfClassification(rf,policy?.threshold);}
 const leagueOf=s=>['weekday','saturday','primetime'].find(l=>String(s).toLowerCase().includes(l))||null;
 export function policyTables(candidates){const tables=[];for(const c of candidates){const league=leagueOf(c.content.split('\n')[0]);if(!league||!/^\w+ DUPR League Divisions/.test(c.content))continue;
  for(const match of c.content.matchAll(/^(?:[MSW]?DUPR\s*(\d+)|PrimeTime\s+(\d+)\s+\(PT\s+\d+\))\s+(\d+(?:\.\d+)?)\s+to\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)[ \t]*$/gm))tables.push({league,number:match[1]||match[2],min:match[3],max:match[4],pair:match[5],candidate:c,text:match[0]});
  }return tables;}
+export function currentEligibilityRules(candidates) {
+ const current=candidates.filter(c=>c.documentType==='league_rules');
+ const versions=new Set(current.map(c=>c.documentVersionId));
+ if(!current.length||versions.size!==1||!current.every(c=>c.documentVersionId))return null;
+ const rf=current.find(c=>rulesRfThreshold(c.content)!==null);
+ const nr=current.find(c=>/Rated\) are eligible to participate in any division\./.test(c.content));
+ const threshold=rulesRfThreshold(rf?.content);
+ const assignment=current.find(c=>/^4\.5\.1\./m.test(c.content));
+ const pair=current.find(c=>/^4\.5\.2\./m.test(c.content)&&/adding the[\s\S]*Season DUPR Ratings of both players/.test(c.content));
+ const enforcement=current.find(c=>/^4\.6\.1\./m.test(c.content));
+ const participation=current.find(c=>/^3\. PLAYER REQUIREMENTS/.test(c.content));
+ const roster=current.find(c=>/\b\d+\.\d+\. Roster Requirements & Retroactive Additions: All active players/.test(c.content));
+ return {version:current[0].documentVersionId,current,rf,nr,threshold,rfReady:threshold!==null&&Boolean(nr),assignment,pair,enforcement,participation,roster,fullReady:Boolean(threshold!==null&&nr&&assignment&&pair&&enforcement&&participation&&roster)};
+}
+export function classifyRfCondition(condition,threshold) {
+ const value=decimal(condition?.value),limit=decimal(threshold);
+ if(value===null||limit===null||value<0||value>decimal(100))return 'RF_UNKNOWN';
+ switch(condition?.operator){
+  case 'eq': return sourceRfClassification(condition.value,threshold);
+  case 'lt': case 'lte': return value<=limit?'NR':'RF_UNKNOWN';
+  case 'gt': return value>=limit?'RATED_BY_RF':'RF_UNKNOWN';
+  case 'gte': return value>limit?'RATED_BY_RF':'RF_UNKNOWN';
+  default: return 'RF_UNKNOWN';
+ }
+}
 export function divisionOptions(divisions,intent){const wanted=divisions.filter(d=>d.active&&(!intent.leagues.length||intent.leagues.includes(d.league))&&(!intent.number||d.name.match(/\d+/)?.[0]===intent.number)&&(!intent.exactLabel||!/^([mw]dupr|[mw]pt)/i.test(intent.exactLabel)||d.name.replaceAll(' ','').toUpperCase()===intent.exactLabel));
  const groups=new Map();for(const d of wanted){const key=JSON.stringify([d.league,d.seasonId,d.name.match(/\d+/)?.[0],d.min,d.max,d.pair,d.rating]);if(!groups.has(key))groups.set(key,{...d,ids:[],names:[]});groups.get(key).ids.push(d.id);groups.get(key).names.push(d.name);}
  return [...groups.values()].map(d=>({...d,label:d.names.join(' / ')+' — '+d.seasonName}));}
 export function eligibilityPolicy(candidates,division,binding=ELIGIBILITY_POLICY_BINDING){
- const current=candidates.filter(c=>c.documentVersionId===binding.version&&c.documentType==='league_rules');
- if(!binding.seasons.includes(division.seasonId)||!current.length)return {status:'POLICY_SCOPE_UNKNOWN'};
+ const rules=currentEligibilityRules(candidates);
+ if(!binding.seasons.includes(division.seasonId)||!rules)return {status:'POLICY_SCOPE_UNKNOWN'};
+ const {current,rf,nr,threshold,assignment,pair,enforcement,participation,roster}=rules;
  const tables=policyTables(current).filter(t=>t.league===division.league&&t.number===division.name.match(/\d+/)?.[0]);
  if(tables.length!==1)return {status:'POLICY_UNKNOWN'};const table=tables[0];
- const rf=current.find(c=>rulesRfThreshold(c.content)!==null);
- const threshold=rulesRfThreshold(rf?.content);
- const nr=current.find(c=>/^Rated\) are eligible to participate in any division\./.test(c.content));
- const assignment=current.find(c=>/^4\.5\.1\./m.test(c.content));const pair=current.find(c=>/^4\.5\.2\./m.test(c.content)&&/adding the[\s\S]*Season DUPR Ratings of both players/.test(c.content));
- const enforcement=current.find(c=>/^4\.6\.1\./m.test(c.content));const participation=current.find(c=>/^3\. PLAYER REQUIREMENTS/.test(c.content));const roster=current.find(c=>/5\.6\. Roster Requirements/.test(c.content));
  const age=division.league==='primetime'?current.find(c=>/6\.3\.2\./.test(c.content)&&/12\/31 of the season/.test(c.content)):null;
  if(threshold===null||!nr||!assignment||!pair||!enforcement||!participation||!roster||(division.league==='primetime'&&!age))return {status:'POLICY_UNKNOWN'};
  const evidence=[excerptSelection(table.candidate,[{text:table.text}],'requirement'),...[rf,nr,assignment,pair,enforcement,participation,roster,...(age?[age]:[])].map(c=>excerptSelection(c,[{text:c.content}],'requirement'))];
@@ -29,7 +50,7 @@ export function eligibilityPolicy(candidates,division,binding=ELIGIBILITY_POLICY
  // Config bounds operate on tenths; a stored 2.80 is consistent with 2.899.
  const maxCompatible=configMax===max||configMax===Math.floor(max/100000)*100000;
  const conflict=decimal(division.min)!==min||!maxCompatible||decimal(division.pair)!==pairMax||division.rating!==(division.league==='primetime'?'primetime':'season');
- return {status:conflict?'POLICY_CONFLICT':'READY',threshold,min:table.min,max:table.max,pair:table.pair,evidence,version:binding.version,league:division.league,number:table.number,divisionLabel:division.names?.join(' / ')||division.name};
+ return {status:conflict?'POLICY_CONFLICT':'READY',threshold,min:table.min,max:table.max,pair:table.pair,evidence,version:rules.version,league:division.league,number:table.number,divisionLabel:division.names?.join(' / ')||division.name};
 }
 export function evaluateEligibility(policy,input){
  const unknown=['PAIR_AGGREGATE_UNKNOWN','PARTICIPATION_UNKNOWN'];

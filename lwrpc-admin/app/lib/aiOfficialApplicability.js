@@ -77,6 +77,8 @@ function applies(candidate, text, plan, scope) {
       if(general)return /(?:service positioning|switching sides|side outs|game points|scoring freeze|win-by-two)/.test(p);
       return Boolean(scope.league && plan.leagues.includes(scope.league) && /rally scoring/.test(p) && !/picklebreaker/.test(p) && !/scoring freeze/.test(plan.question));
     }
+    if(/\b(?:scor(?:e|ed|es|ing)|points?|rally|format|win by)\b/.test(plan.question)
+      && !/(?:game|played|play)\s+to\s+\d+|\b\d+\s+(?:points?|by)\b|rally scoring|win by/.test(p))return false;
     return /picklebreaker/.test(p) && (scope.league ? plan.leagues.includes(scope.league) : !plan.leagues.length && /game overview/i.test(candidate.heading)) && /(?:game to \d|played to \d|picklebreaker[^.]{0,60}to \d|shall be played only when|only played if tie)/.test(p);
   }
   return false;

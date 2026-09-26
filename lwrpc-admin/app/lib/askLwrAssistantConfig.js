@@ -29,6 +29,9 @@ export function assistantPageContext(pathname) {
 }
 
 export const ASK_LWR_INITIAL_COPY = "Ask me about LWR leagues, rules, important dates, scoring, DUPR, Match Setup, or your authorized LMS information.";
+export function displayQuestionForSubmission(question, choiceLabel = '') {
+  return String(choiceLabel || (/^choice:/.test(question) ? 'Selected clarification option' : question));
+}
 export const ASK_LWR_HELP_GROUPS = Object.freeze([
   {title:'LWR leagues & rules',questions:["When does the Women's Weekday League start?",'Does the Weekday League use Rally Scoring?','When can I start entering my roster?','What ball are we using?']},
   {title:'My LMS information',description:"Available information depends on your LMS role and what you're authorized to access.",questions:["What's my Season DUPR?",'What team am I on?',"Who's on my roster?",'When is my next match?']},
