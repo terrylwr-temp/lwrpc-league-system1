@@ -32,7 +32,10 @@ export function questionIntent(value) {
  }
  if(!mixed&&!completed&&/\b(?:rally|scoring|score|picklebreaker)\b/.test(q)&&!/\b(?:ball|paddle|crack|damage)\b/.test(q)){
   if(/\b(?:rally|picklebreaker)\b/.test(q)&&(/\b(?:how|serving|freeze|side out)\b/.test(q)||/\bwhat are\b.*rally scoring rules/.test(q))){kind='scoring_mechanics';object='scoring';}
-  else if(leagues.length&&/\b(?:use|uses|scoring method|all rally|rally)\b/.test(q)){kind='scoring_applicability';object='scoring';}
+ else if(leagues.length&&/\b(?:use|uses|scoring method|all rally|rally)\b/.test(q)
+   && !(/\bpicklebreaker\b/.test(q)&&/\bmixed(?: doubles)? teams?\b/.test(q)
+     && /\b(?:same|different|keep|change|switch|swap)\b/.test(q)
+     && !/\b(?:rally|scoring|score)\b/.test(q))){kind='scoring_applicability';object='scoring';}
  }
  const age=ageReferenceIntent(q);
  if(age){kind='eligibility_reference_date';object='age_eligibility';}
