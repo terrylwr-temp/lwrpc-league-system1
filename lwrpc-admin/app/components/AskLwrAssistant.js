@@ -17,7 +17,7 @@ import { usePathname } from "next/navigation";
 import { getCurrentUserRole, getRequestAuthorizationHeaders, supabase } from "../lib/auth";
 import { GUIDE_DOCUMENT_TYPES, openGuideDocument } from "../lib/dashboardGuides";
 import { LEAGUE_DOCUMENT_TYPES, leagueDocumentPath, normalizeLeagueDocumentBucket } from "../lib/leagueDocuments";
-import { assistantPageContext, canBrowseLeagueDocument, visibleDashboardGuideKeys } from "../lib/askLwrAssistantConfig";
+import { assistantPageContext, canBrowseLeagueDocument, visibleDashboardGuideKeys, displayQuestionForSubmission } from "../lib/askLwrAssistantConfig";
 
 const TECHNICAL_ERROR = "Sorry, I couldn't complete that request right now. Please try again.";
 const MAX_SESSION_EXCHANGES = 8;
@@ -146,7 +146,7 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     composerRef.current?.focus();
   }
 
-  async function submit(event, suggestedQuestion = "") {
+  async function submit(event, suggestedQuestion = "", choiceLabel = "") {
     event?.preventDefault();
     const nextQuestion = String(suggestedQuestion || question).trim();
     if (!nextQuestion || working || context.busy()) return;
@@ -156,7 +156,7 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     const contextRequest = context.begin();
     const conversationReceipt = contextRequest.receipt;
     setQuestion(""); setWorking(true);
-    setExchanges((current) => [{ id: exchangeId, question: nextQuestion, pending: true }, ...current].map(entry=>entry.id===exchangeId?{...entry,liveSensitive:Boolean(eligibilityIntent(nextQuestion))||Boolean(liveIntent(nextQuestion))||Boolean(conversationReceipt?.startsWith('live1.'))}:entry).slice(0, MAX_SESSION_EXCHANGES));
+    setExchanges((current) => [{ id: exchangeId, question: displayQuestionForSubmission(nextQuestion,choiceLabel), pending: true }, ...current].map(entry=>entry.id===exchangeId?{...entry,liveSensitive:Boolean(eligibilityIntent(nextQuestion))||Boolean(liveIntent(nextQuestion))||Boolean(conversationReceipt?.startsWith('live1.'))}:entry).slice(0, MAX_SESSION_EXCHANGES));
     try {
       const response = await (isViewAsMode() ? viewAsAsk(nextQuestion,conversationReceipt) : fetch("/api/ask-lwr", {
         method: "POST",
@@ -201,7 +201,7 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
       <p className="mb-2 shrink-0 px-1 text-center text-xs leading-4 text-slate-500">Ask LWR PC AI may make mistakes. Check Official Sources for important information.</p>
       <form onSubmit={submit} className={`${styles.composer} flex shrink-0 gap-2`}><label className="sr-only" htmlFor="ask-lwr-question">Ask a question</label><textarea id="ask-lwr-question" ref={composerRef} value={question} maxLength={1000} rows={3} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(event); } }} placeholder="Ask a question" className="min-h-[74px] min-w-0 flex-1 resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"/><div className={styles.actions}><button type="button" onClick={newQuestion} disabled={busy} title={busy ? "Wait for the current request or feedback to finish" : "Start a new question"} className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-wait disabled:opacity-50">New Question</button><button type="submit" disabled={busy || working || !question.trim()} className="min-h-11 rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-[#104ab7] disabled:cursor-not-allowed disabled:bg-slate-300">Ask</button></div></form><p role="status" aria-live="polite" className="sr-only">{announcement}</p>
       {exchanges.length === 0 && <AskLwrWelcome onChoose={q=>submit(null,q)} disabled={working||busy}/>}
-      <div className="mt-4 space-y-4">{exchanges.map((entry) => <Exchange key={entry.id} entry={entry} onFeedback={submitFeedback} onChoose={key=>submit(null,key)} choicesDisabled={working||busy||entry!==exchanges[0]}/>)}</div>
+      <div className="mt-4 space-y-4">{exchanges.map((entry) => <Exchange key={entry.id} entry={entry} onFeedback={submitFeedback} onChoose={(key,label)=>submit(null,key,label)} choicesDisabled={working||busy||entry!==exchanges[0]}/>)}</div>
       <div className="mt-5 rounded-xl border border-slate-200 bg-white"><button type="button" onClick={toggleGuides} aria-expanded={guidesOpen} className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left text-sm font-black text-[#102e64]"><span>Browse Guides &amp; Rules</span><span aria-hidden="true">{guidesOpen ? "−" : "+"}</span></button>{guidesOpen && <div className="border-t border-slate-200 p-3"><p className="mb-3 text-xs font-semibold leading-5 text-slate-600">Open the official user guides and league documents already available in the LMS.</p><div className="grid gap-2">{guides.map((guide) => <button key={guide.key} type="button" onClick={() => openGuideDocument(supabase, guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{leagueGuides.map((guide) => <button key={guide.key} type="button" onClick={() => openLeagueGuide(guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{guidesLoading && <p className="text-sm font-semibold text-slate-500" role="status">Loading league documents...</p>}{!guidesLoading && guides.length + leagueGuides.length === 0 && <p className="text-sm font-semibold text-slate-500">No user-facing guides are configured yet.</p>}</div></div>}</div>
     </div>
   </>;

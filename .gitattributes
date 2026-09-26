@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Rollback SQL embeds function bodies whose exact LF bytes are drift-checked.
+docs/lms-0724-lock-correction-rollback.sql text eol=lf
+docs/lms-0728-rollback.sql text eol=lf
+docs/lms-0729-rollback.sql text eol=lf
