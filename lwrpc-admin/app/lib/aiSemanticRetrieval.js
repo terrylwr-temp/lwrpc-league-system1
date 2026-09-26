@@ -89,6 +89,7 @@ export async function assistSemanticRetrieval(retrieval,select,established=[]) {
   diagnostic.status='started';
   diagnostic.initialFailure=established.length?null:retrieval.evidence.sufficient?'APPLICABILITY_REJECTED':'BELOW_EVIDENCE_THRESHOLD';
   const originalPolicy=needsPolicyEvidence(retrieval.request.question);
+  const originalConcept=officialQuestionConcept(retrieval.request.question);
   try {
     const canonical=canonicalMembershipQuery(retrieval.request.question);
     if(!established.length&&canonical){
@@ -133,8 +134,10 @@ export async function assistSemanticRetrieval(retrieval,select,established=[]) {
       retrieval.candidates=rankSemanticCandidates(retrieval.candidates,plan,runtime.qualifies);
       runtime.refresh();
       if(!retrieval.candidates.some(runtime.qualifies))return [];
-      // Never replace the user's question, auth context, conversation or scope.
-      const view={...retrieval,request:{...retrieval.request,question:plan.normalizedQuestion}};
+      // A rewrite can broaden retrieval, but a recognized original concept must
+      // still govern applicability so adjacent-topic passages cannot replace
+      // evidence that answers the relationship in the user's question.
+      const view={...retrieval,request:{...retrieval.request,question:originalConcept?retrieval.request.question:plan.normalizedQuestion}};
       // A failed recognized policy remains authoritative: do not transform it into
       // a generic answer and bypass its completeness/conflict/clarification checks.
       if(originalPolicy && questionIntent(retrieval.request.question).object!==questionIntent(plan.normalizedQuestion).object)return [];
