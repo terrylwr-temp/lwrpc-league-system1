@@ -17,12 +17,14 @@ const ORIGINS = [
   ['view_as', 'View As'],
   ['legacy_unknown', 'Legacy / unknown'],
 ];
-const INITIAL_FILTERS = { period: '30', feedback: 'all', search: '', origin: 'all' };
+const CLASSIFICATIONS = [['none','Player interface'],['manager_console','Manager test'],['automated_test','Automated test'],['all','All classifications']];
+const RESULTS = [['all','All completed results'],['answer','Answers'],['insufficient_evidence','Insufficient evidence']];
+const INITIAL_FILTERS = { period: '30', feedback: 'all', search: '', origin: 'all', classification: 'none', result: 'all', rule: '' };
 const feedbackLabel = value => FEEDBACK.find(([key]) => key === value)?.[1] || 'Not recorded';
 const originLabel = value => ORIGINS.find(([key]) => key === value)?.[1] || 'Not recorded';
 const date = value => value ? new Date(value).toLocaleString() : 'Not recorded';
 const label = value => value ? String(value).replaceAll('_', ' ').replace(/^./, c => c.toUpperCase()) : 'Not recorded';
-const timing = value => typeof value === 'number' ? `${(value / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} s` : 'Not recorded';
+const timing = value => typeof value === 'number' ? value < 1000 ? `${value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ms` : `${(value / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} s` : 'Not recorded';
 
 function missingText(row, field) {
   if (row.payloadPurged) return `${field} text is no longer retained.`;
@@ -35,6 +37,7 @@ function FeedbackBadge({ value }) {
 }
 
 export default function InteractionHistoryPanel({ api }) {
+  const [dataset, setDataset] = useState('completed');
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [search, setSearch] = useState('');
   const [paging, setPaging] = useState({ cursor: null, previous: [], asof: null });
@@ -54,7 +57,7 @@ export default function InteractionHistoryPanel({ api }) {
     (async () => {
       try {
         const result = await api({
-          op: 'interactions', ...filters,
+          op: dataset === 'completed' ? 'interactions' : 'legacy-interactions', ...filters,
           ...(paging.cursor ? { cursor: paging.cursor } : {}),
           ...(paging.asof ? { asof: paging.asof } : {}),
         });
@@ -66,11 +69,16 @@ export default function InteractionHistoryPanel({ api }) {
       }
     })();
     return () => { active = false; };
-  }, [api, filters, paging, refresh]);
+  }, [api, dataset, filters, paging, refresh]);
 
   function applyFilter(changes) {
     setFilters(current => ({ ...current, ...changes }));
     setPaging({ cursor: null, previous: [], asof: null });
+  }
+  function changeDataset(next) {
+    setDataset(next);
+    setPaging({ cursor: null, previous: [], asof: null });
+    setSelectedId(null);
   }
 
   function openDetail(id) {
@@ -89,9 +97,10 @@ export default function InteractionHistoryPanel({ api }) {
 
   return <section className={styles.panel} aria-labelledby="interaction-history-title">
     <header className={styles.heading}>
-      <div><h2 id="interaction-history-title">AI Question &amp; Answer History</h2><p>Explore recorded requests and the feedback on each response.</p></div>
+      <div><h2 id="interaction-history-title">Recent AI Interactions</h2><p>Completed official-document answers and their later feedback.</p></div>
       <span className={styles.readOnly}>Read-only history</span>
     </header>
+    <div className={styles.filters}><label>History view<select aria-label="History view" value={dataset} onChange={event => changeDataset(event.target.value)}><option value="completed">Completed official interactions</option><option value="legacy">Operational / legacy diagnostics</option></select></label></div>
     <div className={styles.cards} aria-label="Filter interaction history by feedback">
       {cards.map(([key, title]) => <button key={key} type="button" aria-pressed={filters.feedback === key} aria-controls="interaction-history-results" onClick={() => applyFilter({ feedback: key })}>
         <span>{title}</span><strong>{data?.summary?.[key === 'all' ? 'total' : key] ?? '—'}</strong>
@@ -101,22 +110,26 @@ export default function InteractionHistoryPanel({ api }) {
     <form className={styles.filters} onSubmit={event => { event.preventDefault(); applyFilter({ search: search.trim() }); }}>
       <label>Date range<select value={filters.period} onChange={event => applyFilter({ period: event.target.value })}><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="all">All retained history</option></select></label>
       <label>Feedback<select value={filters.feedback} onChange={event => applyFilter({ feedback: event.target.value })}>{FEEDBACK.map(([key, title]) => <option key={key} value={key}>{key === 'all' ? 'All feedback' : title}</option>)}</select></label>
-      <label>Origin<select value={filters.origin} onChange={event => applyFilter({ origin: event.target.value })}>{ORIGINS.map(([key, title]) => <option key={key} value={key}>{title}</option>)}</select></label>
+      {dataset === 'completed' ? <>
+        <label>Player or test<select value={filters.classification} onChange={event => applyFilter({ classification: event.target.value })}>{CLASSIFICATIONS.map(([key,title]) => <option key={key} value={key}>{title}</option>)}</select></label>
+        <label>Result type<select value={filters.result} onChange={event => applyFilter({ result: event.target.value })}>{RESULTS.map(([key,title]) => <option key={key} value={key}>{title}</option>)}</select></label>
+        <label>Rule number<input type="search" maxLength={120} value={filters.rule} placeholder="e.g. 6.2.2" onChange={event => applyFilter({rule:event.target.value.trim()})}/></label>
+      </> : <label>Origin<select value={filters.origin} onChange={event => applyFilter({ origin: event.target.value })}>{ORIGINS.map(([key, title]) => <option key={key} value={key}>{title}</option>)}</select></label>}
       <label className={styles.search}>Search questions and answers<input type="search" maxLength={200} value={search} placeholder="Search retained question or answer text" onChange={event => setSearch(event.target.value)} /></label>
       <button type="submit">Search</button>
       {filters.search && <button type="button" onClick={() => { setSearch(''); applyFilter({ search: '' }); }}>Clear search</button>}
     </form>
-    <p className={styles.hint}>Cards share the date, origin and applied search filters. Counts cover retained records, including manager tests and legacy records when selected. Each request is counted once using its latest recorded feedback; No Feedback means no vote was recorded.</p>
-    <details className={styles.retention}><summary>About retained history and missing text</summary><p>Existing logging did not retain question and answer text for every request. Unvoted normal answers may have no retained text; protected and live question or answer text may be unavailable under existing retention and privacy controls. Older retained records may also be incomplete. Search can only match text that still exists. This screen does not collect new user information.</p><p>Dates use request completion when available, otherwise the first recorded event. Displayed times use your device timezone. Names come from the current member profile associated with the recorded user ID; historical roles and page/team context are shown only if recorded.</p></details>
+    <p className={styles.hint}>Counts follow the selected filters. No Feedback means no vote was recorded. Player-interface answers and insufficient-evidence results are shown by default; tests and metadata-only outcomes are available through the filters or diagnostic view.</p>
+    <details className={styles.retention}><summary>About retained history and missing text</summary><p>Completed official-document responses are captured when finalized. Operational / legacy diagnostics include older metadata-only requests whose question, answer or user was never retained. Live LMS and eligibility content is not recorded here. No historical data is reconstructed.</p><p>Names are from the current member profile; the stored role describes the role at request time. Response times measure server processing, not browser delivery.</p></details>
     {error && <p className={styles.error} role="alert">{error}</p>}
     <div id="interaction-history-results" aria-busy={busy}>
-      <div className={styles.resultHeading}><h3>Recent AI interactions</h3><p role="status">{busy ? 'Loading interaction history…' : data ? `${data.total.toLocaleString()} matching ${data.total === 1 ? 'interaction' : 'interactions'} · Page ${pageNumber}${filters.search ? ` · Search: “${filters.search}”` : ''}` : 'History unavailable'}</p></div>
+      <div className={styles.resultHeading}><h3>{dataset === 'completed' ? 'Completed official interactions' : 'Operational / legacy outcomes'}</h3><p role="status">{busy ? 'Loading interaction history…' : data ? `${data.total.toLocaleString()} matching ${data.total === 1 ? 'interaction' : 'interactions'} · Page ${pageNumber}${filters.search ? ` · Search: “${filters.search}”` : ''}` : 'History unavailable'}</p></div>
       {!busy && data && rows.length === 0 && <p className={styles.empty}>No retained interactions match these filters.</p>}
       {rows.length > 0 && <div className={styles.tableWrap}><table role="table"><caption className={styles.visuallyHidden}>Recorded AI questions, answers, users and feedback. Open View details for complete retained text and diagnostics.</caption><thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Date &amp; user</th><th role="columnheader" scope="col">Question</th><th role="columnheader" scope="col">AI answer</th><th role="columnheader" scope="col">Feedback</th><th role="columnheader" scope="col">Details</th></tr></thead><tbody role="rowgroup">{rows.map(row => <tr key={row.id} role="row">
-        <td role="cell"><time dateTime={row.occurredAt || undefined}>{date(row.occurredAt)}</time>{row.timeBasis === 'first_recorded' && <small>First recorded event</small>}<b className={styles.userName}>{row.userName || 'User not recorded'}</b>{row.userNameBasis === 'current_member_record' && <small>Current member profile</small>}<small>Role: {label(row.userRole)}</small><small>{originLabel(row.origin)}{row.legacy ? ' · Legacy' : ''}</small></td>
+        <td role="cell"><time dateTime={row.occurredAt || undefined}>{date(row.occurredAt)}</time>{row.timeBasis === 'first_recorded' && <small>First recorded event</small>}<b className={styles.userName}>{row.userName || (row.userId ? `User ${row.userId}` : 'User not recorded')}</b>{row.userNameBasis === 'current_member_record' && <small>Current member profile</small>}<small>Role: {label(row.userRole)}</small><small>{originLabel(row.origin)}{row.classification && row.classification !== 'none' ? ` · ${label(row.classification)}` : ''}{row.legacy ? ' · Legacy' : ''}</small></td>
         <td role="cell"><p className={styles.preview}>{row.question || missingText(row, 'Question')}</p></td>
         <td role="cell"><p className={styles.preview}>{row.answer || missingText(row, 'Answer')}</p></td>
-        <td role="cell"><FeedbackBadge value={row.feedback} /><small>Response: {timing(row.totalMs)}</small></td>
+        <td role="cell"><FeedbackBadge value={row.feedback} /><small>Response: {timing(row.responseMs ?? row.totalMs)}</small></td>
         <td role="cell"><button type="button" onClick={() => openDetail(row.id)} aria-label={`View interaction details from ${date(row.occurredAt)}${row.userName ? ` for ${row.userName}` : ''}`}>View details</button></td>
       </tr>)}</tbody></table></div>}
     </div>
@@ -125,11 +138,11 @@ export default function InteractionHistoryPanel({ api }) {
       <button type="button" disabled={busy || !paging.previous.length} onClick={() => setPaging(current => ({ cursor: current.previous.at(-1), previous: current.previous.slice(0, -1), asof: data?.asof || current.asof }))}>Previous page</button>
       <button type="button" disabled={busy || !data?.next} onClick={() => setPaging(current => ({ cursor: data.next, previous: [...current.previous, current.cursor], asof: data.asof }))}>Next page</button>
     </div>
-    {selectedId && <InteractionDetail key={selectedId} id={selectedId} api={api} close={closeDetail} />}
+    {selectedId && <InteractionDetail key={`${dataset}:${selectedId}`} id={selectedId} dataset={dataset} api={api} close={closeDetail} />}
   </section>;
 }
 
-function InteractionDetail({ id, api, close }) {
+function InteractionDetail({ id, dataset, api, close }) {
   const dialog = useRef(null);
   const [interaction, setInteraction] = useState(null);
   const [error, setError] = useState('');
@@ -146,14 +159,14 @@ function InteractionDetail({ id, api, close }) {
     let active = true;
     (async () => {
       try {
-        const result = await api({ op: 'interaction', answer: id });
+        const result = await api({ op: dataset === 'completed' ? 'interaction' : 'legacy-interaction', answer: id });
         if (active) setInteraction(result.interaction);
       } catch (e) {
         if (active) setError(e.message || 'Interaction details could not be loaded.');
       }
     })();
     return () => { active = false; };
-  }, [api, id]);
+  }, [api, id, dataset]);
 
   const d = interaction;
   const context = d?.context || {};
@@ -167,7 +180,7 @@ function InteractionDetail({ id, api, close }) {
       <section><h3>AI Answer</h3><p className={styles.fullText}>{d.answer || missingText(d, 'Answer')}</p></section>
       <section><h3>Feedback</h3><FeedbackBadge value={d.feedback} /><p>{d.feedbackAt ? `Latest recorded feedback: ${date(d.feedbackAt)}` : 'No feedback timestamp recorded.'}</p>{d.feedback === 'ambiguous' && <p>Conflicting votes share the latest recorded timestamp. A single Helpful or Not Helpful state cannot be determined.</p>}</section>
       <section><h3>User Context</h3><dl className={styles.context}>
-        <div><dt>User</dt><dd>{d.userName || 'Not recorded'}{d.userNameBasis === 'current_member_record' && <small>Current member profile linked to the recorded user ID; name at request time was not recorded.</small>}</dd></div>
+        <div><dt>User</dt><dd>{d.userName || d.userId || 'Not recorded'}{d.userNameBasis === 'current_member_record' && <small>Current member profile linked to the recorded member ID; name at request time was not recorded.</small>}</dd></div>
         <div><dt>Role at request time</dt><dd>{label(d.userRole)}</dd></div>
         <div><dt>LMS page</dt><dd>{context.page || 'Not recorded'}</dd></div>
         <div><dt>League</dt><dd>{context.league || 'Not recorded'}</dd></div>
@@ -176,12 +189,13 @@ function InteractionDetail({ id, api, close }) {
         <div><dt>Origin</dt><dd>{originLabel(d.origin)}</dd></div>
         <div><dt>Result</dt><dd>{label(d.result)}</dd></div>
         <div><dt>Source family</dt><dd>{label(d.sourceFamily)}</dd></div>
-        <div><dt>Response time</dt><dd>{timing(d.totalMs)}</dd></div>
+        <div><dt>Response time</dt><dd>{timing(d.responseMs ?? d.totalMs)}</dd></div>
         {context.liveIntent && <div><dt>Recorded live intent</dt><dd>{label(context.liveIntent)}</dd></div>}
         {context.resultCode && <div><dt>Recorded context result</dt><dd>{label(context.resultCode)}</dd></div>}
         {context.relationship && <div><dt>Recorded access relationship</dt><dd>{label(context.relationship)}</dd></div>}
         {context.workflow && <div><dt>Recorded workflow</dt><dd>{label(context.workflow)}</dd></div>}
       </dl></section>
+      {dataset === 'completed' && <section><h3>Official Sources</h3>{d.sourceRefs?.length ? <ul>{d.sourceRefs.map((source,index) => <li key={index}>{source.citation || [source.documentTitle || 'Official document',source.ruleNumber && `Rule ${source.ruleNumber}`,source.pageNumber && `Page ${source.pageNumber}`].filter(Boolean).join(' · ')}</li>)}</ul> : <p>No official source cited.</p>}</section>}
       <details className={styles.diagnostics}><summary>Diagnostics and retained evidence</summary><dl className={styles.context}><div><dt>Request / answer ID</dt><dd>{d.id}</dd></div><div><dt>LMS version</dt><dd>{d.version || 'Not recorded'}</dd></div><div><dt>Result</dt><dd>{label(d.result)}</dd></div><div><dt>Source family</dt><dd>{label(d.sourceFamily)}</dd></div></dl><p className={styles.hint}>Only existing retained diagnostics are available. Omitted data was not recorded or is no longer retained.</p>{d.diagnostics && Object.keys(d.diagnostics).length > 0 ? <pre>{JSON.stringify(d.diagnostics, null, 2)}</pre> : <p>No additional diagnostics were retained.</p>}</details>
     </>}
   </dialog>;

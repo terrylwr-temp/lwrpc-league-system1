@@ -43,7 +43,7 @@ function database(responses = [{ rows: [row()], summary }]) {
 }
 
 for (const role of ['commissioner', 'league_manager', 'club_pro', 'captain', 'co_captain', 'player', null]) {
-  for (const op of ['interactions', 'interaction']) {
+  for (const op of ['legacy-interactions', 'legacy-interaction']) {
     test(`history ${op} authorizes ${role || 'anonymous'} before any database access`, async () => {
       const db = database();
       let authorizations = 0;
@@ -67,7 +67,7 @@ for (const role of ['commissioner', 'league_manager', 'club_pro', 'captain', 'co
 }
 
 test('both history operations reject writes even with a valid existing review action token', async () => {
-  for (const op of ['interactions', 'interaction']) {
+  for (const op of ['legacy-interactions', 'legacy-interaction']) {
     const db = database();
     const body = { token: reviewToken({ user, caseId: randomUUID(), revision: 1, cutoff }), operation: randomUUID(), action: 'note', note: 'Do not write this' };
     const response = await handleReviewRequest(new Request(`http://local/api/ai-assistant/review?op=${op}`, {
@@ -87,7 +87,7 @@ test('the existing route blocks View As markers before delegating either history
     handleReviewRequest: () => { delegated++; return Response.json({ success: true }); },
     authorizeAdminRequest: () => { throw Error('authorization must not run inside isolated context'); },
   });
-  for (const op of ['interactions', 'interaction']) {
+  for (const op of ['legacy-interactions', 'legacy-interaction']) {
     for (const method of ['GET', 'POST']) {
       for (const headers of [
         { 'x-view-as-context': 'synthetic-context' },
@@ -102,7 +102,7 @@ test('the existing route blocks View As markers before delegating either history
     }
   }
   assert.equal(delegated, 0);
-  assert.equal(route.GET(new Request(`${env.LMS_ORIGIN}/api/ai-assistant/review?op=interactions`)).status, 200);
+  assert.equal(route.GET(new Request(`${env.LMS_ORIGIN}/api/ai-assistant/review?op=legacy-interactions`)).status, 200);
   assert.equal(delegated, 1);
 });
 

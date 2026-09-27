@@ -95,7 +95,8 @@ export async function runPlayerOfficialAnswer({ body, role, userId, memberId = n
   };
   const answer = await generateOfficialAnswer({ retrieval, supabase });
   return { answer, retrieval, conversationResolution: retrieval.conversationResolution, result: toPlayerAnswerResult(answer, userId, {
-    originalQuestion: resolution.rawQuestion, effectiveQuestion: resolution.effectiveQuestion, memberId, retrieval, now: now(), answerId,
+    originalQuestion: resolution.clarificationConsumed ? resolution.reviewOriginalQuestion || resolution.rawQuestion : resolution.rawQuestion,
+    effectiveQuestion: resolution.effectiveQuestion, memberId, retrieval, now: now(), answerId,
   }) };
 }
 
@@ -127,7 +128,7 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
   const eligibleForFeedback = evidenceSufficient && !conflict && sources.length > 0;
   const feedbackReceipt = eligibleForFeedback ? createFeedbackReceipt({
     userId, memberId, originalQuestion, effectiveQuestion, answer: answer?.answer, sources: answer?.sources || [], selectedEvidence: answer?.selectedEvidence || [], retrieval,
-    assistantVersion: APP_VERSION, model: answer?.model, now, answerId,
+    assistantVersion: APP_VERSION, model: answer?.model, now, answerId, completedInteraction: true,
   }) : null;
   return {
     kind: conflict ? "conflict" : evidenceSufficient ? "answer" : "insufficient_evidence",

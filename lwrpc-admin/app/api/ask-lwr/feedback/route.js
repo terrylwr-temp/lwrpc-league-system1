@@ -18,6 +18,17 @@ export async function POST(req) {
     if (authorization.error) return failure(authorization.status);
     if (typeof body?.helpful !== "boolean") return failure(400);
     const claims = readFeedbackReceipt(body.receipt, authorization.user.id);
+    let completed = null;
+    if (claims.completedInteraction === true) {
+      const lookup = await authorization.supabase.from('ai_completed_interactions')
+        .select('id,auth_user_id,origin,test_classification,result_kind')
+        .eq('id', claims.answerId).maybeSingle();
+      if (lookup.error) throw lookup.error;
+      completed = lookup.data;
+      if (!completed || completed.auth_user_id !== authorization.user.id
+        || completed.origin !== 'player_interface' || completed.test_classification !== 'none'
+        || completed.result_kind !== 'answer') return failure(403);
+    }
     const { data: existing, error: existingError } = await authorization.supabase
       .from("ai_answer_feedback_events")
       .select("id, helpful, created_at")
@@ -32,7 +43,8 @@ export async function POST(req) {
       return NextResponse.json({ success: true, result: { helpful: latest.helpful, changed: false, feedbackId: latest.id } });
     }
     const event = {
-      answer_id: claims.answerId, auth_user_id: authorization.user.id, member_id: claims.memberId || authorization.memberRows?.[0]?.id || null,
+      answer_id: claims.answerId, completed_interaction_id: completed?.id || null,
+      auth_user_id: authorization.user.id, member_id: claims.memberId || authorization.memberRows?.[0]?.id || null,
       helpful: body.helpful, original_question: claims.originalQuestion, effective_question: claims.effectiveQuestion, generated_answer: claims.answer,
       source_snapshot: claims.sources || [], selection_snapshot: { selectedEvidence: claims.selectedEvidence || [], retrieval: claims.retrieval || {} },
       assistant_version: claims.assistantVersion || "", model: claims.model || "", comment: null,

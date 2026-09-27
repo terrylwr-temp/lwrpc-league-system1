@@ -7,16 +7,20 @@ import { retrieveOfficialEvidence } from "../../lib/aiRetrieval";
 import { runPlayerOfficialAnswer } from "../../lib/askLwrPlayerAnswer";
 import { authorizeAdminRequest } from "../../lib/serverSupabase";
 import { observeQualityRequest } from "../../lib/aiQualityCapture";
+import { persistCompletedOfficial } from "../../lib/aiCompletedInteraction";
 import {liveAuthFailure,authenticateLive,needsLive,runLive} from '../../lib/liveLmsService.js';
 
 export const runtime = "nodejs";
 
 export async function POST(req) {
+  const routeStarted = performance.now();
   const viewAsDenied = rejectViewAsMutation(req);
   if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
+    let privatePathAttempted = false;
     if(needsEligibility(body)) {
+      privatePathAttempted = true;
       const eligibilityAuth=await authorizeAdminRequest(req,"player");
       if(eligibilityAuth.error)return failure(eligibilityAuth.status);
       const result=await runEligibility({body,principal:await authenticateLive(req),deferRecovery:after});
@@ -24,6 +28,7 @@ export async function POST(req) {
       body.conversationReceipt=null;
     }
     if(needsLive(body)) {
+      privatePathAttempted = true;
       const result=await runLive({deferRecovery:after,body,principal:await authenticateLive(req)});
       if(result)return NextResponse.json({success:true,result},{headers:{'Cache-Control':'private, no-store'}});
       body.conversationReceipt=null;
@@ -31,7 +36,9 @@ export async function POST(req) {
     const authorization = await authorizeAdminRequest(req, "player");
     if (authorization.error) return failure(authorization.status);
 
-    const { result } = await observeQualityRequest({ deferRecovery: after, supabase: authorization.supabase, run: (answerId, trace) => runPlayerOfficialAnswer({
+    const { result } = await observeQualityRequest({ deferRecovery: after, supabase: authorization.supabase,
+      complete: privatePathAttempted ? undefined : details => persistCompletedOfficial(authorization.supabase, { ...details, authorization, routeStarted, origin: 'player_interface' }),
+      run: (answerId, trace) => runPlayerOfficialAnswer({
       body, role: authorization.role, userId: authorization.user.id, memberId: authorization.memberRows?.[0]?.id || null, supabase: authorization.supabase,
       answerId, retrieveOfficialEvidence: args => { trace.stage3Invoked = true; return retrieveOfficialEvidence(args); }, generateOfficialAnswer,
     }) });

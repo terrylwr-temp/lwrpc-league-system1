@@ -1,0 +1,11 @@
+{
+  "setupSql": "create schema auth; create table auth.users(id uuid primary key); create table public.members(id uuid primary key,first_name text,last_name text,full_name text); create table public.ai_request_outcomes(id uuid primary key,request_started_at timestamptz,completed_at timestamptz,origin text,final_kind text); create table public.ai_answer_feedback_events(id uuid primary key,answer_id uuid,created_at timestamptz,helpful boolean); create function public.capture_ai_quality(jsonb,jsonb,jsonb,uuid) returns jsonb language sql as $$ select '{}'::jsonb $$; grant select on public.members,public.ai_request_outcomes,public.ai_answer_feedback_events to service_role;",
+  "tables": {
+    "ai_completed_interactions": {
+      "grants": { "anon": [], "authenticated": [], "service_role": ["SELECT", "INSERT"] },
+      "rls": true,
+      "policies": [],
+      "sequences": {}
+    }
+  }
+}

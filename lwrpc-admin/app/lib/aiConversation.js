@@ -47,7 +47,8 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
   }
   if(!prior && /^(?:option )?\d{1,2}[?.!]*$/i.test(rawQuestion))return {kind:'clarification',classification:'unresolved_selection',rawQuestion,effectiveQuestion:'',clarification:{category:'full_question',message:'Please ask the full question again.'}};
   const rawMatch = matchingQuestion(rawQuestion, { leagueChoice: prior?.purpose === "clarification" && ["roster_league","league_date"].includes(prior.category) });
-  const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false };
+  const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false,
+    ...(prior?.purpose === 'clarification' ? {reviewOriginalQuestion: prior.originalQuestion} : {}) };
   const bounded=registrationReleaseIntent(rawMatch);
   if(bounded?.contextConflict)return {...diagnostics,kind:'clarification',rawQuestion,effectiveQuestion:'',clarification:{category:'full_question',message:'Please clarify the conflicting league or season in your question.'}};
   if(/^how do i register it[?.!]*$/i.test(rawMatch)){
@@ -166,11 +167,11 @@ export function clarificationFromRetrieval(resolution, retrieval) {
   return { ...resolution, ...clarificationResolution(resolution.rawQuestion, CLARIFICATION_COLOR, hasCandidates ? "missing_color_subject_with_active_candidates" : "missing_color_subject", resolution.priorContextAvailable), clarificationQuestion: resolution.effectiveQuestion };
 }
 
-export function createFeedbackReceipt({ userId, memberId = null, originalQuestion, effectiveQuestion, answer, sources = [], selectedEvidence = [], retrieval, assistantVersion, model, now = Date.now(), answerId = randomUUID() } = {}) {
+export function createFeedbackReceipt({ userId, memberId = null, originalQuestion, effectiveQuestion, answer, sources = [], selectedEvidence = [], retrieval, assistantVersion, model, now = Date.now(), answerId = randomUUID(), completedInteraction = false } = {}) {
   if (!validUuid(answerId)) throw new Error("Invalid server answer identity.");
   return sealReceipt({
     sub: requiredUserId(userId), purpose: "feedback", exp: now + FEEDBACK_TTL_MS, answerId, memberId: cleanId(memberId),
-    originalQuestion: cleanQuestion(originalQuestion), effectiveQuestion: cleanQuestion(effectiveQuestion), answer: String(answer || "").trim().slice(0, 6000),
+    originalQuestion: cleanQuestion(originalQuestion), effectiveQuestion: cleanQuestion(effectiveQuestion), answer: String(answer || "").trim().slice(0, 6000), completedInteraction,
     sources: safeSources(sources), selectedEvidence: safeEvidence(selectedEvidence),
     retrieval: safeRetrievalSnapshot(retrieval), assistantVersion: String(assistantVersion || "").slice(0, 80), model: String(model || "").slice(0, 120),
   });
