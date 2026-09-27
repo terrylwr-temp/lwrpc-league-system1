@@ -86,6 +86,7 @@ export default function SchedulingPage() {
   const [requestDivisionFilter, setRequestDivisionFilter] = useState("");
   const [requestTeamFilter, setRequestTeamFilter] = useState("");
   const [requestDateFilter, setRequestDateFilter] = useState("");
+  const [requestSortBy, setRequestSortBy] = useState("location");
 
   useUnsavedChangesWarning(
     Boolean(
@@ -302,8 +303,9 @@ export default function SchedulingPage() {
       divisionId: requestDivisionFilter,
       teamId: requestTeamFilter,
       requestDate: requestDateFilter,
+      sortBy: requestSortBy,
     }),
-    [requestDateFilter, requestDivisionFilter, requestLocationFilter, requestTeamFilter, specialRequests]
+    [requestDateFilter, requestDivisionFilter, requestLocationFilter, requestSortBy, requestTeamFilter, specialRequests]
   );
 
   function getSeasonWeeks(startDate, endDate) {
@@ -1413,7 +1415,7 @@ export default function SchedulingPage() {
                 </button>
               )}
             >
-              <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2 xl:grid-cols-5">
+              <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2 xl:grid-cols-6">
                 <select value={requestLocationFilter} onChange={(e) => setRequestLocationFilter(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3" aria-label="Filter Special Requests by Location">
                   <option value="">All Locations</option>
                   {locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
@@ -1427,6 +1429,10 @@ export default function SchedulingPage() {
                   {requestFilterTeamOptions.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
                 </select>
                 <input type="date" value={requestDateFilter} onChange={(e) => setRequestDateFilter(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3" aria-label="Filter Special Requests by Date" />
+                <select value={requestSortBy} onChange={(e) => setRequestSortBy(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3" aria-label="Sort Special Requests by">
+                  <option value="location">Sort by Location</option>
+                  <option value="date">Sort by Date</option>
+                </select>
                 <button type="button" onClick={() => { setRequestLocationFilter(""); setRequestDivisionFilter(""); setRequestTeamFilter(""); setRequestDateFilter(""); }} className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300">
                   Clear Filters
                 </button>

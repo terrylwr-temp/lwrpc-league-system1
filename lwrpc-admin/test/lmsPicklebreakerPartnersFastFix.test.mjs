@@ -9,7 +9,7 @@ const exact='can i switch my mix team partners to play the picklebreakers?';
 const rule={chunkId:'partners',documentId:'rules',documentVersionId:'active',documentTitle:'DUPR League Rules',documentType:'league_rules',documentAuthorityRank:10,ruleNumber:'6.2.3',pageNumber:9,heading:'Match Day Format',combinedScore:.49,structuralContext:[{content:'6.2. Saturday DUPR League'}],content:'6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams (same partners as the Mixed Round) that'};
 const noise={...rule,chunkId:'other',ruleNumber:'18.G',documentType:'usap_rulebook',content:'18.G Partner Change (Doubles). Tournament partner changes.'};
 const fixture=(question,candidates=[noise,rule])=>({request:{question},candidates,authorityReviewCandidates:candidates,suppliedEvidence:candidates,evidence:{sufficient:true,threshold:.35}});
-for(const question of [exact,'Can we change mixed doubles partners for the Picklebreaker?','Do we have to keep the same partners for the Saturday Picklebreaker?','Can I swap partners to play the picklebreakers?','Can we use different partners in the Picklebreaker?']){
+for(const question of [exact,'Can we change mixed doubles partners for the Picklebreaker?','Do we have to keep the same partners for the Saturday Picklebreaker?','Can I swap partners to play the picklebreakers?','Can we use different partners in the Picklebreaker?','In the saturday league, if the picklebreaker is played, do the same mixed teams need to play?','If we play the picklebreaker, do the mixed teams need to be the same?','Can we use different mixed teams in the Saturday Picklebreaker?']){
  test(`same-partner rule: ${question}`,()=>{
   assert.equal(officialQuestionConcept(question)?.kind,'picklebreaker_partners');
   const selected=selectAnswerEvidence(fixture(question));
@@ -20,7 +20,7 @@ for(const question of [exact,'Can we change mixed doubles partners for the Pickl
  });
 }
 test('neighboring and eligibility requests do not enter partner-continuity intent',()=>{
- for(const q of ['How does the Saturday Picklebreaker work?','Can I switch my mixed team partners?','Can Terry play with Tim?','Are my partners eligible for the Picklebreaker?','Can I change partners for the Picklebreaker after an injury?','What DUPR rating can my different Picklebreaker partners have?'])assert.notEqual(officialQuestionConcept(q)?.kind,'picklebreaker_partners',q);
+ for(const q of ['How does the Saturday Picklebreaker work?','Can I switch my mixed team partners?','Can Terry play with Tim?','Are my partners eligible for the Picklebreaker?','Can I change partners for the Picklebreaker after an injury?','What DUPR rating can my different Picklebreaker partners have?','Can extra players join the Saturday mixed round?','Do the same mixed teams play every Saturday match?'])assert.notEqual(officialQuestionConcept(q)?.kind,'picklebreaker_partners',q);
  assert.equal(officialQuestionConcept('How does the Saturday Picklebreaker work?').kind,'scoring');
 });
 test('explicit other league, low score, and absent same-partner provision fail closed',()=>{
@@ -36,6 +36,18 @@ test('missed initial passage is recovered with one bounded concept search',async
  assert.deepEqual(selected.map(x=>x.chunkId),['partners']);
  assert.equal(searches,2);assert.deepEqual(embeddings,[exact,'Picklebreaker same partners as the Mixed Round']);
  assert.equal(result.request.question,exact);
+});
+test('same-mixed-team question recovers Rule 6.2.3.5 after unrelated mixed-round evidence ranks first',async()=>{
+ const question='In the saturday league, if the picklebreaker is played, do the same mixed teams need to play?';
+ const unrelated={...rule,chunkId:'mixed-round',content:'6.2.2. Mixed teams may be formed from gender doubles players or from additional players who participate only in the mixed round.'};
+ const raw=c=>({chunk_id:c.chunkId,document_id:c.documentId,document_version_id:c.documentVersionId,document_title:c.documentTitle,document_type:c.documentType,document_authority_rank:c.documentAuthorityRank,document_scope_kind:'all',page_number:9,heading:c.heading,rule_number:c.ruleNumber,content:c.content,semantic_score:.5,keyword_score:.5,exact_score:.5,authority_score:.5,context_score:0,combined_score:.49});
+ let searches=0;
+ const result=await retrieveOfficialEvidence({body:{question},embedQuery:async()=>({embedding:Array(1536).fill(.01),inputTokens:5}),supabase:{rpc:async()=>({data:(++searches===1?[unrelated]:[rule]).map(raw),error:null})}});
+ const selected=await selectAnswerEvidenceWithAssistance(result);
+ assert.deepEqual(selected.map(x=>x.chunkId),['partners']);
+ assert.match(selected[0].content,/6\.2\.3\.5\. Picklebreaker/);
+ assert.doesNotMatch(selected[0].content,/additional players/);
+ assert.equal(searches,2);
 });
 
 async function retrieveOfficialEvidence(options){return retainNonVerificationFixture(await retrieveOfficialEvidenceRaw(options));}

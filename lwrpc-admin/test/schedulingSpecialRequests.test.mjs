@@ -58,16 +58,20 @@ test("member search uses names and email and caps large result sets", () => {
   assert.deepEqual(filterSpecialRequestMembers(members, "example.test", 1).map((member) => member.id), ["1"]);
 });
 
-test("Special Requests filter exactly and sort upcoming before past", () => {
+test("Special Requests sort by location initially or by date when selected", () => {
   const rows = [
-    { id: "past-newer", request_date: "2026-09-16", location_id: "location-1", division_id: "division-1", team_id: "team-1" },
-    { id: "future-later", request_date: "2026-10-02", location_id: "location-2", division_id: "division-2", team_id: "team-2" },
-    { id: "future-sooner", request_date: "2026-09-20", location_id: "location-1", division_id: "division-1", team_id: "team-1" },
-    { id: "past-older", request_date: "2026-08-01", location_id: "location-1", division_id: "division-1", team_id: "team-1" },
+    { id: "past-newer", request_date: "2026-09-16", location_id: "location-1", location: { name: "Cedar" }, division_id: "division-1", team_id: "team-1" },
+    { id: "future-later", request_date: "2026-10-02", location_id: "location-2", location: { name: "Alpha" }, division_id: "division-2", team_id: "team-2" },
+    { id: "future-sooner", request_date: "2026-09-20", location_id: "location-1", location: { name: "Cedar" }, division_id: "division-1", team_id: "team-1" },
+    { id: "past-older", request_date: "2026-08-01", location_id: "location-1", location: { name: "Cedar" }, division_id: "division-1", team_id: "team-1" },
   ];
 
   assert.deepEqual(
     filterAndSortSpecialRequests(rows, {}, "2026-09-18").map((row) => row.id),
+    ["future-later", "future-sooner", "past-newer", "past-older"]
+  );
+  assert.deepEqual(
+    filterAndSortSpecialRequests(rows, { sortBy: "date" }, "2026-09-18").map((row) => row.id),
     ["future-sooner", "future-later", "past-newer", "past-older"]
   );
   assert.deepEqual(
@@ -92,6 +96,10 @@ test("Scheduling UI exposes CRUD and filters while generation remains request-in
   assert.match(page, /Filter Special Requests by Division/);
   assert.match(page, /Filter Special Requests by Team/);
   assert.match(page, /Filter Special Requests by Date/);
+  assert.match(page, /\[requestSortBy, setRequestSortBy\] = useState\("location"\)/);
+  assert.match(page, /aria-label="Sort Special Requests by"/);
+  assert.match(page, /<option value="location">Sort by Location<\/option>/);
+  assert.match(page, /<option value="date">Sort by Date<\/option>/);
   assert.doesNotMatch(generation, /specialRequest/i);
   assert.match(migration, /Administrative tracking only/);
   assert.doesNotMatch(migration, /references public\.matches|references public\.league_schedule_settings|references public\.location_court_availability/i);

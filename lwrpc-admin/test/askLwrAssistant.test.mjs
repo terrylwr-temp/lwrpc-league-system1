@@ -131,7 +131,7 @@ test("the shared AI trigger covers every authenticated header shell without chan
   assert.doesNotMatch(`${header}\n${trigger}\n${playerDashboard}\n${captainDashboard}\n${adminDashboard}\n${assistant}\n${route}\n${page}`, /Ask LWR Pickleball AI/);
   assert.ok(assistant.indexOf("<form onSubmit={submit}") < assistant.indexOf("exchanges.map"));
   assert.ok(assistant.indexOf("exchanges.map") < assistant.indexOf("Browse Guides &amp; Rules"));
-  assert.match(assistant, /\[\{ id: exchangeId, question: nextQuestion, pending: true \}, \.\.\.current\]/);
+  assert.match(assistant, /\[\{ id: exchangeId, question: displayQuestionForSubmission\(nextQuestion,choiceLabel\), pending: true \}, \.\.\.current\]/);
   assert.doesNotMatch(assistant, />New Conversation</);
   assert.match(assistant, /if \(entry\.pending\).*Finding the official answer/s);
   assert.match(assistant, /if \(entry\.requestError\).*TECHNICAL_ERROR/);

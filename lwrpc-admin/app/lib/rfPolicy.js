@@ -1,6 +1,6 @@
 // The caller must supply the reviewed Rules threshold; there is no fallback cutoff.
 export function rulesRfThreshold(content) {
-  const match = String(content || '').match(/4\.1\.1\.[\s\S]*?Reliability Factor of (\d+(?:\.\d{1,3})?) or below will be classified as/);
+  const match = String(content || '').match(/4\.1\.1\.[\s\S]{0,240}?Reliability\s+(?:Score\s*\/\s*)?Factor\s+of\s+(\d+(?:\.\d{1,3})?)\s+or\s+below\s+will\s+be\s+classified\s+as/);
   const value = match ? Number(match[1]) : NaN;
   return Number.isFinite(value) && value >= 0 && value <= 100 ? value : null;
 }

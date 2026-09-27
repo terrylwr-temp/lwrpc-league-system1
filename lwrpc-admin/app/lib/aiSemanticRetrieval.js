@@ -89,6 +89,7 @@ export async function assistSemanticRetrieval(retrieval,select,established=[]) {
   diagnostic.status='started';
   diagnostic.initialFailure=established.length?null:retrieval.evidence.sufficient?'APPLICABILITY_REJECTED':'BELOW_EVIDENCE_THRESHOLD';
   const originalPolicy=needsPolicyEvidence(retrieval.request.question);
+  const originalConcept=officialQuestionConcept(retrieval.request.question);
   try {
     const canonical=canonicalMembershipQuery(retrieval.request.question);
     if(!established.length&&canonical){
@@ -133,8 +134,10 @@ export async function assistSemanticRetrieval(retrieval,select,established=[]) {
       retrieval.candidates=rankSemanticCandidates(retrieval.candidates,plan,runtime.qualifies);
       runtime.refresh();
       if(!retrieval.candidates.some(runtime.qualifies))return [];
-      // Never replace the user's question, auth context, conversation or scope.
-      const view={...retrieval,request:{...retrieval.request,question:plan.normalizedQuestion}};
+      // A rewrite can broaden retrieval, but a recognized original concept must
+      // still govern applicability so adjacent-topic passages cannot replace
+      // evidence that answers the relationship in the user's question.
+      const view={...retrieval,request:{...retrieval.request,question:originalConcept?retrieval.request.question:plan.normalizedQuestion}};
       // A failed recognized policy remains authoritative: do not transform it into
       // a generic answer and bypass its completeness/conflict/clarification checks.
       if(originalPolicy && questionIntent(retrieval.request.question).object!==questionIntent(plan.normalizedQuestion).object)return [];
@@ -153,6 +156,16 @@ export async function assistSemanticRetrieval(retrieval,select,established=[]) {
         const assessed=await selectSemanticEvidence(assessmentView,{assess:runtime.assess,qualifies:runtime.qualifies,preferredIds:(selected.length?selected:established).map(c=>c.chunkId)});
         diagnostic.semanticEvidence=assessed.diagnostic;
         if(assessed.selected.length){retrieval.policyDiagnostic=view.policyDiagnostic;retrieval.policyEvidence=view.policyEvidence;}
+        // A verification assessment selects chunk IDs, not passages. The
+        // Saturday mixed-participation provision may share its stored chunk
+        // with Scheduling (6.2.1), so replacing the direct 6.2.2 passage with
+        // that whole chunk changes the final citation and admits adjacent
+        // Player Cap (6.2.5) as governing evidence. Keep only assessed IDs
+        // whose directly applicable passages were selected above.
+        if(originalConcept?.kind==='mixed_participation'&&selected.length){
+          const verifiedIds=new Set(assessed.selected.map(c=>c.chunkId));
+          return selected.filter(c=>verifiedIds.has(c.chunkId));
+        }
         return assessed.selected;
       }
       if(selected.length){
