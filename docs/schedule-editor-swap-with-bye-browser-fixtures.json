@@ -1,0 +1,33 @@
+{
+  "cases": [
+    "two eligible same-location byes; foreign/busy excluded; selection/result; cancel sends nothing",
+    "home swap saved via captured API; exact schedule position and opponent retained; removed team gets bye",
+    "away swap saved and opponent preserved",
+    "stale conflict remains visible without mutation",
+    "no recorded bye: actions absent",
+    "existing Swap Home confirmation still opens and cancels"
+  ],
+  "capturedRequests": [
+    {
+      "side": "home",
+      "byeId": "20000000-0000-4000-8000-000000000103",
+      "conflict": false
+    },
+    {
+      "side": "away",
+      "byeId": "20000000-0000-4000-8000-000000000104",
+      "conflict": false
+    },
+    {
+      "side": "home",
+      "byeId": "20000000-0000-4000-8000-000000000103",
+      "conflict": true
+    }
+  ],
+  "blockedWrites": [],
+  "pageErrors": [],
+  "httpErrors": [],
+  "forwardedBusinessWrites": 0,
+  "forwardedMail": 0,
+  "status": "PASS"
+}

@@ -4,11 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTimestampShort } from "../lib/dateTime";
 import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { appConfirm, appPrompt } from "../lib/appDialog";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
+
+import { getByeSwapCandidates, scheduleRowSnapshot } from '../lib/scheduleByeSwap.js';
 
 const COMPLETE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -21,6 +23,12 @@ export default function ScheduleEditorPage() {
   const [locations, setLocations] = useState([]);
   const [scheduleSettings, setScheduleSettings] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [byes, setByes] = useState([]);
+  const [byeLoadError, setByeLoadError] = useState('');
+  const [byeSwapPrompt, setByeSwapPrompt] = useState(null);
+  const [byeSwapSelection, setByeSwapSelection] = useState('');
+  const [byeSwapSaving, setByeSwapSaving] = useState(false);
+  const [byeSwapError, setByeSwapError] = useState('');
   const [availability, setAvailability] = useState([]);
   const [leagueBlackouts, setLeagueBlackouts] = useState([]);
   const [scoreMembersById, setScoreMembersById] = useState({});
@@ -115,6 +123,10 @@ export default function ScheduleEditorPage() {
     const { data: blackoutData } = await supabase
       .from("league_blackout_dates")
       .select("*");
+
+    const { data: byeData, error: byeError } = await supabase.from('team_byes').select('*');
+    setByes(byeError ? [] : byeData || []);
+    setByeLoadError(byeError ? 'Swap with Bye is unavailable because bye records could not be loaded.' : '');
 
     const scoreMemberIds = [
       ...(matchData || []).map((match) => match.score_entered_by_member_id),
@@ -566,6 +578,65 @@ export default function ScheduleEditorPage() {
     } finally {
       setIsBulkUpdating(false);
     }
+  }
+
+  function byeChoices(match, side) {
+    if (!divisions.some(division => division.id === match.division_id)) return [];
+    return getByeSwapCandidates({ match, side, teams, byes, matches });
+  }
+
+  function openByeSwap(match, side) {
+    const choices = byeChoices(match, side);
+    if (!choices.length) return;
+    setByeSwapPrompt({ match, side, choices });
+    setByeSwapSelection('');
+    setByeSwapError('');
+  }
+
+  function cancelByeSwap() {
+    if (byeSwapSaving) return;
+    setByeSwapPrompt(null);
+    setByeSwapSelection('');
+    setByeSwapError('');
+  }
+
+  async function confirmByeSwap() {
+    const choice = byeSwapPrompt?.choices.find(row => row.bye.id === byeSwapSelection);
+    if (!choice || byeSwapSaving) return;
+    setByeSwapSaving(true);
+    setByeSwapError('');
+    try {
+      const response = await fetch('/api/schedule-editor/swap-with-bye', {
+        method: 'POST',
+        headers: await getRequestAuthorizationHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          matchId: byeSwapPrompt.match.id, side: byeSwapPrompt.side, byeId: choice.bye.id,
+          expectedMatch: scheduleRowSnapshot(byeSwapPrompt.match), expectedBye: scheduleRowSnapshot(choice.bye),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'The swap could not be saved.');
+      setByeSwapPrompt(null);
+      setByeSwapSelection('');
+      await loadData();
+    } catch (error) {
+      setByeSwapError(error.message || 'The swap could not be saved.');
+    } finally {
+      setByeSwapSaving(false);
+    }
+  }
+
+  function renderByeTeamAction(match, side) {
+    const name = match[side + '_team']?.name || (side === 'home' ? 'Home' : 'Away');
+    if (!byeChoices(match, side).length) return <span>{name}</span>;
+    return (
+      <button type="button" onClick={() => openByeSwap(match, side)}
+        disabled={byeSwapSaving || isBulkUpdating || swapUpdating}
+        aria-label={`Swap ${name} (${side === 'home' ? 'Home' : 'Away'}) with Bye`}
+        title="Swap with Bye" className="rounded text-left text-blue-800 underline decoration-dotted underline-offset-4 hover:text-blue-950 disabled:opacity-60">
+        {name}<span className="sr-only"> — Swap with Bye</span>
+      </button>
+    );
   }
 
   async function swapHomeAway(match) {
@@ -1133,7 +1204,7 @@ export default function ScheduleEditorPage() {
 
           <div className="min-w-0">
             <div className="truncate text-sm font-bold text-slate-900">
-              {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+              {renderByeTeamAction(match, "home")} vs {renderByeTeamAction(match, "away")}
             </div>
             <div className="truncate text-xs text-slate-600">
               {match.leagues?.name || "No League"} · {match.divisions?.name || "No Division"}
@@ -1716,6 +1787,41 @@ export default function ScheduleEditorPage() {
             </div>
           </div>
         )}
+
+        {byeLoadError && <p role="status" className="text-sm text-amber-800">{byeLoadError}</p>}
+        {byeSwapPrompt && (() => {
+          const { match, side, choices } = byeSwapPrompt;
+          const selectedName = match[side + '_team']?.name || side;
+          const choice = choices.find(row => row.bye.id === byeSwapSelection);
+          const homeName = side === 'home' ? choice?.team.name || 'Selected bye team' : match.home_team?.name;
+          const awayName = side === 'away' ? choice?.team.name || 'Selected bye team' : match.away_team?.name;
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+              onKeyDown={event => { if (event.key === 'Escape') cancelByeSwap(); }}>
+              <div role="dialog" aria-modal="true" aria-labelledby="bye-swap-title"
+                className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
+                <h2 id="bye-swap-title" className="text-xl font-black text-slate-950">Swap Team with Bye</h2>
+                <p className="mt-2 text-sm text-slate-600">{match.divisions?.name} · {formatDate(match.scheduled_date)} · Week {match.week_number ?? 'not set'}</p>
+                <p className="mt-4 font-semibold">Current: {match.home_team?.name} (Home) vs {match.away_team?.name} (Away)</p>
+                <label htmlFor="bye-swap-selection" className="mt-4 block font-semibold">Replace {selectedName} ({side === 'home' ? 'Home' : 'Away'}) with:</label>
+                <select id="bye-swap-selection" autoFocus disabled={byeSwapSaving} value={byeSwapSelection}
+                  onChange={event => { setByeSwapSelection(event.target.value); setByeSwapError(''); }}
+                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2">
+                  <option value="">Select a bye team</option>
+                  {choices.map(row => <option key={row.bye.id} value={row.bye.id}>{row.team.name}</option>)}
+                </select>
+                <p className="mt-4 font-bold">Result: {homeName} (Home) vs {awayName} (Away)</p>
+                <p className="mt-2 text-sm">{selectedName} will receive the bye. Date, week, opponent, home/away position, time, location/courts and match format stay the same.</p>
+                {byeSwapError && <p role="alert" className="mt-3 text-sm font-bold text-red-800">{byeSwapError}</p>}
+                <div className="mt-6 flex justify-end gap-2">
+                  <button type="button" disabled={byeSwapSaving} onClick={cancelByeSwap} className="rounded-lg border border-slate-300 px-4 py-2 font-bold disabled:opacity-60">Cancel</button>
+                  <button type="button" disabled={!choice || byeSwapSaving} onClick={confirmByeSwap}
+                    className="rounded-lg bg-blue-700 px-4 py-2 font-bold text-white disabled:bg-slate-300">{byeSwapSaving ? 'Saving...' : 'Confirm Swap'}</button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {swapPrompt && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
