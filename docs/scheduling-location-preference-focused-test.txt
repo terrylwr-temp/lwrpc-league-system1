@@ -1,0 +1,56 @@
+(node:13476) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/t_ade/.codex/worktrees/scheduling-location-release/lwrpc-league-system/lwrpc-admin/app/lib/deleteGeneratedSchedule.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\t_ade\.codex\worktrees\scheduling-location-release\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ SDUPR8-sized schedule deletes without an oversized URL and preserves unrelated rows (198.2583ms)
+✔ large schedules paginate line lookups and batch every ID-filtered delete (655.5873ms)
+✔ copied setting deletes only its matches and linked byes (5.0243ms)
+✔ failure on a later line-lookup page prevents every write (27.4197ms)
+✔ failure on a later game-delete batch stops before any parent deletion (16.3673ms)
+✔ match_lines error is reported and prevents subsequent deletion stages (3.6774ms)
+✔ matches error is reported and prevents subsequent deletion stages (2.3941ms)
+✔ team_byes error is reported and prevents subsequent deletion stages (2.7098ms)
+✔ a schedule without lines skips game deletion and still removes its matches (9.9426ms)
+✔ an empty match selection never deletes byes or sends a request (13.54ms)
+(node:13584) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/t_ade/.codex/worktrees/scheduling-location-release/lwrpc-league-system/lwrpc-admin/app/lib/leagueScheduleGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\t_ade\.codex\worktrees\scheduling-location-release\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 12 teams, 8 weeks: three four-team locations produce zero same-location matchups (37.8253ms)
+✔ zero-location result is stable across reversed and interleaved team input ordering (27.9115ms)
+✔ unavoidable same-location opponents remain eligible and reach the proven minimum (61.1072ms)
+✔ unequal location groups and odd deficit parity reach their mathematical minima (196.138ms)
+✔ location identity uses IDs, ignores display names and does not equate unknown locations (0.4134ms)
+✔ odd divisions preserve one unique bye per cycle and zero local games where possible (2.1464ms)
+✔ full and repeated round-robin cycles retain opponent coverage and reversed hosting (0.9702ms)
+✔ a single location still generates the complete season (0.5052ms)
+✔ aggregate court capacity and existing bookings outrank the location preference (20.876ms)
+✔ location blackout swaps hosts without changing the optimal opponent count (18.4718ms)
+✔ date blackouts and every-other-week cadence retain accepted dates and week numbers (1.6598ms)
+✔ hard pairing requirements can require local games and are never relaxed (1.8722ms)
+✔ alternate swaps improve an initial schedule even when the bounded search is disabled (1.3838ms)
+✔ legacy court warnings, omitted blackout games and season-end warnings remain reviewable (0.7287ms)
+✔ Scheduling uses the tested pure generator before the existing persistence flow (2.4663ms)
+(node:20592) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/t_ade/.codex/worktrees/scheduling-location-release/lwrpc-league-system/lwrpc-admin/app/lib/scheduleSettingsCopy.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\t_ade\.codex\worktrees\scheduling-location-release\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ copy preserves only setting fields and gets an independent name and status (2.2651ms)
+✔ copied status counts only matches generated from the copy (1.9063ms)
+(node:16332) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/t_ade/.codex/worktrees/scheduling-location-release/lwrpc-league-system/lwrpc-admin/app/lib/schedulingSpecialRequests.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\t_ade\.codex\worktrees\scheduling-location-release\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Special Request payload validates required fields and preserves optional nulls (4.387ms)
+✔ Division selection filters teams and rejects inconsistent relationships (3.8091ms)
+✔ member search uses names and email and caps large result sets (20.9742ms)
+✔ Special Requests sort by location initially or by date when selected (1.1801ms)
+✔ Scheduling UI exposes CRUD and filters while generation remains request-independent (4.7042ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1366.0706
