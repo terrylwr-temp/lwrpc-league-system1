@@ -10,6 +10,7 @@ import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { appConfirm } from "../lib/appDialog";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { copyScheduleSettingPayload, scheduleSettingMatches } from "../lib/scheduleSettingsCopy";
+import { deleteGeneratedScheduleRows } from "../lib/deleteGeneratedSchedule";
 import {
   buildSpecialRequestPayload,
   filterAndSortSpecialRequests,
@@ -1170,36 +1171,8 @@ export default function SchedulingPage() {
       details: "This will delete the selected generated matches, match lines, game score rows, and related bye rows. Entered players, scores, verification status, and standings impact for those matches will be lost.",
     })) return;
 
-    const { data: linesToDelete, error: findLineError } = await supabase
-      .from("match_lines")
-      .select("id")
-      .in("match_id", matchIds);
-
-    if (findLineError) return alert(findLineError.message);
-
-    const lineIds = (linesToDelete || []).map((line) => line.id);
-
-    if (lineIds.length > 0) {
-      const { error: gameError } = await supabase.from("line_games").delete().in("match_line_id", lineIds);
-      if (gameError) return alert(gameError.message);
-    }
-
-    const { error: lineError } = await supabase.from("match_lines").delete().in("match_id", matchIds);
-    if (lineError) return alert(lineError.message);
-
-    const { error: matchError } = await supabase.from("matches").delete().in("id", matchIds);
-    if (matchError) return alert(matchError.message);
-
-    let byeQuery = supabase
-      .from("team_byes")
-      .delete()
-      .eq("league_id", setting.league_id)
-      .eq("division_id", setting.division_id);
-    byeQuery = setting.is_copy
-      ? byeQuery.eq("schedule_setting_id", setting.id)
-      : byeQuery.or(`schedule_setting_id.is.null,schedule_setting_id.eq.${setting.id}`);
-    const { error: byeError } = await byeQuery;
-    if (byeError) return alert(byeError.message);
+    const { error: deleteError, stage } = await deleteGeneratedScheduleRows(supabase, setting, matchIds);
+    if (deleteError) return alert(`Unable to delete schedule while ${stage}.\n${deleteError.message}`);
 
     await loadData();
     alert(`Deleted ${matchIds.length} match(es).`);
