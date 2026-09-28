@@ -14,6 +14,7 @@ import {
   rosterPlayerCheckRecipientEmails,
   rosterPlayerCheckSelectionMessage,
   rosterPlayerInformationStatus,
+  rosterPlayerHasDuprDoublesRating,
   rosterPlayerNeedsInformationCheck,
   rosterPlayerSelectionDisabled,
 } from "../../lib/rosterPlayerChecks";
@@ -511,6 +512,10 @@ export default function TeamRosterPage() {
 
     const status = playerRatingEligibility(member);
     if (!rosterPlayerNeedsInformationCheck(status)) return;
+    if (
+      status === "Rating Needed" &&
+      rosterPlayerHasDuprDoublesRating(getSeasonRating(member.id)?.dupr_doubles_rating)
+    ) return;
 
     alert(rosterPlayerCheckSelectionMessage({
       playerName: formatMemberName(member),
@@ -847,8 +852,8 @@ function getAverageTeamRating() {
     const missingDuprId = !memberHasDuprId(member);
     const playerRating = getPlayerRating(member);
     const missingRating =
-      playerRating === null ||
-      Number.isNaN(playerRating);
+      !rosterPlayerHasDuprDoublesRating(getSeasonRating(member.id)?.dupr_doubles_rating) &&
+      (playerRating === null || Number.isNaN(playerRating));
     const nrDuprDoublesRating = hasNrDuprDoublesRating(member);
     const minRating = team?.divisions?.min_dupr;
     const maxRating = team?.divisions?.max_dupr;

@@ -33,6 +33,11 @@ export function rosterPlayerInformationStatus({ duprId, rating } = {}) {
   return "";
 }
 
+export function rosterPlayerHasDuprDoublesRating(rating) {
+  const normalizedRating = String(rating ?? "").trim();
+  return normalizedRating !== "" && Number.isFinite(Number(normalizedRating));
+}
+
 export function rosterPlayerCheckRecipientEmails(members = []) {
   const uniqueEmails = new Map();
 
