@@ -595,7 +595,7 @@ export default function RatingsPage() {
     const seasonName = selectedSeasonLabel();
     const reliabilityThresholdText = await appPrompt({
       title: `Reliability rating threshold — ${seasonName}`,
-      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active division Rating Range Max minus 0.5 instead. Imported Age-Based inputs become Age-Based Season ratings, rounded down to one decimal place. If no Age-Based input exists, the existing Age-Based Season rating is rounded down instead. DUPR Doubles ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
+      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active DUPR division Rating Range Max minus 0.5 instead. PrimeTime NR or low-reliability ratings use the same calculation with only PrimeTime divisions. Each rating uses divisions with its matching Rating Type. Imported Age-Based inputs become Age-Based Season ratings, rounded down to one decimal place. If no Age-Based input exists, the existing Age-Based Season rating is rounded down instead. DUPR Doubles ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season ratings using the NR rule for eligible divisions of each Rating Type.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
       inputLabel: "Reliability Rating threshold",
       placeholder: "0",
       confirmLabel: "Continue",
@@ -629,6 +629,7 @@ export default function RatingsPage() {
           divisions (
             id,
             max_dupr,
+            rating_type,
             leagues (
               id,
               season_id
@@ -639,23 +640,26 @@ export default function RatingsPage() {
 
     if (rosterError) return { error: rosterError };
 
-    const maxRatingByMemberId = {};
+    const maxRatingByType = { dupr: {}, primetime: {} };
 
     (rosterRows || []).forEach((row) => {
       const team = row.teams;
       const division = team?.divisions;
       const maxDupr = Number(division?.max_dupr);
+      const ratingType = division?.rating_type || "dupr";
 
       if (
         team?.is_active === false ||
         String(division?.leagues?.season_id || "") !== String(selectedSeason) ||
-        Number.isNaN(maxDupr)
+        Number.isNaN(maxDupr) ||
+        (ratingType !== "dupr" && ratingType !== "primetime")
       ) {
         return;
       }
 
       const key = String(row.member_id);
-      maxRatingByMemberId[key] = Math.max(maxRatingByMemberId[key] ?? 0, maxDupr);
+      const maxima = maxRatingByType[ratingType];
+      maxima[key] = Math.max(maxima[key] ?? 0, maxDupr);
     });
 
     const rowsByMemberId = Object.fromEntries(
@@ -675,11 +679,18 @@ export default function RatingsPage() {
       );
       const cleanedValue = cleanedSeasonDuprRating(
         rawValue,
-        maxRatingByMemberId[String(member.id)],
+        maxRatingByType.dupr[String(member.id)],
         existing?.dupr_reliability_rating,
         reliabilityThreshold
       );
-      const cleanedAgeBasedValue = cleanedAgeBasedRating(existing?.dupr_age_based_rating, existing?.season_primetime_rating);
+      const cleanedAgeBasedValue = cleanedAgeBasedRating(
+        existing?.dupr_age_based_rating,
+        existing?.season_primetime_rating,
+        maxRatingByType.primetime[String(member.id)],
+        existing?.dupr_reliability_rating,
+        reliabilityThreshold,
+        rawValue
+      );
 
       if (cleanedValue === null && cleanedAgeBasedValue === null) {
         skippedCount += 1;
@@ -2186,11 +2197,28 @@ function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = 
   return truncateToTenth(numberValue);
 }
 
-function cleanedAgeBasedRating(rawValue, existingFinalValue = null) {
+function cleanedAgeBasedRating(
+  rawValue,
+  existingFinalValue = null,
+  highestMaxRating = null,
+  reliabilityValue = null,
+  reliabilityThreshold = 0,
+  doublesRating = null
+) {
   // Older rows may predate separate Age-Based inputs. Preserve their cleanup path.
   // A present but invalid input must not be disguised by falling back to a final.
   const inputText = String(rawValue ?? "").trim();
   const text = inputText || String(existingFinalValue ?? "").trim();
+  const isNr = text.toUpperCase() === "NR" ||
+    String(doublesRating ?? "").trim().toUpperCase() === "NR" ||
+    isReliabilityNrAdjustment(reliabilityValue, reliabilityThreshold);
+
+  // Only a PrimeTime division can supply this NR adjustment. Without one,
+  // retain the existing independent Age-Based input/final cleanup behavior.
+  if (isNr && Number(highestMaxRating) > 0) {
+    return cleanedSeasonDuprRating("NR", highestMaxRating);
+  }
+
   if (!text) return null;
 
   const numberValue = Number(text);
