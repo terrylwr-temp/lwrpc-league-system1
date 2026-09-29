@@ -1,0 +1,340 @@
+{
+  "deployedCommit": "b5ca721a07fddafbe103a5c607e2c791d370cf5b",
+  "deployment": "dpl_GgeYTJ33HqjjwpGBsVck7a9Jhwb3",
+  "previewDeployment": "dpl_2EQWYr8zoqDgg49S5atyNP6haMZ7",
+  "rollbackDeployment": "dpl_3x7zNpSooMX93jREXDyqTZNuozWw",
+  "automated": {
+    "focused": {
+      "passed": 45,
+      "failed": 0
+    },
+    "full": {
+      "passed": 1611,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 507163.249
+    },
+    "lint": {
+      "errors": 0,
+      "existingWarnings": 11
+    },
+    "cleanProductionBuild": {
+      "passed": true,
+      "routes": 85
+    }
+  },
+  "staging": {
+    "target": "qrvwqomqbgciwssitniz",
+    "origin": "https://lwrpc-admin-bbz4a87ji-terry-lwrpc.vercel.app",
+    "cases": [
+      "normal authenticated / loads",
+      "normal authenticated /teams loads",
+      "normal authenticated /members loads",
+      "normal authenticated /matches loads",
+      "normal authenticated /standings loads",
+      "normal authenticated /scheduling loads",
+      "all and only eligible byes; busy/foreign excluded; cancel changes no rows/audit",
+      "home real authenticated swap, exact metadata/opponent retained, bye transferred, persisted audit actor/timestamp verified",
+      "away real authenticated swap, exact metadata/opponent retained, bye transferred, persisted audit actor/timestamp verified",
+      "no eligible bye: swap actions absent",
+      "stale full-row snapshot rejected with no partial updates or audit",
+      "new duplicate match after modal opened rejected atomically",
+      "existing lineup submitted after modal opened rejected without changes",
+      "actual entered game score of zero rejected without changes",
+      "entered result with zero totals rejected without changes",
+      "existing Swap Home review/cancel works",
+      "concurrent real requests: one success/one conflict, one audit event; 4 independent observations show no partial state",
+      "real audit insert failure rolls back both match and bye updates",
+      "actual anon and authenticated direct RPC calls denied with zero changes",
+      "real captain server authorization denies swap without changes"
+    ],
+    "pageErrors": [],
+    "httpErrors": [],
+    "blockedProductionRequests": 0,
+    "mailSent": 0,
+    "swapResponses": [
+      200,
+      200,
+      409,
+      409,
+      409,
+      409,
+      409,
+      200,
+      409,
+      409,
+      403
+    ],
+    "status": "PASS"
+  },
+  "existingEditorStaging": {
+    "target": "qrvwqomqbgciwssitniz",
+    "operation": "existing Swap Home confirmation and save",
+    "errors": [],
+    "status": "PASS"
+  },
+  "candidate": {
+    "label": "candidate",
+    "origin": "https://lwrpc-admin-4bqslau7r-terry-lwrpc.vercel.app",
+    "pages": [
+      {
+        "path": "/",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/teams",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/members",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/matches",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/standings",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/ratings",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/scheduling",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/division-schedules",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/schedule-editor",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/player-dashboard",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/captain-dashboard",
+        "heading": [
+          "Welcome Terry"
+        ]
+      }
+    ],
+    "pageErrors": [],
+    "httpErrors": [],
+    "blockedWrites": [],
+    "forwardedBusinessWrites": 0,
+    "mailSent": 0,
+    "databaseHosts": [
+      "glikrmmgirilnmamxxyl.supabase.co"
+    ],
+    "byeActions": 186,
+    "swapConfirmation": "verified then cancelled",
+    "status": "PASS"
+  },
+  "production": {
+    "label": "production",
+    "origin": "https://league.lwrpickleballclub.com",
+    "pages": [
+      {
+        "path": "/",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/teams",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/members",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/matches",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/standings",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/ratings",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/scheduling",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/division-schedules",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/schedule-editor",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/player-dashboard",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/captain-dashboard",
+        "heading": [
+          "Welcome Terry"
+        ]
+      }
+    ],
+    "pageErrors": [],
+    "httpErrors": [],
+    "blockedWrites": [],
+    "forwardedBusinessWrites": 0,
+    "mailSent": 0,
+    "databaseHosts": [
+      "glikrmmgirilnmamxxyl.supabase.co"
+    ],
+    "byeActions": 186,
+    "swapConfirmation": "verified then cancelled",
+    "status": "PASS"
+  },
+  "rollback": {
+    "label": "rollback",
+    "origin": "https://lwrpc-admin-8zav4dkn3-terry-lwrpc.vercel.app",
+    "pages": [
+      {
+        "path": "/",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/teams",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/members",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/matches",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/standings",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/ratings",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/scheduling",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/division-schedules",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/schedule-editor",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/player-dashboard",
+        "heading": [
+          "Welcome Terry"
+        ]
+      },
+      {
+        "path": "/captain-dashboard",
+        "heading": [
+          "Welcome Terry"
+        ]
+      }
+    ],
+    "pageErrors": [],
+    "httpErrors": [],
+    "blockedWrites": [],
+    "forwardedBusinessWrites": 0,
+    "mailSent": 0,
+    "status": "PASS"
+  },
+  "productionMigrations": [
+    {
+      "name": "schedule_editor_swap_with_bye_unplayed_defaults",
+      "version": "20260929012345",
+      "count": 1
+    },
+    {
+      "name": "schedule_editor_swap_with_bye_atomic_install",
+      "version": "20260929013942",
+      "count": 1
+    }
+  ],
+  "productionAuditCount": 0,
+  "productionMutationExecution": false,
+  "concurrentBusinessChanges": [
+    "members",
+    "team_members",
+    "scheduling_special_requests"
+  ]
+}
