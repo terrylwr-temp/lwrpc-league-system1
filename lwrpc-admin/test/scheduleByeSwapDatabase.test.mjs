@@ -5,6 +5,7 @@ import { PGlite } from '@electric-sql/pglite';
 const migration=await readFile(new URL('../supabase/migrations/20260928213736_schedule_editor_swap_with_bye.sql',import.meta.url),'utf8');
 const auditMigration=await readFile(new URL('../supabase/migrations/20260929003943_schedule_editor_swap_with_bye_audit.sql',import.meta.url),'utf8');
 const defaultsMigration=await readFile(new URL('../supabase/migrations/20260929010400_schedule_editor_swap_with_bye_unplayed_defaults.sql',import.meta.url),'utf8');
+const installMigration=await readFile(new URL('../supabase/migrations/20260929012528_schedule_editor_swap_with_bye_atomic_install.sql',import.meta.url),'utf8');
 const id=n=>`10000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 test('atomic Swap with Bye database contracts',async t=>{
  const db=new PGlite();
@@ -18,7 +19,7 @@ test('atomic Swap with Bye database contracts',async t=>{
  create table line_games(id uuid primary key,match_line_id uuid,home_score int,away_score int);
  create table match_lineups(id uuid primary key,match_id uuid);
  grant select,update on matches,team_byes to service_role;grant select,update on teams,divisions,match_lines,line_games,match_lineups to service_role;`);
- await db.exec(migration);await db.exec(auditMigration);await db.exec(defaultsMigration);
+ await db.exec(migration);await db.exec(auditMigration);await db.exec(defaultsMigration);await db.exec(installMigration);
  async function seed(){
   await db.exec(`delete from schedule_editor_private.bye_swap_audit;delete from match_lineups;delete from line_games;delete from match_lines;delete from team_byes;delete from matches;delete from teams;delete from divisions;
   insert into divisions values('${id(30)}','${id(20)}',true,'best_of_3'),('${id(31)}','${id(20)}',true,'best_of_3');
@@ -84,6 +85,13 @@ test('atomic Swap with Bye database contracts',async t=>{
  });
  await t.test('normal generated unplayed 0-0/not_entered defaults swap and retain score defaults',async()=>{
   await seed();await db.exec("update matches set home_score=0,away_score=0,score_status='not_entered'");await swap(await snapshot());const next=await snapshot();assert.equal(next.match.home_score,0);assert.equal(next.match.away_score,0);assert.equal(next.match.score_status,'not_entered');
+ });
+ await t.test('current atomic installer retains audit history and refuses any legacy callable overload',async()=>{
+  await seed();await swap(await snapshot());const before=(await db.query('select to_jsonb(a) audit from schedule_editor_private.bye_swap_audit a')).rows;await db.exec(installMigration);assert.deepEqual((await db.query('select to_jsonb(a) audit from schedule_editor_private.bye_swap_audit a')).rows,before);
+  await db.exec("create function public.schedule_editor_swap_with_bye(uuid,text,uuid,jsonb,jsonb) returns jsonb language sql as 'select null::jsonb'");await assert.rejects(db.exec(installMigration),/legacy swap overload/);await db.exec('drop function public.schedule_editor_swap_with_bye(uuid,text,uuid,jsonb,jsonb)');
+ });
+ await t.test('current atomic installer completes a partial six-argument-only installation with exact service-only audit/RPC contracts',async()=>{
+  await seed();await db.exec('drop schema schedule_editor_private cascade');await db.exec(installMigration);await db.exec('set role service_role');try{await swap(await snapshot());}finally{await db.exec('reset role');}assert.equal((await db.query('select count(*)::int n from schedule_editor_private.bye_swap_audit')).rows[0].n,1);assert.equal((await db.query("select count(*)::int n from pg_proc where proname='schedule_editor_swap_with_bye'")).rows[0].n,1);
  });
  }finally{await db.close();}
 });
