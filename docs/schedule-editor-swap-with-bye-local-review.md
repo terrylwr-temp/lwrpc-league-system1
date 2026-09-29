@@ -1,5 +1,7 @@
 # Schedule Editor — Swap with Bye local implementation review
 
+> Historical review of cfbe4a1. The owner authorized persistent audit history during release review; see `schedule-editor-swap-with-bye-release-review.md` for the successor migration and acceptance status.
+
 ## Scope and operational purpose
 
 Requested feature: `/schedule-editor` can replace a selected Home or Away team with an active team holding a recorded bye in the same division and exact date/week. This supports a controlled correction to an existing schedule without regenerating it. Existing schedule-edit workflows could be affected by the additional bye read and the new confirmation flow; their handlers are preserved.

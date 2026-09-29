@@ -8,6 +8,7 @@ export function createScheduleByeSwapHandler({ authorize, rejectViewAs }) {
     try {
       const authorization = await authorize(request, 'league_manager');
       if (authorization.error) return Response.json({ success: false, error: authorization.error }, { status: authorization.status });
+      if (!uuid.test(authorization.user?.id || '')) return Response.json({ success: false, error: 'The acting user could not be verified.' }, { status: 500 });
       let body;
       try { body = await request.json(); } catch { return Response.json({ success: false, error: 'Invalid swap request.' }, { status: 400 }); }
       if (!object(body) || !uuid.test(body.matchId || '') || !uuid.test(body.byeId || '') ||
@@ -18,6 +19,7 @@ export function createScheduleByeSwapHandler({ authorize, rejectViewAs }) {
       const { data, error } = await authorization.supabase.rpc('schedule_editor_swap_with_bye', {
         p_match_id: body.matchId, p_side: body.side, p_bye_id: body.byeId,
         p_expected_match: body.expectedMatch, p_expected_bye: body.expectedBye,
+        p_actor_user_id: authorization.user.id,
       });
       if (error) {
         const conflict = ['P0001', '55P03', '40P01', '40001'].includes(error.code);

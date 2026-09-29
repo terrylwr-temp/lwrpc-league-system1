@@ -51,14 +51,20 @@ test('actual editor cancel and confirmation handlers use explicit confirmation, 
 const request=body=>new Request('https://example.invalid/api/schedule-editor/swap-with-bye',{method:'POST',body:JSON.stringify(body),headers:{'Content-Type':'application/json'}});
 const body=()=>({matchId:id(10),byeId:id(103),side:'home',expectedMatch:{id:id(10)},expectedBye:{id:id(103)}});
 test('server handler rejects View-As, unauthorized/captain access, malformed payloads and RPC conflicts; never uses a direct client update',async()=>{
- let calls=0;const authorize=async(req,role)=>{assert.equal(role,'league_manager');return {supabase:{rpc:async(name,args)=>{calls++;assert.equal(name,'schedule_editor_swap_with_bye');assert.equal(args.p_side,'home');return {error:{code:'P0001',message:'Stale schedule'}};}}};};
+ let calls=0;const authorize=async(req,role)=>{assert.equal(role,'league_manager');return {user:{id:id(900)},supabase:{rpc:async(name,args)=>{calls++;assert.equal(name,'schedule_editor_swap_with_bye');assert.equal(args.p_side,'home');assert.equal(args.p_actor_user_id,id(900));return {error:{code:'P0001',message:'Stale schedule'}};}}};};
  assert.equal((await createScheduleByeSwapHandler({authorize,rejectViewAs:()=>Response.json({}, {status:403})})(request(body()))).status,403);assert.equal(calls,0);
  for(const status of [401,403])assert.equal((await createScheduleByeSwapHandler({authorize:async()=>({error:'Denied',status}),rejectViewAs:()=>null})(request(body()))).status,status);
  const handler=createScheduleByeSwapHandler({authorize,rejectViewAs:()=>null});for(const patch of [{side:'both'},{matchId:'invalid'},{expectedMatch:[]},{expectedBye:{id:id(9)}}])assert.equal((await handler(request({...body(),...patch}))).status,400);
  assert.equal(calls,0);assert.equal((await handler(request(body()))).status,409);assert.equal(calls,1);
 });
 test('server handler maps lock conflicts safely and succeeds only through one atomic RPC',async()=>{
- for(const code of ['55P03','40P01','40001']){const handler=createScheduleByeSwapHandler({rejectViewAs:()=>null,authorize:async()=>({supabase:{rpc:async()=>({error:{code}})}})});assert.equal((await handler(request(body()))).status,409);}
- const handler=createScheduleByeSwapHandler({rejectViewAs:()=>null,authorize:async()=>({supabase:{rpc:async()=>({data:{action:'SWAP_WITH_BYE'}})}})});assert.equal((await (await handler(request(body()))).json()).swap.action,'SWAP_WITH_BYE');
+ for(const code of ['55P03','40P01','40001']){const handler=createScheduleByeSwapHandler({rejectViewAs:()=>null,authorize:async()=>({user:{id:id(900)},supabase:{rpc:async()=>({error:{code}})}})});assert.equal((await handler(request(body()))).status,409);}
+ const handler=createScheduleByeSwapHandler({rejectViewAs:()=>null,authorize:async()=>({user:{id:id(900)},supabase:{rpc:async()=>({data:{action:'SWAP_WITH_BYE'}})}})});assert.equal((await (await handler(request(body()))).json()).swap.action,'SWAP_WITH_BYE');
  const wiring=await readFile(new URL('../app/api/schedule-editor/swap-with-bye/route.js',import.meta.url),'utf8');assert.match(wiring,/authorize: authorizeAdminRequest, rejectViewAs: request => rejectViewAsMutation\(request\)/);
+});
+
+test('audit actor comes from authorized identity and cannot be supplied by the client',async()=>{
+ let actor;const handler=createScheduleByeSwapHandler({rejectViewAs:()=>null,authorize:async()=>({user:{id:id(900)},supabase:{rpc:async(name,args)=>{actor=args.p_actor_user_id;return {data:{}};}}})});
+ assert.equal((await handler(request({...body(),actorUserId:id(901)}))).status,200);assert.equal(actor,id(900));
+ const invalid=createScheduleByeSwapHandler({rejectViewAs:()=>null,authorize:async()=>({supabase:{rpc:()=>{throw Error('Must not run without actor');}}})});assert.equal((await invalid(request(body()))).status,500);
 });
