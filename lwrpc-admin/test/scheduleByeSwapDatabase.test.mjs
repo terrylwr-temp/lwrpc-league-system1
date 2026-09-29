@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 const migration=await readFile(new URL('../supabase/migrations/20260928213736_schedule_editor_swap_with_bye.sql',import.meta.url),'utf8');
 const auditMigration=await readFile(new URL('../supabase/migrations/20260929003943_schedule_editor_swap_with_bye_audit.sql',import.meta.url),'utf8');
+const defaultsMigration=await readFile(new URL('../supabase/migrations/20260929010400_schedule_editor_swap_with_bye_unplayed_defaults.sql',import.meta.url),'utf8');
 const id=n=>`10000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 test('atomic Swap with Bye database contracts',async t=>{
  const db=new PGlite();
@@ -17,7 +18,7 @@ test('atomic Swap with Bye database contracts',async t=>{
  create table line_games(id uuid primary key,match_line_id uuid,home_score int,away_score int);
  create table match_lineups(id uuid primary key,match_id uuid);
  grant select,update on matches,team_byes to service_role;grant select,update on teams,divisions,match_lines,line_games,match_lineups to service_role;`);
- await db.exec(migration);await db.exec(auditMigration);
+ await db.exec(migration);await db.exec(auditMigration);await db.exec(defaultsMigration);
  async function seed(){
   await db.exec(`delete from schedule_editor_private.bye_swap_audit;delete from match_lineups;delete from line_games;delete from match_lines;delete from team_byes;delete from matches;delete from teams;delete from divisions;
   insert into divisions values('${id(30)}','${id(20)}',true,'best_of_3'),('${id(31)}','${id(20)}',true,'best_of_3');
@@ -52,6 +53,8 @@ test('atomic Swap with Bye database contracts',async t=>{
   ['already playing same date different week',`insert into matches(id,league_id,division_id,home_team_id,away_team_id,scheduled_date,week_number,status) values('${id(11)}','${id(20)}','${id(30)}','${id(3)}','${id(4)}','2026-10-20',3,'draft')`],
   ['original duplicate match',`insert into matches(id,league_id,division_id,home_team_id,away_team_id,scheduled_date,week_number,status) values('${id(11)}','${id(20)}','${id(30)}','${id(1)}','${id(4)}','2026-10-20',2,'draft')`],
   ['duplicate bye',`insert into team_byes select '${id(104)}',league_id,division_id,team_id,week_number,bye_date,created_at,updated_at,schedule_setting_id from team_byes`],
+  ['entered 0-0 result',`update matches set home_score=0,away_score=0,score_status='entered'`],
+  ['partial zero score',`update matches set home_score=0,away_score=null,score_status='not_entered'`],
   ['completed verified lock',`update matches set status='completed',score_status='verified'`],
   ['existing lineup',`insert into match_lineups values('${id(200)}','${id(10)}')`],
   ['entered player',`insert into match_lines(id,match_id,home_player_1_id) values('${id(200)}','${id(10)}','${id(999)}')`],
@@ -78,6 +81,9 @@ test('atomic Swap with Bye database contracts',async t=>{
  });
  await t.test('audit insert failure rolls back match and bye; failed/replayed requests never add audit history',async()=>{
   await seed();const old=await snapshot();await db.exec(`create function fail_audit() returns trigger language plpgsql as $$begin raise exception 'injected audit failure';end;$$;create trigger fail_audit before insert on schedule_editor_private.bye_swap_audit for each row execute function fail_audit()`);await assert.rejects(swap(old),/injected audit/);assert.deepEqual(await snapshot(),old);assert.equal((await db.query('select count(*)::int n from schedule_editor_private.bye_swap_audit')).rows[0].n,0);await db.exec('drop trigger fail_audit on schedule_editor_private.bye_swap_audit;drop function fail_audit()');await swap(old);await assert.rejects(swap(old));assert.equal((await db.query('select count(*)::int n from schedule_editor_private.bye_swap_audit')).rows[0].n,1);
+ });
+ await t.test('normal generated unplayed 0-0/not_entered defaults swap and retain score defaults',async()=>{
+  await seed();await db.exec("update matches set home_score=0,away_score=0,score_status='not_entered'");await swap(await snapshot());const next=await snapshot();assert.equal(next.match.home_score,0);assert.equal(next.match.away_score,0);assert.equal(next.match.score_status,'not_entered');
  });
  }finally{await db.close();}
 });

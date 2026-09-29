@@ -68,3 +68,8 @@ test('audit actor comes from authorized identity and cannot be supplied by the c
  assert.equal((await handler(request({...body(),actorUserId:id(901)}))).status,200);assert.equal(actor,id(900));
  const invalid=createScheduleByeSwapHandler({rejectViewAs:()=>null,authorize:async()=>({supabase:{rpc:()=>{throw Error('Must not run without actor');}}})});assert.equal((await invalid(request(body()))).status,500);
 });
+
+test('normal generated 0-0/not_entered matches offer byes, while entered/default-looking results stay protected',()=>{
+ const f=fixture();f.match.home_score=0;f.match.away_score=0;f.match.score_status='not_entered';assert.equal(getByeSwapCandidates(f).length,2);
+ for(const patch of [{score_status:'entered'},{score_entered_at:'2026-10-20'},{home_score:1},{home_score:null},{score_verified_at:'2026-10-20'}])assert.equal(getByeSwapCandidates({...f,match:{...f.match,...patch}}).length,0);
+});

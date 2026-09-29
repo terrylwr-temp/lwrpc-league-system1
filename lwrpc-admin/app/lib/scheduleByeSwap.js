@@ -8,7 +8,9 @@ export function scheduleRowSnapshot(row) {
 export function isByeSwapMatchEditable(match) {
   return Boolean(match?.scheduled_date && match.home_team_id && match.away_team_id &&
     match.home_team_id !== match.away_team_id && ['draft', 'scheduled'].includes(match.status) &&
-    match.home_score == null && match.away_score == null && !match.score_entered_at &&
+    ((match.home_score == null && match.away_score == null) ||
+      (match.home_score === 0 && match.away_score === 0 && match.score_status === 'not_entered')) &&
+    (!match.score_status || match.score_status === 'not_entered') && !match.score_entered_at &&
     !match.score_verified_at && !match.finalized_at && !match.winning_team_id);
 }
 
